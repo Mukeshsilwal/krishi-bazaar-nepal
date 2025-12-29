@@ -1,33 +1,41 @@
-import { UserPlus, ListPlus, Handshake, Truck } from "lucide-react";
+import { UserPlus, Camera, MessageCircle, Banknote } from "lucide-react";
 
 const steps = [
   {
     icon: UserPlus,
-    step: "01",
-    title: "Register Easily",
-    description:
-      "Sign up with just your mobile number. Add your location and what you grow.",
+    step: "१",
+    stepEn: "1",
+    title: "दर्ता गर्नुहोस्",
+    titleEn: "Register",
+    description: "मोबाइल नम्बरले दर्ता गर्नुहोस्।",
+    descriptionEn: "Sign up with your mobile number.",
   },
   {
-    icon: ListPlus,
-    step: "02",
-    title: "List Your Crops",
-    description:
-      "Take a photo, set your price, and publish. Get suggested prices from live market data.",
+    icon: Camera,
+    step: "२",
+    stepEn: "2",
+    title: "फोटो खिच्नुहोस्",
+    titleEn: "Take Photo",
+    description: "आफ्नो उब्जनीको फोटो खिच्नुहोस्।",
+    descriptionEn: "Take a photo of your produce.",
   },
   {
-    icon: Handshake,
-    step: "03",
-    title: "Connect & Negotiate",
-    description:
-      "Chat directly with interested buyers. Agree on price and pickup details.",
+    icon: MessageCircle,
+    step: "३",
+    stepEn: "3",
+    title: "किन्नेसँग कुरा गर्नुहोस्",
+    titleEn: "Chat with Buyer",
+    description: "भाउ मिलाउनुहोस्।",
+    descriptionEn: "Negotiate the price.",
   },
   {
-    icon: Truck,
-    step: "04",
-    title: "Deliver & Earn",
-    description:
-      "Schedule pickup or delivery. Receive payment directly to your account.",
+    icon: Banknote,
+    step: "४",
+    stepEn: "4",
+    title: "पैसा पाउनुहोस्",
+    titleEn: "Get Paid",
+    description: "सिधै आफ्नो खातामा पैसा पाउनुहोस्।",
+    descriptionEn: "Receive money directly to your account.",
   },
 ];
 
@@ -37,64 +45,56 @@ const HowItWorksSection = () => {
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="mx-auto mb-16 max-w-2xl text-center">
-          <span className="mb-4 inline-block rounded-full bg-secondary/20 px-4 py-1.5 text-sm font-semibold text-secondary-foreground">
-            How It Works
+          <span className="mb-4 inline-block rounded-full bg-secondary/20 px-5 py-2 text-base font-semibold text-secondary-foreground">
+            कसरी काम गर्छ / How It Works
           </span>
           <h2 className="mb-4 text-3xl font-bold text-foreground md:text-4xl lg:text-5xl">
-            Start Selling in{" "}
-            <span className="text-gradient-warm">4 Simple Steps</span>
+            <span className="text-gradient-warm">४ सजिलो</span> चरणमा
           </h2>
           <p className="text-lg text-muted-foreground">
-            Our platform is designed for simplicity. Get started in minutes, not
-            hours.
+            4 Simple Steps
           </p>
         </div>
 
-        {/* Steps */}
-        <div className="relative mx-auto max-w-5xl">
-          {/* Connection Line */}
-          <div className="absolute left-1/2 top-0 hidden h-full w-0.5 -translate-x-1/2 bg-gradient-to-b from-primary via-secondary to-accent md:block" />
+        {/* Steps - Mobile-friendly vertical layout */}
+        <div className="mx-auto max-w-2xl">
+          <div className="relative">
+            {/* Connection Line */}
+            <div className="absolute left-8 top-0 h-full w-1 bg-gradient-to-b from-primary via-secondary to-accent md:left-10" />
 
-          <div className="grid gap-8 md:gap-0">
-            {steps.map((step, index) => (
-              <div
-                key={step.step}
-                className={`relative flex flex-col items-center gap-6 md:flex-row ${
-                  index % 2 === 1 ? "md:flex-row-reverse" : ""
-                }`}
-              >
-                {/* Card */}
+            <div className="space-y-6">
+              {steps.map((step, index) => (
                 <div
-                  className={`flex-1 ${
-                    index % 2 === 0 ? "md:pr-16 md:text-right" : "md:pl-16"
-                  }`}
+                  key={step.step}
+                  className="relative flex gap-6"
                 >
-                  <div className="rounded-2xl bg-card p-6 shadow-soft transition-all duration-300 hover:shadow-medium md:p-8">
-                    <div
-                      className={`mb-4 flex items-center gap-3 ${
-                        index % 2 === 0 ? "md:justify-end" : ""
-                      }`}
-                    >
-                      <span className="text-sm font-bold text-primary">
-                        Step {step.step}
+                  {/* Icon Circle */}
+                  <div className="relative z-10 flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-gradient-hero shadow-medium md:h-20 md:w-20">
+                    <step.icon className="h-8 w-8 text-primary-foreground md:h-10 md:w-10" />
+                  </div>
+
+                  {/* Content Card */}
+                  <div className="flex-1 rounded-2xl bg-card p-6 shadow-soft transition-all duration-300 hover:shadow-medium">
+                    <div className="mb-2 flex items-center gap-3">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-xl font-bold text-primary">
+                        {step.step}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        Step {step.stepEn}
                       </span>
                     </div>
-                    <h3 className="mb-2 text-xl font-semibold text-foreground">
+                    <h3 className="mb-1 text-xl font-bold text-foreground md:text-2xl">
                       {step.title}
                     </h3>
-                    <p className="text-muted-foreground">{step.description}</p>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {step.titleEn}
+                    </p>
+                    <p className="text-lg text-foreground/80">{step.description}</p>
+                    <p className="text-sm text-muted-foreground">{step.descriptionEn}</p>
                   </div>
                 </div>
-
-                {/* Center Icon */}
-                <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-hero shadow-medium md:absolute md:left-1/2 md:-translate-x-1/2">
-                  <step.icon className="h-7 w-7 text-primary-foreground" />
-                </div>
-
-                {/* Spacer */}
-                <div className="hidden flex-1 md:block" />
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>

@@ -2,52 +2,64 @@ import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 const marketPrices = [
   {
-    name: "Tomato",
-    nameNp: "टमाटर",
+    name: "टमाटर",
+    nameEn: "Tomato",
+    emoji: "🍅",
     price: 85,
-    unit: "kg",
+    unit: "केजी",
+    unitEn: "kg",
     change: 5,
-    market: "Kalimati",
+    market: "कालिमाटी",
   },
   {
-    name: "Potato",
-    nameNp: "आलु",
+    name: "आलु",
+    nameEn: "Potato",
+    emoji: "🥔",
     price: 45,
-    unit: "kg",
+    unit: "केजी",
+    unitEn: "kg",
     change: -2,
-    market: "Kalimati",
+    market: "कालिमाटी",
   },
   {
-    name: "Rice (Basmati)",
-    nameNp: "बासमती चामल",
+    name: "बासमती चामल",
+    nameEn: "Basmati Rice",
+    emoji: "🍚",
     price: 120,
-    unit: "kg",
+    unit: "केजी",
+    unitEn: "kg",
     change: 0,
-    market: "Narayangadh",
+    market: "नारायणगढ",
   },
   {
-    name: "Cauliflower",
-    nameNp: "काउली",
+    name: "काउली",
+    nameEn: "Cauliflower",
+    emoji: "🥬",
     price: 55,
-    unit: "piece",
+    unit: "गोटा",
+    unitEn: "piece",
     change: 8,
-    market: "Kalimati",
+    market: "कालिमाटी",
   },
   {
-    name: "Onion",
-    nameNp: "प्याज",
+    name: "प्याज",
+    nameEn: "Onion",
+    emoji: "🧅",
     price: 65,
-    unit: "kg",
+    unit: "केजी",
+    unitEn: "kg",
     change: -3,
-    market: "Kalimati",
+    market: "कालिमाटी",
   },
   {
-    name: "Carrot",
-    nameNp: "गाजर",
+    name: "गाजर",
+    nameEn: "Carrot",
+    emoji: "🥕",
     price: 70,
-    unit: "kg",
+    unit: "केजी",
+    unitEn: "kg",
     change: 2,
-    market: "Pokhara",
+    market: "पोखरा",
   },
 ];
 
@@ -57,32 +69,34 @@ const MarketPricesSection = () => {
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="mx-auto mb-12 max-w-2xl text-center">
-          <span className="mb-4 inline-block rounded-full bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary">
-            Market Prices
+          <span className="mb-4 inline-block rounded-full bg-primary/10 px-5 py-2 text-base font-semibold text-primary">
+            बजार भाउ / Market Prices
           </span>
           <h2 className="mb-4 text-3xl font-bold text-foreground md:text-4xl lg:text-5xl">
-            Today's <span className="text-primary">Live Prices</span>
+            आजको <span className="text-primary">भाउ</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Real-time wholesale prices from major markets across Nepal. Updated
-            daily.
+            Today's Prices
           </p>
         </div>
 
-        {/* Prices Grid */}
+        {/* Prices Grid - Larger cards with emojis */}
         <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {marketPrices.map((item) => (
             <div
               key={item.name}
-              className="group relative overflow-hidden rounded-xl bg-card p-5 shadow-soft transition-all duration-300 hover:shadow-medium"
+              className="group relative overflow-hidden rounded-2xl bg-card p-6 shadow-soft transition-all duration-300 hover:shadow-medium"
             >
-              <div className="mb-3 flex items-start justify-between">
-                <div>
-                  <h3 className="font-semibold text-foreground">{item.name}</h3>
-                  <p className="text-sm text-muted-foreground">{item.nameNp}</p>
+              <div className="mb-4 flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-4xl">{item.emoji}</span>
+                  <div>
+                    <h3 className="text-xl font-bold text-foreground">{item.name}</h3>
+                    <p className="text-sm text-muted-foreground">{item.nameEn}</p>
+                  </div>
                 </div>
                 <span
-                  className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${
+                  className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium ${
                     item.change > 0
                       ? "bg-primary/10 text-primary"
                       : item.change < 0
@@ -91,43 +105,49 @@ const MarketPricesSection = () => {
                   }`}
                 >
                   {item.change > 0 ? (
-                    <TrendingUp className="h-3 w-3" />
+                    <TrendingUp className="h-4 w-4" />
                   ) : item.change < 0 ? (
-                    <TrendingDown className="h-3 w-3" />
+                    <TrendingDown className="h-4 w-4" />
                   ) : (
-                    <Minus className="h-3 w-3" />
+                    <Minus className="h-4 w-4" />
                   )}
                   {Math.abs(item.change)}%
                 </span>
               </div>
 
-              <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-bold text-foreground">
-                  ₨ {item.price}
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold text-foreground md:text-4xl">
+                  रु. {item.price}
                 </span>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-base text-muted-foreground">
                   /{item.unit}
                 </span>
               </div>
+              <p className="text-sm text-muted-foreground">
+                per {item.unitEn}
+              </p>
 
-              <p className="mt-2 text-xs text-muted-foreground">
-                {item.market} Market
+              <p className="mt-3 text-sm text-muted-foreground">
+                📍 {item.market}
               </p>
 
               {/* Hover Accent */}
-              <div className="absolute bottom-0 left-0 h-1 w-0 bg-gradient-warm transition-all duration-300 group-hover:w-full" />
+              <div className="absolute bottom-0 left-0 h-1.5 w-0 bg-gradient-warm transition-all duration-300 group-hover:w-full" />
             </div>
           ))}
         </div>
 
-        {/* View All Link */}
+        {/* View All Link - Larger button */}
         <div className="mt-10 text-center">
           <a
             href="#"
-            className="inline-flex items-center gap-2 font-medium text-primary transition-colors hover:text-primary/80"
+            className="inline-flex items-center gap-3 rounded-xl bg-primary/10 px-6 py-4 text-lg font-semibold text-primary transition-colors hover:bg-primary/20"
           >
-            View all market prices
-            <TrendingUp className="h-4 w-4" />
+            <span className="flex flex-col leading-tight">
+              <span>सबै भाउ हेर्नुहोस्</span>
+              <span className="text-sm opacity-70">View all prices</span>
+            </span>
+            <TrendingUp className="h-5 w-5" />
           </a>
         </div>
       </div>
