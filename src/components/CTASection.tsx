@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Download } from "lucide-react";
+import { ArrowRight, Download, CheckCircle } from "lucide-react";
 import produceImage from "@/assets/produce-display.jpg";
 
 const CTASection = () => {
@@ -13,52 +13,66 @@ const CTASection = () => {
         <div className="flex flex-col items-center gap-12 lg:flex-row lg:gap-16">
           {/* Content */}
           <div className="flex-1 text-center lg:text-left">
-            <h2 className="mb-6 text-3xl font-bold text-primary-foreground md:text-4xl lg:text-5xl">
-              Ready to Transform Your Farming?
+            <h2 className="mb-3 text-3xl font-bold text-primary-foreground md:text-4xl lg:text-5xl">
+              अब बेच्न सुरु गर्नुहोस्
             </h2>
-            <p className="mb-8 text-lg text-primary-foreground/80">
-              Join thousands of Nepali farmers who are already earning more
-              through direct sales. Download the app or sign up online today.
+            <p className="mb-6 text-xl text-primary-foreground/90">
+              Start Selling Today
+            </p>
+            <p className="mb-8 text-lg text-primary-foreground/70">
+              हजारौं किसानहरू जस्तै तपाईं पनि सिधै बेचेर बढी कमाउनुहोस्।
+            </p>
+            <p className="mb-8 text-base text-primary-foreground/60">
+              Join thousands of farmers earning more through direct sales.
             </p>
 
             <div className="flex flex-col items-center gap-4 sm:flex-row lg:justify-start">
               <Button
                 variant="hero"
                 size="xl"
-                className="w-full sm:w-auto"
+                className="h-16 w-full px-8 sm:w-auto"
               >
-                <Download className="h-5 w-5" />
-                Download App
+                <Download className="mr-2 h-6 w-6" />
+                <span className="flex flex-col items-start leading-tight">
+                  <span className="text-xl font-bold">एप डाउनलोड गर्नुहोस्</span>
+                  <span className="text-sm opacity-80">Download App</span>
+                </span>
               </Button>
               <Button
                 variant="heroOutline"
                 size="xl"
-                className="group w-full sm:w-auto"
+                className="group h-16 w-full px-8 sm:w-auto"
               >
-                Register Online
-                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                <span className="flex flex-col items-start leading-tight">
+                  <span className="text-xl font-bold">अनलाइन दर्ता</span>
+                  <span className="text-sm opacity-80">Register Online</span>
+                </span>
+                <ArrowRight className="ml-2 h-6 w-6 transition-transform group-hover:translate-x-1" />
               </Button>
             </div>
 
-            {/* Trust Badges */}
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-6 lg:justify-start">
-              <div className="flex items-center gap-2 text-sm text-primary-foreground/70">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-foreground/10">
-                  ✓
-                </span>
-                Free to use
+            {/* Trust Badges - Larger with Nepali */}
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
+              <div className="flex items-center gap-3 rounded-xl bg-primary-foreground/10 px-4 py-3">
+                <CheckCircle className="h-6 w-6 text-secondary" />
+                <div className="flex flex-col leading-tight">
+                  <span className="text-sm font-medium text-primary-foreground">निःशुल्क</span>
+                  <span className="text-xs text-primary-foreground/70">Free</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-sm text-primary-foreground/70">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-foreground/10">
-                  ✓
-                </span>
-                No middlemen
+              <div className="flex items-center gap-3 rounded-xl bg-primary-foreground/10 px-4 py-3">
+                <CheckCircle className="h-6 w-6 text-secondary" />
+                <div className="flex flex-col leading-tight">
+                  <span className="text-sm font-medium text-primary-foreground">बिचौलिया छैन</span>
+                  <span className="text-xs text-primary-foreground/70">No middlemen</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-sm text-primary-foreground/70">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-foreground/10">
-                  ✓
-                </span>
-                Secure payments
+              <div className="flex items-center gap-3 rounded-xl bg-primary-foreground/10 px-4 py-3">
+                <CheckCircle className="h-6 w-6 text-secondary" />
+                <div className="flex flex-col leading-tight">
+                  <span className="text-sm font-medium text-primary-foreground">सुरक्षित पेमेन्ट</span>
+                  <span className="text-xs text-primary-foreground/70">Secure payment</span>
+                </div>
               </div>
             </div>
           </div>
@@ -74,14 +88,17 @@ const CTASection = () => {
               />
 
               {/* Floating Card */}
-              <div className="absolute -bottom-6 -left-6 rounded-xl bg-card p-4 shadow-medium">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                    <span className="text-2xl">🌾</span>
+              <div className="absolute -bottom-6 -left-6 rounded-xl bg-card p-5 shadow-medium">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                    <span className="text-3xl">🌾</span>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-foreground">
-                      ₨ 25,000+
+                    <p className="text-lg font-bold text-foreground">
+                      रु. २५,०००+
+                    </p>
+                    <p className="text-sm text-foreground/80">
+                      औसत मासिक आम्दानी
                     </p>
                     <p className="text-xs text-muted-foreground">
                       Avg. monthly earning

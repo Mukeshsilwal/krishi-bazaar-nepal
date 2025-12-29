@@ -3,22 +3,20 @@ import { Facebook, Youtube, Phone, Mail, MapPin } from "lucide-react";
 
 const footerLinks = {
   platform: [
-    { name: "Sell Crops", href: "#" },
-    { name: "Buy Produce", href: "#" },
-    { name: "Market Prices", href: "#prices" },
-    { name: "Agri Store", href: "#" },
+    { name: "उब्जनी बेच्नुहोस्", nameEn: "Sell Crops", href: "#" },
+    { name: "उब्जनी किन्नुहोस्", nameEn: "Buy Produce", href: "#" },
+    { name: "बजार भाउ", nameEn: "Market Prices", href: "#prices" },
+    { name: "कृषि पसल", nameEn: "Agri Store", href: "#" },
   ],
   resources: [
-    { name: "Learning Center", href: "#" },
-    { name: "Farming Calendar", href: "#" },
-    { name: "Weather Updates", href: "#" },
-    { name: "FAQs", href: "#" },
+    { name: "सिक्ने केन्द्र", nameEn: "Learning Center", href: "#" },
+    { name: "खेती क्यालेन्डर", nameEn: "Farming Calendar", href: "#" },
+    { name: "मौसम अपडेट", nameEn: "Weather", href: "#" },
+    { name: "सोधिने प्रश्नहरू", nameEn: "FAQs", href: "#" },
   ],
   company: [
-    { name: "About Us", href: "#about" },
-    { name: "Careers", href: "#" },
-    { name: "Contact", href: "#" },
-    { name: "Partners", href: "#" },
+    { name: "हाम्रो बारेमा", nameEn: "About Us", href: "#about" },
+    { name: "सम्पर्क", nameEn: "Contact", href: "#" },
   ],
 };
 
@@ -32,55 +30,67 @@ const Footer = () => {
             <div className="mb-6 [&_span]:text-primary-foreground [&_span.text-primary]:text-secondary">
               <Logo />
             </div>
+            <p className="mb-4 text-lg text-primary-foreground/90">
+              किसानको साथी, नेपालको प्रगति
+            </p>
             <p className="mb-6 max-w-sm text-sm text-primary-foreground/70">
-              Empowering Nepali farmers with technology. Connecting growers
-              directly to buyers for fair prices and sustainable agriculture.
+              Empowering Nepali farmers with technology.
             </p>
 
-            {/* Contact Info */}
-            <div className="space-y-3 text-sm text-primary-foreground/70">
-              <div className="flex items-center gap-3">
-                <Phone className="h-4 w-4 text-secondary" />
+            {/* Contact Info - Larger touch targets */}
+            <div className="space-y-4 text-base text-primary-foreground/70">
+              <a href="tel:+977-1-4000000" className="flex items-center gap-4 rounded-lg p-2 transition-colors hover:bg-primary-foreground/10">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/20">
+                  <Phone className="h-5 w-5 text-secondary" />
+                </div>
                 <span>+977-1-4XXXXXX</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Mail className="h-4 w-4 text-secondary" />
+              </a>
+              <a href="mailto:info@krishihub.com.np" className="flex items-center gap-4 rounded-lg p-2 transition-colors hover:bg-primary-foreground/10">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/20">
+                  <Mail className="h-5 w-5 text-secondary" />
+                </div>
                 <span>info@krishihub.com.np</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <MapPin className="h-4 w-4 text-secondary" />
-                <span>Kathmandu, Nepal</span>
+              </a>
+              <div className="flex items-center gap-4 p-2">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/20">
+                  <MapPin className="h-5 w-5 text-secondary" />
+                </div>
+                <span>काठमाडौं, नेपाल</span>
               </div>
             </div>
 
-            {/* Social Links */}
+            {/* Social Links - Larger */}
             <div className="mt-6 flex gap-4">
               <a
                 href="#"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-foreground/10 transition-colors hover:bg-secondary"
+                className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-foreground/10 transition-colors hover:bg-secondary"
+                aria-label="Facebook"
               >
-                <Facebook className="h-5 w-5" />
+                <Facebook className="h-6 w-6" />
               </a>
               <a
                 href="#"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-foreground/10 transition-colors hover:bg-secondary"
+                className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-foreground/10 transition-colors hover:bg-secondary"
+                aria-label="YouTube"
               >
-                <Youtube className="h-5 w-5" />
+                <Youtube className="h-6 w-6" />
               </a>
             </div>
           </div>
 
           {/* Links Columns */}
           <div>
-            <h4 className="mb-4 font-semibold">Platform</h4>
+            <h4 className="mb-4 text-lg font-semibold">प्लेटफर्म</h4>
+            <p className="mb-4 text-sm text-primary-foreground/50">Platform</p>
             <ul className="space-y-3">
               {footerLinks.platform.map((link) => (
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    className="text-sm text-primary-foreground/70 transition-colors hover:text-secondary"
+                    className="block rounded-lg p-2 text-base text-primary-foreground/70 transition-colors hover:bg-primary-foreground/10 hover:text-secondary"
                   >
-                    {link.name}
+                    <span className="block">{link.name}</span>
+                    <span className="text-xs text-primary-foreground/50">{link.nameEn}</span>
                   </a>
                 </li>
               ))}
@@ -88,15 +98,17 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="mb-4 font-semibold">Resources</h4>
+            <h4 className="mb-4 text-lg font-semibold">स्रोतहरू</h4>
+            <p className="mb-4 text-sm text-primary-foreground/50">Resources</p>
             <ul className="space-y-3">
               {footerLinks.resources.map((link) => (
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    className="text-sm text-primary-foreground/70 transition-colors hover:text-secondary"
+                    className="block rounded-lg p-2 text-base text-primary-foreground/70 transition-colors hover:bg-primary-foreground/10 hover:text-secondary"
                   >
-                    {link.name}
+                    <span className="block">{link.name}</span>
+                    <span className="text-xs text-primary-foreground/50">{link.nameEn}</span>
                   </a>
                 </li>
               ))}
@@ -104,15 +116,17 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="mb-4 font-semibold">Company</h4>
+            <h4 className="mb-4 text-lg font-semibold">कम्पनी</h4>
+            <p className="mb-4 text-sm text-primary-foreground/50">Company</p>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    className="text-sm text-primary-foreground/70 transition-colors hover:text-secondary"
+                    className="block rounded-lg p-2 text-base text-primary-foreground/70 transition-colors hover:bg-primary-foreground/10 hover:text-secondary"
                   >
-                    {link.name}
+                    <span className="block">{link.name}</span>
+                    <span className="text-xs text-primary-foreground/50">{link.nameEn}</span>
                   </a>
                 </li>
               ))}
@@ -123,14 +137,14 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-primary-foreground/10 pt-8 md:flex-row">
           <p className="text-sm text-primary-foreground/50">
-            © 2024 KrishiHub Nepal. All rights reserved.
+            © २०२४ कृषिहब नेपाल। सर्वाधिकार सुरक्षित।
           </p>
           <div className="flex gap-6 text-sm text-primary-foreground/50">
             <a href="#" className="hover:text-primary-foreground">
-              Privacy Policy
+              गोपनीयता नीति
             </a>
             <a href="#" className="hover:text-primary-foreground">
-              Terms of Service
+              सेवाका शर्तहरू
             </a>
           </div>
         </div>
