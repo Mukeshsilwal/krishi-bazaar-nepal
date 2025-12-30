@@ -13,10 +13,10 @@
     </parent>
 
     <groupId>com.krishihub</groupId>
-    <artifactId>krishihub-backend</artifactId>
+    <artifactId>kisan-sarathi-backend</artifactId>
     <version>1.0.0</version>
-    <name>KrishiHub Nepal Backend</name>
-    <description>Modular monolithic backend for KrishiHub Nepal agricultural platform</description>
+    <name>Kisan Sarathi Backend</name>
+    <description>Modular monolithic backend for Kisan Sarathi agricultural platform</description>
 
     <properties>
         <java.version>17</java.version>

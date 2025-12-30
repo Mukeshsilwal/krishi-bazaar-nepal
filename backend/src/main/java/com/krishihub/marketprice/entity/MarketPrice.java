@@ -50,6 +50,10 @@ public class MarketPrice {
     @Column(length = 100)
     private String source; // e.g., "Kalimati Fruits and Vegetable Market"
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "market_id")
+    private Market market;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

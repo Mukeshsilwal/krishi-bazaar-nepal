@@ -1,6 +1,6 @@
 spring:
   application:
-    name: krishihub-backend
+    name: kisan-sarathi-backend
 
   datasource:
     url: jdbc:postgresql://localhost:5432/krishihub
@@ -52,12 +52,14 @@ app:
   sms:
     api-url: ${SMS_API_URL:}
     api-key: ${SMS_API_KEY:}
-    sender-id: ${SMS_SENDER_ID:KRISHIHUB}
+    sender-id: ${SMS_SENDER_ID:KISAN}
 
   payment:
     esewa:
-      merchant-id: ${ESEWA_MERCHANT_ID:}
-      secret-key: ${ESEWA_SECRET_KEY:}
+      merchant-code: ${ESEWA_MERCHANT_CODE:EPAYTEST}
+      secret-key: ${ESEWA_SECRET_KEY:8gBm/:&EnhH.1/q}
+      base-url: ${ESEWA_BASE_URL:https://rc-epay.esewa.com.np/api/epay/main/v2/form}
+      verify-url: ${ESEWA_VERIFY_URL:https://uat.esewa.com.np/api/epay/transaction/status/}
       success-url: ${ESEWA_SUCCESS_URL:http://localhost:5173/payment/success}
       failure-url: ${ESEWA_FAILURE_URL:http://localhost:5173/payment/failure}
     khalti:

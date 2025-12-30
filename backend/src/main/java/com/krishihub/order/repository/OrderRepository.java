@@ -22,6 +22,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     Page<Order> findByFarmerIdAndStatus(UUID farmerId, Order.OrderStatus status, Pageable pageable);
 
+    Page<Order> findByBuyerIdOrFarmerId(UUID buyerId, UUID farmerId, Pageable pageable);
+
     @Query("SELECT o FROM Order o WHERE o.listing.id = :listingId ORDER BY o.createdAt DESC")
     List<Order> findByListingId(@Param("listingId") UUID listingId);
 

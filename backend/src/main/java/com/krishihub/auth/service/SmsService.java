@@ -23,7 +23,7 @@ public class SmsService {
     private String senderId;
 
     public void sendOtp(String mobileNumber, String otp) {
-        String message = String.format("Your KrishiHub verification code is: %s. Valid for 5 minutes.", otp);
+        String message = String.format("Your Kisan Sarathi verification code is: %s. Valid for 5 minutes.", otp);
 
         try {
             // For development, just log the OTP

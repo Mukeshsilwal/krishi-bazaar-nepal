@@ -81,10 +81,15 @@ public class PaymentService {
         orderRepository.save(order);
 
         // Initiate payment with gateway
-        String paymentUrl;
+        String paymentUrl = null;
+        Map<String, Object> paymentData = null;
+
         try {
             if (paymentMethod == Transaction.PaymentMethod.ESEWA) {
-                paymentUrl = esewaService.initiatePayment(order.getId(), order.getTotalAmount());
+                Map<String, Object> esewaResponse = esewaService.initiatePayment(order.getId(), order.getTotalAmount());
+                paymentData = esewaResponse;
+                // For backward compatibility, set paymentUrl to a placeholder
+                paymentUrl = "esewa-redirect";
             } else if (paymentMethod == Transaction.PaymentMethod.KHALTI) {
                 Map<String, Object> khaltiResponse = khaltiService.initiatePayment(
                         order.getId(), order.getTotalAmount());
@@ -107,6 +112,8 @@ public class PaymentService {
                 .paymentMethod(paymentMethod.name())
                 .status("PENDING")
                 .message("Payment initiated successfully")
+                .amount(order.getTotalAmount())
+                .data(paymentData)
                 .build();
     }
 

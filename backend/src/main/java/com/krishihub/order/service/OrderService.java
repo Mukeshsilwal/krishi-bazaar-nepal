@@ -128,7 +128,7 @@ public class OrderService {
             orders = orderRepository.findByFarmerId(user.getId(), pageable);
         } else {
             // Return all orders (buyer + farmer)
-            orders = orderRepository.findByBuyerId(user.getId(), pageable);
+            orders = orderRepository.findByBuyerIdOrFarmerId(user.getId(), user.getId(), pageable);
         }
 
         return orders.map(OrderDto::fromEntity);
@@ -255,6 +255,8 @@ public class OrderService {
             case COMPLETED:
                 recipient = order.getFarmer().getMobileNumber();
                 message = String.format("Order %s has been completed.", order.getId());
+                break;
+            case CANCELLED:
                 break;
         }
 
