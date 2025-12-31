@@ -101,11 +101,14 @@ export default function ResetPasswordPage() {
                                     type="text"
                                     required
                                     className="focus:ring-green-500 focus:border-green-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3"
-                                    placeholder="Enter OTP"
+                                    placeholder="Enter OTP from your email/mobile"
                                     value={formData.otp}
                                     onChange={(e) => setFormData({ ...formData, otp: e.target.value })}
                                 />
                             </div>
+                            <p className="mt-1 text-xs text-gray-500">
+                                Check your email inbox or spam folder for the OTP.
+                            </p>
                         </div>
 
                         <div>

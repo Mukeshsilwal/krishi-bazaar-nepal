@@ -30,6 +30,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
     private final SmsService smsService;
+    private final com.krishihub.shared.service.EmailService emailService;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${app.otp.expiration}")
@@ -48,6 +49,10 @@ public class AuthService {
             throw new BadRequestException("User with this mobile number already exists");
         }
 
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new BadRequestException("User with this email already exists");
+        }
+
         // Validate role
         User.UserRole role;
         try {
@@ -62,6 +67,7 @@ public class AuthService {
         // Create user
         User user = User.builder()
                 .mobileNumber(mobileNumber)
+                .email(request.getEmail())
                 .name(request.getName())
                 .role(role)
                 .district(request.getDistrict())
@@ -83,7 +89,17 @@ public class AuthService {
         // Generate and send OTP
         String otp = generateOtp();
         saveOtp(mobileNumber, otp);
-        smsService.sendOtp(mobileNumber, otp);
+
+        // Send OTP via Email
+        try {
+            emailService.sendEmail(request.getEmail(), "Registration OTP", "Your OTP for registration is: " + otp);
+            log.info("Registration OTP sent to email {}", request.getEmail());
+        } catch (Exception e) {
+            log.error("Failed to send email OTP", e);
+            // Fallback to SMS if email fails? Or just log error?
+            // For now fallback to SMS as backup
+            smsService.sendOtp(mobileNumber, otp);
+        }
 
         log.info("User registered successfully: {}", mobileNumber);
         return "OTP sent to " + mobileNumber;
@@ -94,14 +110,24 @@ public class AuthService {
         String mobileNumber = normalizeMobileNumber(request.getMobileNumber());
 
         // Check if user exists
-        if (!userRepository.existsByMobileNumber(mobileNumber)) {
-            throw new ResourceNotFoundException("User not found with mobile number: " + mobileNumber);
-        }
+        User user = userRepository.findByMobileNumber(mobileNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with mobile number: " + mobileNumber));
 
         // Generate and send OTP
         String otp = generateOtp();
         saveOtp(mobileNumber, otp);
-        smsService.sendOtp(mobileNumber, otp);
+
+        if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+            try {
+                emailService.sendEmail(user.getEmail(), "Login OTP", "Your OTP for login is: " + otp);
+                log.info("Login OTP sent to email {}", user.getEmail());
+            } catch (Exception e) {
+                log.error("Failed to send login email OTP to {}", user.getEmail(), e);
+                smsService.sendOtp(mobileNumber, otp);
+            }
+        } else {
+            smsService.sendOtp(mobileNumber, otp);
+        }
 
         log.info("OTP sent for login: {}", mobileNumber);
         return "OTP sent to " + mobileNumber;
@@ -286,9 +312,17 @@ public class AuthService {
 
         String otp = generateOtp();
         saveOtp(mobileNumber, otp);
-        smsService.sendOtp(mobileNumber, otp);
 
-        log.info("Forgot password OTP sent to {}", mobileNumber);
+        // Send OTP via Email if available
+        if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+            emailService.sendEmail(user.getEmail(), "Password Reset OTP", "Your OTP is: " + otp);
+            log.info("Forgot password OTP sent to email {}", user.getEmail());
+        } else {
+            // Fallback to SMS or simulated SMS
+            smsService.sendOtp(mobileNumber, otp);
+            log.info("Forgot password OTP sent to mobile {}", mobileNumber);
+        }
+
         return "OTP sent successfully";
     }
 

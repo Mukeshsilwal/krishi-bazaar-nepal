@@ -84,6 +84,11 @@ app:
     api-url: https://api.openai.com/v1/chat/completions
     model: gpt-4o-mini
 
+  email:
+    sendgrid:
+      api-key: ${SENDGRID_API_KEY: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}
+    from-email: ${EMAIL_FROM_ADDRESS:ticketkatum5@gmail.com}
+
 
 logging:
   level:

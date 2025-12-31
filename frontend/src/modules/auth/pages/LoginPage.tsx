@@ -80,6 +80,10 @@ export default function LoginPage() {
                                     placeholder="98XXXXXXXX"
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                     required
+                                    minLength={10}
+                                    maxLength={10}
+                                    pattern="[0-9]{10}"
+                                    title="Please enter a valid 10-digit mobile number"
                                 />
                             </div>
 
@@ -107,7 +111,7 @@ export default function LoginPage() {
                                     required
                                 />
                                 <p className="text-sm text-gray-500 mt-2">
-                                    OTP sent to {mobileNumber}
+                                    OTP sent to {mobileNumber}. Check your email if registered.
                                 </p>
                             </div>
 

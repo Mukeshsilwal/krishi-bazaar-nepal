@@ -17,7 +17,7 @@ export default function ForgotPasswordPage() {
 
         try {
             await authService.forgotPassword(formData.mobileNumber);
-            toast.success('OTP sent successfully!');
+            toast.success('OTP sent to your email (if registered) and mobile number!');
             // Pass mobile number to next page
             navigate('/admin/reset-password', { state: { mobileNumber: formData.mobileNumber } });
         } catch (error: any) {
@@ -55,6 +55,10 @@ export default function ForgotPasswordPage() {
                                     name="mobile"
                                     type="tel"
                                     required
+                                    minLength={10}
+                                    maxLength={10}
+                                    pattern="[0-9]{10}"
+                                    title="Please enter a valid 10-digit mobile number"
                                     className="focus:ring-green-500 focus:border-green-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3"
                                     placeholder="98XXXXXXXX"
                                     value={formData.mobileNumber}

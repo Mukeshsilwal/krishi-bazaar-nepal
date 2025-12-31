@@ -6,6 +6,7 @@ export default function RegisterPage() {
     const [step, setStep] = useState<'form' | 'otp'>('form');
     const [formData, setFormData] = useState({
         mobileNumber: '',
+        email: '',
         name: '',
         role: 'BUYER',
         district: '',
@@ -81,6 +82,22 @@ export default function RegisterPage() {
                                     value={formData.mobileNumber}
                                     onChange={(e) => setFormData({ ...formData, mobileNumber: e.target.value })}
                                     placeholder="98XXXXXXXX"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    required
+                                    minLength={10}
+                                    maxLength={10}
+                                    pattern="[0-9]{10}"
+                                    title="Please enter a valid 10-digit mobile number"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-gray-700 font-medium mb-2">Email Address *</label>
+                                <input
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    placeholder="your@email.com"
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                     required
                                 />
@@ -170,8 +187,8 @@ export default function RegisterPage() {
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-center text-2xl tracking-widest"
                                     required
                                 />
-                                <p className="text-sm text-gray-500 mt-2">
-                                    OTP sent to {formData.mobileNumber}
+                                <p className="text-sm text-gray-700 mt-2 font-medium">
+                                    Please check your email for the OTP
                                 </p>
                             </div>
 
