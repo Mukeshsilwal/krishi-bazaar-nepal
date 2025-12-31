@@ -13,6 +13,12 @@ const marketPriceService = {
         return response.data;
     },
 
+    // Get market by ID
+    getMarketById: async (id) => {
+        const response = await api.get(`/markets/${id}`);
+        return response.data;
+    },
+
     // Price Alerts
     createAlert: async (data) => {
         const response = await api.post('/price-alerts', data);

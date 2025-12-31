@@ -10,6 +10,7 @@ import RegisterPage from './modules/auth/pages/RegisterPage';
 import MarketplacePage from './modules/marketplace/pages/MarketplacePage';
 import ListingDetailPage from './modules/marketplace/pages/ListingDetailPage';
 import OrderDetailPage from './modules/orders/pages/OrderDetailPage';
+import PaymentRedirectPage from './modules/orders/pages/PaymentRedirectPage';
 import MyListingsPage from './modules/marketplace/pages/MyListingsPage';
 import MyOrdersPage from './modules/orders/pages/MyOrdersPage';
 import ChatPage from './pages/ChatPage';
@@ -21,6 +22,9 @@ import FinanceDashboard from './pages/FinanceDashboard';
 import AiAssistant from './pages/AiAssistant';
 import AdminDashboard from './pages/AdminDashboard';
 import NotificationList from './pages/NotificationList';
+import KnowledgePage from './modules/knowledge/pages/KnowledgePage';
+import ArticleDetailPage from './modules/knowledge/pages/ArticleDetailPage';
+import DiagnosticTool from './modules/advisory/pages/DiagnosticTool';
 
 function App() {
   return (
@@ -37,8 +41,19 @@ function App() {
             <Route path="/listing/:id" element={<ListingDetailPage />} />
             <Route path="/market-prices" element={<MarketPriceDashboard />} />
             <Route path="/logistics" element={<LogisticsDashboard />} />
+            <Route path="/knowledge" element={<KnowledgePage />} />
+            <Route path="/knowledge/:id" element={<ArticleDetailPage />} />
+            <Route path="/diagnosis" element={<DiagnosticTool />} />
 
             {/* Protected Routes */}
+            <Route
+              path="/orders/esewa-redirect"
+              element={
+                <ProtectedRoute>
+                  <PaymentRedirectPage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/orders/:id"
               element={
@@ -122,7 +137,7 @@ function App() {
             <Route
               path="/admin/dashboard"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredRole="ADMIN">
                   <AdminDashboard />
                 </ProtectedRoute>
               }

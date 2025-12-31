@@ -5,6 +5,7 @@ import { Bot, Send, Image as ImageIcon, Loader2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
+// AI Assistant Component
 const AiAssistant = () => {
     const { user } = useAuth();
     const [messages, setMessages] = useState<any[]>([
@@ -13,23 +14,51 @@ const AiAssistant = () => {
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const handleSend = async (e) => {
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setSelectedImage(e.target.files[0]);
+        }
+    };
+
+    const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!input.trim()) return;
+        if (!input.trim() && !selectedImage) return;
 
         const userMsg = input;
-        setMessages(prev => [...prev, { type: 'user', text: userMsg }]);
+        const currentImage = selectedImage;
+
+        setMessages(prev => [...prev, {
+            type: 'user',
+            text: userMsg,
+            image: currentImage ? URL.createObjectURL(currentImage) : null
+        }]);
+
         setInput('');
+        setSelectedImage(null);
         setLoading(true);
 
         try {
-            const response = await aiService.getRecommendation(userMsg, user?.id);
+            let imageUrl = null;
+            if (currentImage) {
+                // TODO: Upload image to Cloudinary/Backend first
+                // For now, we will just send a placeholder or skip if not implemented
+                // await imageService.upload(currentImage)...
+                console.log("Image upload not yet fully implemented, skipping actual upload");
+            }
+
+            const response = await aiService.getRecommendation(userMsg, user?.id, imageUrl);
             setMessages(prev => [...prev, {
                 type: 'bot',
                 text: response.recommendation,
-                confidence: response.confidenceScore
+                confidence: response.confidenceScore,
+                crop: response.cropName,
+                disease: response.diseaseDetected
             }]);
         } catch (error) {
+            console.error(error);
             setMessages(prev => [...prev, { type: 'bot', text: 'Sorry, I am having trouble connecting to the server right now.' }]);
         } finally {
             setLoading(false);
@@ -50,8 +79,17 @@ const AiAssistant = () => {
                         {messages.map((msg, idx) => (
                             <div key={idx} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 <div className={`max-w-[80%] p-3 rounded-lg ${msg.type === 'user' ? 'bg-green-100 text-green-900 rounded-br-none' : 'bg-gray-100 text-gray-800 rounded-bl-none'}`}>
+                                    {msg.image && (
+                                        <img src={msg.image} alt="User upload" className="max-w-full h-48 object-cover rounded-lg mb-2" />
+                                    )}
                                     <p>{msg.text}</p>
-                                    {msg.confidence && (
+                                    {msg.crop && msg.crop !== 'Unknown' && (
+                                        <div className="mt-2 text-xs bg-white/50 p-2 rounded">
+                                            <p className="font-semibold">Detected: {msg.crop}</p>
+                                            <p className="text-red-600">Issue: {msg.disease}</p>
+                                        </div>
+                                    )}
+                                    {msg.confidence > 0 && (
                                         <p className="text-xs text-gray-500 mt-1 font-mono">Confidence: {(msg.confidence * 100).toFixed(1)}%</p>
                                     )}
                                 </div>
@@ -67,8 +105,19 @@ const AiAssistant = () => {
                         )}
                     </div>
 
-                    <form onSubmit={handleSend} className="p-4 border-t flex gap-2">
-                        <button type="button" className="p-2 text-gray-400 hover:text-gray-600 transition">
+                    <form onSubmit={handleSend} className="p-4 border-t flex gap-2 items-end">
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            ref={fileInputRef}
+                            onChange={handleImageSelect}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className={`p-2 transition ${selectedImage ? 'text-green-600 bg-green-50 rounded-lg' : 'text-gray-400 hover:text-gray-600'}`}
+                        >
                             <ImageIcon className="w-6 h-6" />
                         </button>
                         <input

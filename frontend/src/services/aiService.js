@@ -1,8 +1,13 @@
 import api from './api';
 
 const aiService = {
-    getRecommendation: async (data) => {
-        const response = await api.post('/ai/recommendation', data);
+    getRecommendation: async (query, farmerId, imageUrl = null) => {
+        const payload = {
+            farmerId,
+            query,
+            imageUrl
+        };
+        const response = await api.post('/ai/recommendation', payload);
         return response.data;
     }
 };

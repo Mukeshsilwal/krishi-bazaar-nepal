@@ -44,13 +44,13 @@ const Navbar = () => {
               {t('nav.home') || 'Home'}
             </Link>
             <Link
-              to="/marketplace"
+              to="/#marketplace"
               className="text-gray-700 hover:text-green-600 font-medium transition"
             >
               {t('nav.marketplace') || 'Marketplace'}
             </Link>
             <Link
-              to="/market-prices"
+              to="/#prices"
               className="text-gray-700 hover:text-green-600 font-medium transition"
             >
               Prices
@@ -60,6 +60,18 @@ const Navbar = () => {
               className="text-gray-700 hover:text-green-600 font-medium transition"
             >
               Logistics
+            </Link>
+            <Link
+              to="/knowledge"
+              className="text-gray-700 hover:text-green-600 font-medium transition"
+            >
+              Knowledge
+            </Link>
+            <Link
+              to="/diagnosis"
+              className="text-gray-700 hover:text-green-600 font-medium transition"
+            >
+              Diagnosis
             </Link>
             {user && (
               <>
@@ -205,14 +217,14 @@ const Navbar = () => {
                 {t('nav.home') || 'Home'}
               </Link>
               <Link
-                to="/marketplace"
+                to="/#marketplace"
                 onClick={() => setIsOpen(false)}
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
               >
                 {t('nav.marketplace') || 'Marketplace'}
               </Link>
               <Link
-                to="/market-prices"
+                to="/#prices"
                 onClick={() => setIsOpen(false)}
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
               >

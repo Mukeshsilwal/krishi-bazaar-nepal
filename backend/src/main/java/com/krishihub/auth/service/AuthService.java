@@ -50,6 +50,9 @@ public class AuthService {
         User.UserRole role;
         try {
             role = User.UserRole.valueOf(request.getRole().toUpperCase());
+            if (role == User.UserRole.ADMIN) {
+                throw new BadRequestException("Admin registration is not allowed publicly.");
+            }
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("Invalid role. Must be FARMER, BUYER, or VENDOR");
         }

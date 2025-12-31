@@ -1,0 +1,65 @@
+import api from '../../../services/api';
+
+export interface KnowledgeCategory {
+    id: string;
+    nameEn: string;
+    nameNe: string;
+    slug: string;
+    iconUrl?: string;
+}
+
+export interface Article {
+    id: string;
+    titleEn: string;
+    titleNe: string;
+    contentEn: string;
+    contentNe: string;
+    category: KnowledgeCategory;
+    tags: string[];
+    coverImageUrl?: string;
+    createdAt: string;
+}
+
+const knowledgeService = {
+    getCategories: async () => {
+        const response = await api.get<KnowledgeCategory[]>('/knowledge/categories');
+        return response.data;
+    },
+
+    getArticles: async (categoryId?: string, tag?: string) => {
+        const params: any = {};
+        if (categoryId && categoryId !== 'undefined') params.categoryId = categoryId;
+        if (tag && tag !== 'undefined') params.tag = tag;
+
+        const response = await api.get<Article[]>('/knowledge/articles', { params });
+        return response.data;
+    },
+
+    getArticleById: async (id: string) => {
+        if (!id || id === 'undefined') throw new Error('Invalid Article ID');
+        const response = await api.get<Article>(`/knowledge/articles/${id}`);
+        return response.data;
+    },
+
+    // Admin Methods
+    createCategory: async (category: Partial<KnowledgeCategory>) => {
+        const response = await api.post<KnowledgeCategory>('/knowledge/categories', category);
+        return response.data;
+    },
+
+    createArticle: async (article: Partial<Article>) => {
+        const response = await api.post<Article>('/knowledge/articles', article);
+        return response.data;
+    },
+
+    updateArticle: async (id: string, article: Partial<Article>) => {
+        const response = await api.put<Article>(`/knowledge/articles/${id}`, article);
+        return response.data;
+    },
+
+    deleteArticle: async (id: string) => {
+        await api.delete(`/knowledge/articles/${id}`);
+    }
+};
+
+export default knowledgeService;

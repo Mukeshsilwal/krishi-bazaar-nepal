@@ -52,9 +52,24 @@ export default function OrderDetailPage() {
                 paymentMethod: method,
             });
 
-            if (response.success && response.data.paymentUrl) {
-                // Redirect to payment gateway
-                window.location.href = response.data.paymentUrl;
+            if (response.success) {
+                if (response.data.data && response.data.data.htmlForm) {
+                    // eSewa returns a full HTML form
+                    // Create a container, inject the form, and submit it
+                    const formContainer = document.createElement('div');
+                    formContainer.innerHTML = response.data.data.htmlForm;
+                    document.body.appendChild(formContainer);
+
+                    // The form inside has onload="document.forms[0].submit()", 
+                    // but since we are injecting it dynamically, we might need to trigger submit manually
+                    const form = formContainer.querySelector('form');
+                    if (form) {
+                        form.submit();
+                    }
+                } else if (response.data.paymentUrl) {
+                    // Fallback for payment methods that return a direct URL
+                    window.location.href = response.data.paymentUrl;
+                }
             }
         } catch (error: any) {
             alert(error.response?.data?.message || 'Failed to initiate payment');
@@ -245,7 +260,7 @@ export default function OrderDetailPage() {
                             )}
 
                             {/* Buyer Actions */}
-                            {isBuyer && order.status === 'CONFIRMED' && (
+                            {isBuyer && (order.status === 'CONFIRMED' || order.status === 'PAYMENT_PENDING') && (
                                 <>
                                     <button
                                         onClick={() => handleInitiatePayment('ESEWA')}

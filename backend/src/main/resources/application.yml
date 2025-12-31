@@ -74,6 +74,12 @@ app:
     allowed-headers: "*"
     allow-credentials: true
 
+  openai:
+    api-key: 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
+    api-url: https://api.openai.com/v1/chat/completions
+    model: gpt-4o-mini
+
+
 logging:
   level:
     com.krishihub: DEBUG
