@@ -8,7 +8,8 @@
 export const BACKEND_PORT = 8089;
 
 // Base Backend URL (e.g., http://localhost:8089)
-export const BACKEND_URL = import.meta.env.VITE_WS_URL || (import.meta.env.PROD ? 'https://krishi-bazaar-nepal-1.onrender.com' : `http://localhost:${BACKEND_PORT}`);
+// Base Backend URL (e.g., http://localhost:8089)
+export const BACKEND_URL = import.meta.env.VITE_WS_URL || `http://localhost:${BACKEND_PORT}`;
 
 // API Base URL (e.g., http://localhost:8089/api)
 // We prefer VITE_API_URL if set, otherwise construct from BACKEND_URL
