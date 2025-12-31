@@ -14,6 +14,7 @@ import {
   Bug
 } from 'lucide-react';
 import adminService from '@/services/adminService';
+import { DashboardSkeleton } from '@/components/ui/skeletons';
 
 const AdminDashboardPage = () => {
   const { language } = useLanguage();
@@ -34,6 +35,14 @@ const AdminDashboardPage = () => {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <AdminLayout title="Dashboard" titleNe="ड्यासबोर्ड">
+        <DashboardSkeleton />
+      </AdminLayout>
+    );
+  }
 
   const widgets = [
     {
@@ -156,18 +165,17 @@ const AdminDashboardPage = () => {
           <CardContent>
             <div className="space-y-4">
               {recentActivity.map((activity, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className="flex items-start gap-4 p-4 bg-muted/50 rounded-xl hover:bg-muted transition-colors"
                 >
-                  <div className={`p-2 rounded-lg ${
-                    activity.status === 'alert' ? 'bg-destructive/10 text-destructive' :
+                  <div className={`p-2 rounded-lg ${activity.status === 'alert' ? 'bg-destructive/10 text-destructive' :
                     activity.status === 'pending' ? 'bg-amber-100 text-amber-600' :
-                    'bg-primary/10 text-primary'
-                  }`}>
+                      'bg-primary/10 text-primary'
+                    }`}>
                     {activity.type === 'disease' ? <Bug className="h-4 w-4" /> :
-                     activity.type === 'article' ? <FileText className="h-4 w-4" /> :
-                     <CheckCircle className="h-4 w-4" />}
+                      activity.type === 'article' ? <FileText className="h-4 w-4" /> :
+                        <CheckCircle className="h-4 w-4" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-foreground text-sm">
@@ -177,15 +185,15 @@ const AdminDashboardPage = () => {
                       {language === 'ne' ? activity.time : activity.timeEn}
                     </p>
                   </div>
-                  <Badge 
-                    variant={activity.status === 'alert' ? 'destructive' : 
-                            activity.status === 'pending' ? 'outline' : 'default'}
+                  <Badge
+                    variant={activity.status === 'alert' ? 'destructive' :
+                      activity.status === 'pending' ? 'outline' : 'default'}
                     className="text-xs"
                   >
                     {activity.status === 'published' ? (language === 'ne' ? 'प्रकाशित' : 'Published') :
-                     activity.status === 'alert' ? (language === 'ne' ? 'सूचना' : 'Alert') :
-                     activity.status === 'pending' ? (language === 'ne' ? 'पर्खिदै' : 'Pending') :
-                     (language === 'ne' ? 'पठाइयो' : 'Sent')}
+                      activity.status === 'alert' ? (language === 'ne' ? 'सूचना' : 'Alert') :
+                        activity.status === 'pending' ? (language === 'ne' ? 'पर्खिदै' : 'Pending') :
+                          (language === 'ne' ? 'पठाइयो' : 'Sent')}
                   </Badge>
                 </div>
               ))}
@@ -204,8 +212,8 @@ const AdminDashboardPage = () => {
           <CardContent>
             <div className="space-y-4">
               {topContent.map((content, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className="flex items-center justify-between p-4 bg-muted/50 rounded-xl"
                 >
                   <div className="flex items-center gap-3">

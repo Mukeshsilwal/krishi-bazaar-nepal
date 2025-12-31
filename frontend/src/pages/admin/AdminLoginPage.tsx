@@ -5,12 +5,12 @@ import { useAuth } from '@/modules/auth/context/AuthContext';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { 
-  Sprout, 
-  Phone, 
-  Lock, 
-  Globe, 
-  Eye, 
+import {
+  Sprout,
+  Phone,
+  Lock,
+  Globe,
+  Eye,
   EyeOff,
   ArrowRight
 } from 'lucide-react';
@@ -18,9 +18,9 @@ import { toast } from 'sonner';
 
 const AdminLoginPage = () => {
   const { language, setLanguage } = useLanguage();
-  const { login } = useAuth();
+  const { adminLogin } = useAuth();
   const navigate = useNavigate();
-  
+
   const [formData, setFormData] = useState({
     mobileOrEmail: '',
     password: ''
@@ -33,9 +33,13 @@ const AdminLoginPage = () => {
     setLoading(true);
 
     try {
-      await login(formData.mobileOrEmail, formData.password);
-      toast.success(language === 'ne' ? 'लगइन सफल!' : 'Login successful!');
-      navigate('/admin/dashboard');
+      const result = await adminLogin(formData.mobileOrEmail, formData.password);
+      if (result.success) {
+        toast.success(language === 'ne' ? 'लगइन सफल!' : 'Login successful!');
+        navigate('/admin/dashboard');
+      } else {
+        toast.error(result.message || (language === 'ne' ? 'लगइन असफल।' : 'Login failed.'));
+      }
     } catch (error) {
       toast.error(language === 'ne' ? 'लगइन असफल। कृपया पुन: प्रयास गर्नुहोस्।' : 'Login failed. Please try again.');
     } finally {
@@ -73,7 +77,7 @@ const AdminLoginPage = () => {
             {language === 'ne' ? 'व्यवस्थापक लगइन' : 'Admin Login'}
           </h2>
           <p className="text-sm text-muted-foreground">
-            {language === 'ne' 
+            {language === 'ne'
               ? 'आफ्नो खातामा लगइन गर्नुहोस्'
               : 'Sign in to your admin account'}
           </p>
@@ -126,8 +130,8 @@ const AdminLoginPage = () => {
 
             {/* Forgot Password */}
             <div className="text-right">
-              <Link 
-                to="/forgot-password" 
+              <Link
+                to="/admin/forgot-password"
                 className="text-sm text-primary hover:underline"
               >
                 {language === 'ne' ? 'पासवर्ड बिर्सनुभयो?' : 'Forgot Password?'}
@@ -135,8 +139,8 @@ const AdminLoginPage = () => {
             </div>
 
             {/* Submit Button */}
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full h-12 text-lg gap-2"
               disabled={loading}
             >
@@ -153,16 +157,25 @@ const AdminLoginPage = () => {
 
           {/* Back to Home */}
           <div className="mt-6 text-center">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="text-sm text-muted-foreground hover:text-primary"
             >
               {language === 'ne' ? '← गृहपृष्ठमा फर्कनुहोस्' : '← Back to Home'}
             </Link>
           </div>
+
+          <div className="mt-4 text-center">
+            <Link
+              to="/admin/register"
+              className="text-xs text-muted-foreground hover:text-primary"
+            >
+              {language === 'ne' ? 'नयाँ व्यवस्थापक दर्ता गर्नुहोस्' : 'Register New Admin'}
+            </Link>
+          </div>
         </CardContent>
       </Card>
-    </div>
+    </div >
   );
 };
 

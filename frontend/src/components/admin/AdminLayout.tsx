@@ -19,7 +19,14 @@ import {
   LogOut,
   Globe,
   ChevronDown,
-  Sprout
+  Sprout,
+  ShieldAlert,
+  MessageSquare,
+  LineChart,
+  Tractor,
+  BookOpenCheck,
+  Database,
+  Activity
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -43,65 +50,119 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, titleNe }) =
   const navigate = useNavigate();
 
   const menuItems = [
-    { 
-      path: '/admin/dashboard', 
-      icon: LayoutDashboard, 
-      labelEn: 'Dashboard', 
-      labelNe: 'ड्यासबोर्ड' 
+    {
+      path: '/admin/dashboard',
+      icon: LayoutDashboard,
+      labelEn: 'Dashboard',
+      labelNe: 'ड्यासबोर्ड'
     },
-    { 
-      path: '/admin/knowledge', 
-      icon: BookOpen, 
-      labelEn: 'Knowledge Content', 
-      labelNe: 'ज्ञान सामग्री' 
+    {
+      path: '/admin/knowledge',
+      icon: BookOpen,
+      labelEn: 'Knowledge Content',
+      labelNe: 'ज्ञान सामग्री'
     },
-    { 
-      path: '/admin/diseases', 
-      icon: Bug, 
-      labelEn: 'Disease & Pest', 
-      labelNe: 'रोग र कीरा' 
+    {
+      path: '/admin/diseases',
+      icon: Bug,
+      labelEn: 'Disease & Pest',
+      labelNe: 'रोग र कीरा'
     },
-    { 
-      path: '/admin/pesticides', 
-      icon: Pill, 
-      labelEn: 'Pesticides & Medicine', 
-      labelNe: 'कीटनाशक र औषधि' 
+    {
+      path: '/admin/pesticides',
+      icon: Pill,
+      labelEn: 'Pesticides & Medicine',
+      labelNe: 'कीटनाशक र औषधि'
     },
-    { 
-      path: '/admin/weather', 
-      icon: CloudSun, 
-      labelEn: 'Weather Advisories', 
-      labelNe: 'मौसम सल्लाह' 
+    {
+      path: '/admin/weather',
+      icon: CloudSun,
+      labelEn: 'Weather Advisories',
+      labelNe: 'मौसम सल्लाह'
     },
-    { 
-      path: '/admin/schemes', 
-      icon: FileText, 
-      labelEn: 'Govt Schemes', 
-      labelNe: 'सरकारी योजना' 
+    {
+      path: '/admin/schemes',
+      icon: FileText,
+      labelEn: 'Govt Schemes',
+      labelNe: 'सरकारी योजना'
     },
-    { 
-      path: '/admin/ai-review', 
-      icon: Brain, 
-      labelEn: 'AI Diagnosis Review', 
-      labelNe: 'AI निदान समीक्षा' 
+    {
+      path: '/admin/ai-review',
+      icon: Brain,
+      labelEn: 'AI Diagnosis Review',
+      labelNe: 'AI निदान समीक्षा'
     },
-    { 
-      path: '/admin/logs', 
-      icon: ClipboardList, 
-      labelEn: 'Advisory Logs', 
-      labelNe: 'सल्लाह लग' 
+    {
+      path: '/admin/logs',
+      icon: ClipboardList,
+      labelEn: 'Advisory Logs',
+      labelNe: 'सल्लाह लग'
     },
-    { 
-      path: '/admin/users', 
-      icon: Users, 
-      labelEn: 'Users & Roles', 
-      labelNe: 'प्रयोगकर्ता र भूमिका' 
+    {
+      path: '/admin/users',
+      icon: Users,
+      labelEn: 'Users & Roles',
+      labelNe: 'प्रयोगकर्ता र भूमिका'
     },
-    { 
-      path: '/admin/settings', 
-      icon: Settings, 
-      labelEn: 'Settings', 
-      labelNe: 'सेटिङ' 
+    {
+      path: '/admin/analytics',
+      icon: LineChart,
+      labelEn: 'Analytics',
+      labelNe: 'तथ्याङ्क'
+    },
+    {
+      path: '/admin/cms',
+      icon: BookOpenCheck,
+      labelEn: 'Content Workflow',
+      labelNe: 'सामग्री प्रवाह'
+    },
+    {
+      path: '/admin/rules',
+      icon: ShieldAlert,
+      labelEn: 'Rules Engine',
+      labelNe: 'नियम इन्जिन'
+    },
+    {
+      path: '/admin/notifications',
+      icon: MessageSquare,
+      labelEn: 'Notifications',
+      labelNe: 'सूचनाहरू'
+    },
+    {
+      path: '/admin/farmers',
+      icon: Tractor,
+      labelEn: 'Farmer Management',
+      labelNe: 'किसान व्यवस्थापन'
+    },
+    {
+      path: '/admin/master-data',
+      icon: Database,
+      labelEn: 'Master Data',
+      labelNe: 'प्रमुख तथ्याङ्क'
+    },
+    {
+      path: '/admin/roles',
+      icon: Users,
+      labelEn: 'RbAC Roles',
+      labelNe: 'भूमिकाहरू'
+    },
+    {
+      path: '/admin/settings',
+      icon: Settings,
+      labelEn: 'Settings',
+      labelNe: 'सेटिङ'
+    },
+    {
+      path: '/admin/system-health',
+      icon: Activity,
+      labelEn: 'System Health',
+      labelNe: 'प्रणाली स्थिति'
+    },
+    {
+      path: '/admin/feedback',
+      icon: MessageSquare,
+      labelEn: 'Support Tickets',
+      labelNe: 'समर्थन टिकट'
     },
   ];
 
@@ -113,10 +174,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, titleNe }) =
   return (
     <div className="min-h-screen bg-muted/30 flex">
       {/* Sidebar */}
-      <aside 
-        className={`fixed lg:static inset-y-0 left-0 z-50 bg-card border-r border-border transition-all duration-300 ${
-          sidebarOpen ? 'w-72' : 'w-0 lg:w-20'
-        } overflow-hidden`}
+      <aside
+        className={`fixed lg:static inset-y-0 left-0 z-50 bg-card border-r border-border transition-all duration-300 ${sidebarOpen ? 'w-72' : 'w-0 lg:w-20'
+          } overflow-hidden`}
       >
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-border bg-primary/5">
@@ -131,9 +191,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, titleNe }) =
               </div>
             )}
           </Link>
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="lg:hidden"
           >
@@ -150,11 +210,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, titleNe }) =
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${
-                  isActive 
-                    ? 'bg-primary text-primary-foreground shadow-md' 
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                }`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${isActive
+                  ? 'bg-primary text-primary-foreground shadow-md'
+                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                  }`}
               >
                 <Icon className={`h-5 w-5 flex-shrink-0 ${isActive ? '' : 'group-hover:scale-110 transition-transform'}`} />
                 {sidebarOpen && (
@@ -178,9 +237,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, titleNe }) =
         {/* Top Header */}
         <header className="h-16 bg-card border-b border-border flex items-center justify-between px-4 lg:px-6 sticky top-0 z-40">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="lg:flex"
             >
@@ -250,7 +309,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, titleNe }) =
 
       {/* Mobile Overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />

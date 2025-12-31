@@ -13,6 +13,19 @@ const authService = {
         return response.data;
     },
 
+    // Admin Login (Password based)
+    adminLogin: async (identifier, password) => {
+        const response = await api.post('/auth/admin/login', { identifier, password });
+        if (response.data.success && response.data.data) {
+            const { accessToken, refreshToken, user } = response.data.data;
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('refreshToken', refreshToken);
+            localStorage.setItem('user', JSON.stringify(user));
+            return response.data;
+        }
+        return response.data;
+    },
+
     // Verify OTP and get tokens
     verifyOtp: async (mobileNumber, otp) => {
         const response = await api.post('/auth/verify-otp', { mobileNumber, otp });
@@ -28,6 +41,18 @@ const authService = {
             return response.data;
         }
 
+        return response.data;
+    },
+
+    // Forgot Password (Admin)
+    forgotPassword: async (mobileNumber) => {
+        const response = await api.post('/auth/forgot-password', { mobileNumber });
+        return response.data;
+    },
+
+    // Reset Password (Admin)
+    resetPassword: async (data) => {
+        const response = await api.post('/auth/reset-password', data);
         return response.data;
     },
 

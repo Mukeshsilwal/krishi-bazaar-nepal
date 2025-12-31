@@ -1,4 +1,5 @@
 import { UserPlus, Camera, MessageCircle, Banknote } from "lucide-react";
+import { useLanguage } from "../context/LanguageContext";
 
 const steps = [
   {
@@ -40,19 +41,21 @@ const steps = [
 ];
 
 const HowItWorksSection = () => {
+  const { t, language } = useLanguage();
+
   return (
     <section id="how-it-works" className="bg-background py-20 md:py-28">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="mx-auto mb-16 max-w-2xl text-center">
           <span className="mb-4 inline-block rounded-full bg-secondary/20 px-5 py-2 text-base font-semibold text-secondary-foreground">
-            कसरी काम गर्छ / How It Works
+            {t('how.badge')}
           </span>
           <h2 className="mb-4 text-3xl font-bold text-foreground md:text-4xl lg:text-5xl">
-            <span className="text-gradient-warm">४ सजिलो</span> चरणमा
+            <span className="text-gradient-warm">{t('how.title.highlight')}</span> {t('how.title.suffix')}
           </h2>
           <p className="text-lg text-muted-foreground">
-            4 Simple Steps
+            {t('how.subtitle')}
           </p>
         </div>
 
@@ -77,20 +80,15 @@ const HowItWorksSection = () => {
                   <div className="flex-1 rounded-2xl bg-card p-6 shadow-soft transition-all duration-300 hover:shadow-medium">
                     <div className="mb-2 flex items-center gap-3">
                       <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-xl font-bold text-primary">
-                        {step.step}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        Step {step.stepEn}
+                        {language === 'ne' ? step.step : step.stepEn}
                       </span>
                     </div>
                     <h3 className="mb-1 text-xl font-bold text-foreground md:text-2xl">
-                      {step.title}
+                      {language === 'ne' ? step.title : step.titleEn}
                     </h3>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {step.titleEn}
+                    <p className="text-lg text-foreground/80">
+                      {language === 'ne' ? step.description : step.descriptionEn}
                     </p>
-                    <p className="text-lg text-foreground/80">{step.description}</p>
-                    <p className="text-sm text-muted-foreground">{step.descriptionEn}</p>
                   </div>
                 </div>
               ))}

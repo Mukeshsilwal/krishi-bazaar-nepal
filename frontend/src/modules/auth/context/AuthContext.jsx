@@ -32,6 +32,22 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const adminLogin = async (identifier, password) => {
+        try {
+            const response = await authService.adminLogin(identifier, password);
+            if (response.success && response.data) {
+                setUser(response.data.user);
+                return { success: true, data: response.data };
+            }
+            return { success: false, message: response.message };
+        } catch (error) {
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Login failed'
+            };
+        }
+    };
+
     const register = async (userData) => {
         try {
             const response = await authService.register(userData);
@@ -58,6 +74,7 @@ export const AuthProvider = ({ children }) => {
         user,
         loading,
         login,
+        adminLogin,
         register,
         logout,
         updateUser,

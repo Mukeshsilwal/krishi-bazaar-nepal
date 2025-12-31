@@ -1,4 +1,5 @@
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { useLanguage } from "../context/LanguageContext";
 
 const marketPrices = [
   {
@@ -64,6 +65,8 @@ const marketPrices = [
 ];
 
 const MarketPricesSection = () => {
+  const { t, language } = useLanguage();
+
   return (
     <section id="prices" className="bg-muted/50 py-20 md:py-28">
       <div className="container mx-auto px-4">
@@ -91,18 +94,19 @@ const MarketPricesSection = () => {
                 <div className="flex items-center gap-3">
                   <span className="text-4xl">{item.emoji}</span>
                   <div>
-                    <h3 className="text-xl font-bold text-foreground">{item.name}</h3>
+                    <h3 className="text-xl font-bold text-foreground">
+                      {language === 'ne' ? item.name : item.nameEn}
+                    </h3>
                     <p className="text-sm text-muted-foreground">{item.nameEn}</p>
                   </div>
                 </div>
                 <span
-                  className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium ${
-                    item.change > 0
+                  className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium ${item.change > 0
                       ? "bg-primary/10 text-primary"
                       : item.change < 0
-                      ? "bg-destructive/10 text-destructive"
-                      : "bg-muted text-muted-foreground"
-                  }`}
+                        ? "bg-destructive/10 text-destructive"
+                        : "bg-muted text-muted-foreground"
+                    }`}
                 >
                   {item.change > 0 ? (
                     <TrendingUp className="h-4 w-4" />
@@ -120,7 +124,7 @@ const MarketPricesSection = () => {
                   रु. {item.price}
                 </span>
                 <span className="text-base text-muted-foreground">
-                  /{item.unit}
+                  /{language === 'ne' ? item.unit : item.unitEn}
                 </span>
               </div>
               <p className="text-sm text-muted-foreground">

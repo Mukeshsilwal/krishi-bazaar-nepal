@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -27,6 +28,7 @@ public class MessagingController {
 
     private final MessagingService messagingService;
     private final UserRepository userRepository;
+    private final com.krishihub.messaging.service.PresenceService presenceService;
 
     // REST endpoints
     @PostMapping("/api/messages")
@@ -67,6 +69,12 @@ public class MessagingController {
         return ResponseEntity.ok(ApiResponse.success(count));
     }
 
+    @GetMapping("/api/messages/presence")
+    @ResponseBody
+    public ResponseEntity<ApiResponse<Map<String, Boolean>>> getOnlineUsers() {
+        return ResponseEntity.ok(ApiResponse.success(presenceService.getOnlineUsers()));
+    }
+
     @PutMapping("/api/messages/{userId}/read")
     @ResponseBody
     public ResponseEntity<ApiResponse<Void>> markAsRead(
@@ -84,5 +92,29 @@ public class MessagingController {
     public void sendMessageViaWebSocket(@Payload SendMessageRequest request, Principal principal) {
         String senderMobile = principal.getName();
         messagingService.sendMessage(senderMobile, request);
+    }
+
+    @MessageMapping("/chat.typing")
+    public void sendTypingIndicator(@Payload Map<String, String> payload, Principal principal) {
+        // payload: { receiverId: "..." }
+        // We need to send this to the specific user's queue
+        // For simplicity, we assume receiverId is the mobile number or we need to look
+        // it up.
+        // But wait, the frontend sends UUID usually.
+        // Let's assume the frontend sends the UUID of the receiver.
+        // Ideally we map UUID -> MobileNumber to send to /user/{mobile}/queue/typing
+
+        // Actually, let's keep it simple: Broadcast to /topic/typing but that's not
+        // secure/private.
+        // Better: SimpleMessagingTemplate convertAndSendToUser
+
+        // Since we don't have easy UUID->Mobile mapping here without DB, let's just
+        // delegate to service if needed.
+        // But for now, let's assume the client subscribes to a specific conversation
+        // topic or user queue.
+
+        // Let's implement this in MessagingService for cleaner code, passing passing it
+        // through.
+        messagingService.sendTypingIndicator(principal.getName(), UUID.fromString(payload.get("receiverId")));
     }
 }

@@ -13,6 +13,13 @@ import java.util.UUID;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, UUID> {
+    List<Order> findByBuyerId(UUID buyerId);
+
+    List<Order> findByFarmerId(UUID farmerId);
+
+    List<Order> findTop5ByBuyerIdOrderByCreatedAtDesc(UUID buyerId);
+
+    long countByBuyerId(UUID buyerId);
 
     Page<Order> findByBuyerId(UUID buyerId, Pageable pageable);
 

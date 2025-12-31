@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play, Users, Banknote, MapPin } from "lucide-react";
 import heroImage from "@/assets/hero-farming.jpg";
+import { useLanguage } from "@/context/LanguageContext";
 
 const HeroSection = () => {
+  const { t } = useLanguage();
   return (
     <section className="relative min-h-screen overflow-hidden">
       {/* Background Image with Overlay */}
@@ -23,40 +25,40 @@ const HeroSection = () => {
           <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary-foreground/10 px-5 py-3 backdrop-blur-sm">
             <span className="h-3 w-3 animate-pulse-slow rounded-full bg-secondary" />
             <span className="text-base font-medium text-primary-foreground">
-              नेपालको #१ कृषि प्लेटफर्म
+              {t('hero.badge')}
             </span>
           </div>
 
           {/* Headline */}
           <h1 className="mb-6 text-4xl font-bold leading-tight text-primary-foreground md:text-5xl lg:text-6xl xl:text-7xl">
-            किसानको साथी,{" "}
+            {t('hero.title.prefix')} {" "}
             <span className="text-gradient-warm inline-block">
-              नेपालको प्रगति
+              {t('hero.title.suffix')}
             </span>
           </h1>
 
           {/* Subheadline - Larger and clearer */}
           <p className="mx-auto mb-4 max-w-2xl text-xl text-primary-foreground/90 md:text-2xl font-medium">
-            आफ्नो उब्जनी सिधै किन्नेलाई बेच्नुहोस्
+            {t('hero.subtitle')}
           </p>
           <p className="mx-auto mb-8 max-w-2xl text-lg text-primary-foreground/70 md:text-xl">
-            Sell your crops directly to buyers
+            {t('hero.description')}
           </p>
 
           {/* CTA Buttons - Larger for easier touch */}
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Button variant="hero" size="xl" className="group h-16 w-full px-8 text-lg sm:w-auto">
               <span className="flex flex-col items-center leading-tight">
-                <span className="text-xl font-bold">बेच्न सुरु गर्नुहोस्</span>
-                <span className="text-sm opacity-80">Start Selling</span>
+                <span className="text-xl font-bold">{t('hero.cta.start')}</span>
+                <span className="text-sm opacity-80">{t('hero.cta.start.sub')}</span>
               </span>
               <ArrowRight className="ml-2 h-6 w-6 transition-transform group-hover:translate-x-1" />
             </Button>
             <Button variant="heroOutline" size="xl" className="h-16 w-full px-8 text-lg sm:w-auto">
               <Play className="mr-2 h-6 w-6" />
               <span className="flex flex-col items-center leading-tight">
-                <span className="text-xl font-bold">भिडियो हेर्नुहोस्</span>
-                <span className="text-sm opacity-80">Watch Video</span>
+                <span className="text-xl font-bold">{t('hero.cta.video')}</span>
+                <span className="text-sm opacity-80">{t('hero.cta.video.sub')}</span>
               </span>
             </Button>
           </div>
@@ -69,10 +71,7 @@ const HeroSection = () => {
                 ५०,०००+
               </div>
               <div className="text-sm text-primary-foreground/70 md:text-base">
-                किसानहरू
-              </div>
-              <div className="text-xs text-primary-foreground/50">
-                Farmers
+                {t('hero.stat.farmers')}
               </div>
             </div>
             <div className="rounded-2xl bg-primary-foreground/10 p-4 backdrop-blur-sm">
@@ -81,10 +80,7 @@ const HeroSection = () => {
                 २.५ करोड+
               </div>
               <div className="text-sm text-primary-foreground/70 md:text-base">
-                मासिक कारोबार
-              </div>
-              <div className="text-xs text-primary-foreground/50">
-                Monthly Trade
+                {t('hero.stat.trade')}
               </div>
             </div>
             <div className="rounded-2xl bg-primary-foreground/10 p-4 backdrop-blur-sm">
@@ -93,10 +89,7 @@ const HeroSection = () => {
                 ७५+
               </div>
               <div className="text-sm text-primary-foreground/70 md:text-base">
-                जिल्लाहरू
-              </div>
-              <div className="text-xs text-primary-foreground/50">
-                Districts
+                {t('hero.stat.districts')}
               </div>
             </div>
           </div>

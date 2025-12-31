@@ -18,4 +18,6 @@ public interface ArticleRepository extends JpaRepository<Article, UUID> {
 
     @Query(value = "SELECT * FROM articles WHERE :tag = ANY(tags) AND status = 'PUBLISHED'", nativeQuery = true)
     List<Article> findByTag(@Param("tag") String tag);
+
+    long countByStatus(ArticleStatus status);
 }

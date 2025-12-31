@@ -30,7 +30,14 @@ public class CorsConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // Parse allowed origins
-        List<String> origins = Arrays.asList(allowedOrigins.split(","));
+        List<String> origins = new java.util.ArrayList<>(Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .toList());
+
+        if (!origins.contains("http://localhost:8080")) {
+            origins.add("http://localhost:8080");
+        }
+
         configuration.setAllowedOriginPatterns(origins); // Use patterns instead of origins for better compatibility
 
         // Parse allowed methods

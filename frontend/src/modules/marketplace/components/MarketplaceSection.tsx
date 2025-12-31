@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useListings } from '../hooks/useListings';
 import { useNavigate } from 'react-router-dom';
+import { useMasterData } from '../../../hooks/useMasterData';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface MarketplaceSectionProps {
     id?: string;
@@ -8,6 +10,8 @@ interface MarketplaceSectionProps {
 
 export default function MarketplaceSection({ id }: MarketplaceSectionProps) {
     const navigate = useNavigate();
+    const { language } = useLanguage();
+    const { data: crops, loading: loadingCrops } = useMasterData('CROP_TYPE');
     const [filters, setFilters] = useState({
         cropName: '',
         district: '',
@@ -42,13 +46,24 @@ export default function MarketplaceSection({ id }: MarketplaceSectionProps) {
                 {/* Search & Filters */}
                 <div className="bg-white rounded-xl shadow-sm p-6 mb-8 max-w-6xl mx-auto">
                     <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        <input
-                            type="text"
-                            placeholder="Search crop..."
-                            value={filters.cropName}
-                            onChange={(e) => setFilters({ ...filters, cropName: e.target.value })}
-                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                        />
+                        <div className="relative">
+                            {loadingCrops ? (
+                                <div className="h-10 w-full bg-gray-100 rounded-lg animate-pulse" />
+                            ) : (
+                                <select
+                                    value={filters.cropName}
+                                    onChange={(e) => setFilters({ ...filters, cropName: e.target.value })}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition appearance-none bg-white"
+                                >
+                                    <option value="">All Crops</option>
+                                    {crops.map((crop) => (
+                                        <option key={crop.code} value={language === 'ne' ? crop.labelNe : crop.labelEn}>
+                                            {language === 'ne' ? crop.labelNe : crop.labelEn}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
+                        </div>
                         <input
                             type="text"
                             placeholder="District"

@@ -25,124 +25,169 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MessagingService {
 
-    private final MessageRepository messageRepository;
-    private final UserRepository userRepository;
-    private final CropListingRepository listingRepository;
-    private final SimpMessagingTemplate messagingTemplate;
+        private final MessageRepository messageRepository;
+        private final UserRepository userRepository;
+        private final CropListingRepository listingRepository;
+        private final SimpMessagingTemplate messagingTemplate;
 
-    @Transactional
-    public MessageDto sendMessage(String senderMobile, SendMessageRequest request) {
-        User sender = userRepository.findByMobileNumber(senderMobile)
-                .orElseThrow(() -> new ResourceNotFoundException("Sender not found"));
+        @Transactional
+        public MessageDto sendMessage(String senderMobile, SendMessageRequest request) {
+                User sender = userRepository.findByMobileNumber(senderMobile)
+                                .orElseThrow(() -> new ResourceNotFoundException("Sender not found"));
 
-        User receiver = userRepository.findById(request.getReceiverId())
-                .orElseThrow(() -> new ResourceNotFoundException("Receiver not found"));
+                User receiver = userRepository.findById(request.getReceiverId())
+                                .orElseThrow(() -> new ResourceNotFoundException("Receiver not found"));
 
-        // Prevent sending message to self
-        if (sender.getId().equals(receiver.getId())) {
-            throw new BadRequestException("Cannot send message to yourself");
+                // Prevent sending message to self
+                if (sender.getId().equals(receiver.getId())) {
+                        throw new BadRequestException("Cannot send message to yourself");
+                }
+
+                CropListing listing = null;
+                if (request.getListingId() != null) {
+                        listing = listingRepository.findById(request.getListingId())
+                                        .orElse(null);
+                }
+
+                Message message = Message.builder()
+                                .sender(sender)
+                                .receiver(receiver)
+                                .listing(listing)
+                                .message(request.getMessage())
+                                .isRead(false)
+                                .build();
+
+                Message savedMessage = messageRepository.save(message);
+
+                // Send real-time notification via WebSocket
+                MessageDto messageDto = MessageDto.fromEntity(savedMessage);
+                messagingTemplate.convertAndSendToUser(
+                                receiver.getMobileNumber(),
+                                "/queue/messages",
+                                messageDto);
+
+                log.info("Message sent from {} to {}", senderMobile, receiver.getMobileNumber());
+
+                return messageDto;
         }
 
-        CropListing listing = null;
-        if (request.getListingId() != null) {
-            listing = listingRepository.findById(request.getListingId())
-                    .orElse(null);
+        public List<MessageDto> getConversation(String userMobile, UUID otherUserId) {
+                User user = userRepository.findByMobileNumber(userMobile)
+                                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+                User otherUser = userRepository.findById(otherUserId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Other user not found"));
+
+                List<Message> messages = messageRepository.findConversationBetween(
+                                user.getId(), otherUser.getId());
+
+                // Mark messages as read
+                markMessagesAsRead(user.getId(), otherUser.getId());
+
+                return messages.stream()
+                                .map(MessageDto::fromEntity)
+                                .collect(Collectors.toList());
         }
 
-        Message message = Message.builder()
-                .sender(sender)
-                .receiver(receiver)
-                .listing(listing)
-                .message(request.getMessage())
-                .isRead(false)
-                .build();
+        public List<ConversationDto> getConversations(String userMobile) {
+                User user = userRepository.findByMobileNumber(userMobile)
+                                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        Message savedMessage = messageRepository.save(message);
+                List<Message> allMessages = messageRepository.findConversations(
+                                user.getId(),
+                                org.springframework.data.domain.PageRequest.of(0, 1000)).getContent();
 
-        // Send real-time notification via WebSocket
-        MessageDto messageDto = MessageDto.fromEntity(savedMessage);
-        messagingTemplate.convertAndSendToUser(
-                receiver.getMobileNumber(),
-                "/queue/messages",
-                messageDto);
+                // Group by conversation partner
+                Map<UUID, List<Message>> conversationMap = new HashMap<>();
+                for (Message msg : allMessages) {
+                        UUID partnerId = msg.getSender().getId().equals(user.getId()) ? msg.getReceiver().getId()
+                                        : msg.getSender().getId();
 
-        log.info("Message sent from {} to {}", senderMobile, receiver.getMobileNumber());
+                        conversationMap.computeIfAbsent(partnerId, k -> new ArrayList<>()).add(msg);
+                }
 
-        return messageDto;
-    }
+                // Build conversation DTOs
+                return conversationMap.entrySet().stream()
+                                .map(entry -> {
+                                        List<Message> msgs = entry.getValue();
+                                        Message lastMsg = msgs.get(0); // Already sorted by createdAt DESC
 
-    public List<MessageDto> getConversation(String userMobile, UUID otherUserId) {
-        User user = userRepository.findByMobileNumber(userMobile)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                                        User partner = lastMsg.getSender().getId().equals(user.getId())
+                                                        ? lastMsg.getReceiver()
+                                                        : lastMsg.getSender();
 
-        User otherUser = userRepository.findById(otherUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("Other user not found"));
+                                        long unreadCount = msgs.stream()
+                                                        .filter(m -> m.getReceiver().getId().equals(user.getId())
+                                                                        && !m.getIsRead())
+                                                        .count();
 
-        List<Message> messages = messageRepository.findConversationBetween(
-                user.getId(), otherUser.getId());
-
-        // Mark messages as read
-        markMessagesAsRead(user.getId(), otherUser.getId());
-
-        return messages.stream()
-                .map(MessageDto::fromEntity)
-                .collect(Collectors.toList());
-    }
-
-    public List<ConversationDto> getConversations(String userMobile) {
-        User user = userRepository.findByMobileNumber(userMobile)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-        List<Message> allMessages = messageRepository.findConversations(
-                user.getId(),
-                org.springframework.data.domain.PageRequest.of(0, 1000)).getContent();
-
-        // Group by conversation partner
-        Map<UUID, List<Message>> conversationMap = new HashMap<>();
-        for (Message msg : allMessages) {
-            UUID partnerId = msg.getSender().getId().equals(user.getId()) ? msg.getReceiver().getId()
-                    : msg.getSender().getId();
-
-            conversationMap.computeIfAbsent(partnerId, k -> new ArrayList<>()).add(msg);
+                                        return ConversationDto.builder()
+                                                        .userId(partner.getId())
+                                                        .userName(partner.getName())
+                                                        .userMobile(partner.getMobileNumber())
+                                                        .listingId(lastMsg.getListing() != null
+                                                                        ? lastMsg.getListing().getId()
+                                                                        : null)
+                                                        .lastMessage(lastMsg.getMessage())
+                                                        .lastMessageTime(lastMsg.getCreatedAt())
+                                                        .unreadCount(unreadCount)
+                                                        .build();
+                                })
+                                .sorted(Comparator.comparing(ConversationDto::getLastMessageTime).reversed())
+                                .collect(Collectors.toList());
         }
 
-        // Build conversation DTOs
-        return conversationMap.entrySet().stream()
-                .map(entry -> {
-                    List<Message> msgs = entry.getValue();
-                    Message lastMsg = msgs.get(0); // Already sorted by createdAt DESC
+        public long getUnreadCount(String userMobile) {
+                User user = userRepository.findByMobileNumber(userMobile)
+                                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-                    User partner = lastMsg.getSender().getId().equals(user.getId()) ? lastMsg.getReceiver()
-                            : lastMsg.getSender();
+                return messageRepository.countUnreadMessages(user.getId());
+        }
 
-                    long unreadCount = msgs.stream()
-                            .filter(m -> m.getReceiver().getId().equals(user.getId()) && !m.getIsRead())
-                            .count();
+        @Transactional
+        public void markMessagesAsRead(UUID receiverId, UUID senderId) {
+                int updated = messageRepository.markAsRead(receiverId, senderId);
+                if (updated > 0) {
+                        log.info("Marked {} messages as read", updated);
 
-                    return ConversationDto.builder()
-                            .userId(partner.getId())
-                            .userName(partner.getName())
-                            .userMobile(partner.getMobileNumber())
-                            .listingId(lastMsg.getListing() != null ? lastMsg.getListing().getId() : null)
-                            .lastMessage(lastMsg.getMessage())
-                            .lastMessageTime(lastMsg.getCreatedAt())
-                            .unreadCount(unreadCount)
-                            .build();
-                })
-                .sorted(Comparator.comparing(ConversationDto::getLastMessageTime).reversed())
-                .collect(Collectors.toList());
-    }
+                        // Notify the sender (senderId) that their messages were read by receiver
+                        // (receiverId)
+                        User sender = userRepository.findById(senderId).orElse(null);
+                        User receiver = userRepository.findById(receiverId).orElse(null);
 
-    public long getUnreadCount(String userMobile) {
-        User user = userRepository.findByMobileNumber(userMobile)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                        if (sender != null && receiver != null) {
+                                Map<String, Object> payload = new HashMap<>();
+                                payload.put("userId", receiver.getId()); // The user who read the messages
+                                payload.put("readAt", new Date());
 
-        return messageRepository.countUnreadMessages(user.getId());
-    }
+                                messagingTemplate.convertAndSendToUser(
+                                                sender.getMobileNumber(),
+                                                "/queue/read",
+                                                payload);
+                        }
+                }
+        }
 
-    @Transactional
-    public void markMessagesAsRead(UUID receiverId, UUID senderId) {
-        int updated = messageRepository.markAsRead(receiverId, senderId);
-        log.info("Marked {} messages as read", updated);
-    }
+        public void sendTypingIndicator(String senderMobile, UUID receiverId) {
+                User receiver = userRepository.findById(receiverId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Receiver not found"));
+
+                Map<String, Object> payload = new HashMap<>();
+                payload.put("senderId", senderMobile); // Sending mobile as ID for simplicity on frontend if needed, or
+                                                       // lookup
+                // Ideally we send UUID of sender. Let's send both.
+                // Actually, the frontend expects "typing" event.
+
+                // Find sender UUID
+                User sender = userRepository.findByMobileNumber(senderMobile)
+                                .orElseThrow(() -> new ResourceNotFoundException("Sender not found"));
+
+                payload.put("userId", sender.getId());
+                payload.put("isTyping", true);
+
+                messagingTemplate.convertAndSendToUser(
+                                receiver.getMobileNumber(),
+                                "/queue/typing",
+                                payload);
+        }
 }

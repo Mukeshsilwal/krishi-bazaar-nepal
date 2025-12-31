@@ -17,44 +17,33 @@ const translations = {
         'nav.contact': 'सम्पर्क',
         'nav.login': 'लगइन',
         'nav.register': 'दर्ता गर्नुहोस्',
+        'nav.logout': 'लगआउट',
 
         // Hero Section
-        'hero.title': 'किसान र खरिददारलाई सिधै जोड्ने',
-        'hero.subtitle': 'नेपालको पहिलो डिजिटल कृषि बजार',
-        'hero.description': 'किसानहरूले आफ्नो उत्पादन सिधै बिक्री गर्नुहोस्। खरिददारहरूले ताजा उत्पादन उचित मूल्यमा किन्नुहोस्।',
-        'hero.cta.browse': 'बजार हेर्नुहोस्',
-        'hero.cta.register': 'दर्ता गर्नुहोस्',
+        'hero.badge': 'नेपालको #१ कृषि प्लेटफर्म',
+        'hero.title.prefix': 'किसानको साथी,',
+        'hero.title.suffix': 'नेपालको प्रगति',
+        'hero.subtitle': 'आफ्नो उब्जनी सिधै किन्नेलाई बेच्नुहोस्',
+        'hero.description': 'Sell your crops directly to buyers',
+        'hero.cta.start': 'बेच्न सुरु गर्नुहोस्',
+        'hero.cta.start.sub': 'Start Selling',
+        'hero.cta.video': 'भिडियो हेर्नुहोस्',
+        'hero.cta.video.sub': 'Watch Video',
+        'hero.stat.farmers': 'किसानहरू',
+        'hero.stat.trade': 'मासिक कारोबार',
+        'hero.stat.districts': 'जिल्लाहरू',
 
         // Features
-        'features.title': 'किन किसान सारथी?',
-        'features.farmers.title': 'किसानहरूको लागि',
-        'features.farmers.1': 'सिधै खरिददारलाई बिक्री गर्नुहोस्',
-        'features.farmers.2': 'आफ्नै मूल्य तोक्नुहोस्',
-        'features.farmers.3': 'बिचौलियाको कमिसन छैन',
-        'features.farmers.4': 'सुरक्षित भुक्तानी',
-
-        'features.buyers.title': 'खरिददारहरूको लागि',
-        'features.buyers.1': 'खेतबाट सिधै ताजा उत्पादन',
-        'features.buyers.2': 'उचित र पारदर्शी मूल्य',
-        'features.buyers.3': 'गुणस्तरको ग्यारेन्टी',
-        'features.buyers.4': 'सजिलो अर्डर प्रक्रिया',
-
-        'features.payment.title': 'सुरक्षित भुक्तानी',
-        'features.payment.1': 'eSewa एकीकरण',
-        'features.payment.2': 'Khalti समर्थन',
-        'features.payment.3': 'Escrow सुरक्षा',
-        'features.payment.4': 'लेनदेन ट्र्याकिङ',
+        'features.badge': 'सुविधाहरू / Features',
+        'features.title.prefix': 'के-के',
+        'features.title.highlight': 'पाइन्छ?',
+        'features.subtitle': 'What can you do here?',
 
         // How It Works
-        'how.title': 'यो कसरी काम गर्छ?',
-        'how.step1.title': 'दर्ता गर्नुहोस्',
-        'how.step1.desc': 'किसान वा खरिददारको रूपमा खाता बनाउनुहोस्',
-        'how.step2.title': 'ब्राउज/सूचीबद्ध',
-        'how.step2.desc': 'किसानहरूले बाली सूचीबद्ध गर्नुहोस्, खरिददारहरूले बजार हेर्नुहोस्',
-        'how.step3.title': 'अर्डर र भुक्तानी',
-        'how.step3.desc': 'अर्डर राख्नुहोस् र सुरक्षित भुक्तानी गर्नुहोस्',
-        'how.step4.title': 'पिकअप',
-        'how.step4.desc': 'पिकअप समन्वय गर्नुहोस् र लेनदेन पूरा गर्नुहोस्',
+        'how.badge': 'कसरी काम गर्छ / How It Works',
+        'how.title.highlight': '४ सजिलो',
+        'how.title.suffix': 'चरणमा',
+        'how.subtitle': '4 Simple Steps',
 
         // CTA
         'cta.title': 'सुरु गर्न तयार हुनुहुन्छ?',
@@ -62,89 +51,94 @@ const translations = {
         'cta.button': 'निःशुल्क खाता बनाउनुहोस्',
 
         // Footer
-        'footer.tagline': 'नेपालभरि किसान र खरिददारलाई जोड्दै',
-        'footer.rights': 'सर्वाधिकार सुरक्षित',
+        'footer.tagline': 'किसानको साथी, नेपालको प्रगति',
+        'footer.subtagline': 'प्रविधिको प्रयोगबाट नेपाली किसानको सशक्तिकरण।',
+        'footer.rights': 'सर्वाधिकार सुरक्षित।',
 
-        // Dashboard
+        // Dashboard keys
         'dashboard.myListings': 'मेरो बाली सूची',
         'dashboard.myOrders': 'मेरो अर्डर',
         'dashboard.chat': 'च्याट',
         'dashboard.profile': 'प्रोफाइल',
-        'nav.logout': 'लगआउट',
+        // 'listings.manage': 'आफ्नो बाली सूची व्यवस्थापन गर्नुहोस्', // This was removed as per the instruction
+        // 'listings.create': 'नयाँ बाली थप्नुहोस्', // This was removed as per the instruction
 
         // Listings
-        'listings.manage': 'आफ्नो बाली सूची व्यवस्थापन गर्नुहोस्',
-        'listings.create': 'नयाँ बाली थप्नुहोस्',
-        'listings.edit': 'सम्पादन गर्नुहोस्',
-        'listings.delete': 'मेटाउनुहोस्',
-        'listings.confirmDelete': 'के तपाईं यो सूची मेटाउन निश्चित हुनुहुन्छ?',
-        'listings.status.active': 'सक्रिय',
-        'listings.status.sold': 'बिक्री भयो',
-        'listings.status.expired': 'म्याद सकियो',
+        'listings.create': 'नयाँ सूची सिर्जना गर्नुहोस्',
+        'listings.subtitle': 'बिक्रीको लागि आफ्नो उब्जनीको विवरण भर्नुहोस्',
+        'listings.back': 'मेरो सूचीमा फर्कनुहोस्',
+        'listings.form.cropName': 'बालीको नाम',
+        'listings.form.variety': 'जात',
+        'listings.form.quantity': 'परिमाण',
+        'listings.form.unit': 'इकाई',
+        'listings.form.price': 'प्रति इकाई मूल्य (रु.)',
+        'listings.form.location': 'स्थान',
+        'listings.form.harvestDate': 'काट्ने मिति',
+        'listings.form.description': 'विवरण',
+        'listings.form.image': 'बालीको फोटो',
+        'listings.form.chooseImage': 'फोटो छान्नुहोस्',
+        'listings.form.cancel': 'रद्द गर्नुहोस्',
+        'listings.form.submit': 'सूची सिर्जना गर्नुहोस्',
+        'listings.form.submitting': 'सिर्जना हुँदैछ...',
+        'listings.form.selectCrop': 'बाली छान्नुहोस्',
+        'listings.form.placeholder.variety': 'जस्तै: बासमती, हाइब्रिड',
+        'listings.form.placeholder.quantity': '१००',
+        'listings.form.placeholder.price': '५०',
+        'listings.form.placeholder.location': 'जस्तै: काठमाडौं, वडा ५',
+        'listings.form.placeholder.description': 'आफ्नो बालीको गुणस्तर, अर्गानिक प्रमाणीकरण, आदि बारे वर्णन गर्नुहोस्।',
+        'listings.form.unit.kg': 'के.जी.',
+        'listings.form.unit.quintal': 'क्विन्टल',
+        'listings.form.unit.ton': 'टन',
+        'listings.form.unit.piece': 'गोटा',
 
-        // Orders
-        'orders.manage': 'आफ्नो अर्डरहरू हेर्नुहोस् र व्यवस्थापन गर्नुहोस्',
-        'orders.asBuyer': 'खरिदकर्ताको रूपमा',
-        'orders.asFarmer': 'किसानको रूपमा',
-        'orders.confirm': 'पुष्टि गर्नुहोस्',
-        'orders.cancel': 'रद्द गर्नुहोस्',
-
-        // Chat
-        'chat.conversations': 'कुराकानी',
-        'chat.noConversations': 'अहिलेसम्म कुनै कुराकानी छैन',
-        'chat.typeMessage': 'सन्देश टाइप गर्नुहोस्...',
-        'chat.send': 'पठाउनुहोस्',
-        'chat.selectConversation': 'च्याट सुरु गर्न कुराकानी चयन गर्नुहोस्',
-
-        // Profile
-        'profile.manage': 'आफ्नो खाता जानकारी व्यवस्थापन गर्नुहोस्',
+        // My Listings Page
+        'listings.stats.total': 'जम्मा सूची',
+        'listings.stats.active': 'सक्रिय',
+        'listings.stats.sold': 'बिक्री भएको',
+        'listings.refresh': 'रिफ्रेस',
+        'listings.empty.title': 'कुनै सूची छैन',
+        'listings.empty.desc': 'बिक्री सुरु गर्न आफ्नो पहिलो बाली सूची बनाउनुहोस्',
+        'listings.actions.view': 'हेर्नुहोस्',
+        'listings.actions.edit': 'सम्पादन',
+        'listings.actions.delete': 'हटाउनुहोस्',
+        'listings.confirmDelete': 'के तपाइँ यो सूची मेटाउन निश्चित हुनुहुन्छ?',
     },
     en: {
         // Navbar
         'nav.home': 'Home',
-        'nav.marketplace': 'Marketplace',
-        'nav.about': 'About',
+        'nav.features': 'Features',
+        'nav.howItWorks': 'How It Works',
+        'nav.market': 'Market',
         'nav.contact': 'Contact',
         'nav.login': 'Login',
         'nav.register': 'Register',
+        'nav.logout': 'Logout',
 
         // Hero Section
-        'hero.title': 'Direct Connection Between Farmers and Buyers',
-        'hero.subtitle': "Nepal's First Digital Agricultural Marketplace",
-        'hero.description': 'Farmers sell your produce directly. Buyers purchase fresh produce at fair prices.',
-        'hero.cta.browse': 'Browse Marketplace',
-        'hero.cta.register': 'Get Started',
+        'hero.badge': 'No. 1 Agri-Tech Platform in Nepal',
+        'hero.title.prefix': 'Farmers\' Companion,',
+        'hero.title.suffix': 'Nepal\'s Progress',
+        'hero.subtitle': 'Get the right price for your produce. Connect directly with buyers.',
+        'hero.description': 'Krishi Sarathi connects farmers directly with markets. Sell crops, buy seeds/fertilizers, and get expert advice—all in one place.',
+        'hero.cta.start': 'Start Selling',
+        'hero.cta.start.sub': 'It\'s free',
+        'hero.cta.video': 'How it works',
+        'hero.cta.video.sub': 'Watch video',
+        'hero.stat.farmers': 'Active Farmers',
+        'hero.stat.trade': 'Trade Volume',
+        'hero.stat.districts': 'Districts Covered',
 
         // Features
-        'features.title': 'Why Kisan Sarathi?',
-        'features.farmers.title': 'For Farmers',
-        'features.farmers.1': 'Sell directly to buyers',
-        'features.farmers.2': 'Set your own prices',
-        'features.farmers.3': 'No middleman commission',
-        'features.farmers.4': 'Secure payments',
-
-        'features.buyers.title': 'For Buyers',
-        'features.buyers.1': 'Fresh produce directly from farms',
-        'features.buyers.2': 'Fair and transparent pricing',
-        'features.buyers.3': 'Quality guaranteed',
-        'features.buyers.4': 'Easy ordering process',
-
-        'features.payment.title': 'Secure Payments',
-        'features.payment.1': 'eSewa integration',
-        'features.payment.2': 'Khalti support',
-        'features.payment.3': 'Escrow protection',
-        'features.payment.4': 'Transaction tracking',
+        'features.badge': 'Features',
+        'features.title.prefix': 'What do you',
+        'features.title.highlight': 'get?',
+        'features.subtitle': 'Everything you need for farming and marketing in one place.',
 
         // How It Works
-        'how.title': 'How It Works',
-        'how.step1.title': 'Register',
-        'how.step1.desc': 'Create your account as a farmer or buyer',
-        'how.step2.title': 'Browse/List',
-        'how.step2.desc': 'Farmers list crops, buyers browse marketplace',
-        'how.step3.title': 'Order & Pay',
-        'how.step3.desc': 'Place orders and make secure payments',
-        'how.step4.title': 'Pickup',
-        'how.step4.desc': 'Coordinate pickup and complete transaction',
+        'how.badge': 'How It Works',
+        'how.title.highlight': '4 Simple',
+        'how.title.suffix': 'Steps',
+        'how.subtitle': 'Easily sell your produce using mobile.',
 
         // CTA
         'cta.title': 'Ready to Get Started?',
@@ -152,42 +146,31 @@ const translations = {
         'cta.button': 'Create Free Account',
 
         // Footer
-        'footer.tagline': 'Connecting Farmers and Buyers Across Nepal',
-        'footer.rights': 'All rights reserved',
+        'footer.tagline': 'Farmers\' Companion, Nepal\'s Progress',
+        'footer.subtagline': 'Empowering Nepali farmers with technology.',
+        'footer.rights': 'All rights reserved.',
 
-        // Dashboard
+        // Dashboard keys
         'dashboard.myListings': 'My Listings',
         'dashboard.myOrders': 'My Orders',
         'dashboard.chat': 'Chat',
         'dashboard.profile': 'Profile',
-        'nav.logout': 'Logout',
-
-        // Listings
         'listings.manage': 'Manage your crop listings',
         'listings.create': 'Create New Listing',
-        'listings.edit': 'Edit',
-        'listings.delete': 'Delete',
+        'listings.form.unit.ton': 'Ton',
+        'listings.form.unit.piece': 'Piece',
+
+        // My Listings Page
+        'listings.stats.total': 'Total Listings',
+        'listings.stats.active': 'Active',
+        'listings.stats.sold': 'Sold',
+        'listings.refresh': 'Refresh',
+        'listings.empty.title': 'No listings yet',
+        'listings.empty.desc': 'Create your first crop listing to start selling',
+        'listings.actions.view': 'View',
+        'listings.actions.edit': 'Edit',
+        'listings.actions.delete': 'Delete',
         'listings.confirmDelete': 'Are you sure you want to delete this listing?',
-        'listings.status.active': 'Active',
-        'listings.status.sold': 'Sold',
-        'listings.status.expired': 'Expired',
-
-        // Orders
-        'orders.manage': 'View and manage your orders',
-        'orders.asBuyer': 'As Buyer',
-        'orders.asFarmer': 'As Farmer',
-        'orders.confirm': 'Confirm',
-        'orders.cancel': 'Cancel',
-
-        // Chat
-        'chat.conversations': 'Conversations',
-        'chat.noConversations': 'No conversations yet',
-        'chat.typeMessage': 'Type a message...',
-        'chat.send': 'Send',
-        'chat.selectConversation': 'Select a conversation to start chatting',
-
-        // Profile
-        'profile.manage': 'Manage your account information',
     },
 };
 
@@ -197,6 +180,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     const [language, setLanguage] = useState<Language>('ne'); // Default to Nepali
 
     const t = (key: string): string => {
+        // Fallback to key if translation missing
         return translations[language][key as keyof typeof translations.ne] || key;
     };
 

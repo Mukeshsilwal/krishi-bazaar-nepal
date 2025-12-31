@@ -6,6 +6,7 @@ import {
   Store,
   MessageCircle,
 } from "lucide-react";
+import { useLanguage } from "../context/LanguageContext";
 
 const features = [
   {
@@ -59,19 +60,21 @@ const features = [
 ];
 
 const FeaturesSection = () => {
+  const { t, language } = useLanguage();
+
   return (
     <section id="features" className="bg-gradient-soft py-20 md:py-28">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="mx-auto mb-16 max-w-2xl text-center">
           <span className="mb-4 inline-block rounded-full bg-primary/10 px-5 py-2 text-base font-semibold text-primary">
-            सुविधाहरू / Features
+            {t('features.badge')}
           </span>
           <h2 className="mb-4 text-3xl font-bold text-foreground md:text-4xl lg:text-5xl">
-            के-के <span className="text-primary">पाइन्छ?</span>
+            {t('features.title.prefix')} <span className="text-primary">{t('features.title.highlight')}</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            What can you do here?
+            {t('features.subtitle')}
           </p>
         </div>
 
@@ -92,13 +95,11 @@ const FeaturesSection = () => {
 
               {/* Content */}
               <h3 className="mb-1 text-2xl font-bold text-foreground">
-                {feature.title}
+                {language === 'ne' ? feature.title : feature.titleEn}
               </h3>
-              <p className="mb-3 text-sm text-muted-foreground">
-                {feature.titleEn}
+              <p className="text-lg text-foreground/80 mb-2">
+                {language === 'ne' ? feature.description : feature.descriptionEn}
               </p>
-              <p className="text-lg text-foreground/80 mb-2">{feature.description}</p>
-              <p className="text-sm text-muted-foreground">{feature.descriptionEn}</p>
 
               {/* Decorative Element */}
               <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/5 transition-transform duration-500 group-hover:scale-150" />
@@ -111,3 +112,4 @@ const FeaturesSection = () => {
 };
 
 export default FeaturesSection;
+

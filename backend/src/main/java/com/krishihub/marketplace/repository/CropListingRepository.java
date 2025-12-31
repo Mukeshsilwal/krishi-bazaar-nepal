@@ -14,6 +14,11 @@ import java.util.UUID;
 
 @Repository
 public interface CropListingRepository extends JpaRepository<CropListing, UUID>, JpaSpecificationExecutor<CropListing> {
+    List<CropListing> findByFarmerId(UUID farmerId);
+
+    List<CropListing> findTop5ByFarmerIdOrderByCreatedAtDesc(UUID farmerId);
+
+    long countByFarmerId(UUID farmerId);
 
     Page<CropListing> findByStatus(CropListing.ListingStatus status, Pageable pageable);
 

@@ -1,6 +1,7 @@
 import api from './api';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
+import { BACKEND_URL } from '../config/app';
 
 const messageService = {
     // Send message via REST
@@ -36,7 +37,7 @@ const messageService = {
     // WebSocket connection
     connectWebSocket: (onMessageReceived) => {
         const token = localStorage.getItem('accessToken');
-        const wsUrl = import.meta.env.VITE_WS_URL || 'http://localhost:8089';
+        const wsUrl = BACKEND_URL;
         const socket = new SockJS(`${wsUrl}/ws`);
 
         const stompClient = new Client({
@@ -58,13 +59,39 @@ const messageService = {
             // Subscribe to personal message queue
             const user = JSON.parse(localStorage.getItem('user'));
             if (user) {
+                // Messages
                 stompClient.subscribe(`/user/${user.mobileNumber}/queue/messages`, (message) => {
                     const receivedMessage = JSON.parse(message.body);
                     if (onMessageReceived) {
-                        onMessageReceived(receivedMessage);
+                        onMessageReceived('MESSAGE', receivedMessage);
+                    }
+                });
+
+
+                // Typing Indicators
+                stompClient.subscribe(`/user/${user.mobileNumber}/queue/typing`, (message) => {
+                    const payload = JSON.parse(message.body);
+                    if (onMessageReceived) {
+                        onMessageReceived('TYPING', payload);
+                    }
+                });
+
+                // Read Receipts
+                stompClient.subscribe(`/user/${user.mobileNumber}/queue/read`, (message) => {
+                    const payload = JSON.parse(message.body);
+                    if (onMessageReceived) {
+                        onMessageReceived('READ', payload);
                     }
                 });
             }
+
+            // Subscribe to global presence
+            stompClient.subscribe('/topic/presence', (message) => {
+                const payload = JSON.parse(message.body);
+                if (onMessageReceived) {
+                    onMessageReceived('PRESENCE', payload);
+                }
+            });
         };
 
         stompClient.onStompError = (frame) => {
@@ -85,6 +112,22 @@ const messageService = {
                 body: JSON.stringify(messageData),
             });
         }
+    },
+
+    // Send typing indicator
+    sendTyping: (stompClient, receiverId) => {
+        if (stompClient && stompClient.connected) {
+            stompClient.publish({
+                destination: '/app/chat.typing',
+                body: JSON.stringify({ receiverId }),
+            });
+        }
+    },
+
+    // Get online users
+    getOnlineUsers: async () => {
+        const response = await api.get('/messages/presence');
+        return response.data;
     },
 
     // Disconnect WebSocket

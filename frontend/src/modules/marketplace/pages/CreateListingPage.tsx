@@ -5,11 +5,16 @@ import Footer from '../../../components/Footer';
 import { useMyListings } from '../hooks/useMyListings';
 import { useLanguage } from '../../../context/LanguageContext';
 import { ArrowLeft, Upload } from 'lucide-react';
+import { useMasterData } from '../../../hooks/useMasterData';
 
 export default function CreateListingPage() {
     const navigate = useNavigate();
     const { createListing, uploadImage } = useMyListings();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
+
+    // Fetch Master Data
+    const { data: crops, loading: loadingCrops } = useMasterData('CROP_TYPE');
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [formData, setFormData] = useState({
@@ -74,12 +79,12 @@ export default function CreateListingPage() {
                         className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
                     >
                         <ArrowLeft size={20} />
-                        Back to My Listings
+                        {t('listings.back')}
                     </button>
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        {t('listings.create') || 'Create New Listing'}
+                        {t('listings.create')}
                     </h1>
-                    <p className="text-gray-600">Fill in the details to list your crop for sale</p>
+                    <p className="text-gray-600">{t('listings.subtitle')}</p>
                 </div>
 
                 {/* Error Message */}
@@ -94,23 +99,33 @@ export default function CreateListingPage() {
                     {/* Crop Name */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Crop Name *
+                            {t('listings.form.cropName')} *
                         </label>
-                        <input
-                            type="text"
-                            name="cropName"
-                            value={formData.cropName}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            placeholder="e.g., Rice, Wheat, Tomato"
-                            required
-                        />
+                        {loadingCrops ? (
+                            <div className="animate-pulse h-10 bg-gray-200 rounded-lg"></div>
+                        ) : (
+                            <select
+                                name="cropName"
+                                value={formData.cropName}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                required
+                            >
+                                <option value="">{t('listings.form.selectCrop')}</option>
+                                {crops.map((crop) => (
+                                    <option key={crop.code} value={crop.labelEn}>
+                                        {language === 'ne' ? crop.labelNe : crop.labelEn}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">{t('listings.form.selectCrop')}</p>
                     </div>
 
                     {/* Variety */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Variety
+                            {t('listings.form.variety')}
                         </label>
                         <input
                             type="text"
@@ -118,7 +133,7 @@ export default function CreateListingPage() {
                             value={formData.variety}
                             onChange={handleChange}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            placeholder="e.g., Basmati, Hybrid"
+                            placeholder={t('listings.form.placeholder.variety')}
                         />
                     </div>
 
@@ -126,7 +141,7 @@ export default function CreateListingPage() {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Quantity *
+                                {t('listings.form.quantity')} *
                             </label>
                             <input
                                 type="number"
@@ -134,7 +149,7 @@ export default function CreateListingPage() {
                                 value={formData.quantity}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                placeholder="100"
+                                placeholder={t('listings.form.placeholder.quantity')}
                                 min="0"
                                 step="0.01"
                                 required
@@ -142,7 +157,7 @@ export default function CreateListingPage() {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Unit *
+                                {t('listings.form.unit')} *
                             </label>
                             <select
                                 name="unit"
@@ -151,10 +166,10 @@ export default function CreateListingPage() {
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                 required
                             >
-                                <option value="kg">KG</option>
-                                <option value="quintal">Quintal</option>
-                                <option value="ton">Ton</option>
-                                <option value="piece">Piece</option>
+                                <option value="kg">{t('listings.form.unit.kg')}</option>
+                                <option value="quintal">{t('listings.form.unit.quintal')}</option>
+                                <option value="ton">{t('listings.form.unit.ton')}</option>
+                                <option value="piece">{t('listings.form.unit.piece')}</option>
                             </select>
                         </div>
                     </div>
@@ -162,7 +177,7 @@ export default function CreateListingPage() {
                     {/* Price Per Unit */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Price Per Unit (Rs.) *
+                            {t('listings.form.price')} *
                         </label>
                         <input
                             type="number"
@@ -170,7 +185,7 @@ export default function CreateListingPage() {
                             value={formData.pricePerUnit}
                             onChange={handleChange}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            placeholder="50"
+                            placeholder={t('listings.form.placeholder.price')}
                             min="0"
                             step="0.01"
                             required
@@ -180,7 +195,7 @@ export default function CreateListingPage() {
                     {/* Location */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Location *
+                            {t('listings.form.location')} *
                         </label>
                         <input
                             type="text"
@@ -188,7 +203,7 @@ export default function CreateListingPage() {
                             value={formData.location}
                             onChange={handleChange}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            placeholder="e.g., Kathmandu, Ward 5"
+                            placeholder={t('listings.form.placeholder.location')}
                             required
                         />
                     </div>
@@ -196,7 +211,7 @@ export default function CreateListingPage() {
                     {/* Harvest Date */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Harvest Date
+                            {t('listings.form.harvestDate')}
                         </label>
                         <input
                             type="date"
@@ -210,7 +225,7 @@ export default function CreateListingPage() {
                     {/* Description */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Description
+                            {t('listings.form.description')}
                         </label>
                         <textarea
                             name="description"
@@ -218,19 +233,19 @@ export default function CreateListingPage() {
                             onChange={handleChange}
                             rows={4}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            placeholder="Describe your crop, quality, organic certification, etc."
+                            placeholder={t('listings.form.placeholder.description')}
                         />
                     </div>
 
                     {/* Image Upload */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Crop Image
+                            {t('listings.form.image')}
                         </label>
                         <div className="flex items-center gap-4">
                             <label className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 cursor-pointer transition">
                                 <Upload size={20} />
-                                Choose Image
+                                {t('listings.form.chooseImage')}
                                 <input
                                     type="file"
                                     accept="image/*"
@@ -251,18 +266,19 @@ export default function CreateListingPage() {
                             onClick={() => navigate('/my-listings')}
                             className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
                         >
-                            Cancel
+                            {t('listings.form.cancel')}
                         </button>
                         <button
                             type="submit"
                             disabled={loading}
                             className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium disabled:opacity-50"
                         >
-                            {loading ? 'Creating...' : 'Create Listing'}
+                            {loading ? t('listings.form.submitting') : t('listings.form.submit')}
                         </button>
                     </div>
                 </form>
             </div>
+
 
             <Footer />
         </div>

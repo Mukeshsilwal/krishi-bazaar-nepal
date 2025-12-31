@@ -9,9 +9,8 @@ import { Plus, Edit, Trash2, Eye, RefreshCw } from 'lucide-react';
 export default function MyListingsPage() {
     const { listings, loading, error, deleteListing, refetch } = useMyListings();
     const { t } = useLanguage();
-    const [showCreateModal, setShowCreateModal] = useState(false);
 
-    const handleDelete = async (id) => {
+    const handleDelete = async (id: string) => {
         if (window.confirm(t('listings.confirmDelete') || 'Are you sure you want to delete this listing?')) {
             try {
                 await deleteListing(id);
@@ -21,7 +20,7 @@ export default function MyListingsPage() {
         }
     };
 
-    const getStatusColor = (status) => {
+    const getStatusColor = (status: string) => {
         switch (status) {
             case 'ACTIVE':
                 return 'bg-green-100 text-green-800';
@@ -50,25 +49,25 @@ export default function MyListingsPage() {
                 {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        {t('dashboard.myListings') || 'My Listings'}
+                        {t('dashboard.myListings')}
                     </h1>
                     <p className="text-gray-600">
-                        {t('listings.manage') || 'Manage your crop listings'}
+                        {t('listings.manage')}
                     </p>
                 </div>
 
                 {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div className="bg-white p-6 rounded-lg shadow">
-                        <div className="text-sm text-gray-600 mb-1">Total Listings</div>
+                        <div className="text-sm text-gray-600 mb-1">{t('listings.stats.total')}</div>
                         <div className="text-3xl font-bold text-gray-900">{stats.total}</div>
                     </div>
                     <div className="bg-white p-6 rounded-lg shadow">
-                        <div className="text-sm text-gray-600 mb-1">Active</div>
+                        <div className="text-sm text-gray-600 mb-1">{t('listings.stats.active')}</div>
                         <div className="text-3xl font-bold text-green-600">{stats.active}</div>
                     </div>
                     <div className="bg-white p-6 rounded-lg shadow">
-                        <div className="text-sm text-gray-600 mb-1">Sold</div>
+                        <div className="text-sm text-gray-600 mb-1">{t('listings.stats.sold')}</div>
                         <div className="text-3xl font-bold text-gray-600">{stats.sold}</div>
                     </div>
                 </div>
@@ -80,15 +79,15 @@ export default function MyListingsPage() {
                         className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
                     >
                         <Plus size={20} />
-                        {t('listings.create') || 'Create New Listing'}
+                        {t('listings.create')}
                     </Link>
                     <button
                         onClick={() => refetch()}
                         className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-                        title="Refresh listings"
+                        title={t('listings.refresh')}
                     >
                         <RefreshCw size={20} />
-                        Refresh
+                        {t('listings.refresh')}
                     </button>
                 </div>
 
@@ -114,17 +113,17 @@ export default function MyListingsPage() {
                             <div className="bg-white rounded-lg shadow p-12 text-center">
                                 <div className="text-6xl mb-4">🌾</div>
                                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                                    No listings yet
+                                    {t('listings.empty.title')}
                                 </h3>
                                 <p className="text-gray-600 mb-6">
-                                    Create your first crop listing to start selling
+                                    {t('listings.empty.desc')}
                                 </p>
                                 <Link
                                     to="/create-listing"
                                     className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
                                 >
                                     <Plus size={20} />
-                                    Create Listing
+                                    {t('listings.create')}
                                 </Link>
                             </div>
                         ) : (
@@ -165,12 +164,12 @@ export default function MyListingsPage() {
                                             </h3>
                                             <div className="space-y-1 text-sm text-gray-600 mb-4">
                                                 <p>
-                                                    Quantity: {listing.quantity} {listing.unit}
+                                                    {t('listings.form.quantity')}: {listing.quantity} {listing.unit}
                                                 </p>
                                                 <p className="text-lg font-bold text-green-600">
                                                     Rs. {listing.pricePerUnit}/{listing.unit}
                                                 </p>
-                                                <p>Location: {listing.location}</p>
+                                                <p>{t('listings.form.location')}: {listing.location}</p>
                                             </div>
 
                                             {/* Actions */}
@@ -180,21 +179,21 @@ export default function MyListingsPage() {
                                                     className="flex-1 flex items-center justify-center gap-1 bg-blue-50 text-blue-600 px-3 py-2 rounded hover:bg-blue-100 transition text-sm"
                                                 >
                                                     <Eye size={16} />
-                                                    View
+                                                    {t('listings.actions.view')}
                                                 </Link>
                                                 <Link
                                                     to={`/edit-listing/${listing.id}`}
                                                     className="flex-1 flex items-center justify-center gap-1 bg-green-50 text-green-600 px-3 py-2 rounded hover:bg-green-100 transition text-sm"
                                                 >
                                                     <Edit size={16} />
-                                                    Edit
+                                                    {t('listings.actions.edit')}
                                                 </Link>
                                                 <button
                                                     onClick={() => handleDelete(listing.id)}
                                                     className="flex-1 flex items-center justify-center gap-1 bg-red-50 text-red-600 px-3 py-2 rounded hover:bg-red-100 transition text-sm"
                                                 >
                                                     <Trash2 size={16} />
-                                                    Delete
+                                                    {t('listings.actions.delete')}
                                                 </button>
                                             </div>
                                         </div>

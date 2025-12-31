@@ -1,5 +1,6 @@
 import Logo from "./Logo";
 import { Facebook, Youtube, Phone, Mail, MapPin } from "lucide-react";
+import { useLanguage } from "../context/LanguageContext";
 
 const footerLinks = {
   platform: [
@@ -21,6 +22,8 @@ const footerLinks = {
 };
 
 const Footer = () => {
+  const { t, language } = useLanguage();
+
   return (
     <footer id="about" className="bg-foreground text-primary-foreground">
       <div className="container mx-auto px-4 py-16">
@@ -31,10 +34,10 @@ const Footer = () => {
               <Logo />
             </div>
             <p className="mb-4 text-lg text-primary-foreground/90">
-              किसानको साथी, नेपालको प्रगति
+              {t('footer.tagline')}
             </p>
             <p className="mb-6 max-w-sm text-sm text-primary-foreground/70">
-              Empowering Nepali farmers with technology.
+              {t('footer.subtagline')}
             </p>
 
             {/* Contact Info - Larger touch targets */}
@@ -81,7 +84,6 @@ const Footer = () => {
           {/* Links Columns */}
           <div>
             <h4 className="mb-4 text-lg font-semibold">प्लेटफर्म</h4>
-            <p className="mb-4 text-sm text-primary-foreground/50">Platform</p>
             <ul className="space-y-3">
               {footerLinks.platform.map((link) => (
                 <li key={link.name}>
@@ -89,8 +91,7 @@ const Footer = () => {
                     href={link.href}
                     className="block rounded-lg p-2 text-base text-primary-foreground/70 transition-colors hover:bg-primary-foreground/10 hover:text-secondary"
                   >
-                    <span className="block">{link.name}</span>
-                    <span className="text-xs text-primary-foreground/50">{link.nameEn}</span>
+                    {language === 'ne' ? link.name : link.nameEn}
                   </a>
                 </li>
               ))}
@@ -99,7 +100,6 @@ const Footer = () => {
 
           <div>
             <h4 className="mb-4 text-lg font-semibold">स्रोतहरू</h4>
-            <p className="mb-4 text-sm text-primary-foreground/50">Resources</p>
             <ul className="space-y-3">
               {footerLinks.resources.map((link) => (
                 <li key={link.name}>
@@ -107,8 +107,7 @@ const Footer = () => {
                     href={link.href}
                     className="block rounded-lg p-2 text-base text-primary-foreground/70 transition-colors hover:bg-primary-foreground/10 hover:text-secondary"
                   >
-                    <span className="block">{link.name}</span>
-                    <span className="text-xs text-primary-foreground/50">{link.nameEn}</span>
+                    {language === 'ne' ? link.name : link.nameEn}
                   </a>
                 </li>
               ))}
@@ -117,7 +116,6 @@ const Footer = () => {
 
           <div>
             <h4 className="mb-4 text-lg font-semibold">कम्पनी</h4>
-            <p className="mb-4 text-sm text-primary-foreground/50">Company</p>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
@@ -125,8 +123,7 @@ const Footer = () => {
                     href={link.href}
                     className="block rounded-lg p-2 text-base text-primary-foreground/70 transition-colors hover:bg-primary-foreground/10 hover:text-secondary"
                   >
-                    <span className="block">{link.name}</span>
-                    <span className="text-xs text-primary-foreground/50">{link.nameEn}</span>
+                    {language === 'ne' ? link.name : link.nameEn}
                   </a>
                 </li>
               ))}
@@ -137,9 +134,12 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-primary-foreground/10 pt-8 md:flex-row">
           <p className="text-sm text-primary-foreground/50">
-            © २०२४ किसान सारथी। सर्वाधिकार सुरक्षित।
+            © २०२४ किसान सारथी। {t('footer.rights')}
           </p>
           <div className="flex gap-6 text-sm text-primary-foreground/50">
+            <a href="/admin/login" className="hover:text-primary-foreground">
+              Admin Login
+            </a>
             <a href="#" className="hover:text-primary-foreground">
               गोपनीयता नीति
             </a>

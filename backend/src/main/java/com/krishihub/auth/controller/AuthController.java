@@ -28,6 +28,18 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(message, message));
     }
 
+    @PostMapping("/admin/login")
+    public ResponseEntity<ApiResponse<AuthResponse>> loginAdmin(@Valid @RequestBody AdminLoginRequest request) {
+        AuthResponse response = authService.loginAdmin(request);
+        return ResponseEntity.ok(ApiResponse.success("Admin login successful", response));
+    }
+
+    @PostMapping("/admin/register")
+    public ResponseEntity<ApiResponse<String>> registerAdmin(@Valid @RequestBody AdminRegisterRequest request) {
+        String message = authService.registerAdmin(request);
+        return ResponseEntity.ok(ApiResponse.success(message, message));
+    }
+
     @PostMapping("/verify-otp")
     public ResponseEntity<ApiResponse<AuthResponse>> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
         AuthResponse response = authService.verifyOtp(request);
@@ -48,5 +60,17 @@ public class AuthController {
         String mobileNumber = authentication.getName();
         UserDto user = authService.updateProfile(mobileNumber, request);
         return ResponseEntity.ok(ApiResponse.success("Profile updated successfully", user));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        String message = authService.initiateForgotPassword(request);
+        return ResponseEntity.ok(ApiResponse.success(message, message));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<String>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        String message = authService.resetPassword(request);
+        return ResponseEntity.ok(ApiResponse.success(message, message));
     }
 }

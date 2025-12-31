@@ -36,6 +36,11 @@ public class User {
     @Column(nullable = false, length = 20)
     private UserRole role;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @Builder.Default
+    private java.util.Set<Role> roles = new java.util.HashSet<>();
+
     @Column(length = 100)
     private String name;
 
@@ -54,6 +59,16 @@ public class User {
     @Column(nullable = false)
     @Builder.Default
     private Boolean verified = false;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean enabled = true;
+
+    @Column(name = "rejection_reason", length = 500)
+    private String rejectionReason;
+
+    @Column(name = "verification_notes", length = 500)
+    private String verificationNotes;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
