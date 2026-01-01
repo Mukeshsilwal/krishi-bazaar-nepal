@@ -33,7 +33,7 @@ spring:
       max-request-size: 10MB
 
 server:
-  port: 8089
+  port: ${PORT:8089}
   error:
     include-message: always
     include-binding-errors: always
