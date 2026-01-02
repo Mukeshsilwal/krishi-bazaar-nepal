@@ -38,6 +38,9 @@ public class CorsConfig {
             origins.add("http://localhost:8080");
         }
 
+        // Allow all Vercel previews
+        origins.add("https://*.vercel.app");
+
         configuration.setAllowedOriginPatterns(origins); // Use patterns instead of origins for better compatibility
 
         // Parse allowed methods
