@@ -1,28 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Line } from 'react-chartjs-2';
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend
-} from 'chart.js';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import marketPriceService from '../services/marketPriceService';
 import { TrendingUp, TrendingDown, Minus, Calculator, Bell } from 'lucide-react';
 import PriceAlerts from '../../../components/PriceAlerts';
-
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend
-);
 
 const MarketPriceDashboard = () => {
     const [prices, setPrices] = useState([]);
@@ -67,18 +47,6 @@ const MarketPriceDashboard = () => {
         } catch (error) {
             console.error("Error loading history", error);
         }
-    };
-
-    const chartData = {
-        labels: priceHistory.map(h => h.date),
-        datasets: [
-            {
-                label: `Price Trend: ${selectedCrop}`,
-                data: priceHistory.map(h => h.price),
-                borderColor: 'rgb(22, 163, 74)',
-                backgroundColor: 'rgba(22, 163, 74, 0.5)',
-            },
-        ],
     };
 
     return (
@@ -144,7 +112,16 @@ const MarketPriceDashboard = () => {
                         {/* Trend Chart */}
                         <div className="bg-white p-6 rounded-lg shadow-sm">
                             <h3 className="text-lg font-semibold text-gray-900 mb-4">Price Trend: {selectedCrop}</h3>
-                            <Line data={chartData} />
+                            <ResponsiveContainer width="100%" height={300}>
+                                <LineChart data={priceHistory}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="date" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Legend />
+                                    <Line type="monotone" dataKey="price" stroke="#16a34a" strokeWidth={2} />
+                                </LineChart>
+                            </ResponsiveContainer>
                         </div>
                     </div>
 
