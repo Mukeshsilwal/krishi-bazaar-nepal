@@ -6,13 +6,41 @@ Add these environment variables in your Render service settings:
 
 ### Database (PostgreSQL)
 
+**IMPORTANT:** Render provides PostgreSQL URLs in this format:
 ```
-SPRING_DATASOURCE_URL=jdbc:postgresql://<your-postgres-host>:<port>/<database-name>
-SPRING_DATASOURCE_USERNAME=<your-db-username>
-SPRING_DATASOURCE_PASSWORD=<your-db-password>
+postgresql://user:password@host:port/database
 ```
 
-**Note:** If using Render's PostgreSQL, the connection string will be provided automatically. Use the **Internal Database URL** for better performance.
+But Spring Boot requires JDBC format:
+```
+jdbc:postgresql://host:port/database
+```
+
+**Solution:** Add `jdbc:` prefix to the Render-provided URL:
+
+```
+SPRING_DATASOURCE_URL=jdbc:postgresql://dpg-xxxxx-a.oregon-postgres.render.com:5432/your_db_name
+SPRING_DATASOURCE_USERNAME=your_db_user
+SPRING_DATASOURCE_PASSWORD=your_db_password
+```
+
+**Quick Fix:** If Render gives you:
+```
+postgresql://krishi_user:pass123@dpg-xxxxx-a/krishi_db
+```
+
+Convert it to:
+```
+SPRING_DATASOURCE_URL=jdbc:postgresql://dpg-xxxxx-a.oregon-postgres.render.com:5432/krishi_db
+SPRING_DATASOURCE_USERNAME=krishi_user
+SPRING_DATASOURCE_PASSWORD=pass123
+```
+
+**Note:** Use the **Internal Database URL** from Render for better performance. Make sure to:
+1. Add `jdbc:` prefix
+2. Include the full hostname with region (e.g., `.oregon-postgres.render.com`)
+3. Include port `:5432`
+4. Set username and password separately
 
 ### Redis (Required for caching)
 
@@ -205,6 +233,34 @@ You should see:
 ---
 
 ## Troubleshooting
+
+### Database URL Format Error
+
+**Error:** `Driver org.postgresql.Driver claims to not accept jdbcUrl, postgresql://...`
+
+**Cause:** Render provides PostgreSQL URLs without the `jdbc:` prefix.
+
+**Solution:**
+1. Go to your Render PostgreSQL database
+2. Copy the **Internal Database URL**
+3. Add `jdbc:` prefix before `postgresql://`
+4. Ensure the URL includes the full hostname with region and port
+
+**Example:**
+```
+# Render provides:
+postgresql://user:pass@dpg-xxxxx-a/database
+
+# You need:
+jdbc:postgresql://dpg-xxxxx-a.oregon-postgres.render.com:5432/database
+```
+
+Or set them separately:
+```
+SPRING_DATASOURCE_URL=jdbc:postgresql://dpg-xxxxx-a.oregon-postgres.render.com:5432/database
+SPRING_DATASOURCE_USERNAME=user
+SPRING_DATASOURCE_PASSWORD=pass
+```
 
 ### Build Fails
 - Check that Java 17+ is being used
