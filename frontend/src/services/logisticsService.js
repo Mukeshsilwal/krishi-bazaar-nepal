@@ -1,21 +1,22 @@
 import api from './api';
+import { COLD_STORAGE_ENDPOINTS, LOGISTICS_ENDPOINTS } from '../config/endpoints';
 
 const logisticsService = {
     // Cold Storage
     getAllColdStorages: async (district) => {
         const params = district ? { district } : {};
-        const response = await api.get('/cold-storage', { params });
+        const response = await api.get(COLD_STORAGE_ENDPOINTS.BASE, { params });
         return response.data;
     },
 
     createColdStorage: async (data) => {
-        const response = await api.post('/cold-storage', data);
+        const response = await api.post(COLD_STORAGE_ENDPOINTS.BASE, data);
         return response.data;
     },
 
     // Logistics Orders
     bookLogistics: async (data) => {
-        const response = await api.post('/logistics/book', data);
+        const response = await api.post(LOGISTICS_ENDPOINTS.BOOK, data);
         return response.data;
     },
 

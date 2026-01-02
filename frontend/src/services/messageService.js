@@ -2,35 +2,36 @@ import api from './api';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import { BACKEND_URL } from '../config/app';
+import { MESSAGE_ENDPOINTS } from '../config/endpoints';
 
 const messageService = {
     // Send message via REST
     sendMessage: async (messageData) => {
-        const response = await api.post('/messages', messageData);
+        const response = await api.post(MESSAGE_ENDPOINTS.SEND, messageData);
         return response.data;
     },
 
     // Get conversations list
     getConversations: async () => {
-        const response = await api.get('/messages/conversations');
+        const response = await api.get(MESSAGE_ENDPOINTS.CONVERSATIONS);
         return response.data;
     },
 
     // Get conversation with specific user
     getConversation: async (userId) => {
-        const response = await api.get(`/messages/${userId}`);
+        const response = await api.get(MESSAGE_ENDPOINTS.CONVERSATION(userId));
         return response.data;
     },
 
     // Get unread message count
     getUnreadCount: async () => {
-        const response = await api.get('/messages/unread/count');
+        const response = await api.get(MESSAGE_ENDPOINTS.UNREAD_COUNT);
         return response.data;
     },
 
     // Mark messages as read
     markAsRead: async (userId) => {
-        const response = await api.put(`/messages/${userId}/read`);
+        const response = await api.put(MESSAGE_ENDPOINTS.MARK_READ(userId));
         return response.data;
     },
 
@@ -124,7 +125,7 @@ const messageService = {
 
     // Get online users
     getOnlineUsers: async () => {
-        const response = await api.get('/messages/presence');
+        const response = await api.get(MESSAGE_ENDPOINTS.PRESENCE);
         return response.data;
     },
 

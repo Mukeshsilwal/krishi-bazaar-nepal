@@ -1,15 +1,16 @@
 import api from './api';
+import { PAYMENT_ENDPOINTS } from '../config/endpoints';
 
 const paymentService = {
     // Initiate payment
     initiatePayment: async (paymentData) => {
-        const response = await api.post('/payments/initiate', paymentData);
+        const response = await api.post(PAYMENT_ENDPOINTS.INITIATE, paymentData);
         return response.data;
     },
 
     // Verify payment
     verifyPayment: async (transactionId, gatewayTransactionId) => {
-        const response = await api.post('/payments/verify', null, {
+        const response = await api.post(PAYMENT_ENDPOINTS.VERIFY, null, {
             params: { transactionId, gatewayTransactionId },
         });
         return response.data;

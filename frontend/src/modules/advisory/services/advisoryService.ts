@@ -1,4 +1,5 @@
 import api from '../../../services/api';
+import { DISEASE_ENDPOINTS, ADVISORY_ENDPOINTS, RULE_ENDPOINTS, DIAGNOSIS_ENDPOINTS } from '../../../config/endpoints';
 
 export interface Treatment {
     medicineName: string;
@@ -33,7 +34,7 @@ const advisoryService = {
     },
 
     getDiseasesByCrop: async (cropName: string) => {
-        const response = await api.get<DiseaseDiagnosis[]>(`/diseases/crop/${cropName}`);
+        const response = await api.get<DiseaseDiagnosis[]>(DISEASE_ENDPOINTS.BY_CROP(cropName));
         return response.data;
     },
 
@@ -46,7 +47,7 @@ const advisoryService = {
 
     // Admin Methods
     createDisease: async (disease: any) => {
-        const response = await api.post('/diseases', disease);
+        const response = await api.post(DISEASE_ENDPOINTS.BASE, disease);
         return response.data;
     },
 
@@ -71,22 +72,22 @@ const advisoryService = {
 
     // Rule Engine Methods
     getAllRules: async () => {
-        const response = await api.get('/admin/rules');
+        const response = await api.get(RULE_ENDPOINTS.BASE);
         return response.data;
     },
 
     createRule: async (rule: any) => {
-        const response = await api.post('/admin/rules', rule);
+        const response = await api.post(RULE_ENDPOINTS.BASE, rule);
         return response.data;
     },
 
     updateRule: async (id: string, rule: any) => {
-        const response = await api.put(`/admin/rules/${id}`, rule);
+        const response = await api.put(RULE_ENDPOINTS.BY_ID(id), rule);
         return response.data;
     },
 
     sendSignal: async (payload: any) => {
-        const response = await api.post('/disease/signals/report', payload);
+        const response = await api.post(DISEASE_ENDPOINTS.REPORT_SIGNAL, payload);
         return response.data;
     },
 

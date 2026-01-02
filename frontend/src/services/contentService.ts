@@ -1,4 +1,5 @@
 import api from './api';
+import { CONTENT_ENDPOINTS } from '../config/endpoints';
 
 export interface ContentDTO {
     id: string;
@@ -48,38 +49,38 @@ export const contentService = {
                 params.append(key, value.toString());
             }
         });
-        const response = await api.get(`/admin/content?${params.toString()}`);
+        const response = await api.get(`${CONTENT_ENDPOINTS.BASE}?${params.toString()}`);
         // Handle Spring Page response or custom ApiResponse wrapper
         if (response.data.data) return response.data.data;
         return response.data;
     },
 
     getContent: async (id: string): Promise<ContentDTO> => {
-        const response = await api.get(`/admin/content/${id}`);
+        const response = await api.get(CONTENT_ENDPOINTS.BY_ID(id));
         return response.data.data || response.data;
     },
 
     createContent: async (content: Partial<ContentDTO>): Promise<ContentDTO> => {
-        const response = await api.post('/admin/content', content);
+        const response = await api.post(CONTENT_ENDPOINTS.BASE, content);
         return response.data.data || response.data;
     },
 
     updateContent: async (id: string, content: Partial<ContentDTO>, reason?: string): Promise<ContentDTO> => {
-        const response = await api.put(`/admin/content/${id}`, content, {
+        const response = await api.put(CONTENT_ENDPOINTS.BY_ID(id), content, {
             params: { reason }
         });
         return response.data.data || response.data;
     },
 
     submitForReview: async (id: string): Promise<void> => {
-        await api.post(`/admin/content/${id}/review`);
+        await api.post(`${CONTENT_ENDPOINTS.BY_ID(id)}/review`);
     },
 
     publishContent: async (id: string): Promise<void> => {
-        await api.post(`/admin/content/${id}/publish`);
+        await api.post(CONTENT_ENDPOINTS.PUBLISH(id));
     },
 
     deprecateContent: async (id: string): Promise<void> => {
-        await api.post(`/admin/content/${id}/deprecate`);
+        await api.post(`${CONTENT_ENDPOINTS.BY_ID(id)}/deprecate`);
     }
 };

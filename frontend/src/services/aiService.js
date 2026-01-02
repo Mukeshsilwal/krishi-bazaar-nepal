@@ -1,4 +1,5 @@
 import api from './api';
+import { AI_ENDPOINTS } from '../config/endpoints';
 
 const aiService = {
     getRecommendation: async (query, farmerId, imageUrl = null) => {

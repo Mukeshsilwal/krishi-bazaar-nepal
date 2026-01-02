@@ -1,4 +1,5 @@
 import api from '../../../services/api';
+import { WEATHER_ENDPOINTS } from '../../../config/endpoints';
 
 export interface WeatherData {
     location: string;
@@ -22,12 +23,12 @@ export interface WeatherData {
 
 const weatherService = {
     getCurrentWeather: async (district: string) => {
-        const response = await api.get<WeatherData>(`/weather/current/${district}`);
+        const response = await api.get<WeatherData>(`${WEATHER_ENDPOINTS.CURRENT}/${district}`);
         return response.data;
     },
 
     getForecast: async (district: string, hours = 48) => {
-        const response = await api.get<WeatherData[]>(`/weather/forecast/${district}`, {
+        const response = await api.get<WeatherData[]>(`${WEATHER_ENDPOINTS.FORECAST}/${district}`, {
             params: { hours }
         });
         return response.data;

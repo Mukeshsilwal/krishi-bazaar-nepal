@@ -1,8 +1,9 @@
 import api from './api';
+import { ADMIN_ENDPOINTS } from '../config/endpoints';
 
 const adminService = {
     getDashboardStats: async () => {
-        const response = await api.get('/admin/dashboard');
+        const response = await api.get(ADMIN_ENDPOINTS.DASHBOARD);
         return response.data.data; // Extract from ApiResponse wrapper
     },
 

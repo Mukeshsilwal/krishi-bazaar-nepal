@@ -1,4 +1,5 @@
 import api from './api';
+import { DIAGNOSIS_ENDPOINTS, ADMIN_DIAGNOSIS_ENDPOINTS } from '../config/endpoints';
 
 export enum ReviewStatus {
     PENDING = 'PENDING',
@@ -29,7 +30,7 @@ export interface AIDiagnosis {
 
 export const diagnosisService = {
     submitDiagnosis: async (data: any) => {
-        const response = await api.post('/diagnoses', data);
+        const response = await api.post(DIAGNOSIS_ENDPOINTS.BASE, data);
         return response.data;
     },
 
@@ -39,7 +40,7 @@ export const diagnosisService = {
     },
 
     getDiagnosis: async (id: string) => {
-        const response = await api.get(`/diagnoses/${id}`);
+        const response = await api.get(DIAGNOSIS_ENDPOINTS.BY_ID(id));
         return response.data;
     },
 
@@ -49,7 +50,7 @@ export const diagnosisService = {
     },
 
     reviewDiagnosis: async (id: string, data: { status: ReviewStatus; finalDiagnosis?: string; reviewNotes?: string }) => {
-        const response = await api.post(`/admin/diagnosis/${id}/review`, data);
+        const response = await api.post(ADMIN_DIAGNOSIS_ENDPOINTS.REVIEW(id), data);
         return response.data;
     }
 };

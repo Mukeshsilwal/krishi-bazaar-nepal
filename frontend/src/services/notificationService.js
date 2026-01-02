@@ -1,18 +1,19 @@
 import api from './api';
+import { NOTIFICATION_ENDPOINTS } from '../config/endpoints';
 
 const notificationService = {
     getNotifications: async (userId) => {
-        const response = await api.get(`/notifications?userId=${userId}`);
+        const response = await api.get(`${NOTIFICATION_ENDPOINTS.BASE}?userId=${userId}`);
         return response.data;
     },
 
     getUnreadCount: async (userId) => {
-        const response = await api.get(`/notifications/unread-count?userId=${userId}`);
+        const response = await api.get(`${NOTIFICATION_ENDPOINTS.UNREAD_COUNT}?userId=${userId}`);
         return response.data;
     },
 
     markAsRead: async (id) => {
-        await api.put(`/notifications/${id}/read`);
+        await api.put(NOTIFICATION_ENDPOINTS.MARK_READ(id));
     }
 };
 

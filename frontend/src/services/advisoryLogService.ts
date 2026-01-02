@@ -1,4 +1,5 @@
 import api from './api';
+import { ADVISORY_LOG_ENDPOINTS } from '../config/endpoints';
 
 export interface AdvisoryLogFilter {
     advisoryType?: string;
@@ -124,7 +125,7 @@ const advisoryLogService = {
         if (filter.cursor) params.append('cursor', filter.cursor);
         if (filter.limit) params.append('limit', filter.limit.toString());
 
-        const response = await api.get(`/advisory-logs?${params.toString()}`);
+        const response = await api.get(`${ADVISORY_LOG_ENDPOINTS.BASE}?${params.toString()}`);
         return response.data.data;
     },
 
@@ -132,7 +133,7 @@ const advisoryLogService = {
      * Get advisory log detail (Admin)
      */
     async getAdvisoryLogDetail(id: string): Promise<AdvisoryLogDetail> {
-        const response = await api.get(`/advisory-logs/${id}`);
+        const response = await api.get(ADVISORY_LOG_ENDPOINTS.BY_ID(id));
         return response.data.data;
     },
 
@@ -141,7 +142,7 @@ const advisoryLogService = {
      */
     async getAnalytics(since?: string): Promise<AdvisoryAnalytics> {
         const params = since ? `?since=${since}` : '';
-        const response = await api.get(`/advisory-logs/analytics${params}`);
+        const response = await api.get(`${ADVISORY_LOG_ENDPOINTS.BASE}/analytics${params}`);
         return response.data.data;
     },
 
@@ -149,7 +150,7 @@ const advisoryLogService = {
      * Get farmer advisory history (Farmer)
      */
     async getFarmerAdvisoryHistory(farmerId: string): Promise<AdvisoryLogResponse[]> {
-        const response = await api.get(`/advisory-logs/farmer/${farmerId}`);
+        const response = await api.get(ADVISORY_LOG_ENDPOINTS.BY_FARMER(farmerId));
         return response.data.data;
     },
 

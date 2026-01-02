@@ -1,4 +1,5 @@
 import api from '../../../services/api';
+import { KNOWLEDGE_ENDPOINTS } from '../../../config/endpoints';
 
 export interface KnowledgeCategory {
     id: string;
@@ -24,7 +25,7 @@ export interface Article {
 
 const knowledgeService = {
     getCategories: async () => {
-        const response = await api.get<KnowledgeCategory[]>('/knowledge/categories');
+        const response = await api.get<KnowledgeCategory[]>(KNOWLEDGE_ENDPOINTS.CATEGORIES);
         return response.data;
     },
 
@@ -46,7 +47,7 @@ const knowledgeService = {
 
     // Admin Methods
     createCategory: async (category: Partial<KnowledgeCategory>) => {
-        const response = await api.post<KnowledgeCategory>('/knowledge/categories', category);
+        const response = await api.post<KnowledgeCategory>(KNOWLEDGE_ENDPOINTS.CATEGORIES, category);
         return response.data;
     },
 

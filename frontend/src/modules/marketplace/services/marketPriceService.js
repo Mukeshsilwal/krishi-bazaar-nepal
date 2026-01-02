@@ -1,41 +1,42 @@
 import api from '../../../services/api';
+import { MARKET_ENDPOINTS, PRICE_ALERT_ENDPOINTS, MARKET_PRICE_ENDPOINTS } from '../../../config/endpoints';
 
 const marketPriceService = {
     // Get prices for specific crop and district
     // Markets
     getMarkets: async () => {
-        const response = await api.get('/markets');
+        const response = await api.get(MARKET_ENDPOINTS.BASE);
         return response.data;
     },
 
     createMarket: async (data) => {
-        const response = await api.post('/markets', data);
+        const response = await api.post(MARKET_ENDPOINTS.BASE, data);
         return response.data;
     },
 
     // Get market by ID
     getMarketById: async (id) => {
-        const response = await api.get(`/markets/${id}`);
+        const response = await api.get(MARKET_ENDPOINTS.BY_ID(id));
         return response.data;
     },
 
     // Price Alerts
     createAlert: async (data) => {
-        const response = await api.post('/price-alerts', data);
+        const response = await api.post(PRICE_ALERT_ENDPOINTS.BASE, data);
         return response.data;
     },
 
     getUserAlerts: async (userId) => {
-        const response = await api.get(`/price-alerts?userId=${userId}`);
+        const response = await api.get(`${PRICE_ALERT_ENDPOINTS.BASE}?userId=${userId}`);
         return response.data;
     },
 
     deleteAlert: async (id) => {
-        await api.delete(`/price-alerts/${id}`);
+        await api.delete(PRICE_ALERT_ENDPOINTS.BY_ID(id));
     },
 
     getPrices: async (cropName, district) => {
-        const response = await api.get('/market-prices', {
+        const response = await api.get(MARKET_PRICE_ENDPOINTS.BASE, {
             params: { cropName, district },
         });
         return response.data;
@@ -43,7 +44,7 @@ const marketPriceService = {
 
     // Get latest price for crop in district
     getLatestPrice: async (cropName, district) => {
-        const response = await api.get('/market-prices/latest', {
+        const response = await api.get(MARKET_PRICE_ENDPOINTS.LATEST, {
             params: { cropName, district },
         });
         return response.data;
@@ -75,7 +76,7 @@ const marketPriceService = {
 
     // Add new price (admin only)
     addPrice: async (priceData) => {
-        const response = await api.post('/market-prices', priceData);
+        const response = await api.post(MARKET_PRICE_ENDPOINTS.BASE, priceData);
         return response.data;
     },
 };

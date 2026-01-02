@@ -1,21 +1,22 @@
 import api from '../../../services/api';
+import { MARKETPLACE_ENDPOINTS } from '../../../config/endpoints';
 
 const listingService = {
     // Get all listings with filters
     getListings: async (params = {}) => {
-        const response = await api.get('/listings', { params });
+        const response = await api.get(MARKETPLACE_ENDPOINTS.LISTINGS, { params });
         return response.data;
     },
 
     // Get single listing by ID
     getListing: async (id) => {
-        const response = await api.get(`/listings/${id}`);
+        const response = await api.get(MARKETPLACE_ENDPOINTS.LISTING_BY_ID(id));
         return response.data;
     },
 
     // Get my listings (farmer)
     getMyListings: async (page = 0, size = 20) => {
-        const response = await api.get('/listings/my', {
+        const response = await api.get(MARKETPLACE_ENDPOINTS.MY_LISTINGS, {
             params: { page, size },
         });
         return response.data;
@@ -23,19 +24,19 @@ const listingService = {
 
     // Create new listing
     createListing: async (listingData) => {
-        const response = await api.post('/listings', listingData);
+        const response = await api.post(MARKETPLACE_ENDPOINTS.LISTINGS, listingData);
         return response.data;
     },
 
     // Update listing
     updateListing: async (id, listingData) => {
-        const response = await api.put(`/listings/${id}`, listingData);
+        const response = await api.put(MARKETPLACE_ENDPOINTS.LISTING_BY_ID(id), listingData);
         return response.data;
     },
 
     // Delete listing
     deleteListing: async (id) => {
-        const response = await api.delete(`/listings/${id}`);
+        const response = await api.delete(MARKETPLACE_ENDPOINTS.LISTING_BY_ID(id));
         return response.data;
     },
 
@@ -45,7 +46,7 @@ const listingService = {
         formData.append('file', file);
         formData.append('isPrimary', isPrimary);
 
-        const response = await api.post(`/listings/${listingId}/images`, formData, {
+        const response = await api.post(MARKETPLACE_ENDPOINTS.UPLOAD_IMAGE(listingId), formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -55,13 +56,13 @@ const listingService = {
 
     // Get available crops
     getAvailableCrops: async () => {
-        const response = await api.get('/listings/crops');
+        const response = await api.get(MARKETPLACE_ENDPOINTS.CROPS);
         return response.data;
     },
 
     // Search listings
     searchListings: async (searchParams) => {
-        const response = await api.get('/listings', {
+        const response = await api.get(MARKETPLACE_ENDPOINTS.LISTINGS, {
             params: {
                 page: searchParams.page || 0,
                 size: searchParams.size || 20,
