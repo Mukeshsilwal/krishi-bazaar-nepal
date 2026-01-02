@@ -29,6 +29,7 @@ const NotificationList = lazy(() => import('./pages/NotificationList'));
 const KnowledgePage = lazy(() => import('./modules/knowledge/pages/KnowledgePage'));
 const ArticleDetailPage = lazy(() => import('./modules/knowledge/pages/ArticleDetailPage'));
 const DiagnosticTool = lazy(() => import('./modules/advisory/pages/DiagnosticTool'));
+const WeatherAdvisory = lazy(() => import('./modules/advisory/pages/WeatherAdvisory'));
 
 const ForgotPasswordPage = lazy(() => import('./modules/auth/pages/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('./modules/auth/pages/ResetPasswordPage'));
@@ -83,6 +84,7 @@ function App() {
                 <Route path="/knowledge" element={<KnowledgePage />} />
                 <Route path="/knowledge/:id" element={<ArticleDetailPage />} />
                 <Route path="/diagnosis" element={<DiagnosticTool />} />
+                <Route path="/weather" element={<WeatherAdvisory />} />
 
                 {/* Auth Routes */}
                 <Route path="/admin/login" element={<AdminLoginPage />} />

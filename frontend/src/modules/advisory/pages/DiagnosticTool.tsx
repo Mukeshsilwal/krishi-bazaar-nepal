@@ -110,33 +110,30 @@ const DiagnosticTool = () => {
 
                     <TabsContent value="diagnose" className="space-y-6">
                         {/* Search Box */}
-                        <div className="bg-white p-6 rounded-2xl shadow-sm">
-                            <form onSubmit={handleDiagnose} className="relative">
-                                <input
-                                    type="text"
-                                    placeholder={language === 'ne' ? 'उदाहरण: धानको पात पहेँलो हुने...' : 'E.g., Yellow spots on Tomato leaves...'}
-                                    className="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none text-lg"
+                        <div className="bg-white p-6 rounded-2xl shadow-soft">
+                            <form onSubmit={handleDiagnose} className="space-y-4">
+                                <textarea
+                                    placeholder={language === 'ne' ? 'उदाहरण: धानको पात पहेँलो हुने, पातमा दाग देखिने...' : 'E.g., Yellow spots on rice leaves...'}
+                                    className="w-full px-4 py-4 rounded-xl border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none text-readable resize-none"
                                     value={query}
                                     onChange={(e) => setQuery(e.target.value)}
+                                    rows={4}
                                 />
-                                <Search className="absolute left-4 top-5 text-gray-400" />
-                                <div className="absolute right-2 top-2">
-                                    <button
-                                        type="submit"
-                                        disabled={loading || !query.trim()}
-                                        className="bg-green-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 transition"
-                                    >
-                                        {loading ? 'Thinking...' : (language === 'ne' ? 'खोज्नुहोस्' : 'Diagnose')}
-                                    </button>
-                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={loading || !query.trim()}
+                                    className="w-full touch-target-comfortable bg-green-600 text-white px-6 py-4 rounded-xl font-bold text-large-readable hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
+                                >
+                                    {loading ? (language === 'ne' ? 'जाँच गर्दै...' : 'Analyzing...') : (language === 'ne' ? 'निदान गर्नुहोस्' : 'Diagnose')}
+                                </button>
                             </form>
                             <div className="mt-4 flex justify-end">
                                 <button
                                     type="button"
                                     onClick={handleReport}
-                                    className="text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1"
+                                    className="text-readable text-orange-600 hover:text-orange-700 font-medium flex items-center gap-2 touch-target"
                                 >
-                                    <AlertTriangle className="h-4 w-4" />
+                                    <AlertTriangle className="h-5 w-5" />
                                     {language === 'ne' ? 'यो समस्या रिपोर्ट गर्नुहोस्' : 'Report this issue to Experts'}
                                 </button>
                             </div>
@@ -144,57 +141,67 @@ const DiagnosticTool = () => {
 
                         {/* Results */}
                         {hasSearched && results.length === 0 && !loading && (
-                            <div className="text-center py-8 text-gray-500 bg-white rounded-xl border border-dashed border-gray-300">
-                                {language === 'ne' ? 'कुनै रोग फेला परेन। कृपया अर्को विवरण प्रयास गर्नुहोस्।' : 'No matching diseases found. Please try a different description.'}
+                            <div className="text-center py-12 text-gray-500 bg-white rounded-2xl border-2 border-dashed border-gray-300">
+                                <p className="text-large-readable">
+                                    {language === 'ne' ? 'कुनै रोग फेला परेन। कृपया अर्को विवरण प्रयास गर्नुहोस्।' : 'No matching diseases found. Please try a different description.'}
+                                </p>
                             </div>
                         )}
 
                         {results.map((diagnosis, index) => (
-                            <div key={index} className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                <div className={`p-6 border-b border-gray-100 ${diagnosis.riskLevel === 'CRITICAL' ? 'bg-red-50' :
+                            <div key={index} className="bg-white rounded-2xl shadow-medium border-2 border-gray-100 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <div className={`p-6 border-b-2 border-gray-100 ${diagnosis.riskLevel === 'CRITICAL' ? 'bg-red-50' :
                                     diagnosis.riskLevel === 'HIGH' ? 'bg-orange-50' : 'bg-green-50'
                                     }`}>
-                                    <div className="flex justify-between items-start mb-2">
+                                    <div className="flex justify-between items-start mb-3">
                                         <h2 className="text-2xl font-bold text-gray-900">{diagnosis.diseaseName}</h2>
-                                        <span className={`inline-flex items-center gap-1 text-sm font-bold px-3 py-1 rounded-full uppercase tracking-wider ${diagnosis.riskLevel === 'CRITICAL' ? 'bg-red-100 text-red-700' :
+                                        <span className={`inline-flex items-center gap-2 text-sm font-bold px-4 py-2 rounded-full uppercase tracking-wider ${diagnosis.riskLevel === 'CRITICAL' ? 'bg-red-100 text-red-700' :
                                             diagnosis.riskLevel === 'HIGH' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'
                                             }`}>
-                                            <AlertTriangle size={14} />
-                                            {diagnosis.riskLevel}
+                                            <AlertTriangle size={16} />
+                                            {language === 'ne' ?
+                                                (diagnosis.riskLevel === 'CRITICAL' ? 'अति जोखिम' :
+                                                    diagnosis.riskLevel === 'HIGH' ? 'उच्च जोखिम' : 'कम जोखिम')
+                                                : diagnosis.riskLevel}
                                         </span>
                                     </div>
-                                    <p className="text-gray-700"><span className="font-semibold">Symptoms:</span> {diagnosis.symptoms}</p>
+                                    <p className="text-large-readable text-gray-700">
+                                        <span className="font-semibold">{language === 'ne' ? 'लक्षण:' : 'Symptoms:'}</span> {diagnosis.symptoms}
+                                    </p>
                                 </div>
 
                                 <div className="p-6">
-                                    <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                                        <Leaf size={20} className="text-green-600" />
-                                        Recommended Treatments
+                                    <h3 className="font-bold text-xl mb-4 flex items-center gap-2">
+                                        <Leaf size={24} className="text-green-600" />
+                                        {language === 'ne' ? 'के गर्ने' : 'What to do'}
                                     </h3>
                                     <div className="space-y-4">
                                         {diagnosis.treatments.map((tx, idx) => (
-                                            <div key={idx} className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <span className="font-bold text-gray-800">{tx.medicineName}</span>
-                                                    <span className={`text-xs px-2 py-1 rounded border ${tx.isOrganic ? 'bg-green-100 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-200'
+                                            <div key={idx} className="bg-gray-50 p-5 rounded-xl border-2 border-gray-100">
+                                                <div className="flex justify-between items-start mb-3">
+                                                    <span className="font-bold text-large-readable text-gray-800">{tx.medicineName}</span>
+                                                    <span className={`text-xs px-3 py-1 rounded-full border ${tx.isOrganic ? 'bg-green-100 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-200'
                                                         }`}>
-                                                        {tx.isOrganic ? 'Organic' : 'Chemical'}
+                                                        {tx.isOrganic ? (language === 'ne' ? 'जैविक' : 'Organic') : (language === 'ne' ? 'रासायनिक' : 'Chemical')}
                                                     </span>
                                                 </div>
-                                                <div className="text-sm text-gray-600 mb-2">
-                                                    <strong>Dosage:</strong> {tx.dosage}
+                                                <div className="text-readable text-gray-600 mb-3">
+                                                    <strong>{language === 'ne' ? 'मात्रा:' : 'Dosage:'}</strong> {tx.dosage}
                                                 </div>
-                                                <div className="text-sm bg-yellow-50 text-yellow-800 p-2 rounded border border-yellow-200">
-                                                    ⚠️ {tx.safetyInstructions}
+                                                <div className="text-readable bg-yellow-50 text-yellow-800 p-3 rounded-lg border-2 border-yellow-200 flex items-start gap-2">
+                                                    <ShieldAlert className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                                                    <span>{tx.safetyInstructions}</span>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
-                                    <div className="mt-6 flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
-                                        <ShieldAlert size={24} className="flex-shrink-0 mt-0.5" />
+                                    <div className="mt-6 flex items-start gap-3 p-5 bg-red-50 border-2 border-red-200 rounded-xl text-red-800">
+                                        <ShieldAlert size={28} className="flex-shrink-0 mt-0.5" />
                                         <div>
-                                            <p className="font-bold text-sm uppercase tracking-wide mb-1">Safety Disclaimer</p>
-                                            <p className="text-sm">{diagnosis.safetyDisclaimer}</p>
+                                            <p className="font-bold text-readable uppercase tracking-wide mb-2">
+                                                {language === 'ne' ? 'सुरक्षा सावधानी' : 'Safety Warning'}
+                                            </p>
+                                            <p className="text-readable">{diagnosis.safetyDisclaimer}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -224,8 +231,8 @@ const DiagnosticTool = () => {
                                             <div className="flex justify-between mb-2">
                                                 <span className="font-semibold text-gray-800">{item.cropType}</span>
                                                 <span className={`text-xs px-2 py-1 rounded-full ${item.reviewStatus === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                                                        item.reviewStatus === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                                                            'bg-gray-100 text-gray-800'
+                                                    item.reviewStatus === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                                                        'bg-gray-100 text-gray-800'
                                                     }`}>
                                                     {item.reviewStatus}
                                                 </span>

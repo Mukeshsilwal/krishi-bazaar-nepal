@@ -49,6 +49,23 @@
     --shadow-medium: 0 8px 30px -8px hsl(30 25% 15% / 0.12);
     --shadow-glow: 0 0 40px hsl(142 55% 32% / 0.15);
 
+    /* Rural-First Design Tokens */
+    --touch-min: 48px;
+    --touch-comfortable: 56px;
+    --touch-large: 64px;
+
+    /* Readable font sizes (minimum 16px) */
+    --text-readable: 16px;
+    --text-large: 18px;
+    --text-heading: 24px;
+
+    /* Priority Colors - Rural First (Red/Yellow/Green) */
+    --priority-critical: 0 84% 60%;
+    --priority-high: 25 95% 53%;
+    --priority-medium: 45 93% 47%;
+    --priority-low: 142 55% 45%;
+    --priority-normal: 142 55% 45%;
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -148,11 +165,60 @@
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }
+
+  /* Rural-First Touch Targets */
+  .touch-target {
+    min-height: var(--touch-min);
+    min-width: var(--touch-min);
+  }
+
+  .touch-target-comfortable {
+    min-height: var(--touch-comfortable);
+    min-width: var(--touch-comfortable);
+  }
+
+  .touch-target-large {
+    min-height: var(--touch-large);
+    min-width: var(--touch-large);
+  }
+
+  /* Readable Text Sizes */
+  .text-readable {
+    font-size: var(--text-readable);
+  }
+
+  .text-large-readable {
+    font-size: var(--text-large);
+  }
+
+  .text-heading-readable {
+    font-size: var(--text-heading);
+  }
+
+  /* Skeleton Loader */
+  .skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+  }
+
+  .skeleton-text {
+    @apply skeleton h-4 w-full;
+  }
+
+  .skeleton-circle {
+    @apply skeleton rounded-full;
+  }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes fadeInUp {
@@ -160,6 +226,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -171,6 +238,7 @@
     opacity: 0;
     transform: translateX(-30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -178,8 +246,15 @@
 }
 
 @keyframes pulse-slow {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
 }
 
 .animate-float {
@@ -198,8 +273,22 @@
   animation: pulse-slow 3s ease-in-out infinite;
 }
 
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-400 { animation-delay: 400ms; }
-.delay-500 { animation-delay: 500ms; }
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+.delay-400 {
+  animation-delay: 400ms;
+}
+
+.delay-500 {
+  animation-delay: 500ms;
+}
