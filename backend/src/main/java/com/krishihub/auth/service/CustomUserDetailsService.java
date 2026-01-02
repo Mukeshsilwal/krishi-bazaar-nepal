@@ -1,6 +1,7 @@
 package com.krishihub.auth.service;
 
 import com.krishihub.auth.entity.User;
+import com.krishihub.auth.model.CustomUserDetails;
 import com.krishihub.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -22,9 +23,15 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByMobileNumber(mobileNumber)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with mobile number: " + mobileNumber));
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getMobileNumber(),
-                user.getPasswordHash() != null ? user.getPasswordHash() : "",
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())));
+        return CustomUserDetails.builder()
+                .id(user.getId())
+                .username(user.getMobileNumber())
+                .password(user.getPasswordHash() != null ? user.getPasswordHash() : "")
+                .authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())))
+                .userType(user.getRole())
+                .district(user.getDistrict())
+                .ward(user.getWard())
+                .name(user.getName())
+                .build();
     }
 }

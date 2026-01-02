@@ -82,6 +82,7 @@ public class User {
         FARMER,
         BUYER,
         VENDOR,
-        ADMIN
+        ADMIN,
+        EXPERT
     }
 }

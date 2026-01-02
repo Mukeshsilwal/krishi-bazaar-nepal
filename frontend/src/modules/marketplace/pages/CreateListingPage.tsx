@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../../../components/Navbar';
-import Footer from '../../../components/Footer';
 import { useMyListings } from '../hooks/useMyListings';
 import { useLanguage } from '../../../context/LanguageContext';
 import { ArrowLeft, Upload } from 'lucide-react';
@@ -68,9 +66,7 @@ export default function CreateListingPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <Navbar />
-
+        <div className="bg-gray-50 min-h-full">
             <div className="max-w-3xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-8">
@@ -278,9 +274,6 @@ export default function CreateListingPage() {
                     </div>
                 </form>
             </div>
-
-
-            <Footer />
         </div>
     );
 }

@@ -5,5 +5,6 @@ public enum ArticleStatus {
     UNDER_REVIEW,
     APPROVED,
     PUBLISHED,
-    ARCHIVED
+    ARCHIVED,
+    PENDING
 }

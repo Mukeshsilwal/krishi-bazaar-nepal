@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class DiseaseController {
 
     private final DiseaseService diseaseService;
+    private final com.krishihub.disease.advisory.AdvisoryService advisoryService;
 
     // Public / Farmer Endpoints
     @GetMapping("/diagnose")
@@ -44,6 +45,11 @@ public class DiseaseController {
         return ResponseEntity.ok(diseaseService.createPesticide(pesticide));
     }
 
+    @GetMapping("/pesticides")
+    public ResponseEntity<List<Pesticide>> getAllPesticides() {
+        return ResponseEntity.ok(diseaseService.getAllPesticides());
+    }
+
     @PostMapping("/{diseaseId}/link-pesticide")
     public ResponseEntity<Void> linkPesticide(
             @PathVariable UUID diseaseId,
@@ -53,6 +59,12 @@ public class DiseaseController {
             @RequestParam(defaultValue = "false") Boolean isPrimary) {
 
         diseaseService.linkPesticideToDisease(diseaseId, pesticideId, dosage, interval, isPrimary);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/feedback")
+    public ResponseEntity<Void> submitFeedback(@RequestBody com.krishihub.disease.dto.AdvisoryFeedbackDTO feedback) {
+        advisoryService.submitFeedback(feedback);
         return ResponseEntity.ok().build();
     }
 }

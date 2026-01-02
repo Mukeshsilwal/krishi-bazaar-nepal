@@ -15,6 +15,26 @@ public class RuleEngineController {
 
     private final RuleEngineService ruleService;
 
+    @PostMapping
+    public ResponseEntity<ApiResponse<com.krishihub.advisory.dto.RuleDTO>> createRule(
+            @RequestBody com.krishihub.advisory.dto.RuleDTO ruleDTO) {
+        com.krishihub.advisory.dto.RuleDTO created = ruleService.createRule(ruleDTO);
+        return ResponseEntity.ok(ApiResponse.success("Rule created successfully", created));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<com.krishihub.advisory.dto.RuleDTO>> updateRule(
+            @PathVariable java.util.UUID id,
+            @RequestBody com.krishihub.advisory.dto.RuleDTO ruleDTO) {
+        com.krishihub.advisory.dto.RuleDTO updated = ruleService.updateRule(id, ruleDTO);
+        return ResponseEntity.ok(ApiResponse.success("Rule updated successfully", updated));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<java.util.List<com.krishihub.advisory.dto.RuleDTO>>> getAllRules() {
+        return ResponseEntity.ok(ApiResponse.success("Rules fetched successfully", ruleService.getAllRules()));
+    }
+
     @PostMapping("/simulate")
     public ResponseEntity<ApiResponse<RuleSimulationResponse>> simulateRule(
             @RequestBody RuleSimulationRequest request) {

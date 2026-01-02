@@ -9,4 +9,12 @@ public class WorkflowActionRequest {
     private String action; // "SUBMIT", "APPROVE", "REJECT", "PUBLISH"
 
     private String comment;
+
+    public String getAction() {
+        return action;
+    }
+
+    public String getComment() {
+        return comment;
+    }
 }

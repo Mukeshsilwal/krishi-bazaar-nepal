@@ -37,8 +37,8 @@ public class OrderService {
     private final SmsService smsService;
 
     @Transactional
-    public OrderDto createOrder(String mobileNumber, CreateOrderRequest request) {
-        User buyer = userRepository.findByMobileNumber(mobileNumber)
+    public OrderDto createOrder(UUID userId, CreateOrderRequest request) {
+        User buyer = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (buyer.getRole() != User.UserRole.BUYER && buyer.getRole() != User.UserRole.FARMER) {
@@ -94,17 +94,17 @@ public class OrderService {
                 savedOrder.getId());
         smsService.sendNotification(listing.getFarmer().getMobileNumber(), farmerMessage);
 
-        log.info("Order created: {} by buyer: {}", savedOrder.getId(), mobileNumber);
+        log.info("Order created: {} by buyer: {}", savedOrder.getId(), userId);
 
         return OrderDto.fromEntity(savedOrder);
     }
 
-    public OrderDto getOrderById(UUID id, String mobileNumber) {
+    public OrderDto getOrderById(UUID id, UUID userId) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
         // Verify access (buyer or farmer)
-        User user = userRepository.findByMobileNumber(mobileNumber)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (!order.getBuyer().getId().equals(user.getId()) &&
@@ -115,8 +115,8 @@ public class OrderService {
         return OrderDto.fromEntity(order);
     }
 
-    public Page<OrderDto> getMyOrders(String mobileNumber, String role, int page, int size) {
-        User user = userRepository.findByMobileNumber(mobileNumber)
+    public Page<OrderDto> getMyOrders(UUID userId, String role, int page, int size) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -135,11 +135,11 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderDto updateOrderStatus(UUID id, String mobileNumber, UpdateOrderRequest request) {
+    public OrderDto updateOrderStatus(UUID id, UUID userId, UpdateOrderRequest request) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
-        User user = userRepository.findByMobileNumber(mobileNumber)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         // Verify access
@@ -179,17 +179,17 @@ public class OrderService {
         }
 
         Order updated = orderRepository.save(order);
-        log.info("Order updated: {} by {}", id, mobileNumber);
+        log.info("Order updated: {} by {}", id, userId);
 
         return OrderDto.fromEntity(updated);
     }
 
     @Transactional
-    public void cancelOrder(UUID id, String mobileNumber) {
+    public void cancelOrder(UUID id, UUID userId) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
-        User user = userRepository.findByMobileNumber(mobileNumber)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         // Only buyer can cancel before confirmation, both can cancel after
@@ -217,7 +217,7 @@ public class OrderService {
         String message = String.format("Order %s has been cancelled.", order.getId());
         smsService.sendNotification(recipient, message);
 
-        log.info("Order cancelled: {} by {}", id, mobileNumber);
+        log.info("Order cancelled: {} by {}", id, userId);
     }
 
     private void validateStatusTransition(Order order, Order.OrderStatus newStatus,

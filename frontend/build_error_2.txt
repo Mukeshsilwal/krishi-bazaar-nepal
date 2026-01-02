@@ -1,0 +1,82 @@
+﻿
+> kisan-sarathi-web@0.0.0 build
+> vite build
+
+node.exe : node:inter
+nal/process/promises:
+394
+At line:1 char:1
++ & "C:\Program Files
+\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (node:in   
+ ternal/process/p    
+romises:394:Stri    
+ng) [], RemoteEx    
+ception
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+    triggerUncaughtEx
+ception(err, true /* 
+fromPromise */);
+    ^
+
+Error: Cannot find 
+package 'C:\workspace
+\krishi-bazaar-nepal\
+frontend\node_modules
+\vite\node_modules\pi
+comatch\index.js' 
+imported from C:\work
+space\krishi-bazaar-n
+epal\frontend\node_mo
+dules\vite\dist\node\
+cli.js
+Did you mean to 
+import 
+"picomatch/index.js"?
+    at 
+legacyMainResolve (no
+de:internal/modules/e
+sm/resolve:204:26)
+    at 
+packageResolve (node:
+internal/modules/esm/
+resolve:778:12)
+    at moduleResolve 
+(node:internal/module
+s/esm/resolve:858:18)
+    at 
+defaultResolve (node:
+internal/modules/esm/
+resolve:990:11)
+    at #cachedDefault
+Resolve (node:interna
+l/modules/esm/loader:
+757:20)
+    at 
+ModuleLoader.resolve 
+(node:internal/module
+s/esm/loader:734:38)
+    at ModuleLoader.g
+etModuleJobForImport 
+(node:internal/module
+s/esm/loader:317:38)
+    at #link (node:in
+ternal/modules/esm/mo
+dule_job:208:49) {
+  code: 'ERR_MODULE_N
+OT_FOUND'
+}
+
+Node.js v24.11.0

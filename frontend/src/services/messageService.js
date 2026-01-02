@@ -45,16 +45,14 @@ const messageService = {
             connectHeaders: {
                 Authorization: `Bearer ${token}`,
             },
-            debug: (str) => {
-                console.log('STOMP: ' + str);
-            },
+
             reconnectDelay: 5000,
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
         });
 
         stompClient.onConnect = (frame) => {
-            console.log('Connected: ' + frame);
+
 
             // Subscribe to personal message queue
             const user = JSON.parse(localStorage.getItem('user'));

@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
+import com.krishihub.common.context.UserContextHolder;
 
 @RestController
 @RequestMapping("/api/logistics")
@@ -17,7 +18,8 @@ public class LogisticsController {
 
     @PostMapping("/book")
     public ResponseEntity<LogisticsOrder> bookLogistics(@RequestBody LogisticsOrder order) {
-        return ResponseEntity.ok(logisticsService.bookLogistics(order));
+        UUID userId = UserContextHolder.getUserId();
+        return ResponseEntity.ok(logisticsService.bookLogistics(userId, order));
     }
 
     @GetMapping("/status")
@@ -26,7 +28,8 @@ public class LogisticsController {
     }
 
     @PutMapping("/{id}/status")
-    public ResponseEntity<Void> updateStatus(@PathVariable UUID id, @RequestBody LogisticsOrder.LogisticsStatus status) {
+    public ResponseEntity<Void> updateStatus(@PathVariable UUID id,
+            @RequestBody LogisticsOrder.LogisticsStatus status) {
         logisticsService.updateStatus(id, status);
         return ResponseEntity.ok().build();
     }

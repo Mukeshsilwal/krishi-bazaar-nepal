@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.krishihub.common.context.UserContextHolder;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/advisory")
@@ -21,6 +23,19 @@ public class AdvisoryController {
     public ResponseEntity<List<AdvisoryResponse>> getAdvisory(
             @RequestParam String context,
             @RequestParam String param) {
-        return ResponseEntity.ok(advisoryService.getContextualAdvisory(context, param));
+        try {
+            com.krishihub.advisory.enums.AdvisoryContextType contextType = com.krishihub.advisory.enums.AdvisoryContextType
+                    .valueOf(context.toUpperCase());
+            return ResponseEntity.ok(advisoryService.getContextualAdvisory(contextType, param));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @org.springframework.web.bind.annotation.PostMapping("/generate")
+    public ResponseEntity<Void> generateAdvisoryRules() {
+        UUID userId = UserContextHolder.getUserId();
+        advisoryService.generateAdvisoryRules(userId);
+        return ResponseEntity.ok().build();
     }
 }

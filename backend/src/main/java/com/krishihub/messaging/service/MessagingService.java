@@ -31,8 +31,8 @@ public class MessagingService {
         private final SimpMessagingTemplate messagingTemplate;
 
         @Transactional
-        public MessageDto sendMessage(String senderMobile, SendMessageRequest request) {
-                User sender = userRepository.findByMobileNumber(senderMobile)
+        public MessageDto sendMessage(UUID senderId, SendMessageRequest request) {
+                User sender = userRepository.findById(senderId)
                                 .orElseThrow(() -> new ResourceNotFoundException("Sender not found"));
 
                 User receiver = userRepository.findById(request.getReceiverId())
@@ -66,13 +66,13 @@ public class MessagingService {
                                 "/queue/messages",
                                 messageDto);
 
-                log.info("Message sent from {} to {}", senderMobile, receiver.getMobileNumber());
+                log.info("Message sent from {} to {}", senderId, receiver.getMobileNumber());
 
                 return messageDto;
         }
 
-        public List<MessageDto> getConversation(String userMobile, UUID otherUserId) {
-                User user = userRepository.findByMobileNumber(userMobile)
+        public List<MessageDto> getConversation(UUID userId, UUID otherUserId) {
+                User user = userRepository.findById(userId)
                                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
                 User otherUser = userRepository.findById(otherUserId)
@@ -89,8 +89,8 @@ public class MessagingService {
                                 .collect(Collectors.toList());
         }
 
-        public List<ConversationDto> getConversations(String userMobile) {
-                User user = userRepository.findByMobileNumber(userMobile)
+        public List<ConversationDto> getConversations(UUID userId) {
+                User user = userRepository.findById(userId)
                                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
                 List<Message> allMessages = messageRepository.findConversations(
@@ -137,8 +137,8 @@ public class MessagingService {
                                 .collect(Collectors.toList());
         }
 
-        public long getUnreadCount(String userMobile) {
-                User user = userRepository.findByMobileNumber(userMobile)
+        public long getUnreadCount(UUID userId) {
+                User user = userRepository.findById(userId)
                                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
                 return messageRepository.countUnreadMessages(user.getId());
@@ -168,20 +168,17 @@ public class MessagingService {
                 }
         }
 
-        public void sendTypingIndicator(String senderMobile, UUID receiverId) {
+        public void sendTypingIndicator(UUID senderId, UUID receiverId) {
                 User receiver = userRepository.findById(receiverId)
                                 .orElseThrow(() -> new ResourceNotFoundException("Receiver not found"));
 
                 Map<String, Object> payload = new HashMap<>();
-                payload.put("senderId", senderMobile); // Sending mobile as ID for simplicity on frontend if needed, or
-                                                       // lookup
-                // Ideally we send UUID of sender. Let's send both.
-                // Actually, the frontend expects "typing" event.
 
                 // Find sender UUID
-                User sender = userRepository.findByMobileNumber(senderMobile)
+                User sender = userRepository.findById(senderId)
                                 .orElseThrow(() -> new ResourceNotFoundException("Sender not found"));
 
+                payload.put("senderId", sender.getMobileNumber()); // Kept for backward compatibility if needed
                 payload.put("userId", sender.getId());
                 payload.put("isTyping", true);
 

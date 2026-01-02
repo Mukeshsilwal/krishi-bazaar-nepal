@@ -8,7 +8,7 @@ import lombok.Data;
 public class AdvisoryResponse {
     private String title;
     private String snippet;
-    private String type; // ARTICLE, DISEASE_ALERT, MARKET_TIP
+    private com.krishihub.advisory.enums.AdvisoryType type;
     private String referenceId; // UUID as string
     private String actionLabel; // e.g. "Read More", "View Alert"
 }

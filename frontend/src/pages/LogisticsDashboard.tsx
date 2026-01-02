@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import logisticsService from '../services/logisticsService';
 import { Truck, Package, MapPin, Calendar, CheckCircle } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 
 const LogisticsDashboard = () => {
     const [storages, setStorages] = useState([]);
@@ -37,8 +35,7 @@ const LogisticsDashboard = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <Navbar />
+        <div className="bg-gray-50 min-h-full">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
@@ -141,7 +138,6 @@ const LogisticsDashboard = () => {
                     </div>
                 )}
             </div>
-            <Footer />
         </div>
     );
 };

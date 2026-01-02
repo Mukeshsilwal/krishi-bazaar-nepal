@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import financeService from '../services/financeService';
 import { useAuth } from '../modules/auth/context/AuthContext';
 import { Landmark, Shield, Coins, ExternalLink, Calendar } from 'lucide-react';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 
 const FinanceDashboard = () => {
     const { user } = useAuth();
@@ -40,8 +38,7 @@ const FinanceDashboard = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <Navbar />
+        <div className="bg-gray-50 min-h-full">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <h1 className="text-3xl font-bold text-gray-900 mb-8 flex items-center gap-3">
                     <Landmark className="w-8 h-8 text-green-600" />
@@ -168,7 +165,6 @@ const FinanceDashboard = () => {
                     </div>
                 </div>
             </div>
-            <Footer />
         </div>
     );
 };

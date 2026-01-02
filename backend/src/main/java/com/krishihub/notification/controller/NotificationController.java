@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import com.krishihub.common.context.UserContextHolder;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -17,7 +18,8 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping
-    public ResponseEntity<List<Notification>> getUserNotifications(@RequestParam UUID userId) {
+    public ResponseEntity<List<Notification>> getUserNotifications() {
+        UUID userId = UserContextHolder.getUserId();
         return ResponseEntity.ok(notificationService.getUserNotifications(userId));
     }
 
@@ -28,7 +30,8 @@ public class NotificationController {
     }
 
     @GetMapping("/unread-count")
-    public ResponseEntity<Long> getUnreadCount(@RequestParam UUID userId) {
+    public ResponseEntity<Long> getUnreadCount() {
+        UUID userId = UserContextHolder.getUserId();
         return ResponseEntity.ok(notificationService.getUnreadCount(userId));
     }
 }

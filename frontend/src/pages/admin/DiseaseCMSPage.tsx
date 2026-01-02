@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
+import React, { useState, useEffect } from 'react';
+import { useAdminTitle } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,8 +39,8 @@ interface Disease {
   id?: string;
   nameEn: string;
   nameNe: string;
-  symptomsEn: string;
-  symptomsNe: string;
+  descriptionEn: string;
+  descriptionNe: string;
   riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   affectedCrops: string[];
   triggerConditions?: string;
@@ -48,13 +48,19 @@ interface Disease {
 
 const DiseaseCMSPage = () => {
   const { language } = useLanguage();
+  const { setTitle } = useAdminTitle();
+
+  useEffect(() => {
+    setTitle('Disease & Pest', 'रोग र कीरा');
+  }, [setTitle]);
+
   const [diseases, setDiseases] = useState<Disease[]>([
     {
       id: '1',
       nameEn: 'Rice Blast',
       nameNe: 'धान झुल्सा',
-      symptomsEn: 'Diamond-shaped lesions on leaves, gray center with brown border',
-      symptomsNe: 'पातमा हीरा आकारको दाग, खैरो किनारासहित खरानी रंगको बीच',
+      descriptionEn: 'Diamond-shaped lesions on leaves, gray center with brown border',
+      descriptionNe: 'पातमा हीरा आकारको दाग, खैरो किनारासहित खरानी रंगको बीच',
       riskLevel: 'HIGH',
       affectedCrops: ['Rice', 'Wheat']
     },
@@ -62,13 +68,13 @@ const DiseaseCMSPage = () => {
       id: '2',
       nameEn: 'Tomato Blight',
       nameNe: 'गोलभेडा झुल्सिने',
-      symptomsEn: 'Brown spots on leaves, fruit rot, wilting',
-      symptomsNe: 'पातमा खैरो दागहरू, फल कुहिने, ओइलाउने',
+      descriptionEn: 'Brown spots on leaves, fruit rot, wilting',
+      descriptionNe: 'पातमा खैरो दागहरू, फल कुहिने, ओइलाउने',
       riskLevel: 'CRITICAL',
       affectedCrops: ['Tomato', 'Potato']
     },
   ]);
-  
+
   const [isEditing, setIsEditing] = useState(false);
   const [editingDisease, setEditingDisease] = useState<Partial<Disease>>({
     riskLevel: 'LOW',
@@ -77,21 +83,51 @@ const DiseaseCMSPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRisk, setFilterRisk] = useState('all');
 
+  const [pesticides, setPesticides] = useState<any[]>([]);
+  const [selectedPesticides, setSelectedPesticides] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchPesticides = async () => {
+      try {
+        const data = await advisoryService.getAllPesticides();
+        setPesticides(data || []);
+      } catch (e) { console.error(e); }
+    };
+    fetchPesticides();
+  }, []);
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      let savedDisease;
       if (editingDisease.id) {
-        setDiseases(prev => prev.map(d => 
+        setDiseases(prev => prev.map(d =>
           d.id === editingDisease.id ? { ...d, ...editingDisease } as Disease : d
         ));
+        savedDisease = editingDisease;
         toast.success(language === 'ne' ? 'रोग अपडेट भयो' : 'Disease updated');
       } else {
-        await advisoryService.createDisease(editingDisease);
-        setDiseases(prev => [...prev, { ...editingDisease, id: Date.now().toString() } as Disease]);
+        savedDisease = await advisoryService.createDisease(editingDisease);
+        setDiseases(prev => [...prev, { ...savedDisease } as Disease]);
         toast.success(language === 'ne' ? 'रोग थपियो' : 'Disease added');
       }
+
+      // Link Pesticides
+      if (savedDisease && savedDisease.id && selectedPesticides.length > 0) {
+        for (const pestId of selectedPesticides) {
+          await advisoryService.linkPesticide(savedDisease.id, {
+            pesticideId: pestId,
+            dosage: 'As per label', // Default
+            interval: 7,
+            isPrimary: true
+          });
+        }
+        toast.success('Treatments linked');
+      }
+
       setIsEditing(false);
       setEditingDisease({ riskLevel: 'LOW', affectedCrops: [] });
+      setSelectedPesticides([]);
     } catch (error) {
       toast.error(language === 'ne' ? 'असफल भयो' : 'Operation failed');
     }
@@ -106,7 +142,7 @@ const DiseaseCMSPage = () => {
 
   const filteredDiseases = diseases.filter(d => {
     const matchesSearch = d.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         d.nameNe.includes(searchQuery);
+      d.nameNe.includes(searchQuery);
     const matchesRisk = filterRisk === 'all' || d.riskLevel === filterRisk;
     return matchesSearch && matchesRisk;
   });
@@ -120,12 +156,12 @@ const DiseaseCMSPage = () => {
 
   if (isEditing) {
     return (
-      <AdminLayout title="Add / Edit Disease" titleNe="रोग थप्नुहोस् / सम्पादन">
+      <>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Bug className="h-5 w-5 text-red-600" />
-              {editingDisease.id 
+              {editingDisease.id
                 ? (language === 'ne' ? 'रोग सम्पादन' : 'Edit Disease')
                 : (language === 'ne' ? 'नयाँ रोग' : 'New Disease')
               }
@@ -168,8 +204,8 @@ const DiseaseCMSPage = () => {
                   </label>
                   <Textarea
                     className="min-h-[100px]"
-                    value={editingDisease.symptomsEn || ''}
-                    onChange={e => setEditingDisease({ ...editingDisease, symptomsEn: e.target.value })}
+                    value={editingDisease.descriptionEn || ''}
+                    onChange={e => setEditingDisease({ ...editingDisease, descriptionEn: e.target.value })}
                     required
                   />
                 </div>
@@ -179,8 +215,8 @@ const DiseaseCMSPage = () => {
                   </label>
                   <Textarea
                     className="min-h-[100px]"
-                    value={editingDisease.symptomsNe || ''}
-                    onChange={e => setEditingDisease({ ...editingDisease, symptomsNe: e.target.value })}
+                    value={editingDisease.descriptionNe || ''}
+                    onChange={e => setEditingDisease({ ...editingDisease, descriptionNe: e.target.value })}
                     required
                   />
                 </div>
@@ -217,13 +253,51 @@ const DiseaseCMSPage = () => {
                   </label>
                   <Input
                     value={editingDisease.affectedCrops?.join(', ') || ''}
-                    onChange={e => setEditingDisease({ 
-                      ...editingDisease, 
+                    onChange={e => setEditingDisease({
+                      ...editingDisease,
                       affectedCrops: e.target.value.split(',').map(c => c.trim()).filter(Boolean)
                     })}
                     placeholder="Rice, Wheat, Tomato"
                     required
                   />
+                </div>
+              </div>
+
+              {/* Connected Treatments */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  {language === 'ne' ? 'उपचार / कीटनाशक' : 'Treatments / Pesticides'}
+                </label>
+                <Select
+                  value={selectedPesticides[0] || ''}
+                  onValueChange={(val) => {
+                    if (!selectedPesticides.includes(val)) setSelectedPesticides([...selectedPesticides, val]);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Treatment" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {pesticides.map(p => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.nameEn} ({p.type})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {selectedPesticides.map(id => {
+                    const p = pesticides.find(pest => pest.id === id);
+                    return p ? (
+                      <Badge key={id} variant="secondary" className="gap-1">
+                        {p.nameEn}
+                        <X
+                          className="h-3 w-3 cursor-pointer"
+                          onClick={() => setSelectedPesticides(selectedPesticides.filter(x => x !== id))}
+                        />
+                      </Badge>
+                    ) : null;
+                  })}
                 </div>
               </div>
 
@@ -251,13 +325,13 @@ const DiseaseCMSPage = () => {
               </div>
             </form>
           </CardContent>
-        </Card>
-      </AdminLayout>
+        </Card >
+      </>
     );
   }
 
   return (
-    <AdminLayout title="Disease & Pest" titleNe="रोग र कीरा">
+    <>
       <Card>
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <CardTitle className="flex items-center gap-2">
@@ -269,8 +343,8 @@ const DiseaseCMSPage = () => {
               <LinkIcon className="h-4 w-4" />
               {language === 'ne' ? 'कीटनाशक म्यापिङ' : 'Pesticide Mapping'}
             </Button>
-            <Button 
-              onClick={() => { setIsEditing(true); setEditingDisease({ riskLevel: 'LOW', affectedCrops: [] }); }} 
+            <Button
+              onClick={() => { setIsEditing(true); setEditingDisease({ riskLevel: 'LOW', affectedCrops: [] }); }}
               className="gap-2 bg-red-600 hover:bg-red-700"
             >
               <Plus className="h-4 w-4" />
@@ -339,8 +413,8 @@ const DiseaseCMSPage = () => {
                           {disease.riskLevel === 'CRITICAL' || disease.riskLevel === 'HIGH' ? (
                             <AlertTriangle className="h-3 w-3" />
                           ) : null}
-                          {language === 'ne' 
-                            ? riskLabels[disease.riskLevel].ne 
+                          {language === 'ne'
+                            ? riskLabels[disease.riskLevel].ne
                             : riskLabels[disease.riskLevel].en}
                         </Badge>
                       </TableCell>
@@ -360,17 +434,17 @@ const DiseaseCMSPage = () => {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8"
                             onClick={() => { setEditingDisease(disease); setIsEditing(true); }}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8 text-destructive"
                             onClick={() => handleDelete(disease.id!)}
                           >
@@ -386,7 +460,7 @@ const DiseaseCMSPage = () => {
           </div>
         </CardContent>
       </Card>
-    </AdminLayout>
+    </>
   );
 };
 

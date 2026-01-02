@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../../../components/Navbar';
-import Footer from '../../../components/Footer';
 import { useOrders } from '../hooks/useOrders';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useAuth } from '../../auth/context/AuthContext';
@@ -18,17 +16,12 @@ export default function MyOrdersPage() {
     const ordersArray = Array.isArray(orders) ? orders : [];
 
     // Debug logging
-    console.log('[MyOrdersPage] User:', user);
-    console.log('[MyOrdersPage] User ID:', user?.id);
-    console.log('[MyOrdersPage] Orders:', ordersArray);
-    console.log('[MyOrdersPage] First order buyer ID:', ordersArray[0]?.buyer?.id);
-    console.log('[MyOrdersPage] First order farmer ID:', ordersArray[0]?.farmer?.id);
+
 
     const buyerOrders = ordersArray.filter((order) => order.buyer?.id === user?.id);
     const farmerOrders = ordersArray.filter((order) => order.farmer?.id === user?.id);
 
-    console.log('[MyOrdersPage] Buyer orders:', buyerOrders.length);
-    console.log('[MyOrdersPage] Farmer orders:', farmerOrders.length);
+
 
     const displayOrders = activeTab === 'buyer' ? buyerOrders : farmerOrders;
     const filteredOrders =
@@ -69,9 +62,7 @@ export default function MyOrdersPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <Navbar />
-
+        <div className="bg-gray-50 min-h-full">
             <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-8">
@@ -237,8 +228,6 @@ export default function MyOrdersPage() {
                     </>
                 )}
             </div>
-
-            <Footer />
         </div>
     );
 }

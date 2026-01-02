@@ -28,6 +28,18 @@ public class KnowledgeServiceImpl implements KnowledgeService {
     }
 
     @Override
+    public List<Article> getAllArticles(String status) {
+        if (status == null || status.trim().isEmpty() || status.equalsIgnoreCase("ALL")) {
+            return articleRepository.findAll();
+        }
+        try {
+            return articleRepository.findByStatus(ArticleStatus.valueOf(status.toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            return articleRepository.findAll();
+        }
+    }
+
+    @Override
     public List<Article> getPublishedArticles() {
         return articleRepository.findByStatus(ArticleStatus.PUBLISHED);
     }

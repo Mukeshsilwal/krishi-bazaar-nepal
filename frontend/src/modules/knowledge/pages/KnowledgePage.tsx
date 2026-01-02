@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../../../context/LanguageContext';
 import knowledgeService, { Article, KnowledgeCategory } from '../services/knowledgeService';
 import { Link } from 'react-router-dom';
-import Navbar from '../../../components/Navbar';
-import Footer from '../../../components/Footer';
 import { Search, BookOpen, Tag } from 'lucide-react';
 
 const KnowledgePage = () => {
@@ -39,9 +37,7 @@ const KnowledgePage = () => {
     );
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-            <Navbar />
-
+        <div className="bg-gray-50 min-h-full">
             {/* Hero Section */}
             <div className="bg-green-700 text-white py-12 px-4">
                 <div className="max-w-7xl mx-auto text-center">
@@ -67,7 +63,7 @@ const KnowledgePage = () => {
                 </div>
             </div>
 
-            <main className="flex-grow max-w-7xl mx-auto px-4 py-8 w-full">
+            <main className="max-w-7xl mx-auto px-4 py-8 w-full">
                 <div className="flex flex-col md:flex-row gap-8">
 
                     {/* Categories Sidebar */}
@@ -141,8 +137,6 @@ const KnowledgePage = () => {
                     </div>
                 </div>
             </main>
-
-            <Footer />
         </div>
     );
 };

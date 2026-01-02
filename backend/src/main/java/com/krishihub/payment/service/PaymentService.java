@@ -33,9 +33,8 @@ public class PaymentService {
     private final KhaltiPaymentService khaltiService;
     private final SmsService smsService;
 
-    @Transactional
-    public PaymentResponse initiatePayment(String mobileNumber, InitiatePaymentRequest request) {
-        User user = userRepository.findByMobileNumber(mobileNumber)
+    public PaymentResponse initiatePayment(UUID userId, InitiatePaymentRequest request) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Order order = orderRepository.findById(request.getOrderId())
@@ -170,11 +169,11 @@ public class PaymentService {
         return TransactionDto.fromEntity(transaction);
     }
 
-    public TransactionDto getTransaction(UUID id, String mobileNumber) {
+    public TransactionDto getTransaction(UUID id, UUID userId) {
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
 
-        User user = userRepository.findByMobileNumber(mobileNumber)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         // Verify access

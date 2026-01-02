@@ -14,7 +14,8 @@ public class LogisticsService {
 
     private final LogisticsOrderRepository logisticsOrderRepository;
 
-    public LogisticsOrder bookLogistics(LogisticsOrder order) {
+    public LogisticsOrder bookLogistics(UUID userId, LogisticsOrder order) {
+        order.setFarmerId(userId);
         order.setStatus(LogisticsOrder.LogisticsStatus.PENDING);
         // Mock auto-assignment logic
         assignDriver(order);
@@ -33,7 +34,7 @@ public class LogisticsService {
         return logisticsOrderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new RuntimeException("Logistics order not found for order: " + orderId));
     }
-    
+
     public void updateStatus(UUID id, LogisticsOrder.LogisticsStatus status) {
         LogisticsOrder order = logisticsOrderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Logistics order not found"));

@@ -27,6 +27,9 @@ public class LogisticsOrder {
     @Column(name = "order_id", nullable = false)
     private UUID orderId; // Linked to Orders module, strictly loosely coupled via ID
 
+    @Column(name = "farmer_id")
+    private UUID farmerId;
+
     @Column(name = "vehicle_type", nullable = false, length = 50)
     private String vehicleType;
 

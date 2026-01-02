@@ -1,7 +1,9 @@
 package com.krishihub.admin.controller;
 
+import com.krishihub.admin.dto.AdminDashboardStats;
 import com.krishihub.admin.service.AdminService;
 import com.krishihub.auth.entity.User;
+import com.krishihub.shared.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,8 +20,8 @@ public class AdminController {
     private final AdminService adminService;
 
     @GetMapping("/dashboard")
-    public ResponseEntity<Map<String, Object>> getDashboard() {
-        return ResponseEntity.ok(adminService.getDashboardStats());
+    public ResponseEntity<ApiResponse<AdminDashboardStats>> getDashboard() {
+        return ResponseEntity.ok(ApiResponse.success("Dashboard stats fetched", adminService.getDashboardStats()));
     }
 
     @GetMapping("/vendors/pending")

@@ -1,0 +1,59 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------< com.krishihub:kisan-sarathi-backend >-----------------
+[INFO] Building Kisan Sarathi Backend 1.0.0
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.3.2:clean (default-clean) @ kisan-sarathi-backend ---
+[INFO] Deleting C:\workspace\krishi-bazaar-nepal\backend\target
+[INFO] 
+[INFO] --- maven-resources-plugin:3.3.1:resources (default-resources) @ kisan-sarathi-backend ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] Copying 26 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.11.0:compile (default-compile) @ kisan-sarathi-backend ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 310 source files with javac [debug release 17] to target\classes
+[INFO] Annotation processing is enabled because one or more processors were found
+  on the class path. A future release of javac may disable annotation processing
+  unless at least one processor is specified by name (-processor), or a search
+  path is specified (--processor-path, --processor-module-path), or annotation
+  processing is enabled explicitly (-proc:only, -proc:full).
+  Use -Xlint:-options to suppress this message.
+  Use -proc:none to disable annotation processing.
+[INFO] /C:/workspace/krishi-bazaar-nepal/backend/src/main/java/com/krishihub/auth/security/JwtUtil.java: C:\workspace\krishi-bazaar-nepal\backend\src\main\java\com\krishihub\auth\security\JwtUtil.java uses or overrides a deprecated API.
+[INFO] /C:/workspace/krishi-bazaar-nepal/backend/src/main/java/com/krishihub/auth/security/JwtUtil.java: Recompile with -Xlint:deprecation for details.
+[INFO] /C:/workspace/krishi-bazaar-nepal/backend/src/main/java/com/krishihub/knowledge/service/CmsService.java: Some input files use unchecked or unsafe operations.
+[INFO] /C:/workspace/krishi-bazaar-nepal/backend/src/main/java/com/krishihub/knowledge/service/CmsService.java: Recompile with -Xlint:unchecked for details.
+[INFO] -------------------------------------------------------------
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] /C:/workspace/krishi-bazaar-nepal/backend/src/main/java/com/krishihub/auth/entity/Role.java:[36,29] @Builder will ignore the initializing expression entirely. If you want the initializing expression to serve as default, add @Builder.Default. If it is not supposed to be settable during building, make the field final.
+[INFO] 1 warning
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /C:/workspace/krishi-bazaar-nepal/backend/src/main/java/com/krishihub/auth/service/CustomUserDetailsService.java:[25,16] cannot find symbol
+  symbol:   variable CustomUserDetails
+  location: class com.krishihub.auth.service.CustomUserDetailsService
+[INFO] 1 error
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  37.067 s
+[INFO] Finished at: 2026-01-02T08:27:49+05:45
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project kisan-sarathi-backend: Compilation failure
+[ERROR] /C:/workspace/krishi-bazaar-nepal/backend/src/main/java/com/krishihub/auth/service/CustomUserDetailsService.java:[25,16] cannot find symbol
+[ERROR]   symbol:   variable CustomUserDetails
+[ERROR]   location: class com.krishihub.auth.service.CustomUserDetailsService
+[ERROR] 
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

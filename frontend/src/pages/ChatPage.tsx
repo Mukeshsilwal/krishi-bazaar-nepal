@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 import { useMessages } from '../hooks/useMessages';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../modules/auth/context/AuthContext';
@@ -59,11 +57,9 @@ export default function ChatPage() {
     const isSelectedUserOnline = selectedUser ? onlineUsers[selectedUser.userMobile] : false;
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-            <Navbar />
-
+        <div className="bg-gray-50 flex flex-col h-[calc(100vh-64px)]">
             <div className="flex-1 max-w-7xl w-full mx-auto px-4 py-8 sm:px-6 lg:px-8">
-                <div className="bg-white rounded-lg shadow h-[calc(100vh-200px)] flex overflow-hidden">
+                <div className="bg-white rounded-lg shadow h-full flex overflow-hidden">
                     {/* Conversations Sidebar */}
                     <div className="w-1/3 border-r border-gray-200 flex flex-col">
                         <div className="p-4 border-b border-gray-200">
@@ -249,8 +245,6 @@ export default function ChatPage() {
                     </div>
                 </div>
             </div>
-
-            <Footer />
         </div>
     );
 }

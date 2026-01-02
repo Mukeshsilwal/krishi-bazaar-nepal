@@ -2,12 +2,14 @@ package com.krishihub.auth.controller;
 
 import com.krishihub.auth.dto.*;
 import com.krishihub.auth.service.AuthService;
+
 import com.krishihub.shared.dto.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -47,18 +49,17 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<UserDto>> getCurrentUser(Authentication authentication) {
-        String mobileNumber = authentication.getName();
-        UserDto user = authService.getCurrentUser(mobileNumber);
+    public ResponseEntity<ApiResponse<UserDto>> getCurrentUser() {
+        UUID userId = com.krishihub.common.context.UserContextHolder.getUserId();
+        UserDto user = authService.getCurrentUser(userId);
         return ResponseEntity.ok(ApiResponse.success(user));
     }
 
     @PutMapping("/me")
     public ResponseEntity<ApiResponse<UserDto>> updateProfile(
-            Authentication authentication,
             @RequestBody UpdateProfileRequest request) {
-        String mobileNumber = authentication.getName();
-        UserDto user = authService.updateProfile(mobileNumber, request);
+        UUID userId = com.krishihub.common.context.UserContextHolder.getUserId();
+        UserDto user = authService.updateProfile(userId, request);
         return ResponseEntity.ok(ApiResponse.success("Profile updated successfully", user));
     }
 

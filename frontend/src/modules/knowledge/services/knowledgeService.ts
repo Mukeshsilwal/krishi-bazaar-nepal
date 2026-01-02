@@ -17,7 +17,9 @@ export interface Article {
     category: KnowledgeCategory;
     tags: string[];
     coverImageUrl?: string;
+    status: 'DRAFT' | 'REVIEW' | 'PUBLISHED';
     createdAt: string;
+    updatedAt?: string;
 }
 
 const knowledgeService = {
@@ -26,10 +28,11 @@ const knowledgeService = {
         return response.data;
     },
 
-    getArticles: async (categoryId?: string, tag?: string) => {
+    getArticles: async (categoryId?: string, tag?: string, status?: string) => {
         const params: any = {};
         if (categoryId && categoryId !== 'undefined') params.categoryId = categoryId;
         if (tag && tag !== 'undefined') params.tag = tag;
+        if (status && status !== 'undefined') params.status = status;
 
         const response = await api.get<Article[]>('/knowledge/articles', { params });
         return response.data;

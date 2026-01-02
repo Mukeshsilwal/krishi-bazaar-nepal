@@ -16,8 +16,20 @@ public class AdminUserService {
 
     private final UserRepository userRepository;
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public org.springframework.data.domain.Page<User> getAllUsers(String search, String role, Boolean status,
+            org.springframework.data.domain.Pageable pageable) {
+        User.UserRole userRole = null;
+        if (role != null && !role.isEmpty() && !role.equalsIgnoreCase("all")) {
+            try {
+                userRole = User.UserRole.valueOf(role.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // Ignore invalid role
+            }
+        }
+
+        String searchQuery = (search != null && !search.isEmpty()) ? search : null;
+
+        return userRepository.searchUsers(userRole, status, searchQuery, pageable);
     }
 
     @Transactional

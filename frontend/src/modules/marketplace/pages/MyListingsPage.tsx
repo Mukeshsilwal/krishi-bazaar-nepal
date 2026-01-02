@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../../../components/Navbar';
-import Footer from '../../../components/Footer';
 import { useMyListings } from '../hooks/useMyListings';
 import { useLanguage } from '../../../context/LanguageContext';
 import { Plus, Edit, Trash2, Eye, RefreshCw } from 'lucide-react';
@@ -42,9 +40,7 @@ export default function MyListingsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <Navbar />
-
+        <div className="bg-gray-50 min-h-full">
             <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-8">
@@ -204,8 +200,6 @@ export default function MyListingsPage() {
                     </>
                 )}
             </div>
-
-            <Footer />
         </div>
     );
 }

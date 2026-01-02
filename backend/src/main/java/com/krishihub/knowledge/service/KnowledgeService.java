@@ -13,6 +13,8 @@ public interface KnowledgeService {
     KnowledgeCategory createCategory(KnowledgeCategory category);
 
     // Articles
+    List<Article> getAllArticles(String status);
+
     List<Article> getPublishedArticles();
 
     List<Article> getArticlesByCategory(UUID categoryId);

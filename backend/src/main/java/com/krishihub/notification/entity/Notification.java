@@ -33,6 +33,37 @@ public class Notification {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String message;
 
+    @Column(name = "title")
+    private String title;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private com.krishihub.notification.enums.NotificationChannel channel;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private com.krishihub.notification.enums.NotificationStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private com.krishihub.notification.enums.NotificationPriority priority;
+
+    @Column(name = "scheduled_at")
+    private LocalDateTime scheduledAt;
+
+    @Column(name = "sent_at")
+    private LocalDateTime sentAt;
+
+    @Column(name = "failure_reason")
+    private String failureReason;
+
+    @Column(name = "target_metadata", columnDefinition = "TEXT")
+    private String targetMetadata;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private com.krishihub.auth.entity.User user;
+
     @Column(name = "is_read")
     @Builder.Default
     private boolean isRead = false;

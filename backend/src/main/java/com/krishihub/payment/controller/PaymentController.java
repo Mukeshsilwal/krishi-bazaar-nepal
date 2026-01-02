@@ -8,7 +8,7 @@ import com.krishihub.shared.dto.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -22,10 +22,9 @@ public class PaymentController {
 
     @PostMapping("/initiate")
     public ResponseEntity<ApiResponse<PaymentResponse>> initiatePayment(
-            Authentication authentication,
             @Valid @RequestBody InitiatePaymentRequest request) {
-        String mobileNumber = authentication.getName();
-        PaymentResponse response = paymentService.initiatePayment(mobileNumber, request);
+        UUID userId = com.krishihub.common.context.UserContextHolder.getUserId();
+        PaymentResponse response = paymentService.initiatePayment(userId, request);
         return ResponseEntity.ok(ApiResponse.success("Payment initiated successfully", response));
     }
 
@@ -39,10 +38,9 @@ public class PaymentController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<TransactionDto>> getTransaction(
-            @PathVariable UUID id,
-            Authentication authentication) {
-        String mobileNumber = authentication.getName();
-        TransactionDto transaction = paymentService.getTransaction(id, mobileNumber);
+            @PathVariable UUID id) {
+        UUID userId = com.krishihub.common.context.UserContextHolder.getUserId();
+        TransactionDto transaction = paymentService.getTransaction(id, userId);
         return ResponseEntity.ok(ApiResponse.success(transaction));
     }
 }

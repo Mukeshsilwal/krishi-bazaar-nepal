@@ -55,6 +55,11 @@ const advisoryService = {
         return response.data;
     },
 
+    getAllPesticides: async () => {
+        const response = await api.get('/diseases/pesticides');
+        return response.data;
+    },
+
     linkPesticide: async (diseaseId: string, data: { pesticideId: string; dosage: string; interval: number; isPrimary: boolean }) => {
         if (!diseaseId || diseaseId === 'undefined') throw new Error('Invalid Disease ID');
         if (!data.pesticideId || data.pesticideId === 'undefined') throw new Error('Invalid Pesticide ID');
@@ -62,6 +67,38 @@ const advisoryService = {
         await api.post(`/diseases/${diseaseId}/link-pesticide`, null, {
             params: data
         });
+    },
+
+    // Rule Engine Methods
+    getAllRules: async () => {
+        const response = await api.get('/admin/rules');
+        return response.data;
+    },
+
+    createRule: async (rule: any) => {
+        const response = await api.post('/admin/rules', rule);
+        return response.data;
+    },
+
+    updateRule: async (id: string, rule: any) => {
+        const response = await api.put(`/admin/rules/${id}`, rule);
+        return response.data;
+    },
+
+    sendSignal: async (payload: any) => {
+        const response = await api.post('/disease/signals/report', payload);
+        return response.data;
+    },
+
+    submitFeedback: async (feedback: { userId: string; diseaseId?: string; queryText: string; isHelpful: boolean; comments?: string }) => {
+        await api.post('/diseases/feedback', feedback);
+    },
+
+    getDiagnosisHistory: async (page = 0, size = 10) => {
+        const response = await api.get('/diagnoses/history', {
+            params: { page, size }
+        });
+        return response.data;
     }
 };
 

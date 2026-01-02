@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/modules/auth/context/AuthContext';
+import { AdminProvider, useAdminTitle } from '@/context/AdminContext';
 import {
   LayoutDashboard,
   BookOpen,
@@ -36,18 +37,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-interface AdminLayoutProps {
-  children: React.ReactNode;
-  title: string;
-  titleNe?: string;
-}
-
-const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, titleNe }) => {
+const AdminLayoutContent: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { language, setLanguage, t } = useLanguage();
+  const { language, setLanguage } = useLanguage();
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const { title, titleNe } = useAdminTitle();
 
   const menuItems = [
     {
@@ -55,6 +51,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, titleNe }) =
       icon: LayoutDashboard,
       labelEn: 'Dashboard',
       labelNe: 'ड्यासबोर्ड'
+    },
+    {
+      path: '/admin/sources',
+      icon: Database,
+      labelEn: 'Sources',
+      labelNe: 'स्रोतहरू'
+    },
+    {
+      path: '/admin/moderation',
+      icon: ShieldAlert,
+      labelEn: 'Moderation Queue',
+      labelNe: 'मध्यस्थता लाम'
     },
     {
       path: '/admin/knowledge',
@@ -111,10 +119,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, titleNe }) =
       labelNe: 'तथ्याङ्क'
     },
     {
-      path: '/admin/cms',
+      path: '/admin/content',
       icon: BookOpenCheck,
-      labelEn: 'Content Workflow',
-      labelNe: 'सामग्री प्रवाह'
+      labelEn: 'Content Management',
+      labelNe: 'सामग्री व्यवस्थापन'
     },
     {
       path: '/admin/rules',
@@ -172,7 +180,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, titleNe }) =
   };
 
   return (
-    <div className="min-h-screen bg-muted/30 flex">
+    <div className="h-screen bg-muted/30 flex overflow-hidden">
       {/* Sidebar */}
       <aside
         className={`fixed lg:static inset-y-0 left-0 z-50 bg-card border-r border-border transition-all duration-300 ${sidebarOpen ? 'w-72' : 'w-0 lg:w-20'
@@ -303,7 +311,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, titleNe }) =
 
         {/* Page Content */}
         <main className="flex-1 p-4 lg:p-6 overflow-auto">
-          {children}
+          <div key={location.pathname} className="animate-fade-in-up">
+            <Outlet />
+          </div>
         </main>
       </div>
 
@@ -315,6 +325,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, titleNe }) =
         />
       )}
     </div>
+  );
+};
+
+const AdminLayout: React.FC = () => {
+  return (
+    <AdminProvider>
+      <AdminLayoutContent />
+    </AdminProvider>
   );
 };
 

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
+import React, { useState, useEffect } from 'react';
+import { useAdminTitle } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -58,6 +58,11 @@ interface Pesticide {
 
 const PesticideCMSPage = () => {
   const { language } = useLanguage();
+  const { setTitle } = useAdminTitle();
+
+  useEffect(() => {
+    setTitle('Pesticides & Medicine', 'कीटनाशक र औषधि');
+  }, [setTitle]);
   const [pesticides, setPesticides] = useState<Pesticide[]>([
     {
       id: '1',
@@ -84,7 +89,7 @@ const PesticideCMSPage = () => {
       status: 'ACTIVE'
     },
   ]);
-  
+
   const [isEditing, setIsEditing] = useState(false);
   const [editingPesticide, setEditingPesticide] = useState<Partial<Pesticide>>({
     type: 'FUNGICIDE',
@@ -98,7 +103,7 @@ const PesticideCMSPage = () => {
     try {
       if (editingPesticide.id) {
         // Update existing
-        setPesticides(prev => prev.map(p => 
+        setPesticides(prev => prev.map(p =>
           p.id === editingPesticide.id ? { ...p, ...editingPesticide } as Pesticide : p
         ));
         toast.success(language === 'ne' ? 'कीटनाशक अपडेट भयो' : 'Pesticide updated');
@@ -124,7 +129,7 @@ const PesticideCMSPage = () => {
 
   const filteredPesticides = pesticides.filter(p => {
     const matchesSearch = p.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         p.nameNe.includes(searchQuery);
+      p.nameNe.includes(searchQuery);
     const matchesType = filterType === 'all' || p.type === filterType;
     return matchesSearch && matchesType;
   });
@@ -138,12 +143,12 @@ const PesticideCMSPage = () => {
 
   if (isEditing) {
     return (
-      <AdminLayout title="Add / Edit Pesticide" titleNe="कीटनाशक थप्नुहोस् / सम्पादन">
+      <>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Pill className="h-5 w-5 text-amber-600" />
-              {editingPesticide.id 
+              {editingPesticide.id
                 ? (language === 'ne' ? 'कीटनाशक सम्पादन' : 'Edit Pesticide')
                 : (language === 'ne' ? 'नयाँ कीटनाशक' : 'New Pesticide')
               }
@@ -157,7 +162,7 @@ const PesticideCMSPage = () => {
             <Alert className="mb-6 border-amber-200 bg-amber-50">
               <ShieldAlert className="h-5 w-5 text-amber-600" />
               <AlertDescription className="text-amber-800">
-                {language === 'ne' 
+                {language === 'ne'
                   ? 'चेतावनी: यहाँ थपिएका सबै कीटनाशकहरूले किसानहरूलाई देखाउँदा स्वचालित रूपमा "सल्लाह मात्र" अस्वीकरण बोक्नेछन्।'
                   : 'Warning: All pesticides added here will automatically carry the mandatory "Advisory Only" disclaimer when shown to farmers.'}
               </AlertDescription>
@@ -303,20 +308,20 @@ const PesticideCMSPage = () => {
             </form>
           </CardContent>
         </Card>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout title="Pesticides & Medicine" titleNe="कीटनाशक र औषधि">
+    <>
       <Card>
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <CardTitle className="flex items-center gap-2">
             <Pill className="h-5 w-5 text-amber-600" />
             {language === 'ne' ? 'कीटनाशक व्यवस्थापन' : 'Pesticide Management'}
           </CardTitle>
-          <Button 
-            onClick={() => { setIsEditing(true); setEditingPesticide({ type: 'FUNGICIDE', isOrganic: false }); }} 
+          <Button
+            onClick={() => { setIsEditing(true); setEditingPesticide({ type: 'FUNGICIDE', isOrganic: false }); }}
             className="gap-2 bg-amber-600 hover:bg-amber-700"
           >
             <Plus className="h-4 w-4" />
@@ -383,8 +388,8 @@ const PesticideCMSPage = () => {
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">
-                          {language === 'ne' 
-                            ? typeLabels[pesticide.type].ne 
+                          {language === 'ne'
+                            ? typeLabels[pesticide.type].ne
                             : typeLabels[pesticide.type].en}
                         </Badge>
                       </TableCell>
@@ -410,24 +415,24 @@ const PesticideCMSPage = () => {
                       </TableCell>
                       <TableCell>
                         <Badge variant={pesticide.status === 'ACTIVE' ? 'default' : 'secondary'}>
-                          {pesticide.status === 'ACTIVE' 
+                          {pesticide.status === 'ACTIVE'
                             ? (language === 'ne' ? 'सक्रिय' : 'Active')
                             : (language === 'ne' ? 'निष्क्रिय' : 'Inactive')}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8"
                             onClick={() => { setEditingPesticide(pesticide); setIsEditing(true); }}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8 text-destructive"
                             onClick={() => handleDelete(pesticide.id!)}
                           >
@@ -443,7 +448,7 @@ const PesticideCMSPage = () => {
           </div>
         </CardContent>
       </Card>
-    </AdminLayout>
+    </>
   );
 };
 

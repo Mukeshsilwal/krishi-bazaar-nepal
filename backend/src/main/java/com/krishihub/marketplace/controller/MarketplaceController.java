@@ -9,7 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,21 +26,19 @@ public class MarketplaceController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<ListingDto>> createListing(
-            Authentication authentication,
             @Valid @RequestBody CreateListingRequest request) {
-        String mobileNumber = authentication.getName();
-        ListingDto listing = marketplaceService.createListing(mobileNumber, request);
+        UUID userId = com.krishihub.common.context.UserContextHolder.getUserId();
+        ListingDto listing = marketplaceService.createListing(userId, request);
         return ResponseEntity.ok(ApiResponse.success("Listing created successfully", listing));
     }
 
     @PostMapping("/{id}/images")
     public ResponseEntity<ApiResponse<String>> uploadImage(
             @PathVariable UUID id,
-            Authentication authentication,
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "isPrimary", defaultValue = "false") boolean isPrimary) {
-        String mobileNumber = authentication.getName();
-        String imageUrl = marketplaceService.uploadListingImage(id, mobileNumber, file, isPrimary);
+        UUID userId = com.krishihub.common.context.UserContextHolder.getUserId();
+        String imageUrl = marketplaceService.uploadListingImage(id, userId, file, isPrimary);
         return ResponseEntity.ok(ApiResponse.success("Image uploaded successfully", imageUrl));
     }
 
@@ -66,30 +64,27 @@ public class MarketplaceController {
 
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<Page<ListingDto>>> getMyListings(
-            Authentication authentication,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        String mobileNumber = authentication.getName();
-        Page<ListingDto> listings = marketplaceService.getMyListings(mobileNumber, page, size);
+        UUID userId = com.krishihub.common.context.UserContextHolder.getUserId();
+        Page<ListingDto> listings = marketplaceService.getMyListings(userId, page, size);
         return ResponseEntity.ok(ApiResponse.success(listings));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ListingDto>> updateListing(
             @PathVariable UUID id,
-            Authentication authentication,
             @RequestBody UpdateListingRequest request) {
-        String mobileNumber = authentication.getName();
-        ListingDto listing = marketplaceService.updateListing(id, mobileNumber, request);
+        UUID userId = com.krishihub.common.context.UserContextHolder.getUserId();
+        ListingDto listing = marketplaceService.updateListing(id, userId, request);
         return ResponseEntity.ok(ApiResponse.success("Listing updated successfully", listing));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteListing(
-            @PathVariable UUID id,
-            Authentication authentication) {
-        String mobileNumber = authentication.getName();
-        marketplaceService.deleteListing(id, mobileNumber);
+            @PathVariable UUID id) {
+        UUID userId = com.krishihub.common.context.UserContextHolder.getUserId();
+        marketplaceService.deleteListing(id, userId);
         return ResponseEntity.ok(ApiResponse.success("Listing deleted successfully", null));
     }
 

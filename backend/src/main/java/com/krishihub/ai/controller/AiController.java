@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
+import com.krishihub.common.context.UserContextHolder;
 
 @RestController
 @RequestMapping("/api/ai")
@@ -17,10 +18,11 @@ public class AiController {
 
     @PostMapping("/recommendation")
     public ResponseEntity<AiRecommendation> getRecommendation(@RequestBody RecommendationRequest request) {
+        UUID farmerId = UserContextHolder.getUserId();
         return ResponseEntity.ok(
-                aiService.maximizeCropYield(request.farmerId(), request.query(), request.imageUrl())
-        );
+                aiService.maximizeCropYield(farmerId, request.query(), request.imageUrl()));
     }
 
-    public record RecommendationRequest(UUID farmerId, String query, String imageUrl) {}
+    public record RecommendationRequest(String query, String imageUrl) {
+    }
 }

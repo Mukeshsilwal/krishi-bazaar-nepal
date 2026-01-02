@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Random;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -246,15 +247,15 @@ public class AuthService {
                 .build();
     }
 
-    public UserDto getCurrentUser(String mobileNumber) {
-        User user = userRepository.findByMobileNumber(mobileNumber)
+    public UserDto getCurrentUser(UUID userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return UserDto.fromEntity(user);
     }
 
     @Transactional
-    public UserDto updateProfile(String mobileNumber, UpdateProfileRequest request) {
-        User user = userRepository.findByMobileNumber(mobileNumber)
+    public UserDto updateProfile(UUID userId, UpdateProfileRequest request) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (request.getName() != null) {
@@ -274,7 +275,7 @@ public class AuthService {
         }
 
         userRepository.save(user);
-        log.info("Profile updated: {}", mobileNumber);
+        log.info("Profile updated: {}", userId);
 
         return UserDto.fromEntity(user);
     }

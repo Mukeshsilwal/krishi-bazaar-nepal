@@ -30,6 +30,11 @@ public class DiseaseServiceImpl implements DiseaseService {
     }
 
     @Override
+    public List<Pesticide> getAllPesticides() {
+        return pesticideRepository.findAll();
+    }
+
+    @Override
     public void linkPesticideToDisease(UUID diseaseId, UUID pesticideId, String dosage, Integer interval,
             Boolean isPrimary) {
         Disease disease = diseaseRepository.findById(diseaseId).orElseThrow();
@@ -82,7 +87,7 @@ public class DiseaseServiceImpl implements DiseaseService {
         return DiseaseDiagnosisResponse.builder()
                 .diseaseName(disease.getNameEn())
                 .riskLevel(disease.getRiskLevel())
-                .symptoms(disease.getSymptomsEn())
+                .symptoms(disease.getDescriptionEn()) // Mapped to new description field
                 .treatments(treatments)
                 .safetyDisclaimer(SAFETY_DISCLAIMER_EN) // MANDATORY FIELD
                 .build();

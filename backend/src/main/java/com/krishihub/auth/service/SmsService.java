@@ -71,8 +71,25 @@ public class SmsService {
                 return;
             }
 
-            // TODO: Implement actual SMS sending
-            log.info("Notification sent to {}: {}", mobileNumber, message);
+            // Implement actual SMS gateway integration
+            WebClient webClient = webClientBuilder.baseUrl(smsApiUrl).build();
+
+            // Example for common Nepal SMS gateways (Sparrow/Aakash) usually GET or POST
+            // Adapting to generic GET request based on example
+            webClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .queryParam("token", smsApiKey)
+                            .queryParam("from", senderId)
+                            .queryParam("to", mobileNumber)
+                            .queryParam("text", message)
+                            .build())
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .subscribe(
+                            response -> log.info("SMS API Response for {}: {}", mobileNumber, response),
+                            error -> log.error("Failed to call SMS API for {}: {}", mobileNumber, error.getMessage()));
+
+            log.info("SMS request initiated for {}", mobileNumber);
         } catch (Exception e) {
             log.error("Error sending notification: {}", e.getMessage());
         }

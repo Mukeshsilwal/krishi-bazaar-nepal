@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../../context/LanguageContext';
 import knowledgeService, { Article } from '../services/knowledgeService';
-import Navbar from '../../../components/Navbar';
-import Footer from '../../../components/Footer';
 import { ArrowLeft, Calendar, Tag, User } from 'lucide-react';
 
 const ArticleDetailPage = () => {
@@ -36,8 +34,7 @@ const ArticleDetailPage = () => {
     const category = language === 'ne' ? article.category.nameNe : article.category.nameEn;
 
     return (
-        <div className="min-h-screen bg-white">
-            <Navbar />
+        <div className="bg-white min-h-full">
             <main className="max-w-4xl mx-auto px-4 py-8">
                 <button
                     onClick={() => navigate('/knowledge')}
@@ -92,7 +89,6 @@ const ArticleDetailPage = () => {
                     )}
                 </article>
             </main>
-            <Footer />
         </div>
     );
 };

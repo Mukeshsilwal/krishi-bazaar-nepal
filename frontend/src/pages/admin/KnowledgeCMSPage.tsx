@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
+import { useAdminTitle } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -45,16 +45,25 @@ import { toast } from 'sonner';
 
 const KnowledgeCMSPage = () => {
   const { language } = useLanguage();
+  const { setTitle } = useAdminTitle();
   const [articles, setArticles] = useState<Article[]>([]);
   const [categories, setCategories] = useState<KnowledgeCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Partial<Article>>({});
-  
+
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+
+  useEffect(() => {
+    if (isEditing) {
+      setTitle('Create / Edit Content', 'सामग्री सिर्जना / सम्पादन');
+    } else {
+      setTitle('Knowledge Content', 'ज्ञान सामग्री');
+    }
+  }, [isEditing, setTitle]);
 
   useEffect(() => {
     loadData();
@@ -63,7 +72,7 @@ const KnowledgeCMSPage = () => {
   const loadData = async () => {
     try {
       const [arts, cats] = await Promise.all([
-        knowledgeService.getArticles(),
+        knowledgeService.getArticles(undefined, undefined, 'ALL'),
         knowledgeService.getCategories()
       ]);
       setArticles(arts);
@@ -107,7 +116,7 @@ const KnowledgeCMSPage = () => {
 
   const filteredArticles = articles.filter(article => {
     const matchesSearch = article.titleEn?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         article.titleNe?.toLowerCase().includes(searchQuery.toLowerCase());
+      article.titleNe?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = filterCategory === 'all' || article.category?.id === filterCategory;
     const matchesStatus = filterStatus === 'all' || article.status === filterStatus;
     return matchesSearch && matchesCategory && matchesStatus;
@@ -115,12 +124,12 @@ const KnowledgeCMSPage = () => {
 
   if (isEditing) {
     return (
-      <AdminLayout title="Create / Edit Content" titleNe="सामग्री सिर्जना / सम्पादन">
+      <>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-primary" />
-              {editingArticle.id 
+              {editingArticle.id
                 ? (language === 'ne' ? 'लेख सम्पादन' : 'Edit Article')
                 : (language === 'ne' ? 'नयाँ लेख' : 'New Article')
               }
@@ -138,7 +147,7 @@ const KnowledgeCMSPage = () => {
                   <h3 className="font-semibold text-lg border-b pb-2">
                     {language === 'ne' ? 'मेटाडाटा' : 'Metadata'}
                   </h3>
-                  
+
                   <div>
                     <label className="block text-sm font-medium mb-2">
                       {language === 'ne' ? 'वर्ग' : 'Category'} *
@@ -188,9 +197,9 @@ const KnowledgeCMSPage = () => {
                     </label>
                     <Input
                       value={editingArticle.tags?.join(', ') || ''}
-                      onChange={e => setEditingArticle({ 
-                        ...editingArticle, 
-                        tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) 
+                      onChange={e => setEditingArticle({
+                        ...editingArticle,
+                        tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean)
                       })}
                       placeholder={language === 'ne' ? 'धान, खेती, जैविक' : 'rice, farming, organic'}
                     />
@@ -211,9 +220,9 @@ const KnowledgeCMSPage = () => {
                       </Button>
                     </div>
                     {editingArticle.coverImageUrl && (
-                      <img 
-                        src={editingArticle.coverImageUrl} 
-                        alt="Cover" 
+                      <img
+                        src={editingArticle.coverImageUrl}
+                        alt="Cover"
                         className="mt-2 h-32 object-cover rounded-lg"
                       />
                     )}
@@ -280,8 +289,8 @@ const KnowledgeCMSPage = () => {
                 <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
                   {language === 'ne' ? 'रद्द गर्नुहोस्' : 'Cancel'}
                 </Button>
-                <Button 
-                  type="button" 
+                <Button
+                  type="button"
                   variant="secondary"
                   onClick={() => setEditingArticle({ ...editingArticle, status: 'DRAFT' as any })}
                 >
@@ -295,12 +304,12 @@ const KnowledgeCMSPage = () => {
             </form>
           </CardContent>
         </Card>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout title="Knowledge Content" titleNe="ज्ञान सामग्री">
+    <>
       <Card>
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <CardTitle className="flex items-center gap-2">
@@ -392,15 +401,15 @@ const KnowledgeCMSPage = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge 
+                        <Badge
                           variant={
                             article.status === 'PUBLISHED' ? 'default' :
-                            article.status === 'REVIEW' ? 'secondary' : 'outline'
+                              article.status === 'REVIEW' ? 'secondary' : 'outline'
                           }
                         >
                           {article.status === 'PUBLISHED' ? (language === 'ne' ? 'प्रकाशित' : 'Published') :
-                           article.status === 'REVIEW' ? (language === 'ne' ? 'समीक्षा' : 'Review') :
-                           (language === 'ne' ? 'ड्राफ्ट' : 'Draft')}
+                            article.status === 'REVIEW' ? (language === 'ne' ? 'समीक्षा' : 'Review') :
+                              (language === 'ne' ? 'ड्राफ्ट' : 'Draft')}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
@@ -411,17 +420,17 @@ const KnowledgeCMSPage = () => {
                           <Button variant="ghost" size="icon" className="h-8 w-8">
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8"
                             onClick={() => { setEditingArticle(article); setIsEditing(true); }}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8 text-destructive"
                             onClick={() => handleDelete(article.id)}
                           >
@@ -437,7 +446,7 @@ const KnowledgeCMSPage = () => {
           </div>
         </CardContent>
       </Card>
-    </AdminLayout>
+    </>
   );
 };
 

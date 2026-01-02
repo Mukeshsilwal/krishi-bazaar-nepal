@@ -1,6 +1,7 @@
 package com.krishihub.admin.service;
 
 import com.krishihub.admin.dto.CreateRoleRequest;
+import com.krishihub.admin.dto.PermissionDto;
 import com.krishihub.admin.dto.RoleDto;
 import com.krishihub.auth.entity.Permission;
 import com.krishihub.auth.entity.Role;
@@ -63,6 +64,17 @@ public class AdminRoleService {
     public List<RoleDto> getAllRoles() {
         return roleRepository.findAll().stream()
                 .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<PermissionDto> getAllPermissions() {
+        return permissionRepository.findAll().stream()
+                .map(permission -> PermissionDto.builder()
+                        .id(permission.getId())
+                        .name(permission.getName())
+                        .module(permission.getModule())
+                        .description(permission.getDescription())
+                        .build())
                 .collect(Collectors.toList());
     }
 

@@ -1,6 +1,7 @@
 package com.krishihub.admin.controller;
 
 import com.krishihub.admin.dto.CreateRoleRequest;
+import com.krishihub.admin.dto.PermissionDto;
 import com.krishihub.admin.dto.RoleDto;
 import com.krishihub.admin.service.AdminRoleService;
 import com.krishihub.shared.dto.ApiResponse;
@@ -34,6 +35,12 @@ public class AdminRbacController {
     public ResponseEntity<ApiResponse<List<RoleDto>>> getAllRoles() {
         List<RoleDto> roles = adminRoleService.getAllRoles();
         return ResponseEntity.ok(ApiResponse.success("Roles fetched successfully", roles));
+    }
+
+    @GetMapping("/permissions")
+    public ResponseEntity<ApiResponse<List<PermissionDto>>> getAllPermissions() {
+        List<PermissionDto> permissions = adminRoleService.getAllPermissions();
+        return ResponseEntity.ok(ApiResponse.success("Permissions fetched successfully", permissions));
     }
 
     @PostMapping("/users/{userId}/roles/{roleId}")

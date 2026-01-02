@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
+import React, { useState, useEffect, useCallback } from 'react';
+import InfiniteScroll from '@/components/common/InfiniteScroll';
+import { useAdminTitle } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -26,231 +28,280 @@ import {
   Users,
   CloudSun,
   Bug,
-  Brain,
-  BarChart3
+  Leaf,
+  FileText,
+  Filter,
+  Download,
+  Loader2
 } from 'lucide-react';
+import advisoryLogService, { AdvisoryLogResponse, AdvisoryLogFilter } from '@/services/advisoryLogService';
+import AdvisoryLogDetailDrawer from '@/components/admin/AdvisoryLogDetailDrawer';
 
 const AdvisoryLogsPage = () => {
   const { language } = useLanguage();
-  const [filterType, setFilterType] = useState('all');
+  const { setTitle } = useAdminTitle();
 
-  const stats = [
-    {
-      titleEn: 'Most Viewed Advisories',
-      titleNe: 'सबैभन्दा धेरै हेरिएको सल्लाह',
-      value: '2,450',
-      icon: Eye,
-      color: 'bg-blue-500'
-    },
-    {
-      titleEn: 'High-Risk Alerts Sent',
-      titleNe: 'पठाइएको उच्च जोखिम सूचना',
-      value: '128',
-      icon: AlertTriangle,
-      color: 'bg-red-500'
-    },
-    {
-      titleEn: 'Farmer Engagement Rate',
-      titleNe: 'किसान संलग्नता दर',
-      value: '78%',
-      icon: Users,
-      color: 'bg-emerald-500'
-    },
-    {
-      titleEn: 'Actions Taken',
-      titleNe: 'लिइएका कार्यहरू',
-      value: '1,892',
-      icon: TrendingUp,
-      color: 'bg-purple-500'
-    },
-  ];
+  const [logs, setLogs] = useState<AdvisoryLogResponse[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [nextCursor, setNextCursor] = useState<string | undefined>();
+  const [selectedLog, setSelectedLog] = useState<string | null>(null);
 
-  const logs = [
-    {
-      id: '1',
-      advisoryName: 'Rice Blast Prevention Guide',
-      advisoryNameNe: 'धान झुल्सा रोकथाम गाइड',
-      triggerType: 'WEATHER',
-      region: 'Chitwan',
-      views: 456,
-      actionsTaken: 89,
-      timestamp: '2024-01-15T10:30:00'
-    },
-    {
-      id: '2',
-      advisoryName: 'Tomato Disease Alert',
-      advisoryNameNe: 'गोलभेडा रोग सूचना',
-      triggerType: 'AI',
-      region: 'Kavre',
-      views: 312,
-      actionsTaken: 67,
-      timestamp: '2024-01-15T09:15:00'
-    },
-    {
-      id: '3',
-      advisoryName: 'Wheat Planting Advisory',
-      advisoryNameNe: 'गहुँ रोपण सल्लाह',
-      triggerType: 'CROP',
-      region: 'Bhaktapur',
-      views: 289,
-      actionsTaken: 45,
-      timestamp: '2024-01-14T16:45:00'
-    },
-    {
-      id: '4',
-      advisoryName: 'Heavy Rain Warning',
-      advisoryNameNe: 'भारी वर्षा चेतावनी',
-      triggerType: 'WEATHER',
-      region: 'Terai',
-      views: 678,
-      actionsTaken: 234,
-      timestamp: '2024-01-14T14:20:00'
-    },
-    {
-      id: '5',
-      advisoryName: 'Pest Control Recommendation',
-      advisoryNameNe: 'कीट नियन्त्रण सिफारिस',
-      triggerType: 'AI',
-      region: 'Pokhara',
-      views: 198,
-      actionsTaken: 56,
-      timestamp: '2024-01-13T11:00:00'
-    },
-  ];
+  // Filters
+  const [filterType, setFilterType] = useState<string>('all');
+  const [filterSeverity, setFilterSeverity] = useState<string>('all');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterDistrict, setFilterDistrict] = useState<string>('all');
 
-  const triggerLabels: Record<string, { en: string; ne: string; icon: React.ElementType; color: string }> = {
-    WEATHER: { en: 'Weather', ne: 'मौसम', icon: CloudSun, color: 'bg-blue-100 text-blue-700' },
-    CROP: { en: 'Crop', ne: 'बाली', icon: Bug, color: 'bg-emerald-100 text-emerald-700' },
-    AI: { en: 'AI', ne: 'AI', icon: Brain, color: 'bg-purple-100 text-purple-700' }
+  useEffect(() => {
+    setTitle('Advisory Logs', 'सल्लाह लग');
+  }, [setTitle]);
+
+  const fetchLogs = useCallback(async (cursor?: string, append = false) => {
+    setLoading(true);
+    try {
+      const filter: AdvisoryLogFilter = {
+        limit: 20,
+        cursor
+      };
+
+      if (filterType !== 'all') filter.advisoryType = filterType;
+      if (filterSeverity !== 'all') filter.severity = filterSeverity;
+      if (filterStatus !== 'all') filter.deliveryStatus = filterStatus;
+      if (filterDistrict !== 'all') filter.district = filterDistrict;
+
+      const response = await advisoryLogService.getAdvisoryLogs(filter);
+
+      if (append) {
+        setLogs(prev => [...prev, ...response.data]);
+      } else {
+        setLogs(response.data);
+      }
+
+      setHasMore(response.hasMore);
+      setNextCursor(response.nextCursor);
+    } catch (error) {
+      console.error('Failed to fetch advisory logs:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [filterType, filterSeverity, filterStatus, filterDistrict]);
+
+  useEffect(() => {
+    fetchLogs();
+  }, [fetchLogs]);
+
+  const loadMore = () => {
+    if (nextCursor && !loading) {
+      fetchLogs(nextCursor, true);
+    }
   };
 
-  const filteredLogs = logs.filter(log => 
-    filterType === 'all' || log.triggerType === filterType
-  );
+  const advisoryTypeLabels: Record<string, { en: string; ne: string; icon: React.ElementType; color: string }> = {
+    WEATHER: { en: 'Weather', ne: 'मौसम', icon: CloudSun, color: 'bg-blue-100 text-blue-700' },
+    DISEASE: { en: 'Disease', ne: 'रोग', icon: Bug, color: 'bg-red-100 text-red-700' },
+    PEST: { en: 'Pest', ne: 'कीट', icon: Bug, color: 'bg-orange-100 text-orange-700' },
+    POLICY: { en: 'Policy', ne: 'नीति', icon: FileText, color: 'bg-purple-100 text-purple-700' }
+  };
+
+  const severityLabels: Record<string, { en: string; ne: string; color: string }> = {
+    INFO: { en: 'Info', ne: 'जानकारी', color: 'bg-gray-100 text-gray-700' },
+    WATCH: { en: 'Watch', ne: 'निगरानी', color: 'bg-yellow-100 text-yellow-700' },
+    WARNING: { en: 'Warning', ne: 'चेतावनी', color: 'bg-orange-100 text-orange-700' },
+    EMERGENCY: { en: 'Emergency', ne: 'आपतकालीन', color: 'bg-red-100 text-red-700' }
+  };
+
+  const statusLabels: Record<string, { en: string; ne: string; color: string }> = {
+    CREATED: { en: 'Created', ne: 'सिर्जना', color: 'bg-gray-100 text-gray-700' },
+    DISPATCHED: { en: 'Dispatched', ne: 'पठाइएको', color: 'bg-blue-100 text-blue-700' },
+    DELIVERED: { en: 'Delivered', ne: 'डेलिभर', color: 'bg-green-100 text-green-700' },
+    OPENED: { en: 'Opened', ne: 'खोलिएको', color: 'bg-emerald-100 text-emerald-700' },
+    FEEDBACK_RECEIVED: { en: 'Feedback', ne: 'प्रतिक्रिया', color: 'bg-purple-100 text-purple-700' },
+    DELIVERY_FAILED: { en: 'Failed', ne: 'असफल', color: 'bg-red-100 text-red-700' },
+    DEDUPED: { en: 'Deduped', ne: 'डुप्लिकेट', color: 'bg-gray-100 text-gray-700' }
+  };
 
   return (
-    <AdminLayout title="Advisory Logs & Analytics" titleNe="सल्लाह लग र विश्लेषण">
+    <>
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={index}>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      {language === 'ne' ? stat.titleNe : stat.titleEn}
-                    </p>
-                    <p className="text-3xl font-bold text-foreground">{stat.value}</p>
-                  </div>
-                  <div className={`${stat.color} p-3 rounded-xl`}>
-                    <Icon className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">
+                  {language === 'ne' ? 'कुल सल्लाहहरू' : 'Total Advisories'}
+                </p>
+                <p className="text-3xl font-bold text-foreground">{logs.length}</p>
+              </div>
+              <div className="bg-blue-500 p-3 rounded-xl">
+                <ClipboardList className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Logs Table */}
+      {/* Filters and Table */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="flex items-center gap-2">
             <ClipboardList className="h-5 w-5 text-primary" />
             {language === 'ne' ? 'सल्लाह लगहरू' : 'Advisory Logs'}
           </CardTitle>
-          <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder={language === 'ne' ? 'ट्रिगर प्रकार' : 'Trigger Type'} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{language === 'ne' ? 'सबै प्रकार' : 'All Types'}</SelectItem>
-              {Object.entries(triggerLabels).map(([key, label]) => (
-                <SelectItem key={key} value={key}>
-                  {language === 'ne' ? label.ne : label.en}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              {language === 'ne' ? 'निर्यात' : 'Export'}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="rounded-lg border overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead>{language === 'ne' ? 'सल्लाह नाम' : 'Advisory Name'}</TableHead>
-                  <TableHead>{language === 'ne' ? 'ट्रिगर प्रकार' : 'Trigger Type'}</TableHead>
-                  <TableHead>{language === 'ne' ? 'क्षेत्र' : 'Region'}</TableHead>
-                  <TableHead className="text-center">{language === 'ne' ? 'हेरिएको' : 'Views'}</TableHead>
-                  <TableHead className="text-center">{language === 'ne' ? 'कार्यहरू' : 'Actions'}</TableHead>
-                  <TableHead>{language === 'ne' ? 'मिति' : 'Date'}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredLogs.map(log => {
-                  const trigger = triggerLabels[log.triggerType];
-                  const TriggerIcon = trigger.icon;
-                  return (
-                    <TableRow key={log.id} className="hover:bg-muted/50">
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">
-                            {language === 'ne' ? log.advisoryNameNe : log.advisoryName}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={`${trigger.color} gap-1`}>
-                          <TriggerIcon className="h-3 w-3" />
-                          {language === 'ne' ? trigger.ne : trigger.en}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm">{log.region}</span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <Eye className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{log.views.toLocaleString()}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <TrendingUp className="h-4 w-4 text-emerald-500" />
-                          <span className="font-medium">{log.actionsTaken}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {new Date(log.timestamp).toLocaleDateString()}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+          {/* Filters */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            {/* ... (existing filters code) ... */}
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger>
+                <SelectValue placeholder={language === 'ne' ? 'प्रकार' : 'Type'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{language === 'ne' ? 'सबै प्रकार' : 'All Types'}</SelectItem>
+                {Object.entries(advisoryTypeLabels).map(([key, label]) => (
+                  <SelectItem key={key} value={key}>
+                    {language === 'ne' ? label.ne : label.en}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={filterSeverity} onValueChange={setFilterSeverity}>
+              <SelectTrigger>
+                <SelectValue placeholder={language === 'ne' ? 'गम्भीरता' : 'Severity'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{language === 'ne' ? 'सबै स्तर' : 'All Levels'}</SelectItem>
+                {Object.entries(severityLabels).map(([key, label]) => (
+                  <SelectItem key={key} value={key}>
+                    {language === 'ne' ? label.ne : label.en}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger>
+                <SelectValue placeholder={language === 'ne' ? 'स्थिति' : 'Status'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{language === 'ne' ? 'सबै स्थिति' : 'All Status'}</SelectItem>
+                {Object.entries(statusLabels).map(([key, label]) => (
+                  <SelectItem key={key} value={key}>
+                    {language === 'ne' ? label.ne : label.en}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={filterDistrict} onValueChange={setFilterDistrict}>
+              <SelectTrigger>
+                <SelectValue placeholder={language === 'ne' ? 'जिल्ला' : 'District'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{language === 'ne' ? 'सबै जिल्ला' : 'All Districts'}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+
+          <InfiniteScroll
+            isLoading={loading}
+            hasMore={hasMore}
+            onLoadMore={loadMore}
+            loader={<div className="p-4 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" /></div>}
+            endMessage={
+              logs.length > 0 ? (
+                <div className="text-center py-4 text-muted-foreground text-sm">
+                  {language === 'ne' ? 'सबै लगहरू देखाइयो' : 'All logs loaded'}
+                </div>
+              ) : null
+            }
+          >
+            <div className="rounded-lg border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead>{language === 'ne' ? 'किसान' : 'Farmer'}</TableHead>
+                    <TableHead>{language === 'ne' ? 'प्रकार' : 'Type'}</TableHead>
+                    <TableHead>{language === 'ne' ? 'गम्भीरता' : 'Severity'}</TableHead>
+                    <TableHead>{language === 'ne' ? 'नियम' : 'Rule'}</TableHead>
+                    <TableHead>{language === 'ne' ? 'स्थिति' : 'Status'}</TableHead>
+                    <TableHead>{language === 'ne' ? 'मिति' : 'Date'}</TableHead>
+                    <TableHead className="text-right">{language === 'ne' ? 'कार्य' : 'Actions'}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {logs.map(log => {
+                    const typeInfo = advisoryTypeLabels[log.advisoryType] || advisoryTypeLabels.WEATHER;
+                    const severityInfo = severityLabels[log.severity] || severityLabels.INFO;
+                    const statusInfo = statusLabels[log.deliveryStatus] || statusLabels.CREATED;
+                    const TypeIcon = typeInfo.icon;
+
+                    return (
+                      <TableRow key={log.id} className="hover:bg-muted/50 cursor-pointer" onClick={() => setSelectedLog(log.id)}>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">{log.farmerName || 'Unknown'}</p>
+                            <p className="text-sm text-muted-foreground">{log.district}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={`${typeInfo.color} gap-1`}>
+                            <TypeIcon className="h-3 w-3" />
+                            {language === 'ne' ? typeInfo.ne : typeInfo.en}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={severityInfo.color}>
+                            {language === 'ne' ? severityInfo.ne : severityInfo.en}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-sm">{log.ruleName || '-'}</span>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={statusInfo.color}>
+                            {language === 'ne' ? statusInfo.ne : statusInfo.en}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {new Date(log.createdAt).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="sm" onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedLog(log.id);
+                          }}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </InfiniteScroll>
         </CardContent>
       </Card>
 
-      {/* Engagement Chart Placeholder */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-primary" />
-            {language === 'ne' ? 'साप्ताहिक संलग्नता' : 'Weekly Engagement'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-64 flex items-center justify-center bg-muted/30 rounded-lg">
-            <p className="text-muted-foreground">
-              {language === 'ne' ? 'चार्ट यहाँ देखाइनेछ' : 'Chart will be displayed here'}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    </AdminLayout>
+      {/* Detail Drawer */}
+      {selectedLog && (
+        <AdvisoryLogDetailDrawer
+          logId={selectedLog}
+          open={!!selectedLog}
+          onClose={() => setSelectedLog(null)}
+        />
+      )}
+    </>
   );
 };
 

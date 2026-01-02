@@ -21,8 +21,15 @@ public class AdminUserController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<List<User>>> getAllUsers() {
-        return ResponseEntity.ok(ApiResponse.success("Users fetched", adminUserService.getAllUsers()));
+    public ResponseEntity<ApiResponse<org.springframework.data.domain.Page<User>>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) Boolean status) {
+        return ResponseEntity.ok(ApiResponse.success("Users fetched",
+                adminUserService.getAllUsers(search, role, status,
+                        org.springframework.data.domain.PageRequest.of(page, size))));
     }
 
     @PatchMapping("/{id}/status")

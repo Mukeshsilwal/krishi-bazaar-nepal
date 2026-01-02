@@ -13,8 +13,6 @@ import {
 import marketPriceService from '../services/marketPriceService';
 import { TrendingUp, TrendingDown, Minus, Calculator, Bell } from 'lucide-react';
 import PriceAlerts from '../../../components/PriceAlerts';
-import Navbar from '../../../components/Navbar';
-import Footer from '../../../components/Footer';
 
 ChartJS.register(
     CategoryScale,
@@ -84,8 +82,7 @@ const MarketPriceDashboard = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <Navbar />
+        <div className="bg-gray-50 min-h-full">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900">Market Intelligence</h1>
@@ -168,7 +165,6 @@ const MarketPriceDashboard = () => {
                     </div>
                 </div>
             </div>
-            <Footer />
         </div>
     );
 };

@@ -34,4 +34,13 @@ public interface CropListingRepository extends JpaRepository<CropListing, UUID>,
 
     @Query("SELECT DISTINCT cl.cropName FROM CropListing cl WHERE cl.status = 'ACTIVE' ORDER BY cl.cropName")
     List<String> findDistinctCropNames();
+
+    @Query("SELECT DISTINCT cl.cropName FROM CropListing cl WHERE cl.farmer.id = :farmerId AND cl.status = 'ACTIVE'")
+    List<String> findDistinctCropNamesByFarmerId(@Param("farmerId") UUID farmerId);
+
+    /**
+     * Find crop listings by crop name (case-insensitive) for weather advisory
+     * targeting
+     */
+    List<CropListing> findByCropNameIgnoreCase(String cropName);
 }

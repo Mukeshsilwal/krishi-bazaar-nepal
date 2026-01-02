@@ -48,9 +48,27 @@ public class Article {
     private String coverImageUrl;
     private UUID authorId;
 
+    // Attribution Fields
+    private String sourceName;
+    private String sourceUrl;
+    private String licenseType;
+    private String originalAuthor;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public ArticleStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ArticleStatus status) {
+        this.status = status;
+    }
 }

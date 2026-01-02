@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import aiService from '../services/aiService';
 import { useAuth } from '../modules/auth/context/AuthContext';
 import { Bot, Send, Image as ImageIcon, Loader2 } from 'lucide-react';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 
 // AI Assistant Component
 const AiAssistant = () => {
@@ -46,7 +44,7 @@ const AiAssistant = () => {
                 // TODO: Upload image to Cloudinary/Backend first
                 // For now, we will just send a placeholder or skip if not implemented
                 // await imageService.upload(currentImage)...
-                console.log("Image upload not yet fully implemented, skipping actual upload");
+                // console.log("Image upload not yet fully implemented, skipping actual upload");
             }
 
             const response = await aiService.getRecommendation(userMsg, user?.id, imageUrl);
@@ -66,8 +64,7 @@ const AiAssistant = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-            <Navbar />
+        <div className="bg-gray-50 flex flex-col h-full">
             <div className="flex-1 p-8">
                 <div className="max-w-2xl mx-auto border rounded-lg shadow-lg bg-white h-[600px] flex flex-col">
                     <div className="bg-green-600 text-white p-4 rounded-t-lg flex items-center gap-2">
@@ -137,7 +134,6 @@ const AiAssistant = () => {
                     </form>
                 </div>
             </div>
-            <Footer />
         </div>
     );
 };

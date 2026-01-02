@@ -44,11 +44,14 @@ interface FarmerProfile {
     recentOrders: any[];
 }
 
+import { useDebounce } from '@/hooks/useDebounce';
+
 const FarmerManager = () => {
     const [farmers, setFarmers] = useState<Farmer[]>([]);
     const [selectedFarmer, setSelectedFarmer] = useState<FarmerProfile | null>(null);
     const [open, setOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const debouncedSearchTerm = useDebounce(searchTerm, 300);
     const [filterStatus, setFilterStatus] = useState<'ALL' | 'VERIFIED' | 'UNVERIFIED'>('ALL');
 
     // Verification State
@@ -149,9 +152,9 @@ const FarmerManager = () => {
 
     // Filter Logic
     const filteredFarmers = farmers.filter(f => {
-        const matchesSearch = f.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            f.mobileNumber.includes(searchTerm) ||
-            f.district.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = f.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+            f.mobileNumber.includes(debouncedSearchTerm) ||
+            f.district.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
 
         const matchesStatus = filterStatus === 'ALL'
             ? true

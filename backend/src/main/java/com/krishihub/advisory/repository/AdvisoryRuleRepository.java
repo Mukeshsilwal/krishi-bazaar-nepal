@@ -10,4 +10,7 @@ import java.util.UUID;
 @Repository
 public interface AdvisoryRuleRepository extends JpaRepository<AdvisoryRule, UUID> {
     List<AdvisoryRule> findByStatus(String status);
+
+    @org.springframework.cache.annotation.Cacheable("activeRules")
+    List<AdvisoryRule> findByIsActiveTrueAndStatus(String status);
 }

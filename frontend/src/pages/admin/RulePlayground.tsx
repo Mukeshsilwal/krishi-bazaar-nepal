@@ -10,6 +10,8 @@ import api from '@/services/api';
 const RulePlayground = () => {
     const [conditions, setConditions] = useState('{\n  "crop": "RICE",\n  "stage": "SOWING"\n}');
     const [mockData, setMockData] = useState('{\n  "crop": "RICE",\n  "stage": "SOWING",\n  "soilType": "CLAY"\n}');
+    const [userId, setUserId] = useState('');
+    const [simulationMode, setSimulationMode] = useState<'mock' | 'user'>('mock');
     const [result, setResult] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -17,21 +19,33 @@ const RulePlayground = () => {
         try {
             setError(null);
             const parsedConditions = JSON.parse(conditions);
-            const parsedData = JSON.parse(mockData);
 
-            setResult({
-                triggered: true,
-                matchReason: "Matched all conditions",
-                outcome: { advice: "Use Nitrogen fertilizer" }
-            });
-            // const response = await api.post('/admin/rules/simulate', {
-            //     ruleConditions: parsedConditions,
-            //     mockFarmerData: parsedData
-            // });
+            const payload: any = {
+                // Auto-detect definition vs simple map
+                definition: (parsedConditions.conditions && Array.isArray(parsedConditions.conditions)) ? parsedConditions : undefined,
+                ruleConditions: (!parsedConditions.conditions) ? parsedConditions : undefined
+            };
 
-            // if (response.data.success) {
-            //     setResult(response.data.data);
-            // }
+            if (simulationMode === 'mock') {
+                try {
+                    payload.mockFarmerData = JSON.parse(mockData);
+                } catch (e) {
+                    setError('Invalid JSON in Mock Data');
+                    return;
+                }
+            } else {
+                if (!userId) {
+                    setError('User ID is required for Real User simulation');
+                    return;
+                }
+                payload.userId = userId;
+            }
+
+            const response = await api.post('/admin/rules/simulate', payload);
+
+            if (response.data.success) {
+                setResult(response.data.data);
+            }
         } catch (err) {
             setError('Simulation failed. Check JSON format or API connection.');
             console.error(err);
@@ -62,15 +76,58 @@ const RulePlayground = () => {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Mock Farmer Data (JSON)</CardTitle>
-                        <CardDescription>Simulate incoming farmer context</CardDescription>
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <CardTitle>Context Data</CardTitle>
+                                <CardDescription>Choose data source for simulation</CardDescription>
+                            </div>
+                            <div className="flex bg-gray-100 p-1 rounded-md">
+                                <button
+                                    onClick={() => setSimulationMode('mock')}
+                                    className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${simulationMode === 'mock'
+                                            ? 'bg-white shadow text-primary'
+                                            : 'text-gray-500 hover:text-gray-900'
+                                        }`}
+                                >
+                                    Mock JSON
+                                </button>
+                                <button
+                                    onClick={() => setSimulationMode('user')}
+                                    className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${simulationMode === 'user'
+                                            ? 'bg-white shadow text-primary'
+                                            : 'text-gray-500 hover:text-gray-900'
+                                        }`}
+                                >
+                                    Real User
+                                </button>
+                            </div>
+                        </div>
                     </CardHeader>
                     <CardContent>
-                        <Textarea
-                            className="font-mono h-[300px]"
-                            value={mockData}
-                            onChange={(e) => setMockData(e.target.value)}
-                        />
+                        {simulationMode === 'mock' ? (
+                            <Textarea
+                                className="font-mono h-[300px]"
+                                value={mockData}
+                                onChange={(e) => setMockData(e.target.value)}
+                                placeholder='{"crop": "RICE", "stage": "SOWING"}'
+                            />
+                        ) : (
+                            <div className="h-[300px] space-y-4">
+                                <div>
+                                    <label className="text-sm font-medium mb-1 block">User UUID</label>
+                                    <input
+                                        type="text"
+                                        className="w-full p-2 border rounded font-mono text-sm bg-background"
+                                        value={userId}
+                                        onChange={(e) => setUserId(e.target.value)}
+                                        placeholder="e.g. 550e8400-e29b-41d4-a716-446655440000"
+                                    />
+                                    <p className="text-xs text-muted-foreground mt-2">
+                                        Enter a valid User ID from the database. The system will fetch their profile (District, Land Size, Role, Verification Status) and run the rules against it.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             </div>

@@ -24,14 +24,23 @@ public class Disease {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false)
     private String nameEn;
     private String nameNe;
 
     @Column(columnDefinition = "TEXT")
-    private String symptomsEn;
+    private String descriptionEn;
 
     @Column(columnDefinition = "TEXT")
-    private String symptomsNe;
+    private String descriptionNe;
+
+    @ManyToMany
+    @JoinTable(name = "disease_symptoms", joinColumns = @JoinColumn(name = "disease_id"), inverseJoinColumns = @JoinColumn(name = "symptom_id"))
+    private List<Symptom> symptoms;
+
+    @ManyToMany
+    @JoinTable(name = "disease_treatments", joinColumns = @JoinColumn(name = "disease_id"), inverseJoinColumns = @JoinColumn(name = "treatment_id"))
+    private List<Treatment> treatments;
 
     @Enumerated(EnumType.STRING)
     private RiskLevel riskLevel;
@@ -41,7 +50,9 @@ public class Disease {
     private List<String> affectedCrops;
 
     @Column(columnDefinition = "TEXT")
-    private String triggerConditions; // JSON string
+    private String triggerConditions; // JSON string for rule engine context
+
+    private String imageUrl;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

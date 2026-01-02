@@ -25,22 +25,35 @@ public class AdvisoryRule {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(name = "rule_group_id")
+    private UUID ruleGroupId;
+
     @Column(nullable = false)
     private String name;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private Map<String, Object> conditions; // e.g., { "crop": "RICE", "temp_min": 20 }
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
-    private Map<String, Object> outcome; // e.g., { "advisory_text": "Spray...", "priority": "HIGH" }
+    private com.krishihub.advisory.model.RuleDefinition definition;
 
     @Column(nullable = false)
-    private String status; // "ACTIVE", "DRAFT"
+    private String status; // "ACTIVE", "DRAFT", "ARCHIVED"
+
+    @Column(name = "rule_type")
+    private String ruleType; // "WEATHER", "DISEASE", "GENERAL"
+
+    @Column(name = "is_active")
+    private boolean isActive;
 
     @Column(nullable = false)
     private Integer version;
+
+    private Integer priority;
+
+    @Column(name = "effective_from")
+    private LocalDateTime effectiveFrom;
+
+    @Column(name = "effective_to")
+    private LocalDateTime effectiveTo;
 
     @Column(name = "created_by")
     private UUID createdBy;

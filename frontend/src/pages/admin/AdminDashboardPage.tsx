@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
+import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAdminTitle } from '@/context/AdminContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -15,64 +15,76 @@ import {
 } from 'lucide-react';
 import adminService from '@/services/adminService';
 import { DashboardSkeleton } from '@/components/ui/skeletons';
+import { useQuery } from '@tanstack/react-query';
+
+interface DashboardStats {
+  // User Metrics
+  totalUsers: number;
+  totalFarmers: number;
+  pendingVerifications: number;
+
+  // Content Metrics
+  totalArticles: number;
+  publishedArticles: number;
+  pendingReviews: number;
+
+  // Advisory Metrics
+  activeAdvisories: number;
+  highRiskAlerts: number;
+  advisoriesDeliveredToday: number;
+
+  // System Metrics
+  totalOrders: number;
+  aiDiagnosisCount: number;
+}
 
 const AdminDashboardPage = () => {
   const { language } = useLanguage();
-  const [stats, setStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { setTitle } = useAdminTitle();
 
-  useEffect(() => {
-    loadDashboard();
-  }, []);
+  React.useEffect(() => {
+    setTitle('Dashboard', 'ड्यासबोर्ड');
+  }, [setTitle]);
 
-  const loadDashboard = async () => {
-    try {
-      const data = await adminService.getDashboardStats();
-      setStats(data);
-    } catch (error) {
-      console.error('Error loading dashboard', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: stats, isLoading } = useQuery<DashboardStats>({
+    queryKey: ['admin-dashboard-stats'],
+    queryFn: adminService.getDashboardStats,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
 
-  if (loading) {
-    return (
-      <AdminLayout title="Dashboard" titleNe="ड्यासबोर्ड">
-        <DashboardSkeleton />
-      </AdminLayout>
-    );
+  if (isLoading) {
+    return <DashboardSkeleton />;
   }
 
   const widgets = [
     {
       titleEn: 'Total Published Content',
       titleNe: 'प्रकाशित सामग्री',
-      value: stats?.publishedContent || 128,
+      value: stats?.publishedArticles || 0,
       icon: FileText,
       color: 'bg-primary',
-      trend: '+12%'
+      trend: null
     },
     {
       titleEn: 'Pending Reviews',
       titleNe: 'समीक्षा पर्खिदै',
-      value: stats?.pendingReviews || 15,
+      value: stats?.pendingReviews || 0,
       icon: Clock,
       color: 'bg-amber-500',
       trend: null
     },
     {
-      titleEn: 'Active Advisories',
-      titleNe: 'सक्रिय सल्लाह',
-      value: stats?.activeAdvisories || 42,
+      titleEn: 'Active Advisories (7d)',
+      titleNe: 'सक्रिय सल्लाह (७ दिन)',
+      value: stats?.activeAdvisories || 0,
       icon: CheckCircle,
       color: 'bg-emerald-500',
-      trend: '+5%'
+      trend: null
     },
     {
       titleEn: 'High-Risk Alerts Today',
       titleNe: 'आज उच्च जोखिम सूचना',
-      value: stats?.highRiskAlerts || 3,
+      value: stats?.highRiskAlerts || 0,
       icon: AlertTriangle,
       color: 'bg-destructive',
       trend: null
@@ -122,7 +134,7 @@ const AdminDashboardPage = () => {
   ];
 
   return (
-    <AdminLayout title="Dashboard" titleNe="ड्यासबोर्ड">
+    <>
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
         {widgets.map((widget, index) => {
@@ -272,7 +284,7 @@ const AdminDashboardPage = () => {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

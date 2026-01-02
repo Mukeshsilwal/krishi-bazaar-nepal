@@ -42,4 +42,54 @@ public class ArticleVersion {
 
     @Column(name = "created_by")
     private UUID createdBy;
+
+    public static ArticleVersionBuilder builder() {
+        return new ArticleVersionBuilder();
+    }
+
+    public static class ArticleVersionBuilder {
+        private UUID id;
+        private Article article;
+        private Integer versionNumber;
+        private Map<String, Object> contentSnapshot;
+        private LocalDateTime createdAt;
+        private UUID createdBy;
+
+        ArticleVersionBuilder() {
+        }
+
+        public ArticleVersionBuilder id(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public ArticleVersionBuilder article(Article article) {
+            this.article = article;
+            return this;
+        }
+
+        public ArticleVersionBuilder versionNumber(Integer versionNumber) {
+            this.versionNumber = versionNumber;
+            return this;
+        }
+
+        public ArticleVersionBuilder contentSnapshot(Map<String, Object> contentSnapshot) {
+            this.contentSnapshot = contentSnapshot;
+            return this;
+        }
+
+        public ArticleVersionBuilder createdAt(LocalDateTime createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public ArticleVersionBuilder createdBy(UUID createdBy) {
+            this.createdBy = createdBy;
+            return this;
+        }
+
+        public ArticleVersion build() {
+            return new ArticleVersion(id, article, versionNumber, contentSnapshot, createdAt, createdBy);
+        }
+    }
 }

@@ -25,7 +25,12 @@ public class KnowledgeController {
     @GetMapping("/articles")
     public ResponseEntity<List<Article>> getArticles(
             @RequestParam(required = false) String categoryId,
-            @RequestParam(required = false) String tag) {
+            @RequestParam(required = false) String tag,
+            @RequestParam(required = false) String status) {
+
+        if (status != null && !status.trim().isEmpty() && !status.equalsIgnoreCase("undefined")) {
+            return ResponseEntity.ok(knowledgeService.getAllArticles(status));
+        }
 
         UUID catId = null;
         if (categoryId != null && !categoryId.trim().isEmpty() && !categoryId.equalsIgnoreCase("undefined")) {

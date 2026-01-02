@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../modules/auth/context/AuthContext';
 import { User, Mail, Phone, MapPin, Edit2, Save } from 'lucide-react';
@@ -47,9 +45,7 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <Navbar />
-
+        <div className="bg-gray-50 min-h-[calc(100vh-4rem)]">
             <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-8">
@@ -244,7 +240,6 @@ export default function ProfilePage() {
                 </div>
             </div>
 
-            <Footer />
         </div>
     );
 }

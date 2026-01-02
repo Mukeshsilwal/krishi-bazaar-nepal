@@ -41,8 +41,8 @@ public class MarketplaceService {
     private final ImageUploadService imageUploadService;
 
     @Transactional
-    public ListingDto createListing(String mobileNumber, CreateListingRequest request) {
-        User farmer = userRepository.findByMobileNumber(mobileNumber)
+    public ListingDto createListing(UUID userId, CreateListingRequest request) {
+        User farmer = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (farmer.getRole() != User.UserRole.FARMER) {
@@ -65,18 +65,18 @@ public class MarketplaceService {
         }
 
         CropListing savedListing = listingRepository.save(listing);
-        log.info("Listing created: {} by farmer: {}", savedListing.getId(), mobileNumber);
+        log.info("Listing created: {} by farmer: {}", savedListing.getId(), userId);
 
         return ListingDto.fromEntity(savedListing);
     }
 
     @Transactional
-    public String uploadListingImage(UUID listingId, String mobileNumber, MultipartFile file, boolean isPrimary) {
+    public String uploadListingImage(UUID listingId, UUID userId, MultipartFile file, boolean isPrimary) {
         CropListing listing = listingRepository.findById(listingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Listing not found"));
 
         // Verify ownership
-        if (!listing.getFarmer().getMobileNumber().equals(mobileNumber)) {
+        if (!listing.getFarmer().getId().equals(userId)) {
             throw new UnauthorizedException("You can only upload images to your own listings");
         }
 
@@ -140,8 +140,8 @@ public class MarketplaceService {
         return ListingDto.fromEntity(listing);
     }
 
-    public Page<ListingDto> getMyListings(String mobileNumber, int page, int size) {
-        User farmer = userRepository.findByMobileNumber(mobileNumber)
+    public Page<ListingDto> getMyListings(UUID userId, int page, int size) {
+        User farmer = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -151,12 +151,12 @@ public class MarketplaceService {
     }
 
     @Transactional
-    public ListingDto updateListing(UUID id, String mobileNumber, UpdateListingRequest request) {
+    public ListingDto updateListing(UUID id, UUID userId, UpdateListingRequest request) {
         CropListing listing = listingRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Listing not found"));
 
         // Verify ownership
-        if (!listing.getFarmer().getMobileNumber().equals(mobileNumber)) {
+        if (!listing.getFarmer().getId().equals(userId)) {
             throw new UnauthorizedException("You can only update your own listings");
         }
 
@@ -197,12 +197,12 @@ public class MarketplaceService {
     }
 
     @Transactional
-    public void deleteListing(UUID id, String mobileNumber) {
+    public void deleteListing(UUID id, UUID userId) {
         CropListing listing = listingRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Listing not found"));
 
         // Verify ownership
-        if (!listing.getFarmer().getMobileNumber().equals(mobileNumber)) {
+        if (!listing.getFarmer().getId().equals(userId)) {
             throw new UnauthorizedException("You can only delete your own listings");
         }
 

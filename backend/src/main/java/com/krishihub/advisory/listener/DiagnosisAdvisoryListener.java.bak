@@ -1,0 +1,71 @@
+package com.krishihub.advisory.listener;
+
+import com.krishihub.advisory.enums.AdvisoryType;
+import com.krishihub.advisory.enums.Severity;
+import com.krishihub.advisory.model.RuleResult;
+import com.krishihub.advisory.service.AdvisoryDeliveryLogService;
+import com.krishihub.advisory.service.RuleEngineService;
+import com.krishihub.diagnosis.entity.AIDiagnosis;
+import com.krishihub.diagnosis.service.AIDiagnosisService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class DiagnosisAdvisoryListener {
+
+    private final RuleEngineService ruleEngineService;
+    private final AdvisoryDeliveryLogService advisoryDeliveryLogService;
+
+    @Async
+    @EventListener
+    @Transactional
+    public void handleDiagnosisApproved(AIDiagnosisService.DiagnosisApprovedEvent event) {
+        AIDiagnosis diagnosis = event.getDiagnosis();
+        log.info("Processing diagnosis approval for farmer {}", diagnosis.getFarmerId());
+
+        try {
+            Map<String, Object> ruleContext = new HashMap<>();
+            ruleContext.put("source", "AI_REVIEWED");
+            ruleContext.put("confidence", 1.0); // Human verified
+            ruleContext.put("disease", diagnosis.getFinalDiagnosis());
+            ruleContext.put("crop_type", diagnosis.getCropType());
+            ruleContext.put("district", diagnosis.getDistrict());
+            ruleContext.put("growth_stage", diagnosis.getGrowthStage());
+            ruleContext.put("farmer_id", diagnosis.getFarmerId().toString());
+
+            List<RuleResult> results = ruleEngineService.executeRules(ruleContext);
+
+            if (results.isEmpty()) {
+                log.info("No advisory rules triggered for diagnosis {}", diagnosis.getId());
+                return;
+            }
+
+            for (RuleResult result : results) {
+                // Log delivery
+                advisoryDeliveryLogService.logAdvisoryCreated(
+                        diagnosis.getFarmerId(),
+                        result.getRuleId(),
+                        result.getRuleName(),
+                        AdvisoryType.DISEASE,
+                        Severity.HIGH, // Defaulting to HIGH for disease for now
+                        "Diagnosis: " + diagnosis.getFinalDiagnosis() + ". " + result.getMatchReason(),
+                        diagnosis.getDistrict(),
+                        diagnosis.getCropType(),
+                        diagnosis.getGrowthStage(),
+                        "DISEASE_DETECTED");
+            }
+        } catch (Exception e) {
+            log.error("Failed to process advisory for diagnosis {}", diagnosis.getId(), e);
+        }
+    }
+}
