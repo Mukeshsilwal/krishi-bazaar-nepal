@@ -1,7 +1,7 @@
 import api from './api';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
-import { BACKEND_URL } from '../config/app';
+import { BACKEND_URL, WS_URL } from '../config/app';
 import { MESSAGE_ENDPOINTS } from '../config/endpoints';
 
 const messageService = {
@@ -38,8 +38,8 @@ const messageService = {
     // WebSocket connection
     connectWebSocket: (onMessageReceived) => {
         const token = localStorage.getItem('accessToken');
-        const wsUrl = BACKEND_URL;
-        const socket = new SockJS(`${wsUrl}/ws`);
+        const wsUrl = WS_URL;
+        const socket = new SockJS(`${wsUrl}`);
 
         const stompClient = new Client({
             webSocketFactory: () => socket,

@@ -66,7 +66,7 @@ openssl rand -base64 32
 ### CORS Configuration
 
 ```
-CORS_ALLOWED_ORIGINS=https://your-frontend-domain.vercel.app,https://krishi-bazaar-nepal.vercel.app
+CORS_ALLOWED_ORIGINS=https://krishi-bazaar-nepal.vercel.app,https://krishi-bazaar-nepal.vercel.app/,http://localhost:5173
 ```
 
 ### File Upload (Cloudinary)
