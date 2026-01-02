@@ -59,6 +59,12 @@ const AdminLayoutContent: React.FC = () => {
       labelNe: 'स्रोतहरू'
     },
     {
+      path: '/admin/master-data',
+      icon: Database,
+      labelEn: 'Master Data',
+      labelNe: 'प्रमुख तथ्याङ्क'
+    },
+    {
       path: '/admin/moderation',
       icon: ShieldAlert,
       labelEn: 'Moderation Queue',
@@ -142,12 +148,7 @@ const AdminLayoutContent: React.FC = () => {
       labelEn: 'Farmer Management',
       labelNe: 'किसान व्यवस्थापन'
     },
-    {
-      path: '/admin/master-data',
-      icon: Database,
-      labelEn: 'Master Data',
-      labelNe: 'प्रमुख तथ्याङ्क'
-    },
+
     {
       path: '/admin/roles',
       icon: Users,

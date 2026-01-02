@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
 import api from '../../services/api';
+import { AUTH_ENDPOINTS } from '../../config/endpoints';
 import { useNavigate } from 'react-router-dom';
 
 const AdminRegisterPage = () => {
@@ -23,7 +24,7 @@ const AdminRegisterPage = () => {
         setLoading(true);
 
         try {
-            const res = await api.post('/auth/admin/register', formData);
+            const res = await api.post(AUTH_ENDPOINTS.ADMIN_REGISTER, formData);
             if (res.data.success) {
                 toast.success("Admin registered successfully! Please login.");
                 navigate('/admin/login');

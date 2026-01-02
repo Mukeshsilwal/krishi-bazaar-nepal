@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Edit, Database, List } from 'lucide-react';
 import api from '@/services/api';
+import { ADMIN_MASTER_DATA_ENDPOINTS } from '@/config/endpoints';
 import { toast } from 'sonner';
 
 interface MasterCategory {
@@ -67,7 +68,7 @@ const MasterDataManager = () => {
 
     const fetchCategories = async () => {
         try {
-            const res = await api.get('/admin/master-data/categories');
+            const res = await api.get(ADMIN_MASTER_DATA_ENDPOINTS.CATEGORIES);
             if (res.data.success) {
                 setCategories(res.data.data);
                 if (res.data.data.length > 0 && !selectedCategory) {
@@ -82,7 +83,7 @@ const MasterDataManager = () => {
 
     const fetchItems = async (categoryId: string) => {
         try {
-            const res = await api.get(`/admin/master-data/categories/${categoryId}/items`);
+            const res = await api.get(ADMIN_MASTER_DATA_ENDPOINTS.ITEMS_BY_CATEGORY(categoryId));
             if (res.data.success) {
                 setItems(res.data.data);
             }
@@ -98,7 +99,7 @@ const MasterDataManager = () => {
             return;
         }
         try {
-            await api.post('/admin/master-data/categories', newCategory);
+            await api.post(ADMIN_MASTER_DATA_ENDPOINTS.CATEGORIES, newCategory);
             toast.success("Category created successfully");
             setIsCatModalOpen(false);
             setNewCategory({ code: '', name: '', description: '' });
@@ -117,10 +118,10 @@ const MasterDataManager = () => {
 
         try {
             if (isEditingItem && currentItem.id) {
-                await api.put(`/admin/master-data/items/${currentItem.id}`, currentItem);
+                await api.put(ADMIN_MASTER_DATA_ENDPOINTS.ITEMS_BY_ID(currentItem.id), currentItem);
                 toast.success("Item updated successfully");
             } else {
-                await api.post(`/admin/master-data/categories/${selectedCategory.id}/items`, currentItem);
+                await api.post(ADMIN_MASTER_DATA_ENDPOINTS.ITEMS_BY_CATEGORY(selectedCategory.id), currentItem);
                 toast.success("Item created successfully");
             }
             setIsItemModalOpen(false);
@@ -170,8 +171,8 @@ const MasterDataManager = () => {
                                     key={cat.id}
                                     onClick={() => setSelectedCategory(cat)}
                                     className={`text-left px-4 py-3 text-sm transition-colors hover:bg-muted/50 border-l-2 ${selectedCategory?.id === cat.id
-                                            ? 'border-primary bg-muted font-medium'
-                                            : 'border-transparent'
+                                        ? 'border-primary bg-muted font-medium'
+                                        : 'border-transparent'
                                         }`}
                                 >
                                     <div className="font-medium">{cat.name}</div>

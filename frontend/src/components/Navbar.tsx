@@ -6,6 +6,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../modules/auth/context/AuthContext';
 import { useMessages } from '../hooks/useMessages';
 import Logo from './Logo';
+import MoreMenu from './navigation/MoreMenu';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -28,82 +29,86 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition">
-            <Logo size={44} />
-            <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
+          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition flex-shrink-0">
+            <Logo size={40} />
+            <span className="text-lg font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent whitespace-nowrap">
               Kisan Sarathi
             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-4">
             <Link
               to="/"
-              className="text-gray-700 hover:text-green-600 font-medium transition"
+              className="text-gray-700 hover:text-green-600 font-medium transition px-1.5 py-2"
             >
               {t('nav.home') || 'Home'}
             </Link>
             <Link
               to="/#marketplace"
-              className="text-gray-700 hover:text-green-600 font-medium transition"
+              className="text-gray-700 hover:text-green-600 font-medium transition px-1.5 py-2"
             >
               {t('nav.marketplace') || 'Marketplace'}
             </Link>
             <Link
-              to="/#prices"
-              className="text-gray-700 hover:text-green-600 font-medium transition"
-            >
-              Prices
-            </Link>
-            <Link
-              to="/logistics"
-              className="text-gray-700 hover:text-green-600 font-medium transition"
-            >
-              Logistics
-            </Link>
-            <Link
-              to="/knowledge"
-              className="text-gray-700 hover:text-green-600 font-medium transition"
-            >
-              Knowledge
-            </Link>
-            <Link
               to="/diagnosis"
-              className="text-gray-700 hover:text-green-600 font-medium transition"
+              className="text-gray-700 hover:text-green-600 font-medium transition px-1.5 py-2"
             >
-              Diagnosis
+              {t('nav.diagnosis') || 'Diagnosis'}
             </Link>
-            {user && (
-              <>
-                <Link
-                  to="/finance"
-                  className="text-gray-700 hover:text-green-600 font-medium transition"
-                >
-                  Finance
-                </Link>
-                <Link
-                  to="/ai-assistant"
-                  className="text-gray-700 hover:text-green-600 font-medium transition"
-                >
-                  AI
-                </Link>
-              </>
-            )}
-            {user?.role === 'ADMIN' && (
+
+            {/* More Menu - Secondary Navigation */}
+            <MoreMenu label={t('nav.more') || 'More'}>
               <Link
-                to="/admin/dashboard"
-                className="text-gray-700 hover:text-green-600 font-medium transition"
+                to="/#prices"
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 transition block"
               >
-                Admin
+                {t('nav.prices') || 'Prices'}
               </Link>
-            )}
+              <Link
+                to="/logistics"
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 transition block"
+              >
+                {t('nav.logistics') || 'Logistics'}
+              </Link>
+              <Link
+                to="/knowledge"
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 transition block"
+              >
+                {t('nav.knowledge') || 'Knowledge'}
+              </Link>
+              {user && (
+                <>
+                  <Link
+                    to="/finance"
+                    className="px-4 py-2 text-gray-700 hover:bg-gray-100 transition block"
+                  >
+                    {t('nav.finance') || 'Finance'}
+                  </Link>
+                  <Link
+                    to="/ai-assistant"
+                    className="px-4 py-2 text-gray-700 hover:bg-gray-100 transition block"
+                  >
+                    {t('nav.ai') || 'AI'}
+                  </Link>
+                </>
+              )}
+              {user?.role === 'ADMIN' && (
+                <Link
+                  to="/admin/dashboard"
+                  className="px-4 py-2 text-gray-700 hover:bg-gray-100 transition block"
+                >
+                  {t('nav.admin') || 'Admin'}
+                </Link>
+              )}
+            </MoreMenu>
 
             {/* Language Switcher */}
             <button
               onClick={toggleLanguage}
-              className="px-3 py-1 rounded-lg border-2 border-green-600 text-green-600 hover:bg-green-600 hover:text-white transition font-semibold"
+              className="px-3 py-2.5 rounded-lg border-2 border-green-600 text-green-600 hover:bg-green-600 hover:text-white transition font-semibold min-h-[44px] text-sm"
             >
-              {language === 'ne' ? 'English' : 'नेपाली'}
+              {language === 'ne' ? 'EN' : 'नेपाली'}
             </button>
 
             {/* User Menu or Auth Buttons */}
@@ -228,14 +233,28 @@ const Navbar = () => {
                 onClick={() => setIsOpen(false)}
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
               >
-                Prices
+                {t('nav.prices') || 'Prices'}
               </Link>
               <Link
                 to="/logistics"
                 onClick={() => setIsOpen(false)}
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
               >
-                Logistics
+                {t('nav.logistics') || 'Logistics'}
+              </Link>
+              <Link
+                to="/knowledge"
+                onClick={() => setIsOpen(false)}
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+              >
+                {t('nav.knowledge') || 'Knowledge'}
+              </Link>
+              <Link
+                to="/diagnosis"
+                onClick={() => setIsOpen(false)}
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+              >
+                {t('nav.diagnosis') || 'Diagnosis'}
               </Link>
               {user && (
                 <>
@@ -244,14 +263,14 @@ const Navbar = () => {
                     onClick={() => setIsOpen(false)}
                     className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
                   >
-                    Finance
+                    {t('nav.finance') || 'Finance'}
                   </Link>
                   <Link
                     to="/ai-assistant"
                     onClick={() => setIsOpen(false)}
                     className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
                   >
-                    AI Assistant
+                    {t('nav.ai') || 'AI Assistant'}
                   </Link>
                 </>
               )}
@@ -261,7 +280,7 @@ const Navbar = () => {
                   onClick={() => setIsOpen(false)}
                   className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
                 >
-                  Admin Dashboard
+                  {t('nav.admin') || 'Admin Dashboard'}
                 </Link>
               )}
 

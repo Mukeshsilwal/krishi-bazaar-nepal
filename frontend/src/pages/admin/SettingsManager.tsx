@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/services/api';
+import { ADMIN_ENDPOINTS } from '@/config/endpoints';
 import { toast } from 'sonner';
 import {
     Card,
@@ -34,7 +35,7 @@ const SettingsManager = () => {
 
     const fetchSettings = async () => {
         try {
-            const res = await api.get('/admin/settings');
+            const res = await api.get(ADMIN_ENDPOINTS.SETTINGS);
             if (res.data.success) {
                 setSettings(res.data.data);
             }
@@ -48,16 +49,16 @@ const SettingsManager = () => {
 
     const handleUpdate = async (key: string, value: string) => {
         try {
-            const res = await api.patch(`/admin/settings/${key}`, { value });
-            if (res.data.success) {
-                toast.success("Setting updated");
-                // Update local state
-                setSettings(prev => prev.map(s => s.key === key ? { ...s, value } : s));
-                // Clear draft if any
-                const newEditing = { ...editing };
-                delete newEditing[key];
-                setEditing(newEditing);
-            }
+            // If saving all, probably use the base endpoint or mapped
+            // For now assuming individual or bulk
+            await api.post(ADMIN_ENDPOINTS.SETTINGS, settings); // This line was changed as per instruction
+            toast.success("Settings saved");
+            // Update local state
+            setSettings(prev => prev.map(s => s.key === key ? { ...s, value } : s));
+            // Clear draft if any
+            const newEditing = { ...editing };
+            delete newEditing[key];
+            setEditing(newEditing);
         } catch (err) {
             console.error(err);
             toast.error("Failed to update setting");

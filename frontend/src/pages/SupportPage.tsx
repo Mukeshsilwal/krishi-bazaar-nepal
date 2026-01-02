@@ -19,7 +19,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { toast } from "sonner";
 import api from '@/services/api';
+import { FEEDBACK_ENDPOINTS } from '@/config/endpoints';
 import { MessageSquare, Send } from 'lucide-react';
 
 const SupportPage = () => {
@@ -27,7 +29,7 @@ const SupportPage = () => {
 
     const onSubmit = async (data: any) => {
         try {
-            const res = await api.post('/feedback', data);
+            const res = await api.post(FEEDBACK_ENDPOINTS.BASE, data);
             if (res.data.success) {
                 toast.success("Feedback submitted successfully!");
                 reset();

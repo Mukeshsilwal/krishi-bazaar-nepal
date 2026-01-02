@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAdminTitle } from '@/context/AdminContext';
 import api from '@/services/api';
+import { ADMIN_NOTIFICATION_ENDPOINTS } from '@/config/endpoints';
 import { Button } from "@/components/ui/button";
 import {
     Table,
@@ -132,7 +133,7 @@ export default function NotificationManager() {
 
 
         try {
-            const res = await api.get(`/admin/notifications?page=${pageNum}&size=${ITEMS_PER_PAGE}`);
+            const res = await api.get(`${ADMIN_NOTIFICATION_ENDPOINTS.BASE}?page=${pageNum}&size=${ITEMS_PER_PAGE}`);
             if (res.data.success) {
                 const newContent = res.data.data.content;
                 const isLast = res.data.data.last;
@@ -161,7 +162,7 @@ export default function NotificationManager() {
 
     const fetchStats = async () => {
         try {
-            const res = await api.get('/admin/notifications/stats');
+            const res = await api.get(ADMIN_NOTIFICATION_ENDPOINTS.STATS);
             if (res.data.success) {
                 setStats(res.data.data);
             }
@@ -173,7 +174,7 @@ export default function NotificationManager() {
     const fetchTemplates = async () => {
         try {
             setLoading(true);
-            const res = await api.get('/admin/notifications/templates');
+            const res = await api.get(ADMIN_NOTIFICATION_ENDPOINTS.TEMPLATES);
             if (res.data.success) {
                 setTemplates(res.data.data);
             }
@@ -192,7 +193,7 @@ export default function NotificationManager() {
         }
 
         try {
-            await api.post('/admin/notifications/templates', {
+            await api.post(ADMIN_NOTIFICATION_ENDPOINTS.TEMPLATES, {
                 ...newTemplate,
                 isActive: true
             });
@@ -213,7 +214,7 @@ export default function NotificationManager() {
         }
 
         try {
-            await api.post('/admin/notifications/broadcast', {
+            await api.post(ADMIN_NOTIFICATION_ENDPOINTS.BROADCAST, {
                 title: sendData.title,
                 message: sendData.message,
                 channel: sendData.channel,
@@ -287,7 +288,7 @@ export default function NotificationManager() {
                                     className="mt-2 w-full"
                                     onClick={async () => {
                                         try {
-                                            await api.post('/admin/notifications/retry-pending');
+                                            await api.post(ADMIN_NOTIFICATION_ENDPOINTS.RETRY_PENDING);
                                             toast.success("Retrying pending notifications...");
                                             fetchStats();
                                         } catch (e) {

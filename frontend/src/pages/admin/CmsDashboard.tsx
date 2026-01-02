@@ -53,8 +53,10 @@ const CmsDashboard = () => {
 
     const fetchArticles = async () => {
         try {
-            const res = await api.get('/admin/cms/articles');
-            setArticles(res.data);
+            const res = await api.get(CMS_ENDPOINTS.ARTICLES);
+            if (res.data.success) {
+                setArticles(res.data.data); // Assuming data is nested under 'data' property
+            }
         } catch (error) {
             console.error("Failed to fetch articles", error);
             toast.error("Failed to load articles");
@@ -64,7 +66,7 @@ const CmsDashboard = () => {
     const handleWorkflowAction = async () => {
         if (!selectedArticle) return;
         try {
-            await api.post(`/admin/cms/articles/${selectedArticle.id}/workflow`, {
+            await api.post(CMS_ENDPOINTS.WORKFLOW(selectedArticle.id), {
                 action: workflowAction,
                 comment: comment
             });

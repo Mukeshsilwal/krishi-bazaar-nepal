@@ -1,5 +1,6 @@
 import api from './api';
-import { FINANCE_ENDPOINTS, SUBSIDY_ENDPOINTS } from '../config/endpoints';
+import { FINANCE_ENDPOINTS } from '../config/endpoints';
+import { SUBSIDY_ENDPOINTS } from '../config/endpoints';
 
 const financeService = {
     // Loans
@@ -15,12 +16,12 @@ const financeService = {
 
     // Insurance
     applyForInsurance: async (data) => {
-        const response = await api.post('/finance/insurance', data);
+        const response = await api.post(FINANCE_ENDPOINTS.INSURANCE, data);
         return response.data;
     },
 
     getPolicies: async (farmerId) => {
-        const response = await api.get('/finance/insurance', { params: { farmerId } });
+        const response = await api.get(FINANCE_ENDPOINTS.INSURANCE, { params: { farmerId } });
         return response.data;
     },
 

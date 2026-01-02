@@ -61,14 +61,14 @@ const ModerationQueue = () => {
     const { data: items = [], isLoading, isError } = useQuery({
         queryKey: ['moderation-queue'],
         queryFn: async () => {
-            const res = await api.get('/knowledge/moderation/pending');
+            const res = await api.get(KNOWLEDGE_ENDPOINTS.MODERATION_PENDING);
             return res.data;
         }
     });
 
     const approveMutation = useMutation({
         mutationFn: async (id: string) => {
-            await api.post(`/knowledge/moderation/${id}/approve?reviewerId=${reviewerId}`);
+            await api.post(KNOWLEDGE_ENDPOINTS.APPROVE(id, reviewerId));
         },
         onSuccess: () => {
             toast.success("Approved and Published");
@@ -82,7 +82,7 @@ const ModerationQueue = () => {
 
     const rejectMutation = useMutation({
         mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
-            await api.post(`/knowledge/moderation/${id}/reject?reviewerId=${reviewerId}`, reason, {
+            await api.post(`${KNOWLEDGE_ENDPOINTS.REJECT(id)}?reviewerId=${reviewerId}`, reason, {
                 headers: { 'Content-Type': 'text/plain' }
             });
         },

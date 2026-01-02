@@ -50,27 +50,29 @@ const marketPriceService = {
         return response.data;
     },
 
-    // Get today's prices
-    getTodaysPrices: async () => {
-        const response = await api.get('/market-prices/today');
+    // Get today's market prices
+    getTodayPrices: async (district = null, crop = null) => {
+        const response = await api.get(MARKET_PRICE_ENDPOINTS.TODAY, {
+            params: { district, crop }
+        });
         return response.data;
     },
 
     // Get prices by date
     getPricesByDate: async (date) => {
-        const response = await api.get(`/market-prices/date/${date}`);
+        const response = await api.get(MARKET_PRICE_ENDPOINTS.BY_DATE(date));
         return response.data;
     },
 
     // Get available crops
     getAvailableCrops: async () => {
-        const response = await api.get('/market-prices/crops');
+        const response = await api.get(MARKET_PRICE_ENDPOINTS.CROPS);
         return response.data;
     },
 
     // Get available districts
     getAvailableDistricts: async () => {
-        const response = await api.get('/market-prices/districts');
+        const response = await api.get(MARKET_PRICE_ENDPOINTS.DISTRICTS);
         return response.data;
     },
 

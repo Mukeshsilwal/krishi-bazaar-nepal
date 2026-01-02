@@ -20,7 +20,7 @@ const orderService = {
         if (role) {
             params.role = role;
         }
-        const response = await api.get('/orders/my', { params });
+        const response = await api.get(ORDER_ENDPOINTS.MY_ORDERS, { params });
         return response.data;
     },
 

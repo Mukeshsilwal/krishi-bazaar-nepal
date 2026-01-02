@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Play, AlertCircle, CheckCircle2 } from 'lucide-react';
 import api from '@/services/api';
+import { RULE_ENDPOINTS } from '@/config/endpoints';
 
 const RulePlayground = () => {
     const [conditions, setConditions] = useState('{\n  "crop": "RICE",\n  "stage": "SOWING"\n}');
@@ -14,6 +15,7 @@ const RulePlayground = () => {
     const [simulationMode, setSimulationMode] = useState<'mock' | 'user'>('mock');
     const [result, setResult] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
 
     const handleSimulate = async () => {
         try {
@@ -36,19 +38,22 @@ const RulePlayground = () => {
             } else {
                 if (!userId) {
                     setError('User ID is required for Real User simulation');
+                    setLoading(false); // Reset loading on error
                     return;
                 }
                 payload.userId = userId;
             }
 
-            const response = await api.post('/admin/rules/simulate', payload);
+            const res = await api.post(RULE_ENDPOINTS.SIMULATE, payload);
 
-            if (response.data.success) {
-                setResult(response.data.data);
+            if (res.data.success) {
+                setResult(res.data.data);
             }
         } catch (err) {
             setError('Simulation failed. Check JSON format or API connection.');
             console.error(err);
+        } finally {
+            setLoading(false); // Reset loading when simulation is complete or errors
         }
     };
 
@@ -85,8 +90,8 @@ const RulePlayground = () => {
                                 <button
                                     onClick={() => setSimulationMode('mock')}
                                     className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${simulationMode === 'mock'
-                                            ? 'bg-white shadow text-primary'
-                                            : 'text-gray-500 hover:text-gray-900'
+                                        ? 'bg-white shadow text-primary'
+                                        : 'text-gray-500 hover:text-gray-900'
                                         }`}
                                 >
                                     Mock JSON
@@ -94,8 +99,8 @@ const RulePlayground = () => {
                                 <button
                                     onClick={() => setSimulationMode('user')}
                                     className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${simulationMode === 'user'
-                                            ? 'bg-white shadow text-primary'
-                                            : 'text-gray-500 hover:text-gray-900'
+                                        ? 'bg-white shadow text-primary'
+                                        : 'text-gray-500 hover:text-gray-900'
                                         }`}
                                 >
                                     Real User

@@ -8,12 +8,12 @@ const adminService = {
     },
 
     getPendingVendors: async () => {
-        const response = await api.get('/admin/vendors/pending');
+        const response = await api.get(ADMIN_ENDPOINTS.VENDORS_PENDING);
         return response.data;
     },
 
     approveUser: async (userId) => {
-        await api.post(`/admin/users/${userId}/approve`);
+        await api.post(ADMIN_ENDPOINTS.APPROVE_USER(userId));
     }
 };
 

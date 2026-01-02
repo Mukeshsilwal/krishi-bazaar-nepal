@@ -17,7 +17,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from 'date-fns';
+
 import api from '@/services/api';
+import { FEEDBACK_ENDPOINTS } from '@/config/endpoints';
 import { toast } from 'sonner';
 
 interface Feedback {
@@ -41,7 +43,7 @@ const FeedbackManager = () => {
 
     const fetchFeedback = async () => {
         try {
-            const res = await api.get('/admin/feedback');
+            const res = await api.get(FEEDBACK_ENDPOINTS.ADMIN);
             if (res.data.success) {
                 setFeedbacks(res.data.data);
             }
@@ -53,7 +55,7 @@ const FeedbackManager = () => {
 
     const handleStatusUpdate = async (id: string, status: string) => {
         try {
-            await api.patch(`/admin/feedback/${id}/status`, { status });
+            await api.patch(FEEDBACK_ENDPOINTS.UPDATE_STATUS(id), { status });
             toast.success("Status updated");
             fetchFeedback();
         } catch (err) {

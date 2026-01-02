@@ -24,6 +24,7 @@ import { Search, Ban, CheckCircle, Loader2, RotateCcw } from "lucide-react";
 import { toast } from 'sonner';
 import { useDebounce } from '@/hooks/useDebounce';
 import InfiniteScroll from '@/components/common/InfiniteScroll';
+import { ADMIN_ENDPOINTS } from '@/config/endpoints';
 
 interface User {
     id: string;
@@ -72,7 +73,7 @@ const UserManagement = () => {
             if (selectedRole && selectedRole !== 'all') params.append('role', selectedRole);
             if (selectedStatus !== 'all') params.append('status', selectedStatus === 'active' ? 'true' : 'false');
 
-            const response = await api.get(`/admin/users?${params.toString()}`);
+            const response = await api.get(`${ADMIN_ENDPOINTS.USERS}?${params.toString()}`);
 
             if (response.data.success) {
                 const newUsers = response.data.data.content;
@@ -100,7 +101,7 @@ const UserManagement = () => {
         setUsers(users.map(u => u.id === user.id ? { ...u, enabled: !u.enabled } : u));
 
         try {
-            await api.patch(`/admin/users/${user.id}/status`, { enabled: !user.enabled });
+            await api.patch(ADMIN_ENDPOINTS.USER_STATUS(user.id), { enabled: !user.enabled });
             toast.success(`User ${!user.enabled ? 'activated' : 'deactivated'} successfully`);
         } catch (error) {
             // Revert on failure

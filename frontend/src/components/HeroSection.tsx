@@ -47,14 +47,14 @@ const HeroSection = () => {
 
           {/* CTA Buttons - Larger for easier touch */}
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button variant="hero" size="xl" className="group h-16 w-full px-8 text-lg sm:w-auto">
+            <Button variant="hero" size="2xl" className="group w-full sm:w-auto">
               <span className="flex flex-col items-center leading-tight">
                 <span className="text-xl font-bold">{t('hero.cta.start')}</span>
                 <span className="text-sm opacity-80">{t('hero.cta.start.sub')}</span>
               </span>
               <ArrowRight className="ml-2 h-6 w-6 transition-transform group-hover:translate-x-1" />
             </Button>
-            <Button variant="heroOutline" size="xl" className="h-16 w-full px-8 text-lg sm:w-auto">
+            <Button variant="heroOutline" size="2xl" className="w-full sm:w-auto">
               <Play className="mr-2 h-6 w-6" />
               <span className="flex flex-col items-center leading-tight">
                 <span className="text-xl font-bold">{t('hero.cta.video')}</span>

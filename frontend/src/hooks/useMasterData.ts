@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
+import { MASTER_DATA_ENDPOINTS } from '@/config/endpoints';
 import { useLanguage } from '../context/LanguageContext';
 
 export interface MasterItem {
@@ -33,7 +34,7 @@ export function useMasterData(categoryCode: string) {
                     return; // Return early if cached
                 }
 
-                const response = await api.get(`/v1/master-data/${categoryCode}`);
+                const response = await api.get(MASTER_DATA_ENDPOINTS.BY_CODE_V1(categoryCode));
                 if (response.data.success) {
                     const items = response.data.data.data;
                     setData(items);

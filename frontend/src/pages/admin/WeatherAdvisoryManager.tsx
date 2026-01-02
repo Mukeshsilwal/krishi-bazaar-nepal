@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/services/api';
+import { WEATHER_ADVISORY_ENDPOINTS } from '@/config/endpoints';
 import { Button } from "@/components/ui/button";
 import {
     Table,
@@ -58,7 +59,7 @@ const WeatherAdvisoryManager = () => {
 
     const fetchAdvisories = async () => {
         try {
-            const res = await api.get('/weather-advisories');
+            const res = await api.get(WEATHER_ADVISORY_ENDPOINTS.BASE);
             if (res.data.success) {
                 setAdvisories(res.data.data);
             }
@@ -70,7 +71,7 @@ const WeatherAdvisoryManager = () => {
 
     const handleCreate = async () => {
         try {
-            await api.post('/weather-advisories', newAdvisory);
+            await api.post(WEATHER_ADVISORY_ENDPOINTS.BASE, newAdvisory);
             setOpen(false);
             setNewAdvisory({ title: '', description: '', region: '', alertLevel: 'NORMAL' });
             fetchAdvisories();
@@ -84,7 +85,7 @@ const WeatherAdvisoryManager = () => {
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this advisory?")) return;
         try {
-            await api.delete(`/weather-advisories/${id}`);
+            await api.delete(WEATHER_ADVISORY_ENDPOINTS.BY_ID(id));
             fetchAdvisories();
             toast.success("Advisory deleted");
         } catch (error) {

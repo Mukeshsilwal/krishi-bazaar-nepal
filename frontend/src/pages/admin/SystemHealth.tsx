@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Activity, HardDrive, Cpu, Server, Info } from 'lucide-react';
 import api from '@/services/api';
+import { ADMIN_ENDPOINTS } from '@/config/endpoints';
 import { BACKEND_URL } from '@/config/app';
 import { toast } from 'sonner';
 
@@ -45,9 +46,9 @@ const SystemHealth = () => {
     const fetchSystemData = async () => {
         try {
             const [healthRes, infoRes, integrationsRes] = await Promise.all([
-                api.get('/actuator/health', { baseURL: BACKEND_URL }),
-                api.get('/actuator/info', { baseURL: BACKEND_URL }).catch(() => ({ data: { app: { name: 'Kisan Sarathi API', version: '1.0.0' } } })), // Fallback if info not configured fully
-                api.get('/admin/health/integrations').catch(() => ({ data: { success: false, data: null } }))
+                api.get(ADMIN_ENDPOINTS.ACTUATOR_HEALTH, { baseURL: BACKEND_URL }),
+                api.get(ADMIN_ENDPOINTS.ACTUATOR_INFO, { baseURL: BACKEND_URL }).catch(() => ({ data: { app: { name: 'Kisan Sarathi API', version: '1.0.0' } } })), // Fallback if info not configured fully
+                api.get(ADMIN_ENDPOINTS.HEALTH_INTEGRATIONS).catch(() => ({ data: { success: false, data: null } }))
             ]);
 
             setHealth(healthRes.data);
@@ -62,7 +63,7 @@ const SystemHealth = () => {
 
             for (const name of metricNames) {
                 try {
-                    const res = await api.get(`/actuator/metrics/${name}`, { baseURL: BACKEND_URL });
+                    const res = await api.get(ADMIN_ENDPOINTS.ACTUATOR_METRICS(name), { baseURL: BACKEND_URL });
                     metricsData[name] = res.data.measurements[0].value;
                 } catch (e) {
                     console.warn(`Failed to fetch metric ${name}`);

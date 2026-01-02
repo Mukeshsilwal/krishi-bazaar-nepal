@@ -51,7 +51,7 @@ const SchemeManager = () => {
 
     const fetchSchemes = async () => {
         try {
-            const res = await api.get('/schemes');
+            const res = await api.get(SCHEME_ENDPOINTS.BASE);
             if (res.data.success) {
                 setSchemes(res.data.data);
             }
@@ -63,7 +63,7 @@ const SchemeManager = () => {
 
     const handleCreate = async () => {
         try {
-            await api.post('/schemes', newScheme);
+            await api.post(SCHEME_ENDPOINTS.BASE, newScheme);
             setOpen(false);
             setNewScheme({
                 title: '',
@@ -83,7 +83,7 @@ const SchemeManager = () => {
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this scheme?")) return;
         try {
-            await api.delete(`/schemes/${id}`);
+            await api.delete(SCHEME_ENDPOINTS.BY_ID(id));
             fetchSchemes();
             toast.success("Scheme deleted");
         } catch (error) {
@@ -94,7 +94,7 @@ const SchemeManager = () => {
 
     const handleToggleActive = async (scheme: Scheme) => {
         try {
-            await api.put(`/schemes/${scheme.id}`, { ...scheme, active: !scheme.active });
+            await api.put(SCHEME_ENDPOINTS.BY_ID(scheme.id), { ...scheme, active: !scheme.active });
             fetchSchemes();
             toast.success(`Scheme ${!scheme.active ? 'activated' : 'deactivated'}`);
         } catch (error) {

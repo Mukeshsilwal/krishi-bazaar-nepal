@@ -12,12 +12,20 @@ const translations = {
     ne: {
         // Navbar
         'nav.home': 'गृहपृष्ठ',
-        'nav.marketplace': 'बजार',
+        'nav.marketplace': 'बजारस्थल',
+        'nav.prices': 'मूल्य',
+        'nav.logistics': 'रसद व्यवस्थापन',
+        'nav.knowledge': 'ज्ञान',
+        'nav.diagnosis': 'रोग निदान',
+        'nav.finance': 'वित्त',
+        'nav.ai': 'एआई सहायक',
+        'nav.admin': 'प्रशासक',
         'nav.about': 'हाम्रो बारेमा',
         'nav.contact': 'सम्पर्क',
         'nav.login': 'लगइन',
         'nav.register': 'दर्ता गर्नुहोस्',
         'nav.logout': 'लगआउट',
+        'nav.more': 'थप',
 
         // Hero Section
         'hero.badge': 'नेपालको #१ कृषि प्लेटफर्म',
@@ -60,8 +68,11 @@ const translations = {
         'dashboard.myOrders': 'मेरो अर्डर',
         'dashboard.chat': 'च्याट',
         'dashboard.profile': 'प्रोफाइल',
-        // 'listings.manage': 'आफ्नो बाली सूची व्यवस्थापन गर्नुहोस्', // This was removed as per the instruction
-        // 'listings.create': 'नयाँ बाली थप्नुहोस्', // This was removed as per the instruction
+
+        // Orders
+        'orders.manage': 'आफ्नो अर्डरहरू हेर्नुहोस् र व्यवस्थापन गर्नुहोस्',
+        'orders.asBuyer': 'खरिददारको रूपमा',
+        'orders.asFarmer': 'किसानको रूपमा',
 
         // Listings
         'listings.create': 'नयाँ सूची सिर्जना गर्नुहोस्',
@@ -106,6 +117,14 @@ const translations = {
     en: {
         // Navbar
         'nav.home': 'Home',
+        'nav.marketplace': 'Marketplace',
+        'nav.prices': 'Prices',
+        'nav.logistics': 'Logistics',
+        'nav.knowledge': 'Knowledge',
+        'nav.diagnosis': 'Diagnosis',
+        'nav.finance': 'Finance',
+        'nav.ai': 'AI Assistant',
+        'nav.admin': 'Admin',
         'nav.features': 'Features',
         'nav.howItWorks': 'How It Works',
         'nav.market': 'Market',
@@ -113,6 +132,7 @@ const translations = {
         'nav.login': 'Login',
         'nav.register': 'Register',
         'nav.logout': 'Logout',
+        'nav.more': 'More',
 
         // Hero Section
         'hero.badge': 'No. 1 Agri-Tech Platform in Nepal',
@@ -155,6 +175,13 @@ const translations = {
         'dashboard.myOrders': 'My Orders',
         'dashboard.chat': 'Chat',
         'dashboard.profile': 'Profile',
+
+        // Orders
+        'orders.manage': 'View and manage your orders',
+        'orders.asBuyer': 'As Buyer',
+        'orders.asFarmer': 'As Farmer',
+
+        // Listings
         'listings.manage': 'Manage your crop listings',
         'listings.create': 'Create New Listing',
         'listings.form.unit.ton': 'Ton',

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../modules/auth/context/AuthContext';
 import api from '../../services/api';
+import { ADMIN_RBAC_ENDPOINTS } from '@/config/endpoints';
 import { Button } from "@/components/ui/button";
 import {
     Table,
@@ -62,7 +63,7 @@ const RoleManagement = () => {
 
     const fetchRoles = async () => {
         try {
-            const response = await api.get('/admin/rbac/roles');
+            const response = await api.get(ADMIN_RBAC_ENDPOINTS.ROLES);
             if (response.data.success) {
                 setRoles(response.data.data);
             }
@@ -74,7 +75,7 @@ const RoleManagement = () => {
 
     const fetchPermissions = async () => {
         try {
-            const response = await api.get('/admin/rbac/permissions');
+            const response = await api.get(ADMIN_RBAC_ENDPOINTS.PERMISSIONS);
             if (response.data.success) {
                 setPermissions(response.data.data);
             }
@@ -91,7 +92,7 @@ const RoleManagement = () => {
         }
 
         try {
-            await api.post('/admin/rbac/roles', {
+            await api.post(ADMIN_RBAC_ENDPOINTS.ROLES, {
                 name: newRole.name,
                 description: newRole.description,
                 permissionNames: newRole.permissionNames

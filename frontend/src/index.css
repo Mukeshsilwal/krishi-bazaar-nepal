@@ -49,6 +49,16 @@
     --shadow-medium: 0 8px 30px -8px hsl(30 25% 15% / 0.12);
     --shadow-glow: 0 0 40px hsl(142 55% 32% / 0.15);
 
+    /* Touch Targets - Rural-First Design */
+    --touch-min: 44px;
+    --touch-comfortable: 48px;
+    --touch-large: 56px;
+
+    /* Readable Text Sizes */
+    --text-readable: 17px;
+    --text-large: 19px;
+    --text-heading: 21px;
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -111,6 +121,8 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Poppins', sans-serif;
+    font-size: 17px;
+    line-height: 1.65;
   }
 }
 
@@ -148,11 +160,114 @@
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }
+
+  /* Rural-First Touch Targets */
+  .touch-target {
+    min-height: var(--touch-min);
+    min-width: var(--touch-min);
+  }
+
+  .touch-target-comfortable {
+    min-height: var(--touch-comfortable);
+    min-width: var(--touch-comfortable);
+  }
+
+  .touch-target-large {
+    min-height: var(--touch-large);
+    min-width: var(--touch-large);
+  }
+
+  /* Readable Text Sizes */
+  .text-readable {
+    font-size: var(--text-readable);
+  }
+
+  .text-large-readable {
+    font-size: var(--text-large);
+  }
+
+  .text-heading-readable {
+    font-size: var(--text-heading);
+  }
+
+  /* Skeleton Loader */
+  .skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+  }
+
+  .skeleton-text {
+    @apply skeleton h-4 w-full;
+  }
+
+  .skeleton-circle {
+    @apply skeleton rounded-full;
+  }
+
+  /* Enhanced Spacing Utilities */
+  .space-comfortable {
+    @apply space-y-4;
+  }
+
+  .space-generous {
+    @apply space-y-6;
+  }
+
+  .padding-comfortable {
+    @apply p-5;
+  }
+
+  .padding-generous {
+    @apply p-7;
+  }
+
+  /* Helper Text Utilities */
+  .helper-text {
+    @apply text-sm text-muted-foreground mt-1.5 leading-relaxed;
+    font-size: 14px;
+  }
+
+  .hint-text {
+    @apply text-xs text-muted-foreground italic;
+    font-size: 13px;
+  }
+
+  /* Status Indicators */
+  .status-success {
+    @apply bg-green-100 text-green-800 border-green-300;
+  }
+
+  .status-warning {
+    @apply bg-yellow-100 text-yellow-800 border-yellow-300;
+  }
+
+  .status-error {
+    @apply bg-red-100 text-red-800 border-red-300;
+  }
+
+  .status-info {
+    @apply bg-blue-100 text-blue-800 border-blue-300;
+  }
+
+  /* Enhanced Line Heights */
+  .leading-comfortable {
+    line-height: 1.7;
+  }
+
+  .leading-generous {
+    line-height: 1.8;
+  }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes fadeInUp {
@@ -160,6 +275,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -171,6 +287,7 @@
     opacity: 0;
     transform: translateX(-30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -178,8 +295,15 @@
 }
 
 @keyframes pulse-slow {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
 }
 
 .animate-float {
@@ -198,8 +322,22 @@
   animation: pulse-slow 3s ease-in-out infinite;
 }
 
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-400 { animation-delay: 400ms; }
-.delay-500 { animation-delay: 500ms; }
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+.delay-400 {
+  animation-delay: 400ms;
+}
+
+.delay-500 {
+  animation-delay: 500ms;
+}

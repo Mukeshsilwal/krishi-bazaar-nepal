@@ -36,6 +36,7 @@ export const ORDER_ENDPOINTS = {
     ORDER_BY_ID: (id) => `/orders/${id}`,
     MY_PURCHASES: '/orders/my/purchases',
     MY_SALES: '/orders/my/sales',
+    MY_ORDERS: '/orders/my',
     UPDATE_STATUS: (id) => `/orders/${id}/status`,
     CANCEL: (id) => `/orders/${id}/cancel`,
 };
@@ -45,6 +46,7 @@ export const PAYMENT_ENDPOINTS = {
     VERIFY: '/payments/verify',
     ESEWA_SUCCESS: '/payments/esewa/success',
     ESEWA_FAILURE: '/payments/esewa/failure',
+    BY_ID: (id) => `/payments/${id}`,
 };
 
 // ==================== Knowledge & Content Management ====================
@@ -56,8 +58,13 @@ export const KNOWLEDGE_ENDPOINTS = {
     BY_CATEGORY: (category) => `/knowledge/category/${category}`,
     CATEGORIES: '/knowledge/categories',
 
+    // Articles
+    ARTICLES: '/knowledge/articles',
+    ARTICLE_BY_ID: (id) => `/knowledge/articles/${id}`,
+
     // Moderation
     MODERATION_QUEUE: '/knowledge/moderation/queue',
+    MODERATION_PENDING: '/knowledge/moderation/pending',
     APPROVE: (id) => `/knowledge/moderation/${id}/approve`,
     REJECT: (id) => `/knowledge/moderation/${id}/reject`,
 
@@ -75,6 +82,8 @@ export const CONTENT_ENDPOINTS = {
 export const CMS_ENDPOINTS = {
     CONTENT: '/admin/cms/content',
     CONTENT_BY_ID: (id) => `/admin/cms/content/${id}`,
+    ARTICLES: '/admin/cms/articles',
+    WORKFLOW: (id) => `/admin/cms/articles/${id}/workflow`,
 };
 
 // ==================== Advisory & Weather ====================
@@ -102,6 +111,14 @@ export const ADVISORY_LOG_ENDPOINTS = {
     BY_ID: (id) => `/advisory-logs/${id}`,
     BY_FARMER: (farmerId) => `/advisory-logs/farmer/${farmerId}`,
     STATS: '/advisory-logs/stats',
+    FEEDBACK: '/advisory-logs/feedback',
+    OPENED: (id) => `/advisory-logs/opened/${id}`,
+    ANALYTICS: '/advisory-logs/analytics',
+    ALERT_FATIGUE: '/advisory-logs/analytics/alert-fatigue',
+    HIGH_RISK_DISTRICTS: '/advisory-logs/analytics/high-risk-districts',
+    TOP_RULES: '/advisory-logs/analytics/top-rules',
+    UNDERPERFORMING_RULES: '/advisory-logs/analytics/underperforming-rules',
+    ENGAGEMENT_SCORE: '/advisory-logs/analytics/engagement-score',
 };
 
 export const RULE_ENDPOINTS = {
@@ -115,6 +132,7 @@ export const RULE_ENDPOINTS = {
 export const AI_ENDPOINTS = {
     CHAT: '/ai/chat',
     DIAGNOSE: '/ai/diagnose',
+    RECOMMENDATION: '/ai/recommendation',
 };
 
 export const DIAGNOSIS_ENDPOINTS = {
@@ -122,12 +140,14 @@ export const DIAGNOSIS_ENDPOINTS = {
     BY_ID: (id) => `/diagnoses/${id}`,
     MY: '/diagnoses/my',
     FEEDBACK: (id) => `/diagnoses/${id}/feedback`,
+    HISTORY: '/diagnoses/history',
 };
 
 export const ADMIN_DIAGNOSIS_ENDPOINTS = {
     PENDING: '/admin/diagnosis/pending',
     REVIEW: (id) => `/admin/diagnosis/${id}/review`,
     STATS: '/admin/diagnosis/stats',
+    QUEUE: '/admin/diagnosis/queue',
 };
 
 export const DISEASE_ENDPOINTS = {
@@ -139,6 +159,11 @@ export const DISEASE_ENDPOINTS = {
     // Signals
     SIGNALS: '/disease/signals',
     REPORT_SIGNAL: '/disease/signals/report',
+
+    // Pesticides & Feedback
+    PESTICIDES: '/diseases/pesticides',
+    FEEDBACK: '/diseases/feedback',
+    LINK_PESTICIDE: (id) => `/diseases/${id}/link-pesticide`,
 };
 
 // ==================== Finance & Subsidies ====================
@@ -147,6 +172,7 @@ export const FINANCE_ENDPOINTS = {
     LOANS: '/finance/loans',
     LOAN_BY_ID: (id) => `/finance/loans/${id}`,
     APPLY_LOAN: '/finance/loans/apply',
+    INSURANCE: '/finance/insurance',
 };
 
 export const SUBSIDY_ENDPOINTS = {
@@ -168,6 +194,8 @@ export const LOGISTICS_ENDPOINTS = {
     QUOTE: '/logistics/quote',
     BOOK: '/logistics/book',
     TRACK: (id) => `/logistics/track/${id}`,
+    STATUS: '/logistics/status',
+    UPDATE_STATUS: (id) => `/logistics/${id}/status`,
 };
 
 export const COLD_STORAGE_ENDPOINTS = {
@@ -192,13 +220,17 @@ export const NOTIFICATION_ENDPOINTS = {
     BASE: '/notifications',
     MARK_READ: (id) => `/notifications/${id}/read`,
     MARK_ALL_READ: '/notifications/read-all',
-    UNREAD_COUNT: '/notifications/unread/count',
+    UNREAD_COUNT: '/notifications/unread-count',
 };
 
 export const ADMIN_NOTIFICATION_ENDPOINTS = {
+    BASE: '/admin/notifications',
     SEND: '/admin/notifications/send',
     BROADCAST: '/admin/notifications/broadcast',
     HISTORY: '/admin/notifications/history',
+    STATS: '/admin/notifications/stats',
+    TEMPLATES: '/admin/notifications/templates',
+    RETRY_PENDING: '/admin/notifications/retry-pending',
 };
 
 // ==================== Market Prices ====================
@@ -208,6 +240,10 @@ export const MARKET_PRICE_ENDPOINTS = {
     LATEST: '/market-prices/latest',
     BY_CROP: (cropName) => `/market-prices/crop/${cropName}`,
     TRENDS: '/market-prices/trends',
+    TODAY: '/market-prices/today',
+    CROPS: '/market-prices/crops',
+    DISTRICTS: '/market-prices/districts',
+    BY_DATE: (date) => `/market-prices/date/${date}`,
 };
 
 export const MARKET_ENDPOINTS = {
@@ -229,17 +265,25 @@ export const ADMIN_ENDPOINTS = {
     // Users
     USERS: '/admin/users',
     USER_BY_ID: (id) => `/admin/users/${id}`,
+    APPROVE_USER: (userId) => `/admin/users/${userId}/approve`,
+    USER_STATUS: (id) => `/admin/users/${id}/status`,
 
     // Farmers
     FARMERS: '/admin/farmers',
     FARMER_BY_ID: (id) => `/admin/farmers/${id}`,
     VERIFY_FARMER: (id) => `/admin/farmers/${id}/verify`,
+    FARMERS_EXPORT: '/admin/farmers/export',
+    FARMERS_IMPORT: '/admin/farmers/import',
+
+    // Vendors
+    VENDORS_PENDING: '/admin/vendors/pending',
 
     // Analytics
     ANALYTICS_OVERVIEW: '/admin/analytics/overview',
     ANALYTICS_USERS: '/admin/analytics/users',
     ANALYTICS_MARKETPLACE: '/admin/analytics/marketplace',
     ANALYTICS_REVENUE: '/admin/analytics/revenue',
+    ANALYTICS_DASHBOARD: '/admin/analytics/dashboard',
 
     // RBAC
     RBAC_ROLES: '/admin/rbac/roles',
@@ -249,15 +293,25 @@ export const ADMIN_ENDPOINTS = {
     // Health
     HEALTH_STATUS: '/admin/health/status',
     HEALTH_INTEGRATIONS: '/admin/health/integrations',
+    ACTUATOR_HEALTH: '/actuator/health',
+    ACTUATOR_INFO: '/actuator/info',
+    ACTUATOR_METRICS: (name) => `/actuator/metrics/${name}`,
 
     // Settings
     SETTINGS: '/admin/settings',
     SETTING_BY_KEY: (key) => `/admin/settings/${key}`,
 };
 
+export const ADMIN_RBAC_ENDPOINTS = {
+    ROLES: '/admin/rbac/roles',
+    PERMISSIONS: '/admin/rbac/permissions',
+    ASSIGN: '/admin/rbac/assign',
+};
+
 // ==================== Master Data ====================
 
 export const MASTER_DATA_ENDPOINTS = {
+    BY_CODE_V1: (code) => `/v1/master-data/${code}`,
     DISTRICTS: '/districts',
     CROPS: '/crops',
     UNITS: '/units',
@@ -265,6 +319,13 @@ export const MASTER_DATA_ENDPOINTS = {
     // Admin endpoints
     ADMIN_CROPS: '/admin/master-data/crops',
     ADMIN_DISTRICTS: '/admin/master-data/districts',
+    ADMIN_CATEGORIES: '/admin/master-data/categories',
+};
+
+export const ADMIN_MASTER_DATA_ENDPOINTS = {
+    CATEGORIES: '/admin/master-data/categories',
+    ITEMS_BY_CATEGORY: (categoryId) => `/admin/master-data/categories/${categoryId}/items`,
+    ITEMS_BY_ID: (id) => `/admin/master-data/items/${id}`,
 };
 
 // ==================== Support & Feedback ====================
@@ -272,6 +333,8 @@ export const MASTER_DATA_ENDPOINTS = {
 export const FEEDBACK_ENDPOINTS = {
     SUBMIT: '/feedback/submit',
     BASE: '/feedback',
+    ADMIN: '/admin/feedback',
+    UPDATE_STATUS: (id) => `/admin/feedback/${id}/status`,
 };
 
 // ==================== Default Export ====================
@@ -306,5 +369,7 @@ export default {
     PRICE_ALERT: PRICE_ALERT_ENDPOINTS,
     ADMIN: ADMIN_ENDPOINTS,
     MASTER_DATA: MASTER_DATA_ENDPOINTS,
+    ADMIN_MASTER_DATA: ADMIN_MASTER_DATA_ENDPOINTS,
+    ADMIN_RBAC: ADMIN_RBAC_ENDPOINTS,
     FEEDBACK: FEEDBACK_ENDPOINTS,
 };

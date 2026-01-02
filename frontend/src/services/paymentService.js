@@ -18,7 +18,7 @@ const paymentService = {
 
     // Get transaction details
     getTransaction: async (id) => {
-        const response = await api.get(`/payments/${id}`);
+        const response = await api.get(PAYMENT_ENDPOINTS.BY_ID(id));
         return response.data;
     },
 };

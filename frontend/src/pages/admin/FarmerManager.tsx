@@ -22,6 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, CheckCircle, XCircle, Download, Upload, Search, Users, UserCheck, UserX } from 'lucide-react';
 import api from '@/services/api';
+import { ADMIN_ENDPOINTS } from '@/config/endpoints';
 import { toast } from 'sonner';
 
 interface Farmer {
@@ -65,7 +66,7 @@ const FarmerManager = () => {
 
     const fetchFarmers = async () => {
         try {
-            const res = await api.get('/admin/farmers');
+            const res = await api.get(ADMIN_ENDPOINTS.FARMERS);
             if (res.data.success) {
                 setFarmers(res.data.data);
             }
@@ -77,7 +78,7 @@ const FarmerManager = () => {
 
     const handleViewProfile = async (id: string) => {
         try {
-            const res = await api.get(`/admin/farmers/${id}`);
+            const res = await api.get(ADMIN_ENDPOINTS.FARMER_BY_ID(id));
             if (res.data.success) {
                 setSelectedFarmer(res.data.data);
                 setVerifyMode(null); // Reset mode
@@ -98,7 +99,7 @@ const FarmerManager = () => {
         }
 
         try {
-            await api.post(`/admin/farmers/${selectedFarmer.farmer.id}/verify`, {
+            await api.post(ADMIN_ENDPOINTS.VERIFY_FARMER(selectedFarmer.farmer.id), {
                 verified: verifyMode === 'APPROVE',
                 rejectionReason: verifyMode === 'REJECT' ? rejectionReason : null,
                 notes: verifyNotes
@@ -115,7 +116,7 @@ const FarmerManager = () => {
 
     const handleExport = async () => {
         try {
-            const res = await api.get('/admin/farmers/export', { responseType: 'blob' });
+            const res = await api.get(ADMIN_ENDPOINTS.FARMERS_EXPORT, { responseType: 'blob' });
             const url = window.URL.createObjectURL(new Blob([res.data]));
             const link = document.createElement('a');
             link.href = url;
@@ -137,7 +138,7 @@ const FarmerManager = () => {
         formData.append('file', file);
 
         try {
-            await api.post('/admin/farmers/import', formData, {
+            await api.post(ADMIN_ENDPOINTS.FARMERS_IMPORT, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             toast.success("Farmers imported successfully");

@@ -19,8 +19,9 @@ const FinanceDashboard = () => {
 
     const loadUserFinance = async () => {
         try {
+            // Corrected method names
             const loanData = await financeService.getLoans(user.id);
-            const policyData = await financeService.getInsurancePolicies(user.id);
+            const policyData = await financeService.getPolicies(user.id);
             setLoans(loanData);
             setPolicies(policyData);
         } catch (error) {
@@ -30,7 +31,7 @@ const FinanceDashboard = () => {
 
     const loadSubsidies = async () => {
         try {
-            const data = await financeService.getSubsidies();
+            const data = await financeService.getAllSubsidies();
             setSubsidies(data);
         } catch (error) {
             console.error("Error loading subsidies", error);

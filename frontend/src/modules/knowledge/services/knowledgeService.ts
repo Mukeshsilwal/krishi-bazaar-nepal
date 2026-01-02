@@ -35,13 +35,13 @@ const knowledgeService = {
         if (tag && tag !== 'undefined') params.tag = tag;
         if (status && status !== 'undefined') params.status = status;
 
-        const response = await api.get<Article[]>('/knowledge/articles', { params });
+        const response = await api.get<Article[]>(KNOWLEDGE_ENDPOINTS.ARTICLES, { params });
         return response.data;
     },
 
     getArticleById: async (id: string) => {
         if (!id || id === 'undefined') throw new Error('Invalid Article ID');
-        const response = await api.get<Article>(`/knowledge/articles/${id}`);
+        const response = await api.get<Article>(KNOWLEDGE_ENDPOINTS.ARTICLE_BY_ID(id));
         return response.data;
     },
 
@@ -52,17 +52,17 @@ const knowledgeService = {
     },
 
     createArticle: async (article: Partial<Article>) => {
-        const response = await api.post<Article>('/knowledge/articles', article);
+        const response = await api.post<Article>(KNOWLEDGE_ENDPOINTS.ARTICLES, article);
         return response.data;
     },
 
     updateArticle: async (id: string, article: Partial<Article>) => {
-        const response = await api.put<Article>(`/knowledge/articles/${id}`, article);
+        const response = await api.put<Article>(KNOWLEDGE_ENDPOINTS.ARTICLE_BY_ID(id), article);
         return response.data;
     },
 
     deleteArticle: async (id: string) => {
-        await api.delete(`/knowledge/articles/${id}`);
+        await api.delete(KNOWLEDGE_ENDPOINTS.ARTICLE_BY_ID(id));
     }
 };
 

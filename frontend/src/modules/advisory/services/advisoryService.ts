@@ -25,6 +25,23 @@ export interface ContextualAdvisory {
     actionLabel: string;
 }
 
+export interface Pesticide {
+    id: string;
+    name: string;
+    targetDiseases: string[];
+    applicationMethod: string;
+    dosage: string;
+    safetyPeriod: number;
+    precautions: string;
+}
+
+export interface DiseaseFeedback {
+    diagnosisId: string;
+    wasAccurate: boolean;
+    actualDisease?: string;
+    comments?: string;
+}
+
 const advisoryService = {
     diagnoseBySymptoms: async (symptom: string) => {
         const response = await api.get<DiseaseDiagnosis[]>('/diseases/diagnose', {
@@ -38,26 +55,14 @@ const advisoryService = {
         return response.data;
     },
 
-    getContextualAdvisory: async (context: string, param: string) => {
-        const response = await api.get<ContextualAdvisory[]>('/advisory/contextual', {
-            params: { context, param }
-        });
+    // Pesticide Management
+    createPesticide: async (pesticide: Partial<Pesticide>) => {
+        const response = await api.post(DISEASE_ENDPOINTS.PESTICIDES, pesticide);
         return response.data;
     },
 
-    // Admin Methods
-    createDisease: async (disease: any) => {
-        const response = await api.post(DISEASE_ENDPOINTS.BASE, disease);
-        return response.data;
-    },
-
-    createPesticide: async (pesticide: any) => {
-        const response = await api.post('/diseases/pesticides', pesticide);
-        return response.data;
-    },
-
-    getAllPesticides: async () => {
-        const response = await api.get('/diseases/pesticides');
+    getPesticides: async () => {
+        const response = await api.get(DISEASE_ENDPOINTS.PESTICIDES);
         return response.data;
     },
 
@@ -65,25 +70,9 @@ const advisoryService = {
         if (!diseaseId || diseaseId === 'undefined') throw new Error('Invalid Disease ID');
         if (!data.pesticideId || data.pesticideId === 'undefined') throw new Error('Invalid Pesticide ID');
 
-        await api.post(`/diseases/${diseaseId}/link-pesticide`, null, {
+        await api.post(DISEASE_ENDPOINTS.LINK_PESTICIDE(diseaseId), null, {
             params: data
         });
-    },
-
-    // Rule Engine Methods
-    getAllRules: async () => {
-        const response = await api.get(RULE_ENDPOINTS.BASE);
-        return response.data;
-    },
-
-    createRule: async (rule: any) => {
-        const response = await api.post(RULE_ENDPOINTS.BASE, rule);
-        return response.data;
-    },
-
-    updateRule: async (id: string, rule: any) => {
-        const response = await api.put(RULE_ENDPOINTS.BY_ID(id), rule);
-        return response.data;
     },
 
     sendSignal: async (payload: any) => {
@@ -91,12 +80,13 @@ const advisoryService = {
         return response.data;
     },
 
-    submitFeedback: async (feedback: { userId: string; diseaseId?: string; queryText: string; isHelpful: boolean; comments?: string }) => {
-        await api.post('/diseases/feedback', feedback);
+    // Disease Feedback
+    submitDiseaseFeedback: async (feedback: DiseaseFeedback) => {
+        await api.post(DISEASE_ENDPOINTS.FEEDBACK, feedback);
     },
 
     getDiagnosisHistory: async (page = 0, size = 10) => {
-        const response = await api.get('/diagnoses/history', {
+        const response = await api.get(DIAGNOSIS_ENDPOINTS.HISTORY, {
             params: { page, size }
         });
         return response.data;

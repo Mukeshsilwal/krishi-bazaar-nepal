@@ -142,7 +142,7 @@ const advisoryLogService = {
      */
     async getAnalytics(since?: string): Promise<AdvisoryAnalytics> {
         const params = since ? `?since=${since}` : '';
-        const response = await api.get(`${ADVISORY_LOG_ENDPOINTS.BASE}/analytics${params}`);
+        const response = await api.get(`${ADVISORY_LOG_ENDPOINTS.ANALYTICS}${params}`);
         return response.data.data;
     },
 
@@ -158,14 +158,14 @@ const advisoryLogService = {
      * Mark advisory as opened (Farmer)
      */
     async markAsOpened(logId: string): Promise<void> {
-        await api.post(`/advisory-logs/opened/${logId}`);
+        await api.post(ADVISORY_LOG_ENDPOINTS.OPENED(logId));
     },
 
     /**
      * Submit feedback (Farmer)
      */
     async submitFeedback(logId: string, feedback: string, comment?: string): Promise<void> {
-        await api.post('/advisory-logs/feedback', {
+        await api.post(ADVISORY_LOG_ENDPOINTS.FEEDBACK, {
             logId,
             feedback,
             comment
@@ -180,7 +180,7 @@ const advisoryLogService = {
         if (since) params.append('since', since);
         params.append('threshold', threshold.toString());
 
-        const response = await api.get(`/advisory-logs/analytics/alert-fatigue?${params.toString()}`);
+        const response = await api.get(`${ADVISORY_LOG_ENDPOINTS.ALERT_FATIGUE}?${params.toString()}`);
         return response.data.data;
     },
 
@@ -189,7 +189,7 @@ const advisoryLogService = {
      */
     async getHighRiskDistricts(since?: string): Promise<string[]> {
         const params = since ? `?since=${since}` : '';
-        const response = await api.get(`/advisory-logs/analytics/high-risk-districts${params}`);
+        const response = await api.get(`${ADVISORY_LOG_ENDPOINTS.HIGH_RISK_DISTRICTS}${params}`);
         return response.data.data;
     },
 
@@ -201,7 +201,7 @@ const advisoryLogService = {
         if (since) params.append('since', since);
         params.append('limit', limit.toString());
 
-        const response = await api.get(`/advisory-logs/analytics/top-rules?${params.toString()}`);
+        const response = await api.get(`${ADVISORY_LOG_ENDPOINTS.TOP_RULES}?${params.toString()}`);
         return response.data.data;
     },
 
@@ -213,7 +213,7 @@ const advisoryLogService = {
         if (since) params.append('since', since);
         params.append('limit', limit.toString());
 
-        const response = await api.get(`/advisory-logs/analytics/underperforming-rules?${params.toString()}`);
+        const response = await api.get(`${ADVISORY_LOG_ENDPOINTS.UNDERPERFORMING_RULES}?${params.toString()}`);
         return response.data.data;
     },
 
@@ -222,7 +222,7 @@ const advisoryLogService = {
      */
     async getFarmerEngagementScore(since?: string): Promise<number> {
         const params = since ? `?since=${since}` : '';
-        const response = await api.get(`/advisory-logs/analytics/engagement-score${params}`);
+        const response = await api.get(`${ADVISORY_LOG_ENDPOINTS.ENGAGEMENT_SCORE}${params}`);
         return response.data.data;
     }
 };

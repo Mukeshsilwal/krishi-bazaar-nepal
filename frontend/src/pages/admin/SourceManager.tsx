@@ -55,8 +55,12 @@ const SourceManager = () => {
 
     const fetchSources = async () => {
         try {
-            const res = await api.get('/knowledge/sources');
-            setSources(res.data);
+            const res = await api.get(KNOWLEDGE_ENDPOINTS.SOURCES);
+            if (res.data.success) {
+                setSources(res.data.data);
+            } else {
+                toast.error(res.data.message || "Failed to fetch sources");
+            }
         } catch (err) {
             console.error(err);
             toast.error("Failed to fetch sources");
@@ -66,10 +70,10 @@ const SourceManager = () => {
     const handleSubmit = async () => {
         try {
             if (isEditing && formData.id) {
-                await api.put(`/knowledge/sources/${formData.id}`, formData);
+                await api.put(KNOWLEDGE_ENDPOINTS.SOURCE_BY_ID(formData.id), formData);
                 toast.success("Source updated successfully");
             } else {
-                await api.post('/knowledge/sources', formData);
+                await api.post(KNOWLEDGE_ENDPOINTS.SOURCES, formData);
                 toast.success("Source created successfully");
             }
             setOpen(false);
@@ -84,7 +88,7 @@ const SourceManager = () => {
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this source?")) return;
         try {
-            await api.delete(`/knowledge/sources/${id}`);
+            await api.delete(KNOWLEDGE_ENDPOINTS.SOURCE_BY_ID(id));
             toast.success("Source deleted");
             fetchSources();
         } catch (err) {

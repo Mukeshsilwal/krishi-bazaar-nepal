@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import api from '@/services/api';
+import { ADMIN_ENDPOINTS } from '@/config/endpoints';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, ShoppingCart, FileText, CheckCircle, Loader2 } from 'lucide-react';
 
@@ -14,7 +15,7 @@ const AnalyticsDashboard = () => {
 
     const fetchStats = async () => {
         try {
-            const res = await api.get('/admin/analytics/dashboard');
+            const res = await api.get(ADMIN_ENDPOINTS.ANALYTICS_DASHBOARD);
             if (res.data.success) {
                 setStats(res.data.data);
             }

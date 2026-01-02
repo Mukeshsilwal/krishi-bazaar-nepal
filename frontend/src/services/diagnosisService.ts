@@ -35,7 +35,7 @@ export const diagnosisService = {
     },
 
     getHistory: async (page = 0, size = 10) => {
-        const response = await api.get(`/diagnoses/history?page=${page}&size=${size}`);
+        const response = await api.get(`${DIAGNOSIS_ENDPOINTS.HISTORY}?page=${page}&size=${size}`);
         return response.data;
     },
 
@@ -45,7 +45,7 @@ export const diagnosisService = {
     },
 
     getReviewQueue: async (page = 0, size = 10) => {
-        const response = await api.get(`/admin/diagnosis/queue?page=${page}&size=${size}`);
+        const response = await api.get(`${ADMIN_DIAGNOSIS_ENDPOINTS.QUEUE}?page=${page}&size=${size}`);
         return response.data;
     },
 

@@ -107,7 +107,7 @@ const AdvisoryHistoryPage = () => {
                     </CardContent>
                 </Card>
             ) : (
-                <div className="space-y-4">
+                <div className="space-comfortable">
                     {advisories.map((advisory) => {
                         const typeInfo = advisoryTypeLabels[advisory.advisoryType] || advisoryTypeLabels.WEATHER;
                         const severityInfo = severityLabels[advisory.severity] || severityLabels.INFO;

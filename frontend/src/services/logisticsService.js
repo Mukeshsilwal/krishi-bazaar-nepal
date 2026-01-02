@@ -21,12 +21,12 @@ const logisticsService = {
     },
 
     getStatus: async (orderId) => {
-        const response = await api.get(`/logistics/status`, { params: { orderId } });
+        const response = await api.get(LOGISTICS_ENDPOINTS.STATUS, { params: { orderId } });
         return response.data;
     },
 
     updateStatus: async (id, status) => {
-        await api.put(`/logistics/${id}/status`, status);
+        await api.put(LOGISTICS_ENDPOINTS.UPDATE_STATUS(id), status);
     }
 };
 
