@@ -41,6 +41,7 @@ import {
   Upload
 } from 'lucide-react';
 import knowledgeService, { Article, KnowledgeCategory } from '@/modules/knowledge/services/knowledgeService';
+import imageUploadService from '@/services/imageUploadService';
 import { toast } from 'sonner';
 
 const KnowledgeCMSPage = () => {
@@ -215,7 +216,30 @@ const KnowledgeCMSPage = () => {
                         onChange={e => setEditingArticle({ ...editingArticle, coverImageUrl: e.target.value })}
                         placeholder="https://..."
                       />
-                      <Button type="button" variant="outline" size="icon">
+                      <input
+                        type="file"
+                        id="cms-upload-input"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            try {
+                              toast.info(language === 'ne' ? 'अपलोड हुँदैछ...' : 'Uploading...');
+                              const url = await imageUploadService.uploadImage(e.target.files[0], 'CONTENT');
+                              setEditingArticle(prev => ({ ...prev, coverImageUrl: url }));
+                              toast.success(language === 'ne' ? 'सफलतापूर्वक अपलोड भयो' : 'Uploaded successfully');
+                            } catch (err) {
+                              toast.error(language === 'ne' ? 'अपलोड असफल भयो' : 'Upload failed');
+                            }
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => document.getElementById('cms-upload-input')?.click()}
+                      >
                         <Upload className="h-4 w-4" />
                       </Button>
                     </div>

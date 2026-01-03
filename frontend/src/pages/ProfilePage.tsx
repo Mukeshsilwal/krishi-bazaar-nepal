@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../modules/auth/context/AuthContext';
 import { User, Mail, Phone, MapPin, Edit2, Save } from 'lucide-react';
+import imageUploadService from '../services/imageUploadService';
 
 export default function ProfilePage() {
     const { t } = useLanguage();
@@ -62,9 +63,38 @@ export default function ProfilePage() {
                     {/* Profile Header */}
                     <div className="bg-gradient-to-r from-green-600 to-blue-600 p-8">
                         <div className="flex items-center gap-4">
-                            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center text-4xl font-bold text-green-600">
-                                {user?.name?.charAt(0) || '?'}
+                            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center text-4xl font-bold text-green-600 relative overflow-hidden group">
+                                {user?.profileImage ? (
+                                    <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
+                                ) : (
+                                    user?.name?.charAt(0) || '?'
+                                )}
+
+                                {isEditing && (
+                                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer" onClick={() => document.getElementById('profile-upload')?.click()}>
+                                        <Edit2 className="text-white w-6 h-6" />
+                                    </div>
+                                )}
                             </div>
+                            <input
+                                type="file"
+                                id="profile-upload"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={async (e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                        try {
+                                            // Assume import imageUploadService from '@/services/imageUploadService'
+                                            const url = await imageUploadService.uploadImage(e.target.files[0], 'PROFILE');
+                                            setFormData(prev => ({ ...prev, profileImage: url }));
+                                            // Also update user context if needed or wait for save
+                                        } catch (err) {
+                                            console.error(err);
+                                            alert('Failed to upload image');
+                                        }
+                                    }
+                                }}
+                            />
                             <div className="text-white">
                                 <h2 className="text-2xl font-bold">{user?.name || 'User'}</h2>
                                 <p className="text-green-100">{user?.role || 'BUYER'}</p>

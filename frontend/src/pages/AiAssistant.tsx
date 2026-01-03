@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import aiService from '../services/aiService';
+import imageUploadService from '../services/imageUploadService';
 import { useAuth } from '../modules/auth/context/AuthContext';
 import { Bot, Send, Image as ImageIcon, Loader2 } from 'lucide-react';
 
@@ -41,10 +42,15 @@ const AiAssistant = () => {
         try {
             let imageUrl = null;
             if (currentImage) {
-                // TODO: Upload image to Cloudinary/Backend first
-                // For now, we will just send a placeholder or skip if not implemented
-                // await imageService.upload(currentImage)...
-                // console.log("Image upload not yet fully implemented, skipping actual upload");
+                // Upload image to Cloudinary using signed upload
+                try {
+                    imageUrl = await imageUploadService.uploadImage(currentImage, 'DIAGNOSIS');
+                } catch (uploadError) {
+                    console.error("Upload failed", uploadError);
+                    setMessages(prev => [...prev, { type: 'bot', text: 'Failed to upload image. Please try again.' }]);
+                    setLoading(false);
+                    return;
+                }
             }
 
             const response = await aiService.getRecommendation(userMsg, user?.id, imageUrl);
