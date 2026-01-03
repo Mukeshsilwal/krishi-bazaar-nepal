@@ -118,8 +118,12 @@ public class PaymentService {
 
     @Transactional
     public TransactionDto verifyPayment(UUID transactionId, String gatewayTransactionId) {
+        // Try to find by Transaction ID first, then by Order ID
         Transaction transaction = transactionRepository.findById(transactionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
+                .orElseGet(() -> transactionRepository.findByOrderIdAndPaymentStatus(
+                        transactionId, Transaction.PaymentStatus.PENDING)
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Transaction not found for ID or Order ID: " + transactionId)));
 
         if (transaction.getPaymentStatus() == Transaction.PaymentStatus.COMPLETED) {
             return TransactionDto.fromEntity(transaction);
@@ -129,7 +133,10 @@ public class PaymentService {
         boolean verified = false;
         try {
             if (transaction.getPaymentMethod() == Transaction.PaymentMethod.ESEWA) {
-                verified = esewaService.verifyPayment(gatewayTransactionId, transaction.getAmount());
+                // eSewa verification requires the exact ID sent during initiation (which was
+                // Order ID)
+                verified = esewaService.verifyPayment(transaction.getOrder().getId().toString(),
+                        transaction.getAmount());
             } else if (transaction.getPaymentMethod() == Transaction.PaymentMethod.KHALTI) {
                 verified = khaltiService.verifyPayment(gatewayTransactionId);
             }
@@ -138,7 +145,7 @@ public class PaymentService {
             transaction.setPaymentStatus(Transaction.PaymentStatus.FAILED);
             transaction.setGatewayResponse(e.getMessage());
             transactionRepository.save(transaction);
-            throw new BadRequestException("Payment verification failed");
+            throw new BadRequestException("Payment verification failed: " + e.getMessage());
         }
 
         if (verified) {

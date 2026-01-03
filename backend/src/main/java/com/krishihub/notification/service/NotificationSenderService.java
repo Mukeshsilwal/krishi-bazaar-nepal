@@ -1,10 +1,14 @@
 package com.krishihub.notification.service;
 
+import com.krishihub.auth.repository.UserRepository;
+import com.krishihub.notification.dto.MessageRequest;
 import com.krishihub.notification.entity.Notification;
+import com.krishihub.notification.enums.MessageType;
 import com.krishihub.notification.enums.NotificationStatus;
 import com.krishihub.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,12 +21,9 @@ public class NotificationSenderService {
 
     private final NotificationRepository notificationRepository;
 
-    @org.springframework.beans.factory.annotation.Autowired
-    private com.krishihub.shared.service.EmailService emailService;
-    @org.springframework.beans.factory.annotation.Autowired
-    private com.krishihub.auth.service.SmsService smsService;
-    @org.springframework.beans.factory.annotation.Autowired
-    private com.krishihub.auth.repository.UserRepository userRepository;
+    private final NotificationOrchestrator notificationOrchestrator;
+    @Autowired
+    private UserRepository userRepository;
 
     public void sendNotification(UUID notificationId) {
         Notification notification = notificationRepository.findById(notificationId).orElse(null);
@@ -38,29 +39,53 @@ public class NotificationSenderService {
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
             boolean success = false;
-            switch (notification.getChannel()) {
-                case SMS:
-                    if (user.getMobileNumber() != null) {
-                        smsService.sendNotification(user.getMobileNumber(), notification.getMessage());
+            try {
+                switch (notification.getChannel()) {
+                    case SMS:
+                        if (user.getMobileNumber() != null) {
+                            MessageRequest smsRequest = MessageRequest.builder()
+                                    .type(MessageType.SMS)
+                                    .recipient(user.getMobileNumber())
+                                    .content(notification.getMessage())
+                                    .build();
+                            notificationOrchestrator.send(smsRequest);
+                            success = true;
+                        }
+                        break;
+                    case EMAIL:
+                        if (user.getEmail() != null) {
+                            MessageRequest emailRequest = MessageRequest.builder()
+                                    .type(MessageType.EMAIL)
+                                    .recipient(user.getEmail())
+                                    .subject(notification.getTitle())
+                                    .content(notification.getMessage())
+                                    .build();
+                            notificationOrchestrator.send(emailRequest);
+                            success = true;
+                        }
+                        break;
+                    case PUSH:
+                        // TODO: Implement Push Notification
                         success = true;
-                    }
-                    break;
-                case EMAIL:
-                    if (user.getEmail() != null) {
-                        emailService.sendEmail(user.getEmail(), notification.getTitle(), notification.getMessage());
-                        success = true;
-                    }
-                    break;
-                case PUSH:
-                    // TODO: Implement Push Notification Service (FCM)
-                    // For now, mark as sent to avoid failure loops if PUSH is selected
-                    // log.info("Push notification logic not implemented yet.");
-                    success = true;
-                    break;
-                case WHATSAPP:
-                    // TODO: Implement WhatsApp Logic
-                    success = true;
-                    break;
+                        break;
+                    case WHATSAPP:
+                        MessageRequest whatsappRequest = MessageRequest.builder()
+                                .type(MessageType.WHATSAPP)
+                                // Assuming mobile number is valid for WhatsApp
+                                .recipient(user.getMobileNumber() != null ? user.getMobileNumber() : "")
+                                .content(notification.getMessage())
+                                .build();
+                        // Only send if recipient is valid
+                        if (!whatsappRequest.getRecipient().isEmpty()) {
+                            notificationOrchestrator.send(whatsappRequest);
+                            success = true;
+                        }
+                        break;
+                }
+            } catch (Exception e) {
+                log.error("Error sending message via orchestrator", e);
+                success = false;
+                notification.setFailureReason(e.getMessage());
             }
 
             if (success) {

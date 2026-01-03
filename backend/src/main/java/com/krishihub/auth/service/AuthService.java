@@ -6,6 +6,9 @@ import com.krishihub.auth.entity.User;
 import com.krishihub.auth.repository.OtpVerificationRepository;
 import com.krishihub.auth.repository.UserRepository;
 import com.krishihub.auth.security.JwtUtil;
+import com.krishihub.notification.dto.MessageRequest;
+import com.krishihub.notification.enums.MessageType;
+import com.krishihub.notification.service.NotificationOrchestrator;
 import com.krishihub.shared.exception.BadRequestException;
 import com.krishihub.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +34,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
     private final SmsService smsService;
-    private final com.krishihub.shared.service.EmailService emailService;
+    private final NotificationOrchestrator notificationOrchestrator;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${app.otp.expiration}")
@@ -93,7 +96,13 @@ public class AuthService {
 
         // Send OTP via Email
         try {
-            emailService.sendEmail(request.getEmail(), "Registration OTP", "Your OTP for registration is: " + otp);
+            MessageRequest emailRequest = MessageRequest.builder()
+                    .type(MessageType.EMAIL)
+                    .recipient(request.getEmail())
+                    .subject("Registration OTP")
+                    .content("Your OTP for registration is: " + otp)
+                    .build();
+            notificationOrchestrator.send(emailRequest);
             log.info("Registration OTP sent to email {}", request.getEmail());
         } catch (Exception e) {
             log.error("Failed to send email OTP", e);
@@ -120,7 +129,13 @@ public class AuthService {
 
         if (user.getEmail() != null && !user.getEmail().isEmpty()) {
             try {
-                emailService.sendEmail(user.getEmail(), "Login OTP", "Your OTP for login is: " + otp);
+                MessageRequest emailRequest = MessageRequest.builder()
+                        .type(MessageType.EMAIL)
+                        .recipient(user.getEmail())
+                        .subject("Login OTP")
+                        .content("Your OTP for login is: " + otp)
+                        .build();
+                notificationOrchestrator.send(emailRequest);
                 log.info("Login OTP sent to email {}", user.getEmail());
             } catch (Exception e) {
                 log.error("Failed to send login email OTP to {}", user.getEmail(), e);
@@ -316,8 +331,18 @@ public class AuthService {
 
         // Send OTP via Email if available
         if (user.getEmail() != null && !user.getEmail().isEmpty()) {
-            emailService.sendEmail(user.getEmail(), "Password Reset OTP", "Your OTP is: " + otp);
-            log.info("Forgot password OTP sent to email {}", user.getEmail());
+            try {
+                MessageRequest emailRequest = MessageRequest.builder()
+                        .type(MessageType.EMAIL)
+                        .recipient(user.getEmail())
+                        .subject("Password Reset OTP")
+                        .content("Your OTP is: " + otp)
+                        .build();
+                notificationOrchestrator.send(emailRequest);
+                log.info("Forgot password OTP sent to email {}", user.getEmail());
+            } catch (Exception e) {
+                log.error("Failed to send forgot password email", e);
+            }
         } else {
             // Fallback to SMS or simulated SMS
             smsService.sendOtp(mobileNumber, otp);

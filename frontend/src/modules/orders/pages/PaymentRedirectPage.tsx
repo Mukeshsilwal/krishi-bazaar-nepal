@@ -25,23 +25,43 @@ export default function PaymentRedirectPage() {
                 const gatewayTransactionId = searchParams.get('refId') || searchParams.get('transaction_code') || searchParams.get('gatewayTransactionId');
                 const data = searchParams.get('data');
 
-                if (data) {
-                    // If 'data' is present, handling might be different or backend expects it.
-                    // For now, let's try to decode if needed, or send as is if backend expects data.
-                    // However, our paymentService.verifyPayment signature is specific.
-                    // Let's log for debugging if verification fails.
-                    console.log('Payment data param received:', data);
+                let rawData = data;
+
+                // Manual extraction for malformed URLs (e.g. double '?' from gateway)
+                // URL: ...?txnId=UUID?data=BLOB
+                if (!rawData) {
+                    const href = window.location.href;
+                    if (href.includes('?data=')) {
+                        const parts = href.split('?data=');
+                        if (parts.length > 1) {
+                            rawData = parts.pop()?.split('&')[0];
+                        }
+                    } else if (href.includes('&data=')) {
+                        const parts = href.split('&data=');
+                        if (parts.length > 1) {
+                            rawData = parts.pop()?.split('&')[0];
+                        }
+                    }
                 }
 
-                if (!transactionId || !gatewayTransactionId) {
-                    // Try to extract from 'data' if it's a JWT-like base64, but simplified for now.
-                    // If explicit params are missing and we have 'data', we might need to change paymentService.
-                    // But to respect existing code, we try to call verify with what we have.
+                if (rawData) {
+                    try {
+                        const decodedData = JSON.parse(atob(rawData));
+                        console.log('Decoded eSewa data:', decodedData);
 
-                    if (data) {
-                        // Fallback: Use 'data' as transactionId or special handling?
-                        // Actually, if data is present, it's likely eSewa V2. 
-                        // It usually contains the signed payload.
+                        if (decodedData.transaction_uuid && (decodedData.transaction_code || decodedData.refId)) {
+                            const txnUuid = decodedData.transaction_uuid;
+                            const gatewayRefId = decodedData.transaction_code || decodedData.refId;
+
+                            await paymentService.verifyPayment(txnUuid, gatewayRefId);
+                            setStatus('SUCCESS');
+                            setTimeout(() => {
+                                navigate(`/orders/${txnUuid}`);
+                            }, 2000);
+                            return;
+                        }
+                    } catch (e) {
+                        console.error('Failed to decode payment data', e);
                     }
                 }
 
@@ -49,14 +69,10 @@ export default function PaymentRedirectPage() {
                     await paymentService.verifyPayment(transactionId, gatewayTransactionId);
                     setStatus('SUCCESS');
                     setTimeout(() => {
-                        navigate('/orders'); // Or to specific order if we had the ID
+                        navigate('/orders');
                     }, 2000);
                 } else if (data) {
-                    // If we only have data, maybe we need a different verify method?
-                    // Or maybe the query params ARE present alongside data?
-                    // Let's assume failure for now if basic params are missing, 
-                    // but to avoid just hanging, show "Processing".
-                    console.error('Missing transaction parameters');
+                    console.error('Invalid or missing transaction parameters in data');
                     setError('Invalid payment response parameters');
                     setStatus('FAILED');
                 } else {

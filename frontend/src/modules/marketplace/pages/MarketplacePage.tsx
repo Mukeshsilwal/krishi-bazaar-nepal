@@ -12,7 +12,7 @@ export default function MarketplacePage() {
         sortBy: 'created',
     });
 
-    const { listings, loading, pagination, nextPage, prevPage } = useListings(filters);
+    const { listings, loading, error, pagination, nextPage, prevPage } = useListings(filters);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -67,6 +67,12 @@ export default function MarketplacePage() {
                             </select>
                         </form>
                     </div>
+
+                    {error && (
+                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+                            Error: {error}
+                        </div>
+                    )}
 
                     {/* Listings Grid */}
                     {loading ? (

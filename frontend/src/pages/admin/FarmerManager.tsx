@@ -138,9 +138,7 @@ const FarmerManager = () => {
         formData.append('file', file);
 
         try {
-            await api.post(ADMIN_ENDPOINTS.FARMERS_IMPORT, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            await api.post(ADMIN_ENDPOINTS.FARMERS_IMPORT, formData);
             toast.success("Farmers imported successfully");
             fetchFarmers(); // Refresh list
         } catch (err: any) {

@@ -45,7 +45,8 @@ public interface AdvisoryDeliveryLogRepository extends JpaRepository<AdvisoryDel
         /**
          * Get delivery success rate
          */
-        @Query("SELECT CAST(COUNT(CASE WHEN l.deliveryStatus = 'DELIVERED' THEN 1 END) AS double) / COUNT(l) * 100 " +
+        @Query("SELECT CAST(COUNT(CASE WHEN l.deliveryStatus IN ('DELIVERED', 'OPENED', 'FEEDBACK_RECEIVED') THEN 1 END) AS double) / NULLIF(COUNT(l), 0) * 100 "
+                        +
                         "FROM AdvisoryDeliveryLog l WHERE l.createdAt >= :since")
         Double getDeliverySuccessRate(@Param("since") LocalDateTime since);
 

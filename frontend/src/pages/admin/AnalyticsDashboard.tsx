@@ -1,12 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
 import api from '@/services/api';
 import { ADMIN_ENDPOINTS } from '@/config/endpoints';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, ShoppingCart, FileText, CheckCircle, Loader2 } from 'lucide-react';
+import DonutChart from '@/components/charts/DonutChart';
+import advisoryLogService from '@/services/advisoryLogService';
 
 const AnalyticsDashboard = () => {
     const [stats, setStats] = useState<any>(null);
+    const [advisoryData, setAdvisoryData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -15,12 +17,33 @@ const AnalyticsDashboard = () => {
 
     const fetchStats = async () => {
         try {
-            const res = await api.get(ADMIN_ENDPOINTS.ANALYTICS_DASHBOARD);
-            if (res.data.success) {
-                setStats(res.data.data);
+            setLoading(true);
+
+            // 1. Fetch System Stats
+            try {
+                console.log("Fetching system stats...");
+                const statsRes = await api.get(ADMIN_ENDPOINTS.ANALYTICS_DASHBOARD);
+                if (statsRes.data.success) {
+                    setStats(statsRes.data.data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch system stats:", error);
             }
+
+            // 2. Fetch Advisory Analytics (Donut Charts)
+            try {
+                console.log("Fetching advisory analytics...");
+                const advisoryRes = await advisoryLogService.getAnalytics();
+                console.log("Advisory analytics received:", advisoryRes);
+                if (advisoryRes) {
+                    setAdvisoryData(advisoryRes);
+                }
+            } catch (error) {
+                console.error("Failed to fetch advisory analytics:", error);
+            }
+
         } catch (err) {
-            console.error(err);
+            console.error("Unexpected error in dashboard:", err);
         } finally {
             setLoading(false);
         }
@@ -52,6 +75,22 @@ const AnalyticsDashboard = () => {
             </CardContent>
         </Card>
     );
+
+    // Prepare chart data
+    const channelData = advisoryData?.channelPerformance
+        ? Object.entries(advisoryData.channelPerformance).map(([key, value]: [string, any]) => ({
+            name: key,
+            value: value.totalSent || 0
+        }))
+        : [];
+
+    const feedbackData = advisoryData?.feedbackDistribution
+        ? Object.entries(advisoryData.feedbackDistribution).map(([key, value]: [string, any]) => ({
+            name: key,
+            value: value as number,
+            color: key === 'USEFUL' ? '#10b981' : '#ef4444' // Green for Useful, Red for Not Useful
+        }))
+        : [];
 
     return (
         <div className="space-y-6">
@@ -85,6 +124,23 @@ const AnalyticsDashboard = () => {
                     icon={CheckCircle}
                     colorClass="bg-green-100 text-green-600"
                 />
+            </div>
+
+            {/* Visual Analytics Section */}
+            <div>
+                <h2 className="text-xl font-semibold mb-4">Advisory Insights</h2>
+                <div className="grid gap-4 md:grid-cols-2">
+                    <DonutChart
+                        title="Notification Methods"
+                        description="Distribution of advisory delivery channels"
+                        data={channelData}
+                    />
+                    <DonutChart
+                        title="Farmer Feedback"
+                        description="User feedback on delivered advisories"
+                        data={feedbackData}
+                    />
+                </div>
             </div>
         </div>
     );
