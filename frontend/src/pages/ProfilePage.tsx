@@ -250,11 +250,11 @@ export default function ProfilePage() {
                 {/* Account Stats */}
                 <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="bg-white p-6 rounded-lg shadow">
-                        <div className="text-sm text-gray-600 mb-1">Account Type</div>
+                        <div className="text-sm text-gray-600 mb-1">{t('profile.accountType') || 'Account Type'}</div>
                         <div className="text-2xl font-bold text-gray-900">{user?.role}</div>
                     </div>
                     <div className="bg-white p-6 rounded-lg shadow">
-                        <div className="text-sm text-gray-600 mb-1">Member Since</div>
+                        <div className="text-sm text-gray-600 mb-1">{t('profile.memberSince') || 'Member Since'}</div>
                         <div className="text-2xl font-bold text-gray-900">
                             {user?.createdAt
                                 ? new Date(user.createdAt).toLocaleDateString()
@@ -262,9 +262,9 @@ export default function ProfilePage() {
                         </div>
                     </div>
                     <div className="bg-white p-6 rounded-lg shadow">
-                        <div className="text-sm text-gray-600 mb-1">Verification Status</div>
+                        <div className="text-sm text-gray-600 mb-1">{t('profile.verificationStatus') || 'Verification Status'}</div>
                         <div className="text-2xl font-bold text-green-600">
-                            {user?.verified ? 'Verified' : 'Pending'}
+                            {user?.verified ? (t('profile.verified') || 'Verified') : (t('profile.pending') || 'Pending')}
                         </div>
                     </div>
                 </div>

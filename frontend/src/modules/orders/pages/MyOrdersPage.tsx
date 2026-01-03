@@ -34,8 +34,14 @@ export default function MyOrdersPage() {
             case 'PENDING':
                 return <Clock className="text-yellow-600" size={20} />;
             case 'CONFIRMED':
+                return <CheckCircle className="text-blue-600" size={20} />;
+            case 'READY_FOR_HARVEST':
+                return <Package className="text-indigo-600" size={20} />;
+            case 'HARVESTED':
+                return <Package className="text-teal-600" size={20} />;
             case 'PAID':
             case 'COMPLETED':
+            case 'READY':
                 return <CheckCircle className="text-green-600" size={20} />;
             case 'CANCELLED':
                 return <XCircle className="text-red-600" size={20} />;
@@ -50,8 +56,14 @@ export default function MyOrdersPage() {
                 return 'bg-yellow-100 text-yellow-800';
             case 'CONFIRMED':
                 return 'bg-blue-100 text-blue-800';
+            case 'READY_FOR_HARVEST':
+                return 'bg-indigo-100 text-indigo-800';
+            case 'HARVESTED':
+                return 'bg-teal-100 text-teal-800';
             case 'PAID':
                 return 'bg-green-100 text-green-800';
+            case 'READY':
+                return 'bg-purple-100 text-purple-800';
             case 'COMPLETED':
                 return 'bg-green-100 text-green-800';
             case 'CANCELLED':

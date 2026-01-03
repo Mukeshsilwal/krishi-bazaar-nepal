@@ -15,6 +15,9 @@ public class UpdateListingRequest {
     private String unit;
     private BigDecimal pricePerUnit;
     private String harvestDate;
+    private Integer harvestWindow;
+    private BigDecimal dailyQuantityLimit;
+    private String orderCutoffTime;
     private String description;
     private String location;
     private String status; // ACTIVE, SOLD, EXPIRED

@@ -72,6 +72,8 @@ public class Order {
     public enum OrderStatus {
         PENDING, // Order placed, awaiting farmer confirmation
         CONFIRMED, // Farmer confirmed the order
+        READY_FOR_HARVEST, // Waiting for harvest (New)
+        HARVESTED, // Crop harvested (New)
         PAYMENT_PENDING, // Waiting for payment
         PAID, // Payment completed
         READY, // Ready for pickup

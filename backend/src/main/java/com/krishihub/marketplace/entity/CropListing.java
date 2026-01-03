@@ -13,6 +13,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -48,6 +49,15 @@ public class CropListing {
 
     @Column(name = "harvest_date")
     private LocalDate harvestDate;
+
+    @Column(name = "harvest_window")
+    private Integer harvestWindow; // Number of days the crop is harvestable
+
+    @Column(name = "daily_quantity_limit", precision = 10, scale = 2)
+    private BigDecimal dailyQuantityLimit;
+
+    @Column(name = "order_cutoff_time")
+    private LocalTime orderCutoffTime;
 
     @Column(columnDefinition = "TEXT")
     private String description;

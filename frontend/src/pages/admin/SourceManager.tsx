@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Edit, Trash2, ExternalLink } from 'lucide-react';
 import api from '@/services/api';
+import { KNOWLEDGE_ENDPOINTS } from '@/config/endpoints';
 import { toast } from 'sonner';
 
 interface KnowledgeSource {

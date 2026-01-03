@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,4 +42,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     boolean existsByIdAndBuyerId(UUID id, UUID buyerId);
 
     boolean existsByIdAndFarmerId(UUID id, UUID farmerId);
+
+    @Query("SELECT SUM(o.quantity) FROM Order o WHERE o.listing.id = :listingId AND o.pickupDate = :pickupDate AND o.status NOT IN ('CANCELLED')")
+    BigDecimal sumQuantityByListingIdAndPickupDate(@Param("listingId") UUID listingId,
+                                                   @Param("pickupDate") LocalDate pickupDate);
 }

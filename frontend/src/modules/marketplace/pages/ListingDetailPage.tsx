@@ -11,6 +11,7 @@ export default function ListingDetailPage() {
     const [listing, setListing] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
+    const [pickupDate, setPickupDate] = useState('');
     const [orderLoading, setOrderLoading] = useState(false);
 
     useEffect(() => {
@@ -41,6 +42,7 @@ export default function ListingDetailPage() {
             const response = await orderService.createOrder({
                 listingId: listing.id,
                 quantity,
+                pickupDate,
                 pickupLocation: listing.location,
             });
 
@@ -169,6 +171,15 @@ export default function ListingDetailPage() {
                                 {listing.harvestDate && (
                                     <p>🌾 Harvest Date: {new Date(listing.harvestDate).toLocaleDateString()}</p>
                                 )}
+                                {listing.harvestWindow && (
+                                    <p>📅 Harvest Window: {listing.harvestWindow} days</p>
+                                )}
+                                {listing.dailyQuantityLimit && (
+                                    <p>📦 Daily Limit: {listing.dailyQuantityLimit} {listing.unit}</p>
+                                )}
+                                {listing.orderCutoffTime && (
+                                    <p>⏰ Order Cutoff: {listing.orderCutoffTime}</p>
+                                )}
                                 <p>📍 Pickup Location: {listing.location}</p>
                             </div>
 
@@ -188,6 +199,20 @@ export default function ListingDetailPage() {
                                             value={quantity}
                                             onChange={(e) => setQuantity(Number(e.target.value))}
                                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                        />
+                                    </div>
+
+                                    <div className="mb-4">
+                                        <label className="block text-gray-700 font-medium mb-2">
+                                            Pickup Date
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={pickupDate}
+                                            onChange={(e) => setPickupDate(e.target.value)}
+                                            min={new Date().toISOString().split('T')[0]}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                            required
                                         />
                                     </div>
 

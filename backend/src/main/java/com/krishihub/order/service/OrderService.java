@@ -58,6 +58,42 @@ public class OrderService {
             throw new BadRequestException("Requested quantity exceeds available quantity");
         }
 
+        // Validate Harvest Date & Window
+        LocalDate pickupDate = request.getPickupDate() != null ? LocalDate.parse(request.getPickupDate())
+                : LocalDate.now();
+        if (listing.getHarvestDate() != null) {
+            if (pickupDate.isBefore(listing.getHarvestDate())) {
+                throw new BadRequestException("Order date cannot be before harvest date: " + listing.getHarvestDate());
+            }
+            if (listing.getHarvestWindow() != null) {
+                LocalDate maxDate = listing.getHarvestDate().plusDays(listing.getHarvestWindow());
+                if (pickupDate.isAfter(maxDate)) {
+                    throw new BadRequestException("Order date is outside harvest window. Available until: " + maxDate);
+                }
+            }
+        }
+
+        // Validate Cutoff Time
+        if (listing.getOrderCutoffTime() != null && pickupDate.equals(LocalDate.now())) {
+            if (java.time.LocalTime.now().isAfter(listing.getOrderCutoffTime())) {
+                throw new BadRequestException(
+                        "Orders for today are closed. Cutoff time was: " + listing.getOrderCutoffTime());
+            }
+        }
+
+        // Validate Daily Quantity Limit
+        if (listing.getDailyQuantityLimit() != null) {
+            BigDecimal currentDailyTotal = orderRepository.sumQuantityByListingIdAndPickupDate(listing.getId(),
+                    pickupDate);
+            if (currentDailyTotal == null) {
+                currentDailyTotal = BigDecimal.ZERO;
+            }
+            if (currentDailyTotal.add(request.getQuantity()).compareTo(listing.getDailyQuantityLimit()) > 0) {
+                throw new BadRequestException("Daily quantity limit exceeded for " + pickupDate + ". Remaining: "
+                        + listing.getDailyQuantityLimit().subtract(currentDailyTotal));
+            }
+        }
+
         // Prevent farmer from ordering their own listing
         if (listing.getFarmer().getId().equals(buyer.getId())) {
             throw new BadRequestException("You cannot order your own listing");
@@ -229,6 +265,13 @@ public class OrderService {
             throw new UnauthorizedException("Only farmer can confirm orders");
         }
 
+        // Farmer only transitions
+        if ((newStatus == Order.OrderStatus.READY_FOR_HARVEST ||
+                newStatus == Order.OrderStatus.HARVESTED ||
+                newStatus == Order.OrderStatus.READY) && !isFarmer) {
+            throw new UnauthorizedException("Only farmer can update this status");
+        }
+
         // Prevent invalid transitions
         if (currentStatus == Order.OrderStatus.COMPLETED) {
             throw new BadRequestException("Cannot modify completed order");
@@ -237,6 +280,10 @@ public class OrderService {
         if (currentStatus == Order.OrderStatus.CANCELLED) {
             throw new BadRequestException("Cannot modify cancelled order");
         }
+
+        // Detailed transition checks (optional but good for strictness)
+        // For now, allowing flexible flow as long as user is authorized,
+        // to avoid blocking legacy flows if any.
     }
 
     private void sendStatusUpdateNotification(Order order, Order.OrderStatus newStatus) {
@@ -247,6 +294,14 @@ public class OrderService {
             case CONFIRMED:
                 recipient = order.getBuyer().getMobileNumber();
                 message = String.format("Your order %s has been confirmed by the farmer.", order.getId());
+                break;
+            case READY_FOR_HARVEST:
+                recipient = order.getBuyer().getMobileNumber();
+                message = String.format("Your order %s is being prepared for harvest.", order.getId());
+                break;
+            case HARVESTED:
+                recipient = order.getBuyer().getMobileNumber();
+                message = String.format("Your order %s has been harvested.", order.getId());
                 break;
             case READY:
                 recipient = order.getBuyer().getMobileNumber();
@@ -260,7 +315,7 @@ public class OrderService {
                 break;
         }
 
-        if (!message.isEmpty()) {
+        if (!message.isEmpty() && recipient != null) {
             smsService.sendNotification(recipient, message);
         }
     }

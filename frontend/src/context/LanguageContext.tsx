@@ -74,6 +74,14 @@ const translations = {
         'orders.asBuyer': 'खरिददारको रूपमा',
         'orders.asFarmer': 'किसानको रूपमा',
 
+        // Profile
+        'profile.manage': 'आफ्नो खाताको जानकारी व्यवस्थापन गर्नुहोस्',
+        'profile.accountType': 'खाताको प्रकार',
+        'profile.memberSince': 'सदस्य मिति',
+        'profile.verificationStatus': 'प्रमाणीकरण स्थिति',
+        'profile.verified': 'प्रमाणित',
+        'profile.pending': 'लम्बित',
+
         // Listings
         'listings.create': 'नयाँ सूची सिर्जना गर्नुहोस्',
         'listings.subtitle': 'बिक्रीको लागि आफ्नो उब्जनीको विवरण भर्नुहोस्',
@@ -85,6 +93,9 @@ const translations = {
         'listings.form.price': 'प्रति इकाई मूल्य (रु.)',
         'listings.form.location': 'स्थान',
         'listings.form.harvestDate': 'काट्ने मिति',
+        'listings.form.harvestWindow': 'काट्ने अवधि',
+        'listings.form.dailyQuantityLimit': 'दैनिक परिमाण सीमा',
+        'listings.form.orderCutoffTime': 'अर्डर गर्ने अन्तिम समय',
         'listings.form.description': 'विवरण',
         'listings.form.image': 'बालीको फोटो',
         'listings.form.chooseImage': 'फोटो छान्नुहोस्',
@@ -101,6 +112,9 @@ const translations = {
         'listings.form.unit.quintal': 'क्विन्टल',
         'listings.form.unit.ton': 'टन',
         'listings.form.unit.piece': 'गोटा',
+
+        // Common
+        'common.days': 'दिन',
 
         // My Listings Page
         'listings.stats.total': 'जम्मा सूची',
@@ -181,11 +195,48 @@ const translations = {
         'orders.asBuyer': 'As Buyer',
         'orders.asFarmer': 'As Farmer',
 
+        // Profile
+        'profile.manage': 'Manage your account information',
+        'profile.accountType': 'Account Type',
+        'profile.memberSince': 'Member Since',
+        'profile.verificationStatus': 'Verification Status',
+        'profile.verified': 'Verified',
+        'profile.pending': 'Pending',
+
         // Listings
         'listings.manage': 'Manage your crop listings',
         'listings.create': 'Create New Listing',
+        'listings.subtitle': 'Fill in the details of your produce for sale',
+        'listings.back': 'Back to My Listings',
+        'listings.form.cropName': 'Crop Name',
+        'listings.form.variety': 'Variety',
+        'listings.form.quantity': 'Quantity',
+        'listings.form.unit': 'Unit',
+        'listings.form.price': 'Price per Unit (Rs.)',
+        'listings.form.location': 'Location',
+        'listings.form.harvestDate': 'Harvest Date',
+        'listings.form.harvestWindow': 'Harvest Window',
+        'listings.form.dailyQuantityLimit': 'Daily Quantity Limit',
+        'listings.form.orderCutoffTime': 'Order Cutoff Time',
+        'listings.form.description': 'Description',
+        'listings.form.image': 'Crop Image',
+        'listings.form.chooseImage': 'Choose Image',
+        'listings.form.cancel': 'Cancel',
+        'listings.form.submit': 'Create Listing',
+        'listings.form.submitting': 'Creating...',
+        'listings.form.selectCrop': 'Select Crop',
+        'listings.form.placeholder.variety': 'e.g., Basmati, Hybrid',
+        'listings.form.placeholder.quantity': '100',
+        'listings.form.placeholder.price': '50',
+        'listings.form.placeholder.location': 'e.g., Kathmandu, Ward 5',
+        'listings.form.placeholder.description': 'Describe quality, organic certification, etc.',
+        'listings.form.unit.kg': 'Kg',
+        'listings.form.unit.quintal': 'Quintal',
         'listings.form.unit.ton': 'Ton',
         'listings.form.unit.piece': 'Piece',
+
+        // Common
+        'common.days': 'Days',
 
         // My Listings Page
         'listings.stats.total': 'Total Listings',

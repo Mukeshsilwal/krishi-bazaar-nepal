@@ -108,6 +108,9 @@ export default function MarketplacePage() {
                                             </div>
                                             <div className="text-sm text-gray-600 space-y-1">
                                                 <p>📦 Available: {listing.quantity} {listing.unit}</p>
+                                                {listing.harvestDate && (
+                                                    <p>🌾 Harvest: {new Date(listing.harvestDate).toLocaleDateString()}</p>
+                                                )}
                                                 <p>📍 {listing.location}</p>
                                                 <p>👨‍🌾 {listing.farmer.name}</p>
                                             </div>

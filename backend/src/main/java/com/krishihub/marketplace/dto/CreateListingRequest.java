@@ -30,6 +30,14 @@ public class CreateListingRequest {
 
     private String harvestDate; // Format: YYYY-MM-DD
 
+    @Min(value = 1, message = "Harvest window must be at least 1 day")
+    private Integer harvestWindow;
+
+    @DecimalMin(value = "0.01", message = "Daily limit must be greater than 0")
+    private BigDecimal dailyQuantityLimit;
+
+    private String orderCutoffTime; // Format: HH:mm
+
     @Size(max = 1000, message = "Description must not exceed 1000 characters")
     private String description;
 

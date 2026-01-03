@@ -3,6 +3,7 @@ package com.krishihub.marketplace.dto;
 import com.krishihub.marketplace.entity.CropListing;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+// I will delay this tool call until I read the file.
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,6 +26,9 @@ public class ListingDto {
     private String unit;
     private BigDecimal pricePerUnit;
     private LocalDate harvestDate;
+    private Integer harvestWindow;
+    private BigDecimal dailyQuantityLimit;
+    private java.time.LocalTime orderCutoffTime;
     private String description;
     private String location;
     private String status;
@@ -71,6 +75,9 @@ public class ListingDto {
                 .unit(listing.getUnit())
                 .pricePerUnit(listing.getPricePerUnit())
                 .harvestDate(listing.getHarvestDate())
+                .harvestWindow(listing.getHarvestWindow())
+                .dailyQuantityLimit(listing.getDailyQuantityLimit())
+                .orderCutoffTime(listing.getOrderCutoffTime())
                 .description(listing.getDescription())
                 .location(listing.getLocation())
                 .status(listing.getStatus().name())

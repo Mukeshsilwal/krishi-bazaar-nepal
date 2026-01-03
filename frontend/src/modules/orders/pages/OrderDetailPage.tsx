@@ -93,19 +93,23 @@ export default function OrderDetailPage() {
         }
     };
 
-    const handleComplete = async () => {
+    const handleUpdateStatus = async (status: string) => {
         setActionLoading(true);
         try {
-            const response = await orderService.updateOrderStatus(id!, { status: 'COMPLETED' });
+            const response = await orderService.updateOrderStatus(id!, { status });
             if (response.success) {
                 setOrder(response.data);
-                alert('Order completed!');
+                alert(`Order marked as ${status.replace(/_/g, ' ').toLowerCase()}!`);
             }
         } catch (error: any) {
-            alert(error.response?.data?.message || 'Failed to complete order');
+            alert(error.response?.data?.message || 'Failed to update order');
         } finally {
             setActionLoading(false);
         }
+    };
+
+    const handleComplete = async () => {
+        await handleUpdateStatus('COMPLETED');
     };
 
     const handleCancel = async () => {
@@ -152,6 +156,8 @@ export default function OrderDetailPage() {
             CONFIRMED: 'bg-blue-100 text-blue-800',
             PAYMENT_PENDING: 'bg-orange-100 text-orange-800',
             PAID: 'bg-green-100 text-green-800',
+            READY_FOR_HARVEST: 'bg-indigo-100 text-indigo-800',
+            HARVESTED: 'bg-teal-100 text-teal-800',
             READY: 'bg-purple-100 text-purple-800',
             COMPLETED: 'bg-green-100 text-green-800',
             CANCELLED: 'bg-red-100 text-red-800',
@@ -249,13 +255,42 @@ export default function OrderDetailPage() {
                                 </button>
                             )}
 
-                            {isFarmer && order.status === 'PAID' && (
+                            {isFarmer && (order.status === 'CONFIRMED' || order.status === 'PAID') && (
+                                <>
+                                    <button
+                                        onClick={() => handleUpdateStatus('READY_FOR_HARVEST')}
+                                        disabled={actionLoading}
+                                        className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                                    >
+                                        Start Harvest
+                                    </button>
+                                    <button
+                                        onClick={() => handleUpdateStatus('READY')}
+                                        disabled={actionLoading}
+                                        className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 disabled:opacity-50"
+                                    >
+                                        Mark Ready (Skip Harvest)
+                                    </button>
+                                </>
+                            )}
+
+                            {isFarmer && order.status === 'READY_FOR_HARVEST' && (
                                 <button
-                                    onClick={handleMarkReady}
+                                    onClick={() => handleUpdateStatus('HARVESTED')}
+                                    disabled={actionLoading}
+                                    className="bg-teal-600 text-white px-6 py-2 rounded-lg hover:bg-teal-700 disabled:opacity-50"
+                                >
+                                    Mark Harvested
+                                </button>
+                            )}
+
+                            {isFarmer && order.status === 'HARVESTED' && (
+                                <button
+                                    onClick={() => handleUpdateStatus('READY')}
                                     disabled={actionLoading}
                                     className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 disabled:opacity-50"
                                 >
-                                    Mark as Ready
+                                    Mark Ready for Pickup
                                 </button>
                             )}
 

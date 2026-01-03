@@ -61,6 +61,16 @@ const advisoryService = {
         return response.data;
     },
 
+    getAllPesticides: async () => {
+        const response = await api.get(DISEASE_ENDPOINTS.PESTICIDES);
+        return response.data;
+    },
+
+    createDisease: async (disease: any) => {
+        const response = await api.post(DISEASE_ENDPOINTS.BASE, disease);
+        return response.data;
+    },
+
     getPesticides: async () => {
         const response = await api.get(DISEASE_ENDPOINTS.PESTICIDES);
         return response.data;

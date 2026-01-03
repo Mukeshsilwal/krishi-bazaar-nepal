@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/services/api';
+import { SCHEME_ENDPOINTS } from '@/config/endpoints';
 import { Button } from "@/components/ui/button";
 import {
     Table,

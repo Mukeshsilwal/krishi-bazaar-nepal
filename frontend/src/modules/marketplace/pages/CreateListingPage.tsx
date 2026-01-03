@@ -24,6 +24,9 @@ export default function CreateListingPage() {
         location: '',
         description: '',
         harvestDate: '',
+        harvestWindow: '',
+        dailyQuantityLimit: '',
+        orderCutoffTime: '',
     });
     const [imageFile, setImageFile] = useState(null);
 
@@ -215,6 +218,52 @@ export default function CreateListingPage() {
                             value={formData.harvestDate}
                             onChange={handleChange}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        />
+                    </div>
+
+                    {/* Harvest Window */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            {t('listings.form.harvestWindow')} ({t('common.days')})
+                        </label>
+                        <input
+                            type="number"
+                            name="harvestWindow"
+                            value={formData.harvestWindow}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            placeholder="e.g., 3"
+                            min="1"
+                        />
+                    </div>
+
+                    {/* Daily Quantity Limit */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            {t('listings.form.dailyQuantityLimit')}
+                        </label>
+                        <input
+                            type="number"
+                            name="dailyQuantityLimit"
+                            value={formData.dailyQuantityLimit}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            placeholder="e.g., 50"
+                            min="0"
+                            step="0.01"
+                        />
+                    </div>
+
+                    {/* Order Cutoff Time */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            {t('listings.form.orderCutoffTime')}
+                        </label>
+                        <input
+                            type="time"
+                            name="orderCutoffTime"
+                            value={formData.orderCutoffTime}
+                            onChange={handleChange}
                         />
                     </div>
 
