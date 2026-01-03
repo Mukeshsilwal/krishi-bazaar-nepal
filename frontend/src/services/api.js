@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'sonner';
 
 import { API_URL } from '../config/app';
 
@@ -26,11 +27,18 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle token refresh
+// Response interceptor to handle token refresh and global errors
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
+    // Show safe user message from backend if available
+    if (error.response?.data?.userMessage) {
+      toast.error(error.response.data.userMessage);
+    } else if (error.message === 'Network Error') {
+      toast.error("इन्टरनेट जडानमा समस्या छ। कृपया जाँच गर्नुहोस्।");
+    }
 
     // If 401 and we haven't retried yet
     if (error.response?.status === 401 && !originalRequest._retry) {
