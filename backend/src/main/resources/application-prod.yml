@@ -3,105 +3,107 @@ spring:
     name: kisan-sarathi-backend
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://krishi_sarathii_user:bFRFoLX1XTwtOv1US0mhZnJGhWQu65N5@dpg-d5am0vmuk2gs73erg5h0-a/krishi_sarathii}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://dpg-d5am0vmuk2gs73erg5h0-a/krishi_sarathii}
     username: ${SPRING_DATASOURCE_USERNAME:krishi_sarathii_user}
     password: ${SPRING_DATASOURCE_PASSWORD:bFRFoLX1XTwtOv1US0mhZnJGhWQu65N5}
     driver-class-name: org.postgresql.Driver
 
-    jpa:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
       hibernate:
-        ddl-auto: update
-      show-sql: false
-      properties:
-        hibernate:
-          dialect: org.hibernate.dialect.PostgreSQLDialect
-          format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
 
-    data:
-      redis:
-        url: ${REDIS_URL:${REDIS_HOST:redis://red-d5ccj5khg0os73e6993g:6379}}
+  data:
+    redis:
+      url: ${REDIS_URL:${REDIS_HOST:redis://red-d5ccj5khg0os73e6993g:6379}}
 
-    flyway:
-      enabled: true
-      baseline-on-migrate: true
-      locations: classpath:db/migration
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
 
-    servlet:
-      multipart:
-        max-file-size: 10MB
-        max-request-size: 10MB
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
-  server:
-    port: ${PORT:8089}
-    error:
-      include-message: always
-      include-binding-errors: always
+server:
+  port: ${PORT:8089}
+  error:
+    include-message: always
+    include-binding-errors: always
 
-  # Application Configuration
-  app:
-    jwt:
-      secret: ${JWT_SECRET:dGhpc2lzYXZlcnlzZWNyZXRrZXlmb3JrcmlzaGlodWJuZXBhbGFwcGxpY2F0aW9uMjU2Yml0cw==}
-      expiration: 86400000 # 24 hours in milliseconds
-      refresh-expiration: 604800000 # 7 days in milliseconds
+# =======================
+# Application Configuration
+# =======================
+app:
+  jwt:
+    secret: ${JWT_SECRET:dGhpc2lzYXZlcnlzZWNyZXRrZXlmb3JrcmlzaGlodWJuZXBhbGFwcGxpY2F0aW9uMjU2Yml0cw==}
+    expiration: 86400000        # 24 hours
+    refresh-expiration: 604800000 # 7 days
 
-    otp:
-      expiration: 300 # 5 minutes in seconds
-      length: 6
+  otp:
+    expiration: 300 # seconds
+    length: 6
 
-    cloudinary:
-      cloud-name: ${CLOUDINARY_CLOUD_NAME:dsqubrfjp}
-      api-key: ${CLOUDINARY_API_KEY:624365773875321}
-      api-secret: ${CLOUDINARY_API_SECRET:9P5wS1lelWdo6CubuJxzQiNTClw}
+  cloudinary:
+    cloud-name: ${CLOUDINARY_CLOUD_NAME:dsqubrfjp}
+    api-key: ${CLOUDINARY_API_KEY:624365773875321}
+    api-secret: ${CLOUDINARY_API_SECRET:9P5wS1lelWdo6CubuJxzQiNTClw}
 
-    sms:
-      api-url: ${SMS_API_URL:}
-      api-key: ${SMS_API_KEY:}
-      sender-id: ${SMS_SENDER_ID:KISAN}
+  sms:
+    api-url: ${SMS_API_URL:}
+    api-key: ${SMS_API_KEY:}
+    sender-id: ${SMS_SENDER_ID:KISAN}
 
-    payment:
-      esewa:
-        merchant-code: ${ESEWA_MERCHANT_CODE:EPAYTEST}
-        secret-key: ${ESEWA_SECRET_KEY:8gBm/:&EnhH.1/q}
-        base-url: ${ESEWA_BASE_URL:https://rc-epay.esewa.com.np/api/epay/main/v2/form}
-        verify-url: ${ESEWA_VERIFY_URL:https://uat.esewa.com.np/api/epay/transaction/status/}
-        success-url: ${ESEWA_SUCCESS_URL:https://krishi-bazaar-nepal-u8ms.vercel.app/payment/success}
-        failure-url: ${ESEWA_FAILURE_URL:https://krishi-bazaar-nepal-u8ms.vercel.app/payment/failure}
-      khalti:
-        public-key: ${KHALTI_PUBLIC_KEY:}
-        secret-key: ${KHALTI_SECRET_KEY:}
-        success-url: ${KHALTI_SUCCESS_URL:http://localhost:5173/payment/success}
-        failure-url: ${KHALTI_FAILURE_URL:http://localhost:5173/payment/failure}
+  payment:
+    esewa:
+      merchant-code: ${ESEWA_MERCHANT_CODE:EPAYTEST}
+      secret-key: ${ESEWA_SECRET_KEY:8gBm/:&EnhH.1/q}
+      base-url: ${ESEWA_BASE_URL:https://rc-epay.esewa.com.np/api/epay/main/v2/form}
+      verify-url: ${ESEWA_VERIFY_URL:https://uat.esewa.com.np/api/epay/transaction/status/}
+      success-url: ${ESEWA_SUCCESS_URL:https://krishi-bazaar-nepal-u8ms.vercel.app/payment/success}
+      failure-url: ${ESEWA_FAILURE_URL:https://krishi-bazaar-nepal-u8ms.vercel.app/payment/failure}
 
-    cors:
-      allowed-origins: ${CORS_ALLOWED_ORIGINS:https://krishi-bazaar-nepal-u8ms.vercel.app}
-      allowed-methods: GET,POST,PUT,DELETE,OPTIONS
-      allowed-headers: "*"
-      allow-credentials: true
+    khalti:
+      public-key: ${KHALTI_PUBLIC_KEY:}
+      secret-key: ${KHALTI_SECRET_KEY:}
+      success-url: ${KHALTI_SUCCESS_URL:http://localhost:5173/payment/success}
+      failure-url: ${KHALTI_FAILURE_URL:http://localhost:5173/payment/failure}
 
-    openai:
-      api-key: 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
-      api-url: https://api.openai.com/v1/chat/completions
-      model: gpt-4o-mini
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://krishi-bazaar-nepal-u8ms.vercel.app}
+    allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+    allowed-headers: "*"
+    allow-credentials: true
 
-    email:
-      sendgrid:
-        api-key: ${SENDGRID_API_KEY}
-      from-email: ${EMAIL_FROM_ADDRESS:ticketkatum5@gmail.com}
+  openai:
+    api-key: ${OPENAI_API_KEY}
+    api-url: https://api.openai.com/v1/chat/completions
+    model: gpt-4o-mini
 
+  email:
+    sendgrid:
+      api-key: ${SENDGRID_API_KEY}
+    from-email: ${EMAIL_FROM_ADDRESS:ticketkatum5@gmail.com}
 
-  logging:
-    level:
-      com.krishihub: DEBUG
-      org.springframework.web: INFO
-      org.hibernate: INFO
-    pattern:
-      console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+logging:
+  level:
+    com.krishihub: DEBUG
+    org.springframework.web: INFO
+    org.hibernate: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 
-  management:
-    endpoints:
-      web:
-        exposure:
-          include: health,info,metrics
-    endpoint:
-      health:
-        show-details: always
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
