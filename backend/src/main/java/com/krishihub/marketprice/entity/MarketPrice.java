@@ -29,6 +29,9 @@ public class MarketPrice {
     @Column(name = "crop_name", nullable = false, length = 100)
     private String cropName;
 
+    @Column(name = "crop_code", length = 50)
+    private String cropCode;
+
     @Column(nullable = false, length = 50)
     private String district;
 
@@ -57,4 +60,16 @@ public class MarketPrice {
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @org.springframework.data.annotation.CreatedBy
+    @Column(name = "created_by")
+    private UUID createdBy;
+
+    @org.springframework.data.annotation.LastModifiedDate
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @org.springframework.data.annotation.LastModifiedBy
+    @Column(name = "updated_by")
+    private UUID updatedBy;
 }

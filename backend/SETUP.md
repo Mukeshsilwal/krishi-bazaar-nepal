@@ -220,7 +220,7 @@ SMS_API_KEY=your-sms-api-key
 
 ### Port Already in Use
 ```bash
-# Change port in application.yml
+# Change port in application-dev.yml
 server:
   port: 8081
 ```

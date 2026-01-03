@@ -17,6 +17,7 @@ import java.util.UUID;
 public class MarketPriceDto {
     private UUID id;
     private String cropName;
+    private String cropCode;
     private String district;
     private BigDecimal minPrice;
     private BigDecimal maxPrice;
@@ -29,6 +30,7 @@ public class MarketPriceDto {
         return MarketPriceDto.builder()
                 .id(price.getId())
                 .cropName(price.getCropName())
+                .cropCode(price.getCropCode())
                 .district(price.getDistrict())
                 .minPrice(price.getMinPrice())
                 .maxPrice(price.getMaxPrice())

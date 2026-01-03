@@ -62,6 +62,7 @@ const SourceManager = lazy(() => import('./pages/admin/SourceManager'));
 const ModerationQueue = lazy(() => import('./pages/admin/ModerationQueue'));
 const ContentDashboard = lazy(() => import('./pages/admin/content/ContentDashboard'));
 const ContentEditor = lazy(() => import('./pages/admin/content/ContentEditor'));
+const MarketPriceManager = lazy(() => import('./pages/admin/MarketPriceManager'));
 
 function App() {
   return (
@@ -135,6 +136,7 @@ function App() {
                 <Route path="moderation" element={<ModerationQueue />} />
                 <Route path="content" element={<ContentDashboard />} />
                 <Route path="content/:id" element={<ContentEditor />} />
+                <Route path="market-prices" element={<MarketPriceManager />} />
               </Route>
             </Routes>
           </Suspense>

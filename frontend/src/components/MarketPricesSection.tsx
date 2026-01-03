@@ -1,71 +1,42 @@
+import { useEffect, useState } from "react";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import marketPriceService from "@/modules/marketplace/services/marketPriceService";
 
-const marketPrices = [
-  {
-    name: "टमाटर",
-    nameEn: "Tomato",
-    emoji: "🍅",
-    price: 85,
-    unit: "केजी",
-    unitEn: "kg",
-    change: 5,
-    market: "कालिमाटी",
-  },
-  {
-    name: "आलु",
-    nameEn: "Potato",
-    emoji: "🥔",
-    price: 45,
-    unit: "केजी",
-    unitEn: "kg",
-    change: -2,
-    market: "कालिमाटी",
-  },
-  {
-    name: "बासमती चामल",
-    nameEn: "Basmati Rice",
-    emoji: "🍚",
-    price: 120,
-    unit: "केजी",
-    unitEn: "kg",
-    change: 0,
-    market: "नारायणगढ",
-  },
-  {
-    name: "काउली",
-    nameEn: "Cauliflower",
-    emoji: "🥬",
-    price: 55,
-    unit: "गोटा",
-    unitEn: "piece",
-    change: 8,
-    market: "कालिमाटी",
-  },
-  {
-    name: "प्याज",
-    nameEn: "Onion",
-    emoji: "🧅",
-    price: 65,
-    unit: "केजी",
-    unitEn: "kg",
-    change: -3,
-    market: "कालिमाटी",
-  },
-  {
-    name: "गाजर",
-    nameEn: "Carrot",
-    emoji: "🥕",
-    price: 70,
-    unit: "केजी",
-    unitEn: "kg",
-    change: 2,
-    market: "पोखरा",
-  },
-];
+// Helper for emojis (can be expanded)
+const getEmoji = (name: string) => {
+  if (name.toLowerCase().includes('tomato') || name.includes('टमाटर')) return "🍅";
+  if (name.toLowerCase().includes('potato') || name.includes('आलु')) return "🥔";
+  if (name.toLowerCase().includes('rice') || name.includes('चामल')) return "🍚";
+  if (name.toLowerCase().includes('onion') || name.includes('प्याज')) return "🧅";
+  if (name.toLowerCase().includes('carrot') || name.includes('गाजर')) return "🥕";
+  if (name.toLowerCase().includes('cauliflower') || name.includes('काउली')) return "🥬";
+  if (name.toLowerCase().includes('apple') || name.includes('स्याउ')) return "🍎";
+  return "🥬";
+};
 
 const MarketPricesSection = () => {
   const { t, language } = useLanguage();
+  const [prices, setPrices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPrices = async () => {
+      try {
+        const data = await marketPriceService.getTodaysPrices();
+        // Handle paginated (data.content) vs legacy list (data) response
+        const items = Array.isArray(data) ? data : (data.content || []);
+        const sliced = items.slice(0, 6);
+        setPrices(sliced);
+      } catch (error) {
+        console.error("Failed to load home prices", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPrices();
+  }, []);
 
   return (
     <section id="prices" className="bg-muted/50 py-20 md:py-28">
@@ -83,68 +54,64 @@ const MarketPricesSection = () => {
           </p>
         </div>
 
-        {/* Prices Grid - Larger cards with emojis */}
+        {/* Prices Grid */}
         <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {marketPrices.map((item) => (
-            <div
-              key={item.name}
-              className="group relative overflow-hidden rounded-2xl bg-card p-6 shadow-soft transition-all duration-300 hover:shadow-medium"
-            >
-              <div className="mb-4 flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-4xl">{item.emoji}</span>
-                  <div>
-                    <h3 className="text-xl font-bold text-foreground">
-                      {language === 'ne' ? item.name : item.nameEn}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">{item.nameEn}</p>
-                  </div>
-                </div>
-                <span
-                  className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium ${item.change > 0
-                      ? "bg-primary/10 text-primary"
-                      : item.change < 0
-                        ? "bg-destructive/10 text-destructive"
-                        : "bg-muted text-muted-foreground"
-                    }`}
+          {loading ? (
+            <div className="col-span-full text-center py-10">Loading live prices...</div>
+          ) : prices.length === 0 ? (
+            <div className="col-span-full text-center py-10">No prices available today.</div>
+          ) : (
+            prices.map((item, index) => {
+              const emoji = getEmoji(item.cropName);
+              // Mocking change for now as API doesn't provide it yet
+              const change = 0;
+
+              return (
+                <div
+                  key={index}
+                  className="group relative overflow-hidden rounded-2xl bg-card p-6 shadow-soft transition-all duration-300 hover:shadow-medium"
                 >
-                  {item.change > 0 ? (
-                    <TrendingUp className="h-4 w-4" />
-                  ) : item.change < 0 ? (
-                    <TrendingDown className="h-4 w-4" />
-                  ) : (
-                    <Minus className="h-4 w-4" />
-                  )}
-                  {Math.abs(item.change)}%
-                </span>
-              </div>
+                  <div className="mb-4 flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-4xl">{emoji}</span>
+                      <div>
+                        <h3 className="text-xl font-bold text-foreground">
+                          {item.cropName}
+                        </h3>
 
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold text-foreground md:text-4xl">
-                  रु. {item.price}
-                </span>
-                <span className="text-base text-muted-foreground">
-                  /{language === 'ne' ? item.unit : item.unitEn}
-                </span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                per {item.unitEn}
-              </p>
+                      </div>
+                    </div>
+                    {/* Removed change indicator as we don't have real data for it yet */}
+                  </div>
 
-              <p className="mt-3 text-sm text-muted-foreground">
-                📍 {item.market}
-              </p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-bold text-foreground md:text-4xl">
+                      रु. {item.avgPrice}
+                    </span>
+                    <span className="text-base text-muted-foreground">
+                      /{item.unit}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {item.district}
+                  </p>
 
-              {/* Hover Accent */}
-              <div className="absolute bottom-0 left-0 h-1.5 w-0 bg-gradient-warm transition-all duration-300 group-hover:w-full" />
-            </div>
-          ))}
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    Minimum: Rs. {item.minPrice}
+                  </p>
+
+                  {/* Hover Accent */}
+                  <div className="absolute bottom-0 left-0 h-1.5 w-0 bg-gradient-warm transition-all duration-300 group-hover:w-full" />
+                </div>
+              )
+            })
+          )}
         </div>
 
-        {/* View All Link - Larger button */}
+        {/* View All Link */}
         <div className="mt-10 text-center">
-          <a
-            href="#"
+          <Link
+            to="/market-prices"
             className="inline-flex items-center gap-3 rounded-xl bg-primary/10 px-6 py-4 text-lg font-semibold text-primary transition-colors hover:bg-primary/20"
           >
             <span className="flex flex-col leading-tight">
@@ -152,7 +119,7 @@ const MarketPricesSection = () => {
               <span className="text-sm opacity-70">View all prices</span>
             </span>
             <TrendingUp className="h-5 w-5" />
-          </a>
+          </Link>
         </div>
       </div>
     </section>

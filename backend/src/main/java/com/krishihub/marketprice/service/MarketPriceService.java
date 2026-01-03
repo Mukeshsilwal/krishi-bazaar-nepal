@@ -2,6 +2,8 @@ package com.krishihub.marketprice.service;
 
 import com.krishihub.marketprice.dto.MarketPriceDto;
 import com.krishihub.marketprice.entity.MarketPrice;
+import com.krishihub.marketprice.entity.MarketPriceAudit;
+import com.krishihub.marketprice.repository.MarketPriceAuditRepository;
 import com.krishihub.marketprice.repository.MarketPriceRepository;
 import com.krishihub.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,6 +22,7 @@ import java.util.stream.Collectors;
 public class MarketPriceService {
 
     private final MarketPriceRepository priceRepository;
+    private final MarketPriceAuditRepository auditRepository;
 
     public List<MarketPriceDto> getPricesByCropAndDistrict(String cropName, String district) {
         List<MarketPrice> prices = priceRepository.findByCropAndDistrict(cropName, district);
@@ -38,11 +42,36 @@ public class MarketPriceService {
         return MarketPriceDto.fromEntity(prices.get(0)); // Already sorted by date DESC
     }
 
+    public org.springframework.data.domain.Page<MarketPriceDto> getPricesByDate(LocalDate date,
+            org.springframework.data.domain.Pageable pageable) {
+        org.springframework.data.domain.Page<MarketPrice> pricesPage = priceRepository.findByDate(date, pageable);
+        return pricesPage.map(MarketPriceDto::fromEntity);
+    }
+
     public List<MarketPriceDto> getPricesByDate(LocalDate date) {
-        List<MarketPrice> prices = priceRepository.findByDate(date);
-        return prices.stream()
+        // Fallback for non-paginated legacy calls - get all (using unpaged if necessary
+        // or large default)
+        // For backwards compatibility, we might just call the repository with unpaged
+        // However, the repository signature changed. We need to overloading in
+        // repository or adapt here.
+        // Easiest is to call repo with Pageable.unpaged()
+        return priceRepository.findByDate(date, org.springframework.data.domain.Pageable.unpaged())
+                .stream()
                 .map(MarketPriceDto::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    public org.springframework.data.domain.Page<MarketPriceDto> getTodaysPrices(String district, int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        if (district != null && !district.isEmpty()) {
+            return priceRepository.findByDistrictAndPriceDate(district, LocalDate.now(), pageable)
+                    .map(MarketPriceDto::fromEntity);
+        }
+        return getPricesByDate(LocalDate.now(), pageable);
+    }
+
+    public org.springframework.data.domain.Page<MarketPriceDto> getTodaysPrices(int page, int size) {
+        return getTodaysPrices(null, page, size);
     }
 
     public List<MarketPriceDto> getTodaysPrices() {
@@ -89,5 +118,30 @@ public class MarketPriceService {
                 saved.getCropName(), saved.getDistrict(), saved.getPriceDate());
 
         return MarketPriceDto.fromEntity(saved);
+    }
+
+    @Transactional
+    public MarketPriceDto overridePrice(MarketPriceDto priceDto, UUID executedBy) {
+        MarketPriceDto saved = addPrice(priceDto);
+
+        // Create audit record
+        MarketPriceAudit audit = MarketPriceAudit.builder()
+                .priceId(saved.getId())
+                .action("OVERRIDE")
+                .newValue(saved.getAvgPrice())
+                .userId(executedBy)
+                .createdAt(java.time.LocalDateTime.now())
+                .build();
+
+        auditRepository.save(audit);
+        log.info("Audit log created for override by {}", executedBy);
+
+        return saved;
+    }
+
+    public MarketPriceDto getPreviousPrice(String cropName, String district, LocalDate date) {
+        MarketPrice previous = priceRepository.findFirstByCropNameAndDistrictAndPriceDateBeforeOrderByPriceDateDesc(
+                cropName, district, date);
+        return previous != null ? MarketPriceDto.fromEntity(previous) : null;
     }
 }

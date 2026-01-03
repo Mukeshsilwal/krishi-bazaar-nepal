@@ -1,8 +1,7 @@
 spring:
-  config:
-    activate:
-      on-profile: prod
-  
+  application:
+    name: kisan-sarathi-backend
+
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://krishi_sarathii_user:bFRFoLX1XTwtOv1US0mhZnJGhWQu65N5@dpg-d5am0vmuk2gs73erg5h0-a/krishi_sarathii}
     username: ${SPRING_DATASOURCE_USERNAME:krishi_sarathii_user}
@@ -33,7 +32,7 @@ spring:
         max-request-size: 10MB
 
   server:
-    port: ${PORT:8080}
+    port: ${PORT:8089}
     error:
       include-message: always
       include-binding-errors: always

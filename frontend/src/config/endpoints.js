@@ -240,10 +240,13 @@ export const MARKET_PRICE_ENDPOINTS = {
     LATEST: '/market-prices/latest',
     BY_CROP: (cropName) => `/market-prices/crop/${cropName}`,
     TRENDS: '/market-prices/trends',
+    HISTORY: '/market-prices/history',
+    ANALYTICS: '/market-prices/analytics',
     TODAY: '/market-prices/today',
     CROPS: '/market-prices/crops',
     DISTRICTS: '/market-prices/districts',
     BY_DATE: (date) => `/market-prices/date/${date}`,
+    OVERRIDE: '/market-prices/override',
 };
 
 export const MARKET_ENDPOINTS = {
