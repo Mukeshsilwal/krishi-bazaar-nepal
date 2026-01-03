@@ -20,8 +20,7 @@ spring:
 
     data:
       redis:
-        host: ${REDIS_HOST:redis://red-d5ccj5khg0os73e6993g:6379}
-        port: ${REDIS_PORT:6379}
+        url: ${REDIS_URL:${REDIS_HOST:redis://red-d5ccj5khg0os73e6993g:6379}}
 
     flyway:
       enabled: true
