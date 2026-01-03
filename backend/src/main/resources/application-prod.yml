@@ -66,8 +66,8 @@ spring:
         secret-key: ${ESEWA_SECRET_KEY:8gBm/:&EnhH.1/q}
         base-url: ${ESEWA_BASE_URL:https://rc-epay.esewa.com.np/api/epay/main/v2/form}
         verify-url: ${ESEWA_VERIFY_URL:https://uat.esewa.com.np/api/epay/transaction/status/}
-        success-url: ${ESEWA_SUCCESS_URL:http://localhost:5173/payment/success}
-        failure-url: ${ESEWA_FAILURE_URL:http://localhost:5173/payment/failure}
+        success-url: ${ESEWA_SUCCESS_URL:https://krishi-bazaar-nepal-u8ms.vercel.app/payment/success}
+        failure-url: ${ESEWA_FAILURE_URL:https://krishi-bazaar-nepal-u8ms.vercel.app/payment/failure}
       khalti:
         public-key: ${KHALTI_PUBLIC_KEY:}
         secret-key: ${KHALTI_SECRET_KEY:}

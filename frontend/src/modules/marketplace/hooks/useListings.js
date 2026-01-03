@@ -15,17 +15,21 @@ export const useListings = (filters = {}) => {
     const fetchListings = async (page = 0) => {
         try {
             setLoading(true);
-            const response = await listingService.searchListings({
-                ...filters,
-                page,
-                size: pagination.size,
+            // Clean filters to remove empty strings
+            const searchParams = { ...filters, page, size: pagination.size };
+            Object.keys(searchParams).forEach(key => {
+                if (searchParams[key] === '' || searchParams[key] === null) {
+                    delete searchParams[key];
+                }
             });
+
+            const response = await listingService.searchListings(searchParams);
 
             if (response.success && response.data) {
                 setListings(response.data.content || []);
                 setPagination({
-                    page: response.data.pageNumber || 0,
-                    size: response.data.pageSize || 20,
+                    page: response.data.pageable?.pageNumber ?? response.data.number ?? 0,
+                    size: response.data.pageable?.pageSize ?? response.data.size ?? 20,
                     totalPages: response.data.totalPages || 0,
                     totalElements: response.data.totalElements || 0,
                 });

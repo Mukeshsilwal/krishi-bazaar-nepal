@@ -51,11 +51,12 @@ export default function CreateListingPage() {
 
         try {
             // Create the listing
-            const newListing = await createListing(formData);
+            const response = await createListing(formData);
+            const listingId = response.data?.id || response.id;
 
             // Upload image if provided
-            if (imageFile && newListing.id) {
-                await uploadImage(newListing.id, imageFile, true);
+            if (imageFile && listingId) {
+                await uploadImage(listingId, imageFile, true);
             }
 
 

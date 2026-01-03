@@ -45,10 +45,7 @@ public class ImageUploadService {
                     ObjectUtils.asMap(
                             "public_id", publicId,
                             "folder", "krishihub/" + folder,
-                            "resource_type", "image",
-                            "transformation", ObjectUtils.asMap(
-                                    "quality", "auto",
-                                    "fetch_format", "auto")));
+                            "resource_type", "image"));
 
             String imageUrl = (String) uploadResult.get("secure_url");
             log.info("Image uploaded successfully: {}", imageUrl);

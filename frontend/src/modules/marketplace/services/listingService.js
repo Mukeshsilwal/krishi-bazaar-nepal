@@ -46,11 +46,7 @@ const listingService = {
         formData.append('file', file);
         formData.append('isPrimary', isPrimary);
 
-        const response = await api.post(MARKETPLACE_ENDPOINTS.UPLOAD_IMAGE(listingId), formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
+        const response = await api.post(MARKETPLACE_ENDPOINTS.UPLOAD_IMAGE(listingId), formData);
         return response.data;
     },
 

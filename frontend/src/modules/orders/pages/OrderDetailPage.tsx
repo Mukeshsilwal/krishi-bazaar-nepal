@@ -150,6 +150,11 @@ export default function OrderDetailPage() {
     const isBuyer = user?.id === order.buyer.id;
     const isFarmer = user?.id === order.farmer.id;
 
+    console.log('[OrderDetailPage] User ID:', user?.id);
+    console.log('[OrderDetailPage] Order Buyer ID:', order.buyer.id);
+    console.log('[OrderDetailPage] isBuyer:', isBuyer);
+    console.log('[OrderDetailPage] Order Status:', order.status);
+
     const getStatusColor = (status: string) => {
         const colors: any = {
             PENDING: 'bg-yellow-100 text-yellow-800',

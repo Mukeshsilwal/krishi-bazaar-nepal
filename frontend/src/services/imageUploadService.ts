@@ -42,9 +42,6 @@ class ImageUploadService {
             const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
 
             const response = await axios.post(cloudinaryUrl, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
                 onUploadProgress: (progressEvent) => {
                     // You could add a callback for progress here if needed
                     const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));

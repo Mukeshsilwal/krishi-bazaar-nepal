@@ -8,7 +8,7 @@ const API_BASE_URL = API_URL;
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    // 'Content-Type': 'application/json', // Let axios set this automatically based on body
   },
 });
 

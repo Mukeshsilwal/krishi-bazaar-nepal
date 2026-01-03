@@ -92,6 +92,8 @@ function App() {
 
                 {/* Protected User Routes */}
                 <Route path="/orders/esewa-redirect" element={<ProtectedRoute><PaymentRedirectPage /></ProtectedRoute>} />
+                <Route path="/payment/success" element={<ProtectedRoute><PaymentRedirectPage /></ProtectedRoute>} />
+                <Route path="/payment/failure" element={<ProtectedRoute><PaymentRedirectPage /></ProtectedRoute>} />
                 <Route path="/orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
                 <Route path="/my-listings" element={<ProtectedRoute><MyListingsPage /></ProtectedRoute>} />
                 <Route path="/create-listing" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
