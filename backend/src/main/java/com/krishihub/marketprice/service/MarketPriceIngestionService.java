@@ -28,6 +28,17 @@ public class MarketPriceIngestionService {
     @Scheduled(cron = "0 0 6 * * *") // Daily at 6 AM
     public void ingestPrices() {
         log.info("Starting scheduled market price ingestion...");
+        triggerInternalIngestion();
+    }
+
+    @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
+    public void onStartup() {
+        log.info("Triggering initial market price ingestion on startup...");
+        // Running in a separate thread to not block startup
+        new Thread(this::triggerInternalIngestion).start();
+    }
+
+    private void triggerInternalIngestion() {
         for (MarketPriceDataSource source : dataSources) {
             long successCount = 0;
             try {
