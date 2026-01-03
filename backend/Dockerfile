@@ -24,14 +24,16 @@ RUN chown appuser:appgroup app.jar
 # Switch to non-root user
 USER appuser
 
-# Expose port
+
+# Expose port (Documentation only, Railway sets PORT env var)
 EXPOSE 8080
 
 # Environment variables
 ENV SPRING_PROFILES_ACTIVE=prod
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s \
-    CMD wget -q --spider http://localhost:8080/actuator/health || exit 1
+# Health check - Use the PORT env var or default to 8080.
+# We use curl or wget. Alpine uses wget by default.
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+    CMD wget -q --spider http://localhost:${PORT:-8080}/actuator/health || exit 1
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
