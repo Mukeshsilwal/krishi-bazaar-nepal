@@ -35,7 +35,7 @@ public class WeatherAdvisoryConfig {
     @Data
     public static class OpenWeatherMap {
         @NotBlank(message = "OpenWeatherMap API key is required")
-        private String apiKey = "demo";
+        private String apiKey = "e2388988e796b68dcf4c86b3df46e960";
 
         @NotBlank
         private String baseUrl = "https://api.openweathermap.org/data/2.5";

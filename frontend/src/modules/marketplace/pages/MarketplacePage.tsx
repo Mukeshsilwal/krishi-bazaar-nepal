@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useListings } from '../hooks/useListings';
 import { useNavigate } from 'react-router-dom';
+import listingService from '../services/listingService';
+import SearchBar from '../components/SearchBar';
 
 export default function MarketplacePage() {
     const navigate = useNavigate();
@@ -11,8 +13,23 @@ export default function MarketplacePage() {
         maxPrice: '',
         sortBy: 'created',
     });
+    const [availableCrops, setAvailableCrops] = useState<string[]>([]);
 
     const { listings, loading, error, pagination, nextPage, prevPage } = useListings(filters);
+
+    useEffect(() => {
+        const fetchCrops = async () => {
+            try {
+                const response = await listingService.getAvailableCrops();
+                if (response.success) {
+                    setAvailableCrops(response.data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch available crops", err);
+            }
+        };
+        fetchCrops();
+    }, []);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,12 +45,13 @@ export default function MarketplacePage() {
                     {/* Search & Filters */}
                     <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                         <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                            <input
-                                type="text"
-                                placeholder="Search crop..."
+                            <SearchBar
                                 value={filters.cropName}
-                                onChange={(e) => setFilters({ ...filters, cropName: e.target.value })}
-                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                onChange={(val) => setFilters({ ...filters, cropName: val })}
+                                onSearch={handleSearch}
+                                suggestions={availableCrops}
+                                placeholder="Search crop..."
+                                className="md:col-span-1"
                             />
                             <input
                                 type="text"

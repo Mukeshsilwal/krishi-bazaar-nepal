@@ -29,7 +29,7 @@ public interface MarketPriceRepository extends JpaRepository<MarketPrice, UUID> 
 
         @Query("SELECT mp FROM MarketPrice mp WHERE " +
                         "mp.cropName = :cropName AND mp.district = :district AND mp.priceDate = :date")
-        Optional<MarketPrice> findByCropDistrictAndDate(
+        List<MarketPrice> findByCropDistrictAndDate(
                         @Param("cropName") String cropName,
                         @Param("district") String district,
                         @Param("date") LocalDate date);

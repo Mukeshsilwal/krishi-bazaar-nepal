@@ -89,18 +89,35 @@ public class MarketPriceService {
     @Transactional
     public MarketPriceDto addPrice(MarketPriceDto priceDto) {
         // Check if price already exists for this crop, district, and date
-        priceRepository.findByCropDistrictAndDate(
+        List<MarketPrice> existingPrices = priceRepository.findByCropDistrictAndDate(
                 priceDto.getCropName(),
                 priceDto.getDistrict(),
-                priceDto.getPriceDate()).ifPresent(existing -> {
-                    // Update existing record
-                    existing.setMinPrice(priceDto.getMinPrice());
-                    existing.setMaxPrice(priceDto.getMaxPrice());
-                    existing.setAvgPrice(priceDto.getAvgPrice());
-                    existing.setUnit(priceDto.getUnit());
-                    existing.setSource(priceDto.getSource());
-                    priceRepository.save(existing);
-                });
+                priceDto.getPriceDate());
+
+        if (!existingPrices.isEmpty()) {
+            // Update the first one
+            MarketPrice existing = existingPrices.get(0);
+            existing.setMinPrice(priceDto.getMinPrice());
+            existing.setMaxPrice(priceDto.getMaxPrice());
+            existing.setAvgPrice(priceDto.getAvgPrice());
+            existing.setUnit(priceDto.getUnit());
+            existing.setSource(priceDto.getSource());
+
+            MarketPrice saved = priceRepository.save(existing);
+
+            // Clean up duplicates if any
+            if (existingPrices.size() > 1) {
+                log.warn("Found {} duplicate prices for {} in {} on {}. Cleaning up.",
+                        existingPrices.size(), priceDto.getCropName(), priceDto.getDistrict(), priceDto.getPriceDate());
+                for (int i = 1; i < existingPrices.size(); i++) {
+                    priceRepository.delete(existingPrices.get(i));
+                }
+            }
+
+            log.info("Market price updated: {} in {} on {}",
+                    saved.getCropName(), saved.getDistrict(), saved.getPriceDate());
+            return MarketPriceDto.fromEntity(saved);
+        }
 
         MarketPrice price = MarketPrice.builder()
                 .cropName(priceDto.getCropName())
