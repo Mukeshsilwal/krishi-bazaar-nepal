@@ -68,7 +68,7 @@ class MarketPriceServiceTest {
     @Test
     void addPrice_ShouldSaveAndReturnDto() {
         when(priceRepository.findByCropDistrictAndDate(any(), any(), any()))
-                .thenReturn(Optional.empty());
+                .thenReturn(Collections.emptyList());
         when(priceRepository.save(any(MarketPrice.class))).thenReturn(samplePrice);
 
         MarketPriceDto result = marketPriceService.addPrice(sampleDto);

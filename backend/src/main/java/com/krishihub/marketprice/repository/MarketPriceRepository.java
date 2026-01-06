@@ -44,6 +44,9 @@ public interface MarketPriceRepository extends JpaRepository<MarketPrice, UUID> 
         @Query("SELECT DISTINCT mp.district FROM MarketPrice mp ORDER BY mp.district")
         List<String> findDistinctDistricts();
 
+        @Query("SELECT MAX(mp.priceDate) FROM MarketPrice mp WHERE mp.district = :district")
+        LocalDate findMaxDateByDistrict(@Param("district") String district);
+
         MarketPrice findFirstByCropNameAndDistrictAndPriceDateBeforeOrderByPriceDateDesc(
                         String cropName, String district, LocalDate date);
 }

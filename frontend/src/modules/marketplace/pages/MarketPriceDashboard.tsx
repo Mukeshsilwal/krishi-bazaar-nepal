@@ -139,7 +139,14 @@ const MarketPriceDashboard = () => {
                         {/* Price Table */}
                         <div className="bg-white rounded-lg shadow-sm overflow-hidden min-h-[400px]">
                             <div className="px-6 py-4 border-b border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-900">Daily Rates - {selectedDistrict}</h3>
+                                <h3 className="text-lg font-semibold text-gray-900">
+                                    Daily Rates - {selectedDistrict}
+                                    {prices.length > 0 && (
+                                        <span className="ml-2 text-sm font-normal text-gray-500">
+                                            ({new Date(prices[0].priceDate).toLocaleDateString()})
+                                        </span>
+                                    )}
+                                </h3>
                             </div>
                             <div className="overflow-x-auto">
                                 {!loading && prices.length === 0 ? (
