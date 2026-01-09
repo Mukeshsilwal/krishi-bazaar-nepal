@@ -117,11 +117,19 @@ public class AuthService {
 
     @Transactional
     public String login(LoginRequest request) {
-        String mobileNumber = normalizeMobileNumber(request.getMobileNumber());
+        String identifier = request.getMobileNumber();
+        User user;
 
-        // Check if user exists
-        User user = userRepository.findByMobileNumber(mobileNumber)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with mobile number: " + mobileNumber));
+        if (identifier.contains("@")) {
+            user = userRepository.findByEmail(identifier)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + identifier));
+        } else {
+            String mobile = normalizeMobileNumber(identifier);
+            user = userRepository.findByMobileNumber(mobile)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with mobile number: " + mobile));
+        }
+
+        String mobileNumber = user.getMobileNumber();
 
         // Generate and send OTP
         String otp = generateOtp();
@@ -217,7 +225,16 @@ public class AuthService {
 
     @Transactional
     public AuthResponse verifyOtp(VerifyOtpRequest request) {
-        String mobileNumber = normalizeMobileNumber(request.getMobileNumber());
+        String identifier = request.getMobileNumber();
+        String mobileNumber;
+
+        if (identifier.contains("@")) {
+            User user = userRepository.findByEmail(identifier)
+                    .orElseThrow(() -> new BadRequestException("User not found with provided email"));
+            mobileNumber = user.getMobileNumber();
+        } else {
+            mobileNumber = normalizeMobileNumber(identifier);
+        }
 
         // Find latest OTP
         OtpVerification otpVerification = otpRepository
