@@ -25,7 +25,7 @@ public class MarketPriceIngestionService {
      * Scheduled to run every hour.
      * Cron expression: second, minute, hour, day of month, month, day(s) of week
      */
-    @Scheduled(cron = "0 0 6 * * *") // Daily at 6 AM
+    @Scheduled(cron = "0 0 10 * * *") // Daily at 10 AM
     public void ingestPrices() {
         log.info("Starting scheduled market price ingestion...");
         triggerInternalIngestion();
