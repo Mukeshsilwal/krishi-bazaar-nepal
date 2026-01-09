@@ -90,6 +90,10 @@ public class AdminService {
                 .build();
     }
 
+    public org.springframework.data.domain.Page<UserActivity> getAllActivities(org.springframework.data.domain.Pageable pageable) {
+        return userActivityService.getAllActivities(pageable);
+    }
+
     public List<User> getPendingVendors() {
         // Assuming getting unverified users with role VENDOR or FARMER
         // For MVP, just returning all unverified

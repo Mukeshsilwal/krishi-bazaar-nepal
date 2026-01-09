@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from "@/components/ui/textarea";
 import { Check, X, Eye, Loader2 } from 'lucide-react';
 import api from '@/services/api';
+import { KNOWLEDGE_ENDPOINTS } from '@/config/endpoints';
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -61,8 +62,14 @@ const ModerationQueue = () => {
     const { data: items = [], isLoading, isError } = useQuery({
         queryKey: ['moderation-queue'],
         queryFn: async () => {
-            const res = await api.get(KNOWLEDGE_ENDPOINTS.MODERATION_PENDING);
-            return res.data;
+            try {
+                const res = await api.get(KNOWLEDGE_ENDPOINTS.MODERATION_PENDING);
+                console.log('Moderation Queue Response:', res);
+                return res.data;
+            } catch (err) {
+                console.error('Moderation Queue Fetch Error:', err);
+                throw err;
+            }
         }
     });
 

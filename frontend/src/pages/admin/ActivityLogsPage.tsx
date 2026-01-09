@@ -42,11 +42,13 @@ const ActivityLogsPage = () => {
         try {
             // Backend uses 0-indexed pages
             const data = await adminService.getUserActivities({ page: pageNumber, size: 20, sort: 'timestamp,desc' });
-            setLogs(data.content);
-            setTotalPages(data.totalPages);
-            setPage(data.number);
+            console.log('Fetched activities data:', data);
+            setLogs(data?.content || []);
+            setTotalPages(data?.totalPages || 0);
+            setPage(data?.number || 0);
         } catch (error) {
             console.error('Error fetching logs', error);
+            setLogs([]);
             // Optional: add toast notification here using existing toast hook
         } finally {
             setLoading(false);

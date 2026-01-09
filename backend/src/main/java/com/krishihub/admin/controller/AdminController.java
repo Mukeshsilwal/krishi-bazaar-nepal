@@ -27,6 +27,14 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success("Dashboard stats fetched", adminService.getDashboardStats()));
     }
 
+    @GetMapping("/activities")
+    public ResponseEntity<ApiResponse<org.springframework.data.domain.Page<com.krishihub.analytics.entity.UserActivity>>> getActivities(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(ApiResponse.success("Activities fetched",
+                adminService.getAllActivities(org.springframework.data.domain.PageRequest.of(page, size))));
+    }
+
     @GetMapping("/vendors/pending")
     public ResponseEntity<List<User>> getPendingVendors() {
         return ResponseEntity.ok(adminService.getPendingVendors());
