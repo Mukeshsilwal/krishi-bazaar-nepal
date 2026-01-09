@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jms.annotation.JmsListener;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -18,7 +18,7 @@ public class NotificationConsumerService {
     private final ObjectMapper objectMapper;
     private final NotificationSenderService senderService;
 
-    @JmsListener(destination = "notification.queue")
+    @RabbitListener(queues = "notification.queue")
     public void consumeNotification(String message) {
         log.info("Received message from queue: {}", message);
         try {

@@ -7,7 +7,7 @@ import com.krishihub.notification.enums.NotificationStatus;
 import com.krishihub.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jms.core.JmsTemplate;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -18,7 +18,7 @@ import java.util.Map;
 @Slf4j
 public class NotificationProducerService {
 
-    private final JmsTemplate jmsTemplate;
+    private final RabbitTemplate rabbitTemplate;
     private final ObjectMapper objectMapper;
     private final NotificationRepository notificationRepository;
 
@@ -36,7 +36,7 @@ public class NotificationProducerService {
             // In a real scheduled scenario, we might use AMQ_SCHEDULED_DELAY header
             // For now, assume immediate or external scheduler handles delay
 
-            jmsTemplate.convertAndSend(NOTIFICATION_QUEUE, jsonMessage);
+            rabbitTemplate.convertAndSend(NOTIFICATION_QUEUE, jsonMessage);
 
             notification.setStatus(NotificationStatus.QUEUED);
             notificationRepository.save(notification);

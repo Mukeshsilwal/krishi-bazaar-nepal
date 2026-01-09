@@ -21,12 +21,15 @@ spring:
     redis:
       url: ${REDIS_URL:${REDIS_HOST:redis://red-d5ccj5khg0os73e6993g:6379}}
 
-  activemq:
-    broker-url: ${ACTIVEMQ_BROKER_URL}
-    user: ${ACTIVEMQ_USER}
-    password: ${ACTIVEMQ_PASSWORD}
-    packages:
-      trust-all: true
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT:5671}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+    virtual-host: ${RABBITMQ_VIRTUAL_HOST:/}
+    ssl:
+      enabled: ${RABBITMQ_SSL_ENABLED:true}
+      algorithm: TLSv1.2
 
   flyway:
     enabled: true
