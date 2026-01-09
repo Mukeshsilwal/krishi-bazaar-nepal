@@ -42,6 +42,12 @@ public class WeatherAdvisoryController {
         return ResponseEntity.ok(ApiResponse.success("Advisory created", service.createAdvisory(advisory)));
     }
 
+    @GetMapping("/test-broadcast")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> testBroadcast(@RequestParam String district) {
+        return ResponseEntity.ok(ApiResponse.success("Broadcast test result", service.testBroadcast(district)));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteAdvisory(@PathVariable UUID id) {

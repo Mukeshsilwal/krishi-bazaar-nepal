@@ -7,6 +7,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -23,6 +24,7 @@ public class HtmlScraperService implements MarketPriceDataSource {
     private static final String TARGET_URL = "https://ramropatro.com/vegetable";
 
     @Override
+    @Async
     public List<MarketPriceDto> fetchPrices() {
         log.info("Scraping prices from HTML source: {}", TARGET_URL);
         List<MarketPriceDto> prices = new ArrayList<>();

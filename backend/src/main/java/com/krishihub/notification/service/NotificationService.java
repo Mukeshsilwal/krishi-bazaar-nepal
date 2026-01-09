@@ -10,13 +10,16 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-    // Assuming SimpMessagingTemplate is available from existing WebSocket config
-    // If not, we can remove this dependency or ensure it's configured
-    private final SimpMessagingTemplate messagingTemplate; 
+    private final SimpMessagingTemplate messagingTemplate;
+
+    public NotificationService(NotificationRepository notificationRepository,
+                               @org.springframework.context.annotation.Lazy SimpMessagingTemplate messagingTemplate) {
+        this.notificationRepository = notificationRepository;
+        this.messagingTemplate = messagingTemplate;
+    } 
 
     @org.springframework.scheduling.annotation.Async
     public void createNotification(UUID userId, String type, String message) {

@@ -36,11 +36,18 @@ public class WeatherAdvisoryService {
         return saved;
     }
 
-    @org.springframework.scheduling.annotation.Async
+    // @org.springframework.scheduling.annotation.Async // Removed to ensure synchronous execution for debugging
     public void broadcastAdvisory(WeatherAdvisory advisory) {
         try {
             List<com.krishihub.auth.entity.User> farmers = userRepository.findByDistrictAndRole(
                     advisory.getRegion(), com.krishihub.auth.entity.User.UserRole.FARMER);
+
+            if (farmers.isEmpty()) {
+                 System.out.println("No farmers found for district: " + advisory.getRegion());
+                 return;
+            }
+
+            System.out.println("Broadcasting advisory to " + farmers.size() + " farmers in " + advisory.getRegion());
 
             for (com.krishihub.auth.entity.User farmer : farmers) {
                 advisoryDeliveryLogService.logAdvisoryCreated(
@@ -62,6 +69,7 @@ public class WeatherAdvisoryService {
             // Log error but don't fail the transaction
             // log.error("Failed to broadcast advisory", e);
              System.err.println("Failed to broadcast advisory: " + e.getMessage());
+             e.printStackTrace();
         }
     }
 
@@ -79,5 +87,16 @@ public class WeatherAdvisoryService {
     @Transactional
     public void deleteAdvisory(UUID id) {
         repository.deleteById(id);
+    }
+    public java.util.Map<String, Object> testBroadcast(String district) {
+        List<com.krishihub.auth.entity.User> farmers = userRepository.findByDistrictAndRole(
+                district, com.krishihub.auth.entity.User.UserRole.FARMER);
+        java.util.Map<String, Object> result = new java.util.HashMap<>();
+        result.put("district", district);
+        result.put("farmerCount", farmers.size());
+        result.put("farmers", farmers.stream()
+                .map(f -> f.getName() + " (" + f.getMobileNumber() + ")")
+                .collect(java.util.stream.Collectors.toList()));
+        return result;
     }
 }

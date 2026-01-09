@@ -26,9 +26,10 @@ public interface UserRepository extends JpaRepository<User, UUID> {
         List<User> findByVerifiedFalse();
 
         /**
-         * Find users by district and role (for weather advisory targeting)
+         * Find users by district and role (for weather advisory targeting) - Case Insensitive & Trimmed
          */
-        List<User> findByDistrictAndRole(String district, User.UserRole role);
+        @Query("SELECT u FROM User u WHERE LOWER(TRIM(u.district)) = LOWER(TRIM(:district)) AND u.role = :role")
+        List<User> findByDistrictAndRole(@Param("district") String district, @Param("role") User.UserRole role);
 
         /**
          * Count users by role

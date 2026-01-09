@@ -6,6 +6,7 @@ import com.krishihub.marketprice.repository.PriceAlertRepository;
 import com.krishihub.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -20,6 +21,7 @@ public class MarketPriceRuleEvaluator {
     private final NotificationService notificationService;
     private final MarketPriceService marketPriceService;
 
+    @Async
     public void evaluateRules(MarketPriceDto newPrice) {
         // 1. Check User Defined Alerts
         checkUserAlerts(newPrice);

@@ -51,10 +51,10 @@ public class AdvisoryDeliveryLogService {
         String deduplicationKey = generateDeduplicationKey(farmerId, advisoryType, weatherSignal);
 
         // Check for duplicates
-        if (repository.existsByDeduplicationKey(deduplicationKey)) {
-            log.debug("Duplicate advisory detected for farmer {}, logging as DEDUPED", farmerId);
-            return logDedupedAdvisory(farmerId, farmerName, farmerPhone, ruleId, ruleName, advisoryType, severity, deduplicationKey);
-        }
+        // if (repository.existsByDeduplicationKey(deduplicationKey)) {
+        //     log.debug("Duplicate advisory detected for farmer {}, logging as DEDUPED", farmerId);
+        //     return logDedupedAdvisory(farmerId, farmerName, farmerPhone, ruleId, ruleName, advisoryType, severity, deduplicationKey);
+        // }
 
         AdvisoryDeliveryLog advisoryLog = AdvisoryDeliveryLog.builder()
                 .farmerId(farmerId)

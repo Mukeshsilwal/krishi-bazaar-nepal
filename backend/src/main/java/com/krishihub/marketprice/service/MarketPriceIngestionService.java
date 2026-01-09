@@ -3,6 +3,8 @@ package com.krishihub.marketprice.service;
 import com.krishihub.marketprice.dto.MarketPriceDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import com.krishihub.marketprice.service.MarketPriceService;
@@ -25,21 +27,24 @@ public class MarketPriceIngestionService {
      * Scheduled to run every hour.
      * Cron expression: second, minute, hour, day of month, month, day(s) of week
      */
-    @org.springframework.scheduling.annotation.Async
-    @Scheduled(cron = "0 0 10 * * *") // Daily at 10 AM
+    /**
+     * Ingestion triggered by scheduler or event
+     */
+    @Async
     public void ingestPrices() {
-        log.info("Starting scheduled market price ingestion on thread: {}", Thread.currentThread().getName());
+        log.info("Starting market price ingestion on thread: {}", Thread.currentThread().getName());
         triggerInternalIngestion();
     }
 
-    @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
-    @org.springframework.scheduling.annotation.Async
+    @EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
+    @Async
     public void onStartup() {
         log.info("Triggering initial market price ingestion on startup...");
         triggerInternalIngestion();
     }
 
-    private void triggerInternalIngestion() {
+    @Async
+    public void triggerInternalIngestion() {
         for (MarketPriceDataSource source : dataSources) {
             long successCount = 0;
             try {
@@ -75,7 +80,7 @@ public class MarketPriceIngestionService {
     }
 
     // Manual trigger for testing
-    @org.springframework.scheduling.annotation.Async
+    @Async
     public void triggerIngestion() {
         ingestPrices();
     }
