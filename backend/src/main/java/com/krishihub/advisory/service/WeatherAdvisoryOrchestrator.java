@@ -33,6 +33,7 @@ public class WeatherAdvisoryOrchestrator {
     private final WeatherAdvisoryNotificationService notificationService;
     private final AdvisoryDeliveryLogRepository deliveryLogRepository;
     private final AdvisoryDeliveryLogService advisoryDeliveryLogService;
+    private final com.krishihub.auth.repository.UserRepository userRepository;
 
     // Deduplication cache to prevent alert storms
     private final Set<String> recentAlerts = Collections.synchronizedSet(new HashSet<>());
@@ -246,9 +247,16 @@ public class WeatherAdvisoryOrchestrator {
             // Build advisory content snapshot
             String advisoryContent = buildAdvisoryContentSnapshot(context, result);
 
+            // Fetch farmer details (In a real high-throughput system, this should likely be cached or passed in context)
+            com.krishihub.auth.entity.User farmer = userRepository.findById(context.getFarmerId()).orElse(null);
+            String farmerName = farmer != null ? farmer.getName() : "Unknown";
+            String farmerPhone = farmer != null ? farmer.getMobileNumber() : null;
+
             // Use the centralized logging service
             advisoryDeliveryLogService.logAdvisoryCreated(
                     context.getFarmerId(),
+                    farmerName,
+                    farmerPhone,
                     result.getRuleId(),
                     result.getRuleName(),
                     AdvisoryType.WEATHER,

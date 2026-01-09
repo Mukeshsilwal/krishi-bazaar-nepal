@@ -45,6 +45,8 @@ public class WeatherAdvisoryService {
             for (com.krishihub.auth.entity.User farmer : farmers) {
                 advisoryDeliveryLogService.logAdvisoryCreated(
                         farmer.getId(),
+                        farmer.getName(),
+                        farmer.getMobileNumber(),
                         null, // Rule ID
                         "Weather Advisory: " + advisory.getTitle(),
                         com.krishihub.advisory.enums.AdvisoryType.WEATHER,

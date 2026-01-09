@@ -36,6 +36,8 @@ public class AdvisoryDeliveryLogService {
     @Transactional
     public AdvisoryDeliveryLog logAdvisoryCreated(
             UUID farmerId,
+            String farmerName,
+            String farmerPhone,
             UUID ruleId,
             String ruleName,
             AdvisoryType advisoryType,
@@ -51,11 +53,13 @@ public class AdvisoryDeliveryLogService {
         // Check for duplicates
         if (repository.existsByDeduplicationKey(deduplicationKey)) {
             log.debug("Duplicate advisory detected for farmer {}, logging as DEDUPED", farmerId);
-            return logDedupedAdvisory(farmerId, ruleId, ruleName, advisoryType, severity, deduplicationKey);
+            return logDedupedAdvisory(farmerId, farmerName, farmerPhone, ruleId, ruleName, advisoryType, severity, deduplicationKey);
         }
 
         AdvisoryDeliveryLog advisoryLog = AdvisoryDeliveryLog.builder()
                 .farmerId(farmerId)
+                .farmerName(farmerName)
+                .farmerPhone(farmerPhone)
                 .ruleId(ruleId)
                 .ruleName(ruleName)
                 .advisoryType(advisoryType)
@@ -83,6 +87,8 @@ public class AdvisoryDeliveryLogService {
      */
     private AdvisoryDeliveryLog logDedupedAdvisory(
             UUID farmerId,
+            String farmerName,
+            String farmerPhone,
             UUID ruleId,
             String ruleName,
             AdvisoryType advisoryType,
@@ -91,6 +97,8 @@ public class AdvisoryDeliveryLogService {
 
         AdvisoryDeliveryLog log = AdvisoryDeliveryLog.builder()
                 .farmerId(farmerId)
+                .farmerName(farmerName)
+                .farmerPhone(farmerPhone)
                 .ruleId(ruleId)
                 .ruleName(ruleName)
                 .advisoryType(advisoryType)

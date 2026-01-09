@@ -23,6 +23,7 @@ public class DiagnosisAdvisoryListener {
 
     private final RuleEngineService ruleEngineService;
     private final AdvisoryDeliveryLogService advisoryDeliveryLogService;
+    private final com.krishihub.auth.repository.UserRepository userRepository;
 
     @Async
     @EventListener
@@ -48,10 +49,17 @@ public class DiagnosisAdvisoryListener {
                 return;
             }
 
+            // Fetch farmer details
+            com.krishihub.auth.entity.User farmer = userRepository.findById(diagnosis.getFarmerId()).orElse(null);
+            String farmerName = farmer != null ? farmer.getName() : "Unknown";
+            String farmerPhone = farmer != null ? farmer.getMobileNumber() : null;
+
             for (RuleResult result : results) {
                 // Log delivery
                 advisoryDeliveryLogService.logAdvisoryCreated(
                         diagnosis.getFarmerId(),
+                        farmerName,
+                        farmerPhone,
                         result.getRuleId(),
                         result.getRuleName(),
                         AdvisoryType.DISEASE,
