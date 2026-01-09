@@ -10,10 +10,17 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+    private final org.springframework.scheduling.TaskScheduler taskScheduler;
+
+    public WebSocketConfig(org.springframework.scheduling.TaskScheduler taskScheduler) {
+        this.taskScheduler = taskScheduler;
+    }
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        // Enable a simple in-memory message broker
-        config.enableSimpleBroker("/topic", "/queue");
+        // Enable a simple in-memory message broker with a dedicated scheduler for heartbeats
+        config.enableSimpleBroker("/topic", "/queue")
+              .setTaskScheduler(taskScheduler);
         
         // Prefix for messages from client to server
         config.setApplicationDestinationPrefixes("/app");

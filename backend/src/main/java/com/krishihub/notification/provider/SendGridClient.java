@@ -35,8 +35,10 @@ public class SendGridClient {
             request.setMethod(Method.POST);
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
+            log.info("SendGridClient: About to call SendGrid API via HTTP...");
             Response response = sg.api(request);
             log.info("Email sent to {}. Status Code: {}", to, response.getStatusCode());
+            log.info("SendGrid Response Body: {}", response.getBody());
 
             if (response.getStatusCode() >= 400) {
                 log.error("SendGrid Error: Body: {}", response.getBody());

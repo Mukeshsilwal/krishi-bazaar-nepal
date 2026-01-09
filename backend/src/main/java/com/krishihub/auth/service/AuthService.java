@@ -45,6 +45,7 @@ public class AuthService {
 
     @Transactional
     public String register(RegisterRequest request) {
+        log.info("AuthService: Register request received for mobile: {}", request.getMobileNumber());
         // Normalize mobile number
         String mobileNumber = normalizeMobileNumber(request.getMobileNumber());
 
@@ -117,6 +118,7 @@ public class AuthService {
 
     @Transactional
     public String login(LoginRequest request) {
+        log.info("AuthService: Login request received for identifier: {}", request.getIdentifier());
         String identifier = request.getIdentifier();
         User user;
 
@@ -327,6 +329,7 @@ public class AuthService {
     }
 
     private void saveOtp(String mobileNumber, String otp) {
+        log.info("=== DEVELOPMENT OTP for {}: {} ===", mobileNumber, otp);
         OtpVerification otpVerification = OtpVerification.builder()
                 .mobileNumber(mobileNumber)
                 .otp(otp)

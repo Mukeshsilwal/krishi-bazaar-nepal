@@ -18,6 +18,7 @@ public class NotificationService {
     // If not, we can remove this dependency or ensure it's configured
     private final SimpMessagingTemplate messagingTemplate; 
 
+    @org.springframework.scheduling.annotation.Async
     public void createNotification(UUID userId, String type, String message) {
         Notification notification = Notification.builder()
                 .userId(userId)

@@ -39,7 +39,7 @@ public class WeatherIngestionService {
      */
     @Scheduled(cron = "${weather.ingestion.cron:0 0 * * * *}")
     public void pollWeatherData() {
-        log.info("Starting scheduled weather data polling for {} districts", MONITORED_DISTRICTS.size());
+        log.info("Starting scheduled weather data polling for {} districts on thread: {}", MONITORED_DISTRICTS.size(), Thread.currentThread().getName());
 
         for (String district : MONITORED_DISTRICTS) {
             try {
