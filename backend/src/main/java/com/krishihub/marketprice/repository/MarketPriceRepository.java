@@ -56,4 +56,7 @@ public interface MarketPriceRepository extends JpaRepository<MarketPrice, UUID> 
 
         MarketPrice findFirstByCropNameAndDistrictAndPriceDateBeforeOrderByPriceDateDesc(
                         String cropName, String district, LocalDate date);
+
+    @org.springframework.transaction.annotation.Transactional
+    long deleteBySource(String source);
 }

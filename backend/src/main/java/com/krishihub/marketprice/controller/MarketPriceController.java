@@ -8,6 +8,7 @@ import com.krishihub.marketprice.service.MarketPriceIngestionService;
 import com.krishihub.shared.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,8 +20,14 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/market-prices")
-@RequiredArgsConstructor
+@Slf4j
 public class MarketPriceController {
+
+    public MarketPriceController(MarketPriceService priceService, MarketPriceIngestionService ingestionService) {
+        this.priceService = priceService;
+        this.ingestionService = ingestionService;
+        log.info("MarketPriceController initialized");
+    }
 
     private final MarketPriceService priceService;
     private final MarketPriceIngestionService ingestionService;
@@ -41,7 +48,7 @@ public class MarketPriceController {
         return ResponseEntity.ok(ApiResponse.success(price));
     }
 
-    @GetMapping("/today")
+    @GetMapping({"/today", "/today/"})
     public ResponseEntity<?> getTodaysPrices(
             @RequestParam(required = false) String district,
             @RequestParam(required = false) String cropName,

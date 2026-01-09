@@ -4,6 +4,7 @@ import com.krishihub.advisory.weather.model.WeatherData;
 import com.krishihub.advisory.weather.model.WeatherSignal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -54,6 +55,7 @@ public class WeatherIngestionService {
     /**
      * Ingest weather data for a specific district
      */
+    @CachePut(value = "weatherData_v3", key = "#district", unless = "#result == null || #result.isEmpty()")
     public Optional<WeatherData> ingestWeatherForDistrict(String district) {
         log.debug("Ingesting weather data for district: {}", district);
 
@@ -103,7 +105,7 @@ public class WeatherIngestionService {
     /**
      * Get current weather with caching
      */
-    @Cacheable(value = "weatherData", key = "#district", unless = "#result == null")
+    @Cacheable(value = "weatherData_v3", key = "#district", unless = "#result == null")
     public Optional<WeatherData> getCurrentWeather(String district) {
         return ingestWeatherForDistrict(district);
     }
@@ -111,7 +113,7 @@ public class WeatherIngestionService {
     /**
      * Get weather forecast for a district
      */
-    @Cacheable(value = "weatherForecast", key = "#district + ',' + #hours", unless = "#result == null || #result.isEmpty()")
+    @Cacheable(value = "weatherForecast_v3", key = "#district + ',' + #hours", unless = "#result == null || #result.isEmpty()")
     public List<WeatherData> getForecast(String district, int hours) {
         for (WeatherDataProvider provider : weatherProviders) {
             try {

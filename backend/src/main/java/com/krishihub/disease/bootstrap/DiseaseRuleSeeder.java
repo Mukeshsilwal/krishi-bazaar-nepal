@@ -13,19 +13,21 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class DiseaseRuleSeeder implements CommandLineRunner {
 
         private final RuleEngineService ruleEngineService;
 
         @Override
         public void run(String... args) throws Exception {
-                if (ruleEngineService.getAllRules().isEmpty()) {
+                if (ruleEngineService.getRuleCount() == 0) {
                         seedRules();
                 }
         }
 
         private void seedRules() {
-                System.out.println("Seeding Disease Rules...");
+                log.info("Seeding Disease Rules...");
+
 
                 // Rule 1: High Humidity + Paddy -> Blast Risk
                 RuleDefinition blastRisk = RuleDefinition.builder()
@@ -77,6 +79,6 @@ public class DiseaseRuleSeeder implements CommandLineRunner {
 
                 ruleEngineService.createRule(rule2);
 
-                System.out.println("Disease Rules Seeded.");
+                log.info("Disease Rules Seeded.");
         }
 }

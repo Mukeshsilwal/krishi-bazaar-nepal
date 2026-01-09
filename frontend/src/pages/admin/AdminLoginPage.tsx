@@ -22,7 +22,7 @@ const AdminLoginPage = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    mobileOrEmail: '',
+    identifier: '',
     password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -33,7 +33,7 @@ const AdminLoginPage = () => {
     setLoading(true);
 
     try {
-      const result = await adminLogin(formData.mobileOrEmail, formData.password);
+      const result = await adminLogin(formData.identifier, formData.password);
       if (result.success) {
         toast.success(language === 'ne' ? 'लगइन सफल!' : 'Login successful!');
         navigate('/admin/dashboard');
@@ -94,8 +94,8 @@ const AdminLoginPage = () => {
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   type="text"
-                  value={formData.mobileOrEmail}
-                  onChange={e => setFormData({ ...formData, mobileOrEmail: e.target.value })}
+                  value={formData.identifier}
+                  onChange={e => setFormData({ ...formData, identifier: e.target.value })}
                   placeholder={language === 'ne' ? '९८XXXXXXXX वा इमेल' : '98XXXXXXXX or email'}
                   className="pl-11 h-12 text-lg"
                   required

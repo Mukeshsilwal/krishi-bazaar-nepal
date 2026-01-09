@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class LoginRequest {
 
-    @NotBlank(message = "Mobile number is required")
-    @Pattern(regexp = "^\\+?977[0-9]{10}$|^[0-9]{10}$", message = "Invalid Nepali mobile number")
-    private String mobileNumber;
+    @NotBlank(message = "Mobile number or Email is required")
+    private String identifier;
 }

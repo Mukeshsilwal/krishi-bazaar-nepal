@@ -9,8 +9,8 @@ const authService = {
     },
 
     // Request OTP for login
-    login: async (mobileNumber) => {
-        const response = await api.post(AUTH_ENDPOINTS.LOGIN, { mobileNumber });
+    login: async (identifier) => {
+        const response = await api.post(AUTH_ENDPOINTS.LOGIN, { identifier });
         return response.data;
     },
 
@@ -28,8 +28,8 @@ const authService = {
     },
 
     // Verify OTP and get tokens
-    verifyOtp: async (mobileNumber, otp) => {
-        const response = await api.post(AUTH_ENDPOINTS.VERIFY_OTP, { mobileNumber, otp });
+    verifyOtp: async (identifier, otp) => {
+        const response = await api.post(AUTH_ENDPOINTS.VERIFY_OTP, { identifier, otp });
 
         if (response.data.success && response.data.data) {
             const { accessToken, refreshToken, user } = response.data.data;

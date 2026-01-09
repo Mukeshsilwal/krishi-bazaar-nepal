@@ -4,7 +4,7 @@ import authService from '../services/authService';
 
 export default function LoginPage() {
     const [step, setStep] = useState<'mobile' | 'otp'>('mobile');
-    const [mobileNumber, setMobileNumber] = useState('');
+    const [identifier, setIdentifier] = useState('');
     const [otp, setOtp] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -16,7 +16,7 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            const result = await authService.login(mobileNumber);
+            const result = await authService.login(identifier);
             if (result.success) {
                 setStep('otp');
             } else {
@@ -35,7 +35,7 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            const result = await login(mobileNumber, otp);
+            const result = await login(identifier, otp);
             if (result.success) {
                 window.location.href = '/';
             } else {
@@ -55,7 +55,7 @@ export default function LoginPage() {
                     <div className="text-center mb-8">
                         <h1 className="text-3xl font-bold text-green-600 mb-2">Kisan Sarathi</h1>
                         <p className="text-gray-600">
-                            {step === 'mobile' ? 'Enter your mobile number' : 'Enter OTP'}
+                            {step === 'mobile' ? 'Enter your login details' : 'Enter OTP'}
                         </p>
                     </div>
 
@@ -69,19 +69,15 @@ export default function LoginPage() {
                         <form onSubmit={handleRequestOtp}>
                             <div className="mb-6">
                                 <label className="block text-gray-700 font-medium mb-2">
-                                    Mobile Number
+                                    Mobile Number or Email
                                 </label>
                                 <input
-                                    type="tel"
-                                    value={mobileNumber}
-                                    onChange={(e) => setMobileNumber(e.target.value)}
-                                    placeholder="98XXXXXXXX"
+                                    type="text"
+                                    value={identifier}
+                                    onChange={(e) => setIdentifier(e.target.value)}
+                                    placeholder="Enter mobile number or email"
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                     required
-                                    minLength={10}
-                                    maxLength={10}
-                                    pattern="[0-9]{10}"
-                                    title="Please enter a valid 10-digit mobile number"
                                 />
                             </div>
 
@@ -109,7 +105,7 @@ export default function LoginPage() {
                                     required
                                 />
                                 <p className="text-sm text-gray-500 mt-2">
-                                    OTP sent to {mobileNumber}. Check your email if registered.
+                                    OTP sent to {identifier}. Check your email/SMS.
                                 </p>
                             </div>
 
@@ -130,7 +126,7 @@ export default function LoginPage() {
                                 }}
                                 className="w-full text-green-600 py-2 font-medium hover:underline"
                             >
-                                Change Mobile Number
+                                Change Identifier
                             </button>
                         </form>
                     )}

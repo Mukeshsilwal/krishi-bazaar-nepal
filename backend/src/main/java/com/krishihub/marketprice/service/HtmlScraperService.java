@@ -59,7 +59,7 @@ public class HtmlScraperService implements MarketPriceDataSource {
 
                         if (min != null) {
                             prices.add(MarketPriceDto.builder()
-                                    .cropName(cleanName(name))
+                                    .cropName(name)
                                     .unit(unit)
                                     .minPrice(min)
                                     .maxPrice(max)
@@ -92,10 +92,7 @@ public class HtmlScraperService implements MarketPriceDataSource {
                 .get();
     }
 
-    private String cleanName(String rawName) {
-        // Remove text in parentheses e.g. "Tomato Big(Nepali)" -> "Tomato Big"
-        return rawName.replaceAll("\\(.*?\\)", "").trim();
-    }
+    // cleanName method removed to preserve raw data as per user request
 
     private BigDecimal parsePrice(String text) {
         try {

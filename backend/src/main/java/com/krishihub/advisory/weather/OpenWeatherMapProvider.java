@@ -49,7 +49,6 @@ public class OpenWeatherMapProvider implements WeatherDataProvider {
             Map.entry("Sindhupalchok", new double[] { 27.9500, 85.6833 }));
 
     @Override
-    @Cacheable(value = "currentWeather", key = "#district", unless = "#result == null || #result.isEmpty()")
     public Optional<WeatherData> getCurrentWeather(String district) {
         double[] coords = DISTRICT_COORDINATES.get(district);
         if (coords == null) {
@@ -61,7 +60,7 @@ public class OpenWeatherMapProvider implements WeatherDataProvider {
     }
 
     @Override
-    @Cacheable(value = "currentWeather", key = "#latitude + ',' + #longitude", unless = "#result == null || #result.isEmpty()")
+    @Cacheable(value = "currentWeather_v3", key = "#latitude + ',' + #longitude", unless = "#result == null")
     public Optional<WeatherData> getCurrentWeather(Double latitude, Double longitude) {
         return retryOperation(() -> fetchCurrentWeather(latitude, longitude), 3);
     }
@@ -93,7 +92,6 @@ public class OpenWeatherMapProvider implements WeatherDataProvider {
     }
 
     @Override
-    @Cacheable(value = "weatherForecast", key = "#district + ',' + #hours", unless = "#result == null || #result.isEmpty()")
     public List<WeatherData> getForecast(String district, int hours) {
         double[] coords = DISTRICT_COORDINATES.get(district);
         if (coords == null) {
@@ -105,7 +103,7 @@ public class OpenWeatherMapProvider implements WeatherDataProvider {
     }
 
     @Override
-    @Cacheable(value = "weatherForecast", key = "#latitude + ',' + #longitude + ',' + #hours", unless = "#result == null || #result.isEmpty()")
+    @Cacheable(value = "weatherForecast_v3", key = "#latitude + ',' + #longitude + ',' + #hours", unless = "#result == null || #result.isEmpty()")
     public List<WeatherData> getForecast(Double latitude, Double longitude, int hours) {
         return retryOperation(() -> fetchForecast(latitude, longitude, hours), 3);
     }

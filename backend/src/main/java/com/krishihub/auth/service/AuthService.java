@@ -117,7 +117,7 @@ public class AuthService {
 
     @Transactional
     public String login(LoginRequest request) {
-        String identifier = request.getMobileNumber();
+        String identifier = request.getIdentifier();
         User user;
 
         if (identifier.contains("@")) {
@@ -176,6 +176,7 @@ public class AuthService {
 
         User user = User.builder()
                 .mobileNumber(mobileNumber)
+                .email(request.getEmail())
                 .name(request.getName())
                 .role(User.UserRole.ADMIN)
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
@@ -193,10 +194,14 @@ public class AuthService {
     @Transactional
     public AuthResponse loginAdmin(AdminLoginRequest request) {
         // Normalize mobile number (if used as identifier) or check email
-        // For simplicity, we check if identifier matches mobile or email
-        User user = userRepository.findByMobileNumber(normalizeMobileNumber(request.getIdentifier()))
-                .orElseGet(() -> userRepository.findByEmail(request.getIdentifier())
-                        .orElseThrow(() -> new ResourceNotFoundException("Admin not found")));
+        User user;
+        if (request.getIdentifier().contains("@")) {
+             user = userRepository.findByEmail(request.getIdentifier())
+                    .orElseThrow(() -> new ResourceNotFoundException("Admin not found"));
+        } else {
+             user = userRepository.findByMobileNumber(normalizeMobileNumber(request.getIdentifier()))
+                    .orElseThrow(() -> new ResourceNotFoundException("Admin not found"));
+        }
 
         // Check if user is admin
         if (user.getRole() != User.UserRole.ADMIN) {
@@ -225,7 +230,7 @@ public class AuthService {
 
     @Transactional
     public AuthResponse verifyOtp(VerifyOtpRequest request) {
-        String identifier = request.getMobileNumber();
+        String identifier = request.getIdentifier();
         String mobileNumber;
 
         if (identifier.contains("@")) {

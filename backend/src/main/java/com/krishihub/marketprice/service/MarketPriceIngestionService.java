@@ -47,17 +47,11 @@ public class MarketPriceIngestionService {
 
                 for (MarketPriceDto raw : rawPrices) {
                     try {
-                        // 1. Normalize
-                        MarketPriceDto normalized = normalizer.normalize(raw);
+                        // 1. Skip Normalization (User request: Use raw data as is)
+                        // MarketPriceDto normalized = normalizer.normalize(raw);
 
-                        // 2. Validate
-                        if (!validator.isValid(normalized)) {
-                            log.warn("Skipping invalid price for {}", raw.getCropName());
-                            continue;
-                        }
-
-                        // 3. Save
-                        MarketPriceDto savedPrice = marketPriceService.addPrice(normalized);
+                        // 2. Save Raw Data directly
+                        MarketPriceDto savedPrice = marketPriceService.addPrice(raw);
 
                         // 4. Evaluate Rules (Alerts)
                         ruleEvaluator.evaluateRules(savedPrice);

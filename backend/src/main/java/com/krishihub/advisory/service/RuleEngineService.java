@@ -75,6 +75,10 @@ public class RuleEngineService {
         return ruleRepository.findAll().stream().map(this::mapToDTO).collect(java.util.stream.Collectors.toList());
     }
 
+    public long getRuleCount() {
+        return ruleRepository.count();
+    }
+
     private com.krishihub.advisory.dto.RuleDTO mapToDTO(AdvisoryRule rule) {
         return com.krishihub.advisory.dto.RuleDTO.builder()
                 .id(rule.getId())

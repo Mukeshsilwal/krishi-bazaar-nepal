@@ -21,17 +21,23 @@ export interface WeatherData {
     dataSource: string;
 }
 
+interface ApiResponse<T> {
+    success: boolean;
+    message: string;
+    data: T;
+}
+
 const weatherService = {
     getCurrentWeather: async (district: string) => {
-        const response = await api.get<WeatherData>(`${WEATHER_ENDPOINTS.CURRENT}/${district}`);
-        return response.data;
+        const response = await api.get<ApiResponse<WeatherData>>(`${WEATHER_ENDPOINTS.CURRENT}/${district}`);
+        return response.data.data;
     },
 
     getForecast: async (district: string, hours = 48) => {
-        const response = await api.get<WeatherData[]>(`${WEATHER_ENDPOINTS.FORECAST}/${district}`, {
+        const response = await api.get<ApiResponse<WeatherData[]>>(`${WEATHER_ENDPOINTS.FORECAST}/${district}`, {
             params: { hours }
         });
-        return response.data;
+        return response.data.data;
     }
 };
 
