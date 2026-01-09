@@ -3,6 +3,8 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import marketPriceService from '../services/marketPriceService';
 import { TrendingUp, TrendingDown, Minus, Calculator, Bell, Loader2 } from 'lucide-react';
 import PriceAlerts from '../../../components/PriceAlerts';
+import SearchBar from '../components/SearchBar';
+import { useLanguage } from '../../../context/LanguageContext';
 
 // Format source name for display
 const formatSource = (source: string) => {
@@ -13,6 +15,7 @@ const formatSource = (source: string) => {
 };
 
 const MarketPriceDashboard = () => {
+    const { t } = useLanguage();
     const [prices, setPrices] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
@@ -20,10 +23,45 @@ const MarketPriceDashboard = () => {
     const [selectedCrop, setSelectedCrop] = useState('');
     const [priceHistory, setPriceHistory] = useState([]);
 
+    // Search state
+    const [searchTerm, setSearchTerm] = useState('');
+    const [availableCrops, setAvailableCrops] = useState<string[]>([]);
+
     // Pagination state
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const loaderRef = useRef(null);
+
+    // Fetch available crops for search suggestions
+    useEffect(() => {
+        const fetchCrops = async () => {
+            try {
+                const data = await marketPriceService.getAvailableCrops();
+                // Ensure data is array of strings
+                if (Array.isArray(data)) setAvailableCrops(data);
+            } catch (err) {
+                console.error("Failed to fetch crop suggestions", err);
+            }
+        };
+        fetchCrops();
+    }, []);
+
+    const handleSearch = (e: React.FormEvent | string) => {
+        if (typeof e !== 'string') e?.preventDefault();
+        const term = typeof e === 'string' ? e : searchTerm;
+
+        setSearchTerm(term);
+        // If we select a term, we filter the list AND show history
+        if (term) {
+            setSelectedCrop(term);
+        }
+
+        // Trigger backend search
+        setPage(0);
+        setHasMore(true);
+        setLoading(true);
+        loadPrices(0, true, term);
+    };
 
     // Initial load when district changes
     useEffect(() => {
@@ -57,14 +95,15 @@ const MarketPriceDashboard = () => {
     // Load next page
     useEffect(() => {
         if (page > 0) {
-            loadPrices(page, false);
+            loadPrices(page, false, searchTerm);
         }
     }, [page]);
 
-    const loadPrices = async (pageNum: number, isReset: boolean) => {
+    const loadPrices = async (pageNum: number, isReset: boolean, search: string = searchTerm) => {
         if (!isReset) setLoadingMore(true);
         try {
-            const data = await marketPriceService.getTodaysPrices(selectedDistrict, pageNum, 20);
+            // Pass searchTerm to service
+            const data = await marketPriceService.getTodaysPrices(selectedDistrict, search, pageNum, 20);
 
             // Handle paginated response structure if available, otherwise assume list
             const newPrices = data.content ? data.content : (Array.isArray(data) ? data : []);
@@ -72,8 +111,11 @@ const MarketPriceDashboard = () => {
 
             if (isReset) {
                 setPrices(newPrices);
-                if (newPrices.length > 0 && !selectedCrop) {
+                // Always select the first crop on a fresh load/search to ensure Trend shows valid data
+                if (newPrices.length > 0) {
                     setSelectedCrop(newPrices[0].cropName);
+                } else {
+                    setSelectedCrop('');
                 }
             } else {
                 setPrices(prev => [...prev, ...newPrices]);
@@ -110,11 +152,30 @@ const MarketPriceDashboard = () => {
 
     return (
         <div className="bg-gray-50 min-h-full">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">Market Intelligence</h1>
-                    <p className="mt-2 text-gray-600">Real-time agricultural commodity prices and trends</p>
+            {/* Hero Search Section */}
+            <div className="bg-gradient-to-r from-green-600 to-green-700 py-16">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <h1 className="text-4xl font-bold text-white mb-4">
+                        {t('market.hero.title')}
+                    </h1>
+                    <p className="text-green-100 text-lg mb-8">
+                        {t('market.hero.subtitle')}
+                    </p>
+
+                    <div className="max-w-2xl mx-auto">
+                        <SearchBar
+                            value={searchTerm}
+                            onChange={(val) => { setSearchTerm(val); if (!val) setSelectedCrop(''); }}
+                            onSearch={handleSearch}
+                            suggestions={availableCrops}
+                            placeholder={t('market.search.placeholder')}
+                            className="w-full text-lg shadow-lg"
+                        />
+                    </div>
                 </div>
+            </div>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Price List */}
@@ -122,7 +183,7 @@ const MarketPriceDashboard = () => {
                         {/* Filters */}
                         <div className="bg-white p-4 rounded-lg shadow-sm flex gap-4">
                             <label className="flex items-center gap-2 text-gray-700 font-medium">
-                                District:
+                                {t('market.filter.district')}
                             </label>
                             <select
                                 value={selectedDistrict}
@@ -140,7 +201,7 @@ const MarketPriceDashboard = () => {
                         <div className="bg-white rounded-lg shadow-sm overflow-hidden min-h-[400px]">
                             <div className="px-6 py-4 border-b border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-900">
-                                    Daily Rates - {selectedDistrict}
+                                    {t('market.table.title')} - {selectedDistrict}
                                     {prices.length > 0 && (
                                         <span className="ml-2 text-sm font-normal text-gray-500">
                                             ({new Date(prices[0].priceDate).toLocaleDateString()})
@@ -150,18 +211,18 @@ const MarketPriceDashboard = () => {
                             </div>
                             <div className="overflow-x-auto">
                                 {!loading && prices.length === 0 ? (
-                                    <div className="p-8 text-center text-gray-500">No prices found for today in {selectedDistrict}.</div>
+                                    <div className="p-8 text-center text-gray-500">{t('market.empty')} {selectedDistrict}.</div>
                                 ) : (
                                     <>
                                         <table className="min-w-full divide-y divide-gray-200">
                                             <thead className="bg-gray-50">
                                                 <tr>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Commodity</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Min</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Max</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('market.table.commodity')}</th>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('market.table.unit')}</th>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('market.table.min')}</th>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('market.table.max')}</th>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('market.table.avg')}</th>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('market.table.source')}</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="bg-white divide-y divide-gray-200">
@@ -190,11 +251,11 @@ const MarketPriceDashboard = () => {
                                             {(loading || loadingMore) && (
                                                 <div className="flex items-center gap-2 text-sm text-gray-500">
                                                     <Loader2 className="h-4 w-4 animate-spin" />
-                                                    Loading more prices...
+                                                    {t('market.loading')}
                                                 </div>
                                             )}
                                             {!hasMore && prices.length > 0 && (
-                                                <span className="text-xs text-gray-400">End of list</span>
+                                                <span className="text-xs text-gray-400">{t('market.end')}</span>
                                             )}
                                         </div>
                                     </>
@@ -204,7 +265,7 @@ const MarketPriceDashboard = () => {
 
                         {/* Trend Chart */}
                         <div className="bg-white p-6 rounded-lg shadow-sm">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Price Trend: {selectedCrop || 'Select a crop'}</h3>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('market.trend.title')}: {selectedCrop || t('market.trend.select')}</h3>
                             {priceHistory.length > 0 ? (
                                 <ResponsiveContainer width="100%" height={300}>
                                     <LineChart data={priceHistory}>
@@ -218,7 +279,7 @@ const MarketPriceDashboard = () => {
                                 </ResponsiveContainer>
                             ) : (
                                 <div className="h-[300px] flex items-center justify-center text-gray-400">
-                                    {selectedCrop ? 'No history data available' : 'Select a crop to see trends'}
+                                    {selectedCrop ? t('market.trend.noData') : t('market.trend.select')}
                                 </div>
                             )}
                         </div>
@@ -231,11 +292,11 @@ const MarketPriceDashboard = () => {
 
                         {/* Market Summary/Tips */}
                         <div className="bg-green-50 p-6 rounded-lg border border-green-100">
-                            <h3 className="font-semibold text-green-800 mb-2">Market Tips</h3>
+                            <h3 className="font-semibold text-green-800 mb-2">{t('market.tips.title')}</h3>
                             <ul className="text-sm text-green-700 space-y-2">
-                                <li>• Prices are updated hourly from major markets.</li>
-                                <li>• Wholesale prices usually exclude VAT.</li>
-                                <li>• check "RamroPatro" for additional market listings.</li>
+                                <li>{t('market.tips.1')}</li>
+                                <li>{t('market.tips.2')}</li>
+                                <li>{t('market.tips.3')}</li>
                             </ul>
                         </div>
                     </div>

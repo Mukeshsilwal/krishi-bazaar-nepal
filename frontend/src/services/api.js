@@ -34,10 +34,42 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Show safe user message from backend if available
+    // Show safe user message from backend if available
     if (error.response?.data?.userMessage) {
       toast.error(error.response.data.userMessage);
     } else if (error.message === 'Network Error') {
       toast.error("इन्टरनेट जडानमा समस्या छ। कृपया जाँच गर्नुहोस्।");
+    } else if (error.response) {
+      // Handle standard HTTP errors
+      const status = error.response.status;
+      switch (status) {
+        case 400:
+          // Bad request - often validation errors, usually handled by form
+          // Only show if no specific userMessage was sent
+          if (!error.response.data?.userMessage) {
+            toast.error("आवेदनमा त्रुटि। कृपया विवरण जाँच गर्नुहोस्।");
+          }
+          break;
+        case 401:
+          // Handled by refresh logic, but show message if it fails eventually
+          if (originalRequest._retry) {
+            toast.error("सत्र समाप्त भयो। कृपया पुन: लगइन गर्नुहोस्।");
+          }
+          break;
+        case 403:
+          toast.error("तपाईंलाई यो कार्य गर्न अनुमति छैन।");
+          break;
+        case 404:
+          toast.error("अनुरोध गरिएको स्रोत फेला परेन।");
+          break;
+        case 500:
+          toast.error("सर्भरमा समस्या आयो। कृपया केहि समय पछि पुन: प्रयास गर्नुहोस्।");
+          break;
+        default:
+          toast.error("केही गलत भयो। कृपया पुन: प्रयास गर्नुहोस्।");
+      }
+    } else {
+      toast.error("केही गलत भयो। कृपया पुन: प्रयास गर्नुहोस्।");
     }
 
     // If 401 and we haven't retried yet

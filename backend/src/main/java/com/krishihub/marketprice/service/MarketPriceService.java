@@ -61,21 +61,28 @@ public class MarketPriceService {
                 .collect(Collectors.toList());
     }
 
-    public org.springframework.data.domain.Page<MarketPriceDto> getTodaysPrices(String district, int page, int size) {
+    public org.springframework.data.domain.Page<MarketPriceDto> getTodaysPrices(String district, String cropName, int page, int size) {
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
 
         // 1. Try to get today's prices
         if (district != null && !district.isEmpty()) {
-            org.springframework.data.domain.Page<MarketPrice> todaysPrices = priceRepository
-                    .findByDistrictAndPriceDate(district, LocalDate.now(), pageable);
+            org.springframework.data.domain.Page<MarketPrice> todaysPrices;
+            
+            if (cropName != null && !cropName.trim().isEmpty()) {
+                 todaysPrices = priceRepository.findByDistrictAndCropNameContainingIgnoreCaseAndPriceDate(
+                        district, cropName.trim(), LocalDate.now(), pageable);
+            } else {
+                 todaysPrices = priceRepository.findByDistrictAndPriceDate(district, LocalDate.now(), pageable);
+            }
 
             if (todaysPrices.hasContent()) {
                 return todaysPrices.map(MarketPriceDto::fromEntity);
             }
 
-            // 2. If no prices for today, and we are on the first page, try fallback to
-            // latest available date
-            if (page == 0) {
+            // 2. If no prices for today, try fallback to latest available date
+            // (Only do this complex fallback if NOT searching, or keep it simple? 
+            // User said "don't overcomplicate". Let's skip complex fallback for search for now unless critical.)
+            if (page == 0 && (cropName == null || cropName.trim().isEmpty())) {
                 LocalDate latestDate = priceRepository.findMaxDateByDistrict(district);
                 if (latestDate != null) {
                     log.info("No prices found for today in {}. Falling back to latest date: {}", district, latestDate);
@@ -83,16 +90,16 @@ public class MarketPriceService {
                             .map(MarketPriceDto::fromEntity);
                 }
             }
-
+            
             return todaysPrices.map(MarketPriceDto::fromEntity); // Empty page
         }
 
-        // Fallback for all districts (less critical, but consistent)
+        // Fallback for all districts
         return getPricesByDate(LocalDate.now(), pageable);
     }
 
     public org.springframework.data.domain.Page<MarketPriceDto> getTodaysPrices(int page, int size) {
-        return getTodaysPrices(null, page, size);
+        return getTodaysPrices(null, null, page, size);
     }
 
     public List<MarketPriceDto> getTodaysPrices() {

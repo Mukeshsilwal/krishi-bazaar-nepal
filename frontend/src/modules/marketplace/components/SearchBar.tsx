@@ -5,7 +5,7 @@ import { Search } from 'lucide-react';
 interface SearchBarProps {
     value: string;
     onChange: (value: string) => void;
-    onSearch: (e: React.FormEvent) => void;
+    onSearch: (e: React.FormEvent | string) => void;
     suggestions: string[];
     placeholder?: string;
     className?: string;
@@ -34,13 +34,44 @@ const CROP_ICONS: Record<string, string> = {
     bean: "🫘",
     garlic: "🧄",
     ginger: "🫚",
+    okra: "🌿",
+    asparagus: "🎋",
+    peas: "🫛",
+    sweetpotato: "🥔",
+    yam: "🥔",
+    bittergourd: "🥒",
+    bottlegourd: "🥒",
+    turmeric: "🫚",
+    corlander: "🌿",
+    mint: "🌿",
+    // Fruits
     apple: "🍎",
     banana: "🍌",
     orange: "🍊",
     grape: "🍇",
     strawberry: "🍓",
+    watermelon: "🍉",
+    lemon: "🍋",
+    peach: "🍑",
+    cherry: "🍒",
+    pear: "🍐",
+    pineapple: "🍍",
+    mango: "🥭",
+    coconut: "🥥",
+    kiwi: "🥝",
+    avocado: "🥑",
+    pomegranate: "🍎",
+    papaya: "🥭",
+
+    // Grains & Others
     rice: "🌾",
     wheat: "🌾",
+    millet: "🌾",
+    barley: "🌾",
+    sugarcane: "🎋",
+    tea: "🍃",
+    coffee: "☕",
+    honey: "🍯",
     default: "🌱"
 };
 
@@ -97,7 +128,23 @@ const SearchBar: React.FC<SearchBarProps> = ({
     const handleSuggestionClick = (suggestion: string) => {
         onChange(suggestion);
         setShowSuggestions(false);
-        // Optional: Trigger search immediately on suggestion click
+        onSearch(suggestion);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            onSearch(e);
+            setShowSuggestions(false);
+        }
+    };
+
+    const handleSearchClick = (e: React.MouseEvent) => {
+        // Create a synthetic event or just pass null if check allows, but strict typing expects FormEvent.
+        // We can cast or construct a simple object compatible enough, or just pass the mouse event casted.
+        // Ideally onSearch should accept FormEvent | MouseEvent or just void.
+        // But let's respect the interface "onSearch: (e: React.FormEvent) => void;"
+        onSearch(e as unknown as React.FormEvent);
     };
 
     return (
@@ -107,11 +154,18 @@ const SearchBar: React.FC<SearchBarProps> = ({
                     type="text"
                     value={value}
                     onChange={handleInputChange}
+                    onKeyDown={handleKeyDown}
                     onFocus={() => setShowSuggestions(true)}
                     placeholder={placeholder}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+                    className="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
                 />
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <button
+                    onClick={handleSearchClick}
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-green-600 cursor-pointer p-1"
+                    type="button"
+                >
+                    <Search className="w-5 h-5" />
+                </button>
             </div>
 
             {showSuggestions && value && filteredSuggestions.length > 0 && (

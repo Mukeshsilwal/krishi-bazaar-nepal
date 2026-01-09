@@ -1,5 +1,6 @@
 import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import { AuthProvider } from './modules/auth/context/AuthContext';
 import AdminLayout from './components/admin/AdminLayout';
 import { LanguageProvider } from './context/LanguageContext';
@@ -142,6 +143,7 @@ function App() {
           </Suspense>
         </AuthProvider>
       </LanguageProvider>
+      <Toaster richColors closeButton position="top-right" />
     </Router >
   );
 }

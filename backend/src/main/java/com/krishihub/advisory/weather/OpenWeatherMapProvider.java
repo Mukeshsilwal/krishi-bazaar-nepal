@@ -29,7 +29,7 @@ public class OpenWeatherMapProvider implements WeatherDataProvider {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    @Value("${weather.openweathermap.api-key:demo}")
+    @Value("${weather.openweathermap.api-key:cc1f6ee6c3d30d4276544a101c0607ad}")
     private String apiKey;
 
     @Value("${weather.openweathermap.base-url:https://api.openweathermap.org/data/2.5}")

@@ -44,12 +44,13 @@ public class MarketPriceController {
     @GetMapping("/today")
     public ResponseEntity<?> getTodaysPrices(
             @RequestParam(required = false) String district,
+            @RequestParam(required = false) String cropName,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "false") boolean paginated) {
 
         if (paginated) {
-            org.springframework.data.domain.Page<MarketPriceDto> pricesPage = priceService.getTodaysPrices(district,
+            org.springframework.data.domain.Page<MarketPriceDto> pricesPage = priceService.getTodaysPrices(district, cropName,
                     page, size);
             return ResponseEntity.ok(ApiResponse.success(pricesPage));
         } else {

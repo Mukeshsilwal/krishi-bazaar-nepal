@@ -27,6 +27,13 @@ public interface MarketPriceRepository extends JpaRepository<MarketPrice, UUID> 
                         @Param("date") LocalDate date,
                         org.springframework.data.domain.Pageable pageable);
 
+        @Query("SELECT mp FROM MarketPrice mp WHERE mp.district = :district AND LOWER(mp.cropName) LIKE LOWER(CONCAT('%', :cropName, '%')) AND mp.priceDate = :date ORDER BY mp.cropName")
+        org.springframework.data.domain.Page<MarketPrice> findByDistrictAndCropNameContainingIgnoreCaseAndPriceDate(
+                        @Param("district") String district,
+                        @Param("cropName") String cropName,
+                        @Param("date") LocalDate date,
+                        org.springframework.data.domain.Pageable pageable);
+
         @Query("SELECT mp FROM MarketPrice mp WHERE " +
                         "mp.cropName = :cropName AND mp.district = :district AND mp.priceDate = :date")
         List<MarketPrice> findByCropDistrictAndDate(

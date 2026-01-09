@@ -127,6 +127,36 @@ const translations = {
         'listings.actions.edit': 'सम्पादन',
         'listings.actions.delete': 'हटाउनुहोस्',
         'listings.confirmDelete': 'के तपाइँ यो सूची मेटाउन निश्चित हुनुहुन्छ?',
+
+        // Market Price Dashboard
+        'market.title': 'बजार जानकारी',
+        'market.subtitle': 'ताजा कृषि बजार मूल्य र रुझानहरू',
+        'market.hero.title': 'बजार जानकारी',
+        'market.hero.subtitle': 'वास्तविक समयमा बजार मूल्य ट्र्याक गर्नुहोस् र बजारको अवस्था विश्लेषण गर्नुहोस्।',
+        'market.search.placeholder': 'आलु, स्याउ आदीको मूल्य खोज्नुहोस्...',
+        'market.filter.district': 'जिल्ला:',
+        'market.table.title': 'दैनिक दरहरू',
+        'market.table.commodity': 'कृषि उपज',
+        'market.table.unit': 'इकाई',
+        'market.table.min': 'न्यूनतम',
+        'market.table.max': 'अधिकतम',
+        'market.table.avg': 'औसत',
+        'market.table.source': 'स्रोत',
+        'market.trend.title': 'मूल्य प्रवृत्ति',
+        'market.trend.select': 'बाली छान्नुहोस्',
+        'market.trend.noData': 'इतिहास उपलब्ध छैन',
+        'market.tips.title': 'बजार सुझावहरू',
+        'market.tips.1': '• मूल्यहरू प्रमुख बजारहरूबाट हरेक घण्टा अपडेट हुन्छन्।',
+        'market.tips.2': '• थोक मूल्यमा सामान्यतया भ्याट समावेश हुँदैन।',
+        'market.tips.3': '• थप बजार विवरणको लागि "राम्रोपात्रो" हेर्नुहोस्।',
+        'market.empty': 'मा कुनै मूल्य फेला परेन',
+        'market.loading': 'थप मूल्यहरू लोड हुँदै...',
+        'market.end': 'सूची समाप्त',
+
+        // Marketplace Page
+        'marketplace.hero.title': 'ताजा कृषि उपज खोज्नुहोस्',
+        'marketplace.hero.subtitle': 'किसानहरूसँग सिधै जोडिनुहोस् र ताजा तरकारी, फलफूल र अन्नको उत्कृष्ट मूल्य पाउनुहोस्।',
+        'marketplace.search.placeholder': 'विशेष तरकारी, फलफूल खोज्नुहोस् (जस्तै: आलु, आँप)...',
     },
     en: {
         // Navbar
@@ -249,6 +279,36 @@ const translations = {
         'listings.actions.edit': 'Edit',
         'listings.actions.delete': 'Delete',
         'listings.confirmDelete': 'Are you sure you want to delete this listing?',
+
+        // Market Price Dashboard
+        'market.title': 'Market Intelligence',
+        'market.subtitle': 'Real-time agricultural commodity prices and trends',
+        'market.hero.title': 'Market Intelligence',
+        'market.hero.subtitle': 'Track real-time agricultural prices and analyze market trends.',
+        'market.search.placeholder': 'Search price for Potato, Apple...',
+        'market.filter.district': 'District:',
+        'market.table.title': 'Daily Rates',
+        'market.table.commodity': 'Commodity',
+        'market.table.unit': 'Unit',
+        'market.table.min': 'Min',
+        'market.table.max': 'Max',
+        'market.table.avg': 'Avg',
+        'market.table.source': 'Source',
+        'market.trend.title': 'Price Trend',
+        'market.trend.select': 'Select a crop',
+        'market.trend.noData': 'No history data available',
+        'market.tips.title': 'Market Tips',
+        'market.tips.1': '• Prices are updated hourly from major markets.',
+        'market.tips.2': '• Wholesale prices usually exclude VAT.',
+        'market.tips.3': '• Check "RamroPatro" for additional market listings.',
+        'market.empty': 'No prices found in',
+        'market.loading': 'Loading more prices...',
+        'market.end': 'End of list',
+
+        // Marketplace Page
+        'marketplace.hero.title': 'Find Fresh Agricultural Produce',
+        'marketplace.hero.subtitle': 'Connect directly with farmers and get the best prices for fresh vegetables, fruits, and grains.',
+        'marketplace.search.placeholder': 'Search for specific vegetables, fruits (e.g. Potato, Mango)...',
     },
 };
 

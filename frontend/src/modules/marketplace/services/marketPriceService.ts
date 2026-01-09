@@ -21,9 +21,9 @@ const marketPriceService = {
     },
 
     // Market Prices
-    getTodaysPrices: async (district?: string, page = 0, size = 20) => {
+    getTodaysPrices: async (district?: string, cropName?: string, page = 0, size = 20) => {
         const response = await api.get(MARKET_PRICE_ENDPOINTS.TODAY, {
-            params: { district, page, size, paginated: true }
+            params: { district, cropName, page, size, paginated: true }
         });
         return response.data.data || response.data;
     },
