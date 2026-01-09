@@ -15,6 +15,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import com.krishihub.marketprice.dto.PriceStats;
+
 
 @Service
 @RequiredArgsConstructor
@@ -61,6 +65,7 @@ public class MarketPriceService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "todaysPrices", key = "{#district, #cropName, #page, #size}")
     public org.springframework.data.domain.Page<MarketPriceDto> getTodaysPrices(String district, String cropName, int page, int size) {
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
 
@@ -110,15 +115,18 @@ public class MarketPriceService {
         return getPricesByDate(LocalDate.now());
     }
 
+    @Cacheable(value = "availableCrops")
     public List<String> getAvailableCrops() {
         return priceRepository.findDistinctCropNames();
     }
 
+    @Cacheable(value = "availableDistricts")
     public List<String> getAvailableDistricts() {
         return priceRepository.findDistinctDistricts();
     }
 
     @Transactional
+    @CacheEvict(value = {"todaysPrices", "availableCrops", "availableDistricts"}, allEntries = true)
     public MarketPriceDto addPrice(MarketPriceDto priceDto) {
         // Check if price already exists for this crop, district, and date
         List<MarketPrice> existingPrices = priceRepository.findByCropDistrictAndDate(
@@ -192,5 +200,9 @@ public class MarketPriceService {
         MarketPrice previous = priceRepository.findFirstByCropNameAndDistrictAndPriceDateBeforeOrderByPriceDateDesc(
                 cropName, district, date);
         return previous != null ? MarketPriceDto.fromEntity(previous) : null;
+    }
+
+    public List<PriceStats> getPriceHistory(String cropName, String district, LocalDate startDate, LocalDate endDate) {
+        return priceRepository.findPriceHistory(cropName, district, startDate, endDate);
     }
 }

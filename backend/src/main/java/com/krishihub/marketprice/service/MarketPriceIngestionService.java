@@ -25,6 +25,7 @@ public class MarketPriceIngestionService {
      * Scheduled to run every hour.
      * Cron expression: second, minute, hour, day of month, month, day(s) of week
      */
+    @org.springframework.scheduling.annotation.Async
     @Scheduled(cron = "0 0 10 * * *") // Daily at 10 AM
     public void ingestPrices() {
         log.info("Starting scheduled market price ingestion on thread: {}", Thread.currentThread().getName());
@@ -32,10 +33,10 @@ public class MarketPriceIngestionService {
     }
 
     @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
+    @org.springframework.scheduling.annotation.Async
     public void onStartup() {
         log.info("Triggering initial market price ingestion on startup...");
-        // Running in a separate thread to not block startup
-        new Thread(this::triggerInternalIngestion).start();
+        triggerInternalIngestion();
     }
 
     private void triggerInternalIngestion() {
@@ -74,6 +75,7 @@ public class MarketPriceIngestionService {
     }
 
     // Manual trigger for testing
+    @org.springframework.scheduling.annotation.Async
     public void triggerIngestion() {
         ingestPrices();
     }

@@ -16,7 +16,9 @@ const RegisterPage = lazy(() => import('./modules/auth/pages/RegisterPage'));
 const MarketplacePage = lazy(() => import('./modules/marketplace/pages/MarketplacePage'));
 const ListingDetailPage = lazy(() => import('./modules/marketplace/pages/ListingDetailPage'));
 const OrderDetailPage = lazy(() => import('./modules/orders/pages/OrderDetailPage'));
-const PaymentRedirectPage = lazy(() => import('./modules/orders/pages/PaymentRedirectPage'));
+// const PaymentRedirectPage = lazy(() => import('./modules/orders/pages/PaymentRedirectPage')); // Replaced
+const PaymentSuccessPage = lazy(() => import('./pages/PaymentSuccessPage'));
+const PaymentFailurePage = lazy(() => import('./pages/PaymentFailurePage'));
 const MyListingsPage = lazy(() => import('./modules/marketplace/pages/MyListingsPage'));
 const MyOrdersPage = lazy(() => import('./modules/orders/pages/MyOrdersPage'));
 const ChatPage = lazy(() => import('./pages/ChatPage'));
@@ -42,6 +44,7 @@ const KnowledgeCMSPage = lazy(() => import('./pages/admin/KnowledgeCMSPage'));
 const DiseaseCMSPage = lazy(() => import('./pages/admin/DiseaseCMSPage'));
 const PesticideCMSPage = lazy(() => import('./pages/admin/PesticideCMSPage'));
 const AIReviewPage = lazy(() => import('./pages/admin/AIReviewPage'));
+const ActivityLogsPage = lazy(() => import('./pages/admin/ActivityLogsPage'));
 const AdvisoryLogsPage = lazy(() => import('./pages/admin/AdvisoryLogsPage'));
 const RoleManagement = lazy(() => import('./pages/admin/RoleManagement'));
 const CmsDashboard = lazy(() => import('./pages/admin/CmsDashboard'));
@@ -93,9 +96,9 @@ function App() {
                 <Route path="/admin/reset-password" element={<ResetPasswordPage />} />
 
                 {/* Protected User Routes */}
-                <Route path="/orders/esewa-redirect" element={<ProtectedRoute><PaymentRedirectPage /></ProtectedRoute>} />
-                <Route path="/payment/success" element={<ProtectedRoute><PaymentRedirectPage /></ProtectedRoute>} />
-                <Route path="/payment/failure" element={<ProtectedRoute><PaymentRedirectPage /></ProtectedRoute>} />
+                <Route path="/orders/esewa-redirect" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />
+                <Route path="/payment/success" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />
+                <Route path="/payment/failure" element={<ProtectedRoute><PaymentFailurePage /></ProtectedRoute>} />
                 <Route path="/orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
                 <Route path="/my-listings" element={<ProtectedRoute><MyListingsPage /></ProtectedRoute>} />
                 <Route path="/create-listing" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
@@ -120,7 +123,7 @@ function App() {
                 <Route path="pesticides" element={<PesticideCMSPage />} />
                 <Route path="ai-review" element={<AIReviewPage />} />
                 <Route path="logs" element={<AdvisoryLogsPage />} />
-                <Route path="roles" element={<RoleManagement />} />
+
                 <Route path="cms" element={<CmsDashboard />} />
                 <Route path="rules" element={<RulePlayground />} />
                 <Route path="rules-manager" element={<RuleCMSPage />} />
@@ -139,6 +142,7 @@ function App() {
                 <Route path="content" element={<ContentDashboard />} />
                 <Route path="content/:id" element={<ContentEditor />} />
                 <Route path="market-prices" element={<MarketPriceManager />} />
+                <Route path="activities" element={<ActivityLogsPage />} />
               </Route>
             </Routes>
           </Suspense>

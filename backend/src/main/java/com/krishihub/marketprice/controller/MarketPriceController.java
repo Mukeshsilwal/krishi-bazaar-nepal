@@ -23,20 +23,23 @@ import java.util.UUID;
 @Slf4j
 public class MarketPriceController {
 
-    public MarketPriceController(MarketPriceService priceService, MarketPriceIngestionService ingestionService) {
-        this.priceService = priceService;
-        this.ingestionService = ingestionService;
-        log.info("MarketPriceController initialized");
-    }
-
     private final MarketPriceService priceService;
     private final MarketPriceIngestionService ingestionService;
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
+
+    public MarketPriceController(MarketPriceService priceService, MarketPriceIngestionService ingestionService, org.springframework.context.ApplicationEventPublisher eventPublisher) {
+        this.priceService = priceService;
+        this.ingestionService = ingestionService;
+        this.eventPublisher = eventPublisher;
+        log.info("MarketPriceController initialized");
+    }
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<MarketPriceDto>>> getPrices(
             @RequestParam String cropName,
             @RequestParam String district) {
         List<MarketPriceDto> prices = priceService.getPricesByCropAndDistrict(cropName, district);
+        eventPublisher.publishEvent(new com.krishihub.analytics.event.ActivityEvent(this, null, "VIEW_MARKET_PRICES", "Crop: " + cropName + ", District: " + district, null));
         return ResponseEntity.ok(ApiResponse.success(prices));
     }
 
@@ -45,6 +48,7 @@ public class MarketPriceController {
             @RequestParam String cropName,
             @RequestParam String district) {
         MarketPriceDto price = priceService.getLatestPrice(cropName, district);
+        eventPublisher.publishEvent(new com.krishihub.analytics.event.ActivityEvent(this, null, "VIEW_LATEST_PRICE", "Crop: " + cropName + ", District: " + district, null));
         return ResponseEntity.ok(ApiResponse.success(price));
     }
 

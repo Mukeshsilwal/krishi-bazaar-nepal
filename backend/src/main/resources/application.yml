@@ -3,3 +3,7 @@ spring:
     name: kisan-sarathi-backend
   profiles:
     active: dev
+  data:
+    redis:
+      timeout: 2000
+      connect-timeout: 2000

@@ -1,5 +1,8 @@
 package com.krishihub.auth.service;
 
+import com.krishihub.analytics.event.ActivityEvent;
+import org.springframework.context.ApplicationEventPublisher;
+
 import com.krishihub.auth.dto.*;
 import com.krishihub.auth.entity.OtpVerification;
 import com.krishihub.auth.entity.User;
@@ -36,6 +39,8 @@ public class AuthService {
     private final SmsService smsService;
     private final NotificationOrchestrator notificationOrchestrator;
     private final PasswordEncoder passwordEncoder;
+    private final ApplicationEventPublisher eventPublisher;
+    private final RefreshTokenService refreshTokenService;
 
     @Value("${app.otp.expiration}")
     private int otpExpiration;
@@ -111,6 +116,8 @@ public class AuthService {
             // For now fallback to SMS as backup
             smsService.sendOtp(mobileNumber, otp);
         }
+        
+        eventPublisher.publishEvent(new ActivityEvent(this, user.getId(), "REGISTER", "User registered via " + request.getMobileNumber(), null));
 
         log.info("User registered successfully: {}", mobileNumber);
         return "OTP sent to " + mobileNumber;
@@ -189,6 +196,9 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
+        
+        eventPublisher.publishEvent(new ActivityEvent(this, user.getId(), "ADMIN_REGISTER", "Admin registered: " + user.getName(), null));
+        
         log.info("Admin registered successfully: {}", mobileNumber);
         return "Admin registered successfully";
     }
@@ -218,13 +228,15 @@ public class AuthService {
         // Generate JWT tokens
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getMobileNumber());
         String accessToken = jwtUtil.generateToken(userDetails);
-        String refreshToken = jwtUtil.generateRefreshToken(userDetails);
+        com.krishihub.auth.entity.RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+        
+        eventPublisher.publishEvent(new ActivityEvent(this, user.getId(), "ADMIN_LOGIN", "Admin logged in via " + request.getIdentifier(), null));
 
         log.info("Admin logged in: {}", user.getMobileNumber());
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .refreshToken(refreshToken.getToken())
                 .tokenType("Bearer")
                 .user(UserDto.fromEntity(user))
                 .build();
@@ -274,13 +286,15 @@ public class AuthService {
         // Generate JWT tokens
         UserDetails userDetails = userDetailsService.loadUserByUsername(mobileNumber);
         String accessToken = jwtUtil.generateToken(userDetails);
-        String refreshToken = jwtUtil.generateRefreshToken(userDetails);
+        com.krishihub.auth.entity.RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+        
+        eventPublisher.publishEvent(new ActivityEvent(this, user.getId(), "LOGIN_VERIFY", "User logged in via OTP", null));
 
         log.info("User verified and logged in: {}", mobileNumber);
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .refreshToken(refreshToken.getToken())
                 .tokenType("Bearer")
                 .user(UserDto.fromEntity(user))
                 .build();
@@ -407,6 +421,26 @@ public class AuthService {
 
         log.info("Password reset successfully for {}", mobileNumber);
         return "Password reset successfully";
+    }
+
+    @Transactional
+    public AuthResponse refreshToken(RefreshTokenRequest request) {
+        String requestRefreshToken = request.getRefreshToken();
+
+        return refreshTokenService.findByToken(requestRefreshToken)
+                .map(refreshTokenService::verifyExpiration)
+                .map(com.krishihub.auth.entity.RefreshToken::getUser)
+                .map(user -> {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(user.getMobileNumber());
+                    String token = jwtUtil.generateToken(userDetails);
+                    return AuthResponse.builder()
+                            .accessToken(token)
+                            .refreshToken(requestRefreshToken)
+                            .tokenType("Bearer")
+                            .user(UserDto.fromEntity(user))
+                            .build();
+                })
+                .orElseThrow(() -> new ResourceNotFoundException("Refresh token is not in database!"));
     }
 
     private String normalizeMobileNumber(String mobileNumber) {

@@ -13,10 +13,14 @@ import com.krishihub.payment.repository.TransactionRepository;
 import com.krishihub.shared.exception.BadRequestException;
 import com.krishihub.shared.exception.ResourceNotFoundException;
 import com.krishihub.shared.exception.UnauthorizedException;
+import com.krishihub.order.dto.OrderStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.krishihub.payment.event.PaymentCompletedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.Map;
 import java.util.UUID;
@@ -31,7 +35,8 @@ public class PaymentService {
     private final UserRepository userRepository;
     private final EsewaPaymentService esewaService;
     private final KhaltiPaymentService khaltiService;
-    private final SmsService smsService;
+    private final ApplicationEventPublisher eventPublisher;
+
 
     public PaymentResponse initiatePayment(UUID userId, InitiatePaymentRequest request) {
         User user = userRepository.findById(userId)
@@ -46,8 +51,8 @@ public class PaymentService {
         }
 
         // Verify order status
-        if (order.getStatus() != Order.OrderStatus.CONFIRMED &&
-                order.getStatus() != Order.OrderStatus.PAYMENT_PENDING) {
+        if (order.getStatus() != OrderStatus.CONFIRMED &&
+                order.getStatus() != OrderStatus.PAYMENT_PENDING) {
             throw new BadRequestException("Order is not ready for payment");
         }
 
@@ -76,7 +81,7 @@ public class PaymentService {
         Transaction savedTransaction = transactionRepository.save(transaction);
 
         // Update order status
-        order.setStatus(Order.OrderStatus.PAYMENT_PENDING);
+        order.setStatus(OrderStatus.PAYMENT_PENDING);
         orderRepository.save(order);
 
         // Initiate payment with gateway
@@ -155,16 +160,11 @@ public class PaymentService {
 
             // Update order status
             Order order = transaction.getOrder();
-            order.setStatus(Order.OrderStatus.PAID);
+            order.setStatus(OrderStatus.PAID);
             orderRepository.save(order);
 
-            // Send notifications
-            smsService.sendNotification(
-                    order.getBuyer().getMobileNumber(),
-                    "Payment successful for order " + order.getId());
-            smsService.sendNotification(
-                    order.getFarmer().getMobileNumber(),
-                    "Payment received for order " + order.getId() + ". Please prepare the order.");
+            // Send notifications event
+            eventPublisher.publishEvent(new PaymentCompletedEvent(this, transaction));
 
             log.info("Payment verified and completed: {}", transactionId);
         } else {

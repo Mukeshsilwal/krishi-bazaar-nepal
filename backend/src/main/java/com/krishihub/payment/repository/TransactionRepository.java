@@ -16,4 +16,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
     Optional<Transaction> findByTransactionId(String transactionId);
 
     Optional<Transaction> findByOrderIdAndPaymentStatus(UUID orderId, Transaction.PaymentStatus status);
+
+    List<Transaction> findByPaymentStatusAndCreatedAtBefore(Transaction.PaymentStatus status,
+                                                           java.time.LocalDateTime createdAt);
 }

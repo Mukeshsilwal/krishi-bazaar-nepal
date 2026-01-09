@@ -79,14 +79,27 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
-          // TODO: Implement refresh token endpoint
-          // For now, just redirect to login
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('user');
-          window.location.href = '/login';
+          // Call backend to refresh token
+          // Use axios directly to avoid interceptor loop
+          const response = await axios.post(`${API_BASE_URL}/api/auth/refresh-token`, {
+            refreshToken: refreshToken
+          });
+
+          if (response.data?.success) {
+            const { accessToken, refreshToken: newRefreshToken, user } = response.data.data;
+
+            // Update local storage
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('refreshToken', newRefreshToken);
+            localStorage.setItem('user', JSON.stringify(user));
+
+            // Update header and retry
+            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+            return api(originalRequest);
+          }
         }
       } catch (refreshError) {
+        // If refresh fails, clear everything and redirect
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');

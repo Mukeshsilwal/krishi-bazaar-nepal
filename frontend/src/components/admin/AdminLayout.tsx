@@ -113,6 +113,12 @@ const AdminLayoutContent: React.FC = () => {
       labelNe: 'सल्लाह लग'
     },
     {
+      path: '/admin/activities',
+      icon: Activity,
+      labelEn: 'User Activity',
+      labelNe: 'प्रयोगकर्ता गतिविधि'
+    },
+    {
       path: '/admin/users',
       icon: Users,
       labelEn: 'Users & Roles',
@@ -149,12 +155,7 @@ const AdminLayoutContent: React.FC = () => {
       labelNe: 'किसान व्यवस्थापन'
     },
 
-    {
-      path: '/admin/roles',
-      icon: Users,
-      labelEn: 'RbAC Roles',
-      labelNe: 'भूमिकाहरू'
-    },
+
     {
       path: '/admin/settings',
       icon: Settings,

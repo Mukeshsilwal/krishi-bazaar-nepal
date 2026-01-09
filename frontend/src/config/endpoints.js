@@ -303,6 +303,7 @@ export const ADMIN_ENDPOINTS = {
     // Settings
     SETTINGS: '/admin/settings',
     SETTING_BY_KEY: (key) => `/admin/settings/${key}`,
+    ACTIVITIES: '/admin/activities',
 };
 
 export const ADMIN_RBAC_ENDPOINTS = {

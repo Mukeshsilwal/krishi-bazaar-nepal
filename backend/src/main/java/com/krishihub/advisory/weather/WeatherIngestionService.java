@@ -37,6 +37,17 @@ public class WeatherIngestionService {
      * Scheduled task to poll weather data
      * Runs every hour
      */
+    @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
+    @org.springframework.scheduling.annotation.Async
+    public void onStartup() {
+        log.info("Triggering initial weather data polling on startup...");
+        pollWeatherData();
+    }
+
+    /**
+     * Scheduled task to poll weather data
+     * Runs every hour
+     */
     @Scheduled(cron = "${weather.ingestion.cron:0 0 * * * *}")
     public void pollWeatherData() {
         log.info("Starting scheduled weather data polling for {} districts on thread: {}", MONITORED_DISTRICTS.size(), Thread.currentThread().getName());

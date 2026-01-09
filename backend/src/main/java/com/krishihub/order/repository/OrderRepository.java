@@ -1,5 +1,6 @@
 package com.krishihub.order.repository;
 
+import com.krishihub.order.dto.OrderStatus;
 import com.krishihub.order.entity.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,9 +28,9 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     Page<Order> findByFarmerId(UUID farmerId, Pageable pageable);
 
-    Page<Order> findByBuyerIdAndStatus(UUID buyerId, Order.OrderStatus status, Pageable pageable);
+    Page<Order> findByBuyerIdAndStatus(UUID buyerId, OrderStatus status, Pageable pageable);
 
-    Page<Order> findByFarmerIdAndStatus(UUID farmerId, Order.OrderStatus status, Pageable pageable);
+    Page<Order> findByFarmerIdAndStatus(UUID farmerId, OrderStatus status, Pageable pageable);
 
     Page<Order> findByBuyerIdOrFarmerId(UUID buyerId, UUID farmerId, Pageable pageable);
 

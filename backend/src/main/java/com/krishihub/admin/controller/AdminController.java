@@ -1,5 +1,7 @@
 package com.krishihub.admin.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.krishihub.admin.dto.AdminDashboardStats;
 import com.krishihub.admin.service.AdminService;
 import com.krishihub.auth.entity.User;
@@ -15,6 +17,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     private final AdminService adminService;

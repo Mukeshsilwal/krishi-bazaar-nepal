@@ -36,6 +36,21 @@ interface DashboardStats {
   // System Metrics
   totalOrders: number;
   aiDiagnosisCount: number;
+
+  recentActivity: {
+    type: string;
+    titleEn: string;
+    titleNe: string;
+    time: string;
+    timeEn: string;
+    status: string;
+  }[];
+
+  topContent: {
+    titleEn: string;
+    titleNe: string;
+    views: number;
+  }[];
 }
 
 const AdminDashboardPage = () => {
@@ -91,47 +106,7 @@ const AdminDashboardPage = () => {
     },
   ];
 
-  const recentActivity = [
-    {
-      type: 'article',
-      titleEn: 'Rice Cultivation Guide updated',
-      titleNe: 'धान खेती गाइड अपडेट',
-      time: '5 मिनेट पहिले',
-      timeEn: '5 minutes ago',
-      status: 'published'
-    },
-    {
-      type: 'disease',
-      titleEn: 'New disease alert: Tomato Blight',
-      titleNe: 'नयाँ रोग सूचना: गोलभेडा झुल्सिने',
-      time: '1 घण्टा पहिले',
-      timeEn: '1 hour ago',
-      status: 'alert'
-    },
-    {
-      type: 'review',
-      titleEn: 'Pesticide recommendation pending review',
-      titleNe: 'कीटनाशक सिफारिस समीक्षा पर्खिदै',
-      time: '2 घण्टा पहिले',
-      timeEn: '2 hours ago',
-      status: 'pending'
-    },
-    {
-      type: 'advisory',
-      titleEn: 'Weather advisory sent to Terai region',
-      titleNe: 'तराई क्षेत्रमा मौसम सल्लाह पठाइयो',
-      time: '3 घण्टा पहिले',
-      timeEn: '3 hours ago',
-      status: 'sent'
-    },
-  ];
 
-  const topContent = [
-    { titleEn: 'How to grow organic vegetables', titleNe: 'जैविक तरकारी कसरी उमार्ने', views: 2450 },
-    { titleEn: 'Rice disease prevention', titleNe: 'धानको रोग रोकथाम', views: 1890 },
-    { titleEn: 'Fertilizer application guide', titleNe: 'मल प्रयोग गाइड', views: 1650 },
-    { titleEn: 'Seasonal crop calendar', titleNe: 'मौसमी बाली क्यालेन्डर', views: 1420 },
-  ];
 
   return (
     <>
@@ -176,39 +151,42 @@ const AdminDashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivity.map((activity, index) => (
-                <div
-                  key={index}
-                  className="flex items-start gap-4 p-4 bg-muted/50 rounded-xl hover:bg-muted transition-colors"
-                >
-                  <div className={`p-2 rounded-lg ${activity.status === 'alert' ? 'bg-destructive/10 text-destructive' :
-                    activity.status === 'pending' ? 'bg-amber-100 text-amber-600' :
-                      'bg-primary/10 text-primary'
-                    }`}>
-                    {activity.type === 'disease' ? <Bug className="h-4 w-4" /> :
-                      activity.type === 'article' ? <FileText className="h-4 w-4" /> :
-                        <CheckCircle className="h-4 w-4" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground text-sm">
-                      {language === 'ne' ? activity.titleNe : activity.titleEn}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {language === 'ne' ? activity.time : activity.timeEn}
-                    </p>
-                  </div>
-                  <Badge
-                    variant={activity.status === 'alert' ? 'destructive' :
-                      activity.status === 'pending' ? 'outline' : 'default'}
-                    className="text-xs"
+              {stats?.recentActivity && stats.recentActivity.length > 0 ? (
+                stats.recentActivity.map((activity, index) => (
+                  <div
+                    key={index}
+                    className="flex items-start gap-4 p-4 bg-muted/50 rounded-xl hover:bg-muted transition-colors"
                   >
-                    {activity.status === 'published' ? (language === 'ne' ? 'प्रकाशित' : 'Published') :
-                      activity.status === 'alert' ? (language === 'ne' ? 'सूचना' : 'Alert') :
-                        activity.status === 'pending' ? (language === 'ne' ? 'पर्खिदै' : 'Pending') :
-                          (language === 'ne' ? 'पठाइयो' : 'Sent')}
-                  </Badge>
+                    <div className={`p-2 rounded-lg ${activity.status === 'alert' ? 'bg-destructive/10 text-destructive' :
+                      activity.status === 'pending' ? 'bg-amber-100 text-amber-600' :
+                        'bg-primary/10 text-primary'
+                      }`}>
+                      {activity.type === 'disease' ? <Bug className="h-4 w-4" /> :
+                        activity.type === 'article' ? <FileText className="h-4 w-4" /> :
+                          <CheckCircle className="h-4 w-4" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground text-sm">
+                        {language === 'ne' ? activity.titleNe : activity.titleEn}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {language === 'ne' ? activity.time : activity.timeEn}
+                      </p>
+                    </div>
+                    <Badge
+                      variant={activity.status === 'alert' ? 'destructive' :
+                        activity.status === 'pending' ? 'outline' : 'default'}
+                      className="text-xs"
+                    >
+                      {activity.status}
+                    </Badge>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-muted-foreground py-8">
+                  {language === 'ne' ? 'कुनै गतिविधि छैन' : 'No recent activity'}
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
@@ -223,27 +201,33 @@ const AdminDashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {topContent.map((content, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-4 bg-muted/50 rounded-xl"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-sm font-bold text-primary">
-                      {index + 1}
-                    </span>
-                    <div>
-                      <p className="font-medium text-sm text-foreground">
-                        {language === 'ne' ? content.titleNe : content.titleEn}
-                      </p>
+              {stats?.topContent && stats.topContent.length > 0 ? (
+                stats.topContent.map((content, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-4 bg-muted/50 rounded-xl"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-sm font-bold text-primary">
+                        {index + 1}
+                      </span>
+                      <div>
+                        <p className="font-medium text-sm text-foreground">
+                          {language === 'ne' ? content.titleNe : content.titleEn}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 text-muted-foreground">
+                      <Eye className="h-4 w-4" />
+                      <span className="text-sm font-medium">{content.views.toLocaleString()}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <Eye className="h-4 w-4" />
-                    <span className="text-sm font-medium">{content.views.toLocaleString()}</span>
-                  </div>
+                ))
+              ) : (
+                <div className="text-center text-muted-foreground py-8">
+                  {language === 'ne' ? 'कुनै सामग्री छैन' : 'No top content'}
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
@@ -263,6 +247,7 @@ const AdminDashboardPage = () => {
                 { labelEn: 'Add Disease', labelNe: 'रोग थप्नुहोस्', icon: Bug, path: '/admin/diseases' },
                 { labelEn: 'Review AI', labelNe: 'AI समीक्षा', icon: CheckCircle, path: '/admin/ai-review' },
                 { labelEn: 'Send Alert', labelNe: 'सूचना पठाउनुहोस्', icon: AlertTriangle, path: '/admin/weather' },
+                { labelEn: 'Activity Logs', labelNe: 'गतिविधि लगहरू', icon: Clock, path: '/admin/activities' },
               ].map((action, index) => {
                 const Icon = action.icon;
                 return (

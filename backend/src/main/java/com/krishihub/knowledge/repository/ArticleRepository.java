@@ -20,4 +20,6 @@ public interface ArticleRepository extends JpaRepository<Article, UUID> {
     List<Article> findByTag(@Param("tag") String tag);
 
     long countByStatus(ArticleStatus status);
+    
+    List<com.krishihub.knowledge.entity.Article> findTop5ByOrderByViewsDesc();
 }

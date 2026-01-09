@@ -5,6 +5,7 @@ import com.krishihub.advisory.repository.AdvisoryDeliveryLogRepository;
 import com.krishihub.auth.entity.User;
 import com.krishihub.auth.repository.UserRepository;
 import com.krishihub.diagnosis.repository.AIDiagnosisRepository;
+import com.krishihub.analytics.entity.UserActivity;
 import com.krishihub.knowledge.entity.ArticleStatus;
 import com.krishihub.knowledge.repository.ArticleRepository;
 import com.krishihub.order.repository.OrderRepository;
@@ -30,10 +31,38 @@ public class AdminService {
     private final ArticleRepository articleRepository;
     private final AdvisoryDeliveryLogRepository advisoryLogRepository;
     private final AIDiagnosisRepository aiDiagnosisRepository;
+    private final com.krishihub.analytics.service.UserActivityService userActivityService;
 
     public AdminDashboardStats getDashboardStats() {
         LocalDateTime todayStart = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
         LocalDateTime todayEnd = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
+
+        // Recent Activity
+        List<UserActivity> activities = userActivityService.getAllActivities(
+            org.springframework.data.domain.PageRequest.of(0, 5, org.springframework.data.domain.Sort.Direction.DESC, "timestamp")
+        ).getContent();
+
+        List<AdminDashboardStats.RecentActivityDto> recentActivityDtos = activities.stream().map(activity -> 
+            AdminDashboardStats.RecentActivityDto.builder()
+                .type("activity") // simplified for now
+                .titleEn(activity.getAction() + ": " + activity.getDetails())
+                .titleNe(activity.getAction() + ": " + activity.getDetails())
+                .time(activity.getTimestamp().toString()) // formatted in frontend
+                .timeEn(activity.getTimestamp().toString())
+                .status("completed")
+                .build()
+        ).toList();
+
+        // Top Content
+        List<com.krishihub.knowledge.entity.Article> topArticles = articleRepository.findTop5ByOrderByViewsDesc();
+        
+        List<AdminDashboardStats.TopContentDto> topContentDtos = topArticles.stream().map(article ->
+            AdminDashboardStats.TopContentDto.builder()
+                .titleEn(article.getTitleEn())
+                .titleNe(article.getTitleNe())
+                .views(article.getViews() != null ? article.getViews() : 0)
+                .build()
+        ).toList();
 
         return AdminDashboardStats.builder()
                 // User Metrics
@@ -54,6 +83,10 @@ public class AdminService {
                 // System Metrics
                 .totalOrders(orderRepository.count())
                 .aiDiagnosisCount(aiDiagnosisRepository.count())
+                
+                // Lists
+                .recentActivity(recentActivityDtos)
+                .topContent(topContentDtos)
                 .build();
     }
 
@@ -63,10 +96,32 @@ public class AdminService {
         return userRepository.findByVerifiedFalse();
     }
 
+    private final com.krishihub.admin.service.AuditService auditService;
+
     public void approveUser(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         user.setVerified(true);
         userRepository.save(user);
+        
+        // Audit
+        try {
+            UUID adminId = getCurrentUserId();
+            auditService.logAction(adminId, "APPROVE_USER", "USER", userId.toString(), null, "SYSTEM", "WEB");
+        } catch (Exception e) {
+            // log error
+        }
+    }
+    
+    private UUID getCurrentUserId() {
+        try {
+            org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getPrincipal() instanceof com.krishihub.auth.model.CustomUserDetails) {
+                return ((com.krishihub.auth.model.CustomUserDetails) auth.getPrincipal()).getId();
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        return UUID.fromString("00000000-0000-0000-0000-000000000000"); // System/Unknown
     }
 }

@@ -11,9 +11,16 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final org.springframework.scheduling.TaskScheduler taskScheduler;
+    private final WebSocketAuthInterceptor authInterceptor;
 
-    public WebSocketConfig(org.springframework.scheduling.TaskScheduler taskScheduler) {
+    public WebSocketConfig(org.springframework.scheduling.TaskScheduler taskScheduler, WebSocketAuthInterceptor authInterceptor) {
         this.taskScheduler = taskScheduler;
+        this.authInterceptor = authInterceptor;
+    }
+
+    @Override
+    public void configureClientInboundChannel(org.springframework.messaging.simp.config.ChannelRegistration registration) {
+        registration.interceptors(authInterceptor);
     }
 
     @Override

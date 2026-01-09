@@ -96,6 +96,10 @@ const UserManagement = () => {
     };
 
     const toggleStatus = async (user: User) => {
+        if (!window.confirm(`Are you sure you want to ${user.enabled ? 'deactivate' : 'activate'} ${user.name}?`)) {
+            return;
+        }
+
         // Optimistic update
         const originalUsers = [...users];
         setUsers(users.map(u => u.id === user.id ? { ...u, enabled: !u.enabled } : u));

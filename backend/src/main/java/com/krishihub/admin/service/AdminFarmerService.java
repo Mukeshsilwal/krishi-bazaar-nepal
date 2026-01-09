@@ -29,14 +29,12 @@ public class AdminFarmerService {
         private final UserRepository userRepository;
         private final CropListingRepository cropListingRepository;
         private final OrderRepository orderRepository;
+        private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+        private final com.krishihub.notification.repository.NotificationRepository notificationRepository;
+        private final com.krishihub.notification.service.NotificationSenderService notificationSenderService;
 
-        public List<User> getAllFarmers() {
-                // ideally filter by Role.FARMER, but for now filtering in memory or custom
-                // query if needed
-                // Assuming all users for now or added specific logic
-                return userRepository.findAll().stream()
-                                .filter(u -> u.getRole() == User.UserRole.FARMER)
-                                .collect(Collectors.toList());
+        public org.springframework.data.domain.Page<User> getAllFarmers(String search, Pageable pageable) {
+                return userRepository.searchUsers(User.UserRole.FARMER, null, search, pageable);
         }
 
         public FarmerProfileDto getFarmerProfile(UUID farmerId) {
@@ -65,6 +63,8 @@ public class AdminFarmerService {
                                 .build();
         }
 
+        private final com.krishihub.admin.service.AuditService auditService;
+
         @Transactional
         public User verifyFarmer(UUID farmerId, FarmerVerificationRequest request) {
                 User farmer = userRepository.findById(farmerId)
@@ -80,12 +80,20 @@ public class AdminFarmerService {
 
                 farmer.setVerificationNotes(request.getVerificationNotes());
 
-                return userRepository.save(farmer);
+                User saved = userRepository.save(farmer);
+                
+                // Audit
+                try {
+                    auditService.logAction(getCurrentUserId(), "VERIFY_FARMER", "USER", farmerId.toString(), 
+                        Map.of("verified", request.isVerified()), "SYSTEM", "WEB");
+                } catch (Exception e) {}
+                
+                return saved;
         }
 
         public void exportFarmers(java.io.PrintWriter writer) {
                 try {
-                        List<User> farmers = getAllFarmers();
+                        List<User> farmers = getAllFarmers(null, PageRequest.of(0, 10000)).getContent(); // Export all (limit 10k)
                         com.opencsv.CSVWriter csvWriter = new com.opencsv.CSVWriter(writer);
 
                         // Header
@@ -121,6 +129,7 @@ public class AdminFarmerService {
                                 records.remove(0);
                         }
 
+                        int importedCount = 0;
                         for (String[] record : records) {
                                 // Simplistic assumption of column order: Name, Mobile, District, Ward
                                 // In production, robust validation needed.
@@ -131,27 +140,77 @@ public class AdminFarmerService {
                                 String mobile = record[2];
                                 String district = record[3];
                                 String ward = record.length > 4 ? record[4] : "";
+                                String email = record.length > 5 ? record[5] : null; // Assuming email might be in 5th index
 
                                 // Check duplicates by mobile
                                 if (userRepository.findByMobileNumber(mobile).isPresent()) {
                                         continue; // Skip existing
                                 }
+                                
+                                String rawPassword = java.util.UUID.randomUUID().toString().substring(0, 8);
+                                String encodedPassword = passwordEncoder.encode(rawPassword);
 
                                 User newFarmer = User.builder()
                                                 .name(name)
                                                 .mobileNumber(mobile)
+                                                .email(email)
                                                 .district(district)
                                                 .ward(ward)
                                                 .role(User.UserRole.FARMER)
                                                 .verified(false) // Default unverified for imported
                                                 .createdAt(java.time.LocalDateTime.now())
-                                                .passwordHash("CHANGE_ME") // distinct placeholder
+                                                .passwordHash(encodedPassword)
                                                 .build();
 
-                                userRepository.save(newFarmer);
+                                User savedUser = userRepository.save(newFarmer);
+                                importedCount++;
+                                
+                                // Create Notification
+                                createAndSendWelcomeNotification(savedUser, rawPassword);
                         }
+                        
+                        // Audit Import
+                         try {
+                            auditService.logAction(getCurrentUserId(), "IMPORT_FARMERS", "BATCH", "N/A", 
+                                Map.of("count", importedCount), "SYSTEM", "WEB");
+                        } catch (Exception e) {}
+
                 } catch (Exception e) {
                         throw new RuntimeException("Error processing CSV import: " + e.getMessage());
                 }
+        }
+        
+        private void createAndSendWelcomeNotification(User user, String password) {
+             try {
+                String message = "Welcome to Krishi Bazaar! Your account has been created. Password: " + password;
+                com.krishihub.notification.entity.Notification notification = com.krishihub.notification.entity.Notification.builder()
+                    .userId(user.getId())
+                    .title("Welcome to Krishi Bazaar")
+                    .message(message)
+                    .type("ACCOUNT_CREATED")
+                    .channel(user.getEmail() != null ? com.krishihub.notification.enums.NotificationChannel.EMAIL : com.krishihub.notification.enums.NotificationChannel.SMS)
+                    .status(com.krishihub.notification.enums.NotificationStatus.PENDING)
+                    .isRead(false)
+                    .createdAt(java.time.LocalDateTime.now())
+                    .build();
+                
+                com.krishihub.notification.entity.Notification saved = notificationRepository.save(notification);
+                notificationSenderService.sendNotification(saved.getId());
+             } catch (Exception e) {
+                 // Log but don't fail import
+                 System.err.println("Failed to notify user " + user.getId());
+             }
+        }
+        
+        private UUID getCurrentUserId() {
+            try {
+                org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+                if (auth != null && auth.getPrincipal() instanceof com.krishihub.auth.model.CustomUserDetails) {
+                    return ((com.krishihub.auth.model.CustomUserDetails) auth.getPrincipal()).getId();
+                }
+            } catch (Exception e) {
+                // ignore
+            }
+            return UUID.fromString("00000000-0000-0000-0000-000000000000"); // System/Unknown
         }
 }

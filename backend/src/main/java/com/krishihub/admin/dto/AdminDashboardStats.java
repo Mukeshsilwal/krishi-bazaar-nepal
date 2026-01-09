@@ -24,4 +24,26 @@ public class AdminDashboardStats {
     // System Metrics
     private long totalOrders;
     private long aiDiagnosisCount;
+
+    private java.util.List<RecentActivityDto> recentActivity;
+    private java.util.List<TopContentDto> topContent;
+
+    @Data
+    @Builder
+    public static class RecentActivityDto {
+        private String type;
+        private String titleEn;
+        private String titleNe;
+        private String time;
+        private String timeEn;
+        private String status;
+    }
+
+    @Data
+    @Builder
+    public static class TopContentDto {
+        private String titleEn;
+        private String titleNe;
+        private long views;
+    }
 }

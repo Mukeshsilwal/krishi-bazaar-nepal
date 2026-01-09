@@ -1,11 +1,9 @@
 package com.krishihub.payment.entity;
 
 import com.krishihub.order.entity.Order;
+import com.krishihub.shared.entity.AuditableEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -15,12 +13,12 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "transactions")
-@EntityListeners(AuditingEntityListener.class)
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Transaction {
+public class Transaction extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -47,10 +45,6 @@ public class Transaction {
 
     @Column(name = "gateway_response", columnDefinition = "TEXT")
     private String gatewayResponse;
-
-    @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
 
     public enum PaymentMethod {
         ESEWA,

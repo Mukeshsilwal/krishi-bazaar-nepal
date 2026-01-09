@@ -2,19 +2,27 @@ package com.krishihub.order.service;
 
 import com.krishihub.auth.entity.User;
 import com.krishihub.auth.repository.UserRepository;
-import com.krishihub.auth.service.SmsService;
+
+
 import com.krishihub.marketplace.entity.CropListing;
 import com.krishihub.marketplace.repository.CropListingRepository;
 import com.krishihub.order.dto.CreateOrderRequest;
 import com.krishihub.order.dto.OrderDto;
+import com.krishihub.order.dto.OrderStatus;
 import com.krishihub.order.dto.UpdateOrderRequest;
 import com.krishihub.order.entity.Order;
+import com.krishihub.order.event.OrderCancelledEvent;
+import com.krishihub.order.event.OrderPlacedEvent;
+import com.krishihub.order.event.OrderStatusChangedEvent;
 import com.krishihub.order.repository.OrderRepository;
+import com.krishihub.order.validator.OrderStateValidator;
 import com.krishihub.shared.exception.BadRequestException;
 import com.krishihub.shared.exception.ResourceNotFoundException;
 import com.krishihub.shared.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,7 +42,9 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CropListingRepository listingRepository;
     private final UserRepository userRepository;
-    private final SmsService smsService;
+    private final OrderStateValidator orderStateValidator;
+    private final ApplicationEventPublisher eventPublisher;
+
 
     @Transactional
     public OrderDto createOrder(UUID userId, CreateOrderRequest request) {
@@ -109,7 +119,7 @@ public class OrderService {
                 .farmer(listing.getFarmer())
                 .quantity(request.getQuantity())
                 .totalAmount(totalAmount)
-                .status(Order.OrderStatus.PENDING)
+                .status(OrderStatus.PENDING)
                 .pickupLocation(
                         request.getPickupLocation() != null ? request.getPickupLocation() : listing.getLocation())
                 .notes(request.getNotes())
@@ -121,14 +131,9 @@ public class OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        // Send notification to farmer
-        String farmerMessage = String.format(
-                "New order received for %s (%.2f %s). Order ID: %s. Login to confirm.",
-                listing.getCropName(),
-                request.getQuantity(),
-                listing.getUnit(),
-                savedOrder.getId());
-        smsService.sendNotification(listing.getFarmer().getMobileNumber(), farmerMessage);
+        // Send notification event
+        eventPublisher.publishEvent(new OrderPlacedEvent(this, savedOrder));
+
 
         log.info("Order created: {} by buyer: {}", savedOrder.getId(), userId);
 
@@ -188,19 +193,21 @@ public class OrderService {
 
         // Update status if provided
         if (request.getStatus() != null) {
-            Order.OrderStatus newStatus;
+            OrderStatus newStatus;
             try {
-                newStatus = Order.OrderStatus.valueOf(request.getStatus().toUpperCase());
+                newStatus = OrderStatus.valueOf(request.getStatus().toUpperCase());
             } catch (IllegalArgumentException e) {
                 throw new BadRequestException("Invalid status: " + request.getStatus());
             }
 
             // Validate status transitions
-            validateStatusTransition(order, newStatus, isFarmer, isBuyer);
+            orderStateValidator.validateTransition(order.getStatus(), newStatus, user);
+
+            OrderStatus oldStatus = order.getStatus();
             order.setStatus(newStatus);
 
-            // Send notifications
-            sendStatusUpdateNotification(order, newStatus);
+            // Send notifications event
+            eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order, oldStatus, newStatus));
         }
 
         // Update other fields
@@ -237,86 +244,16 @@ public class OrderService {
         }
 
         // Validate cancellation
-        if (order.getStatus() == Order.OrderStatus.COMPLETED) {
-            throw new BadRequestException("Cannot cancel completed order");
-        }
+        orderStateValidator.validateTransition(order.getStatus(), OrderStatus.CANCELLED, user);
 
-        if (order.getStatus() == Order.OrderStatus.CANCELLED) {
-            throw new BadRequestException("Order is already cancelled");
-        }
-
-        order.setStatus(Order.OrderStatus.CANCELLED);
+        order.setStatus(OrderStatus.CANCELLED);
         orderRepository.save(order);
 
-        // Send notification
-        String recipient = isBuyer ? order.getFarmer().getMobileNumber() : order.getBuyer().getMobileNumber();
-        String message = String.format("Order %s has been cancelled.", order.getId());
-        smsService.sendNotification(recipient, message);
+        // Send notification event
+        String reason = "User requested cancellation";
+        eventPublisher.publishEvent(new OrderCancelledEvent(this, order, reason));
 
         log.info("Order cancelled: {} by {}", id, userId);
     }
 
-    private void validateStatusTransition(Order order, Order.OrderStatus newStatus,
-            boolean isFarmer, boolean isBuyer) {
-        Order.OrderStatus currentStatus = order.getStatus();
-
-        // Farmers can confirm orders
-        if (newStatus == Order.OrderStatus.CONFIRMED && !isFarmer) {
-            throw new UnauthorizedException("Only farmer can confirm orders");
-        }
-
-        // Farmer only transitions
-        if ((newStatus == Order.OrderStatus.READY_FOR_HARVEST ||
-                newStatus == Order.OrderStatus.HARVESTED ||
-                newStatus == Order.OrderStatus.READY) && !isFarmer) {
-            throw new UnauthorizedException("Only farmer can update this status");
-        }
-
-        // Prevent invalid transitions
-        if (currentStatus == Order.OrderStatus.COMPLETED) {
-            throw new BadRequestException("Cannot modify completed order");
-        }
-
-        if (currentStatus == Order.OrderStatus.CANCELLED) {
-            throw new BadRequestException("Cannot modify cancelled order");
-        }
-
-        // Detailed transition checks (optional but good for strictness)
-        // For now, allowing flexible flow as long as user is authorized,
-        // to avoid blocking legacy flows if any.
-    }
-
-    private void sendStatusUpdateNotification(Order order, Order.OrderStatus newStatus) {
-        String message = "";
-        String recipient = "";
-
-        switch (newStatus) {
-            case CONFIRMED:
-                recipient = order.getBuyer().getMobileNumber();
-                message = String.format("Your order %s has been confirmed by the farmer.", order.getId());
-                break;
-            case READY_FOR_HARVEST:
-                recipient = order.getBuyer().getMobileNumber();
-                message = String.format("Your order %s is being prepared for harvest.", order.getId());
-                break;
-            case HARVESTED:
-                recipient = order.getBuyer().getMobileNumber();
-                message = String.format("Your order %s has been harvested.", order.getId());
-                break;
-            case READY:
-                recipient = order.getBuyer().getMobileNumber();
-                message = String.format("Your order %s is ready for pickup.", order.getId());
-                break;
-            case COMPLETED:
-                recipient = order.getFarmer().getMobileNumber();
-                message = String.format("Order %s has been completed.", order.getId());
-                break;
-            case CANCELLED:
-                break;
-        }
-
-        if (!message.isEmpty() && recipient != null) {
-            smsService.sendNotification(recipient, message);
-        }
-    }
 }

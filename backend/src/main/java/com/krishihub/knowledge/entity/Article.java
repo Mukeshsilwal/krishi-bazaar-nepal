@@ -41,6 +41,9 @@ public class Article {
     @Enumerated(EnumType.STRING)
     private ArticleStatus status;
 
+    @Builder.Default
+    private Long views = 0L;
+
     @JdbcTypeCode(SqlTypes.ARRAY)
     @Column(columnDefinition = "text[]")
     private List<String> tags;

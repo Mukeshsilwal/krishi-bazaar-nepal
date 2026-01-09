@@ -1,5 +1,7 @@
 package com.krishihub.admin.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.krishihub.admin.dto.FarmerProfileDto;
 import com.krishihub.admin.service.AdminFarmerService;
 import com.krishihub.auth.entity.User;
@@ -14,13 +16,16 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/admin/farmers")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminFarmerController {
 
     private final AdminFarmerService farmerService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<User>>> getAllFarmers() {
-        return ResponseEntity.ok(ApiResponse.success("Farmers fetched", farmerService.getAllFarmers()));
+    public ResponseEntity<ApiResponse<org.springframework.data.domain.Page<User>>> getAllFarmers(
+            @RequestParam(required = false) String search,
+            @org.springframework.data.web.PageableDefault(sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success("Farmers fetched", farmerService.getAllFarmers(search, pageable)));
     }
 
     @GetMapping("/{id}")

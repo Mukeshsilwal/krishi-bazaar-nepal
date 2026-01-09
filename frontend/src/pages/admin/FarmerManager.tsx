@@ -51,9 +51,14 @@ const FarmerManager = () => {
     const [farmers, setFarmers] = useState<Farmer[]>([]);
     const [selectedFarmer, setSelectedFarmer] = useState<FarmerProfile | null>(null);
     const [open, setOpen] = useState(false);
+
+    // Pagination & Search State
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalElements, setTotalElements] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
-    const debouncedSearchTerm = useDebounce(searchTerm, 300);
-    const [filterStatus, setFilterStatus] = useState<'ALL' | 'VERIFIED' | 'UNVERIFIED'>('ALL');
+    const debouncedSearchTerm = useDebounce(searchTerm, 500);
+    const [filterStatus, setFilterStatus] = useState<'ALL' | 'VERIFIED' | 'UNVERIFIED'>('ALL'); // Note: Filtering by status not yet implemented in backend for Farmers specifically, keeping for UI or client-side if needed, but optimally should be backend
 
     // Verification State
     const [verifyMode, setVerifyMode] = useState<'APPROVE' | 'REJECT' | null>(null);
@@ -62,13 +67,21 @@ const FarmerManager = () => {
 
     useEffect(() => {
         fetchFarmers();
-    }, []);
+    }, [debouncedSearchTerm, page]);
 
     const fetchFarmers = async () => {
         try {
-            const res = await api.get(ADMIN_ENDPOINTS.FARMERS);
+            // Build query params
+            const params = new URLSearchParams();
+            params.append('page', page.toString());
+            params.append('size', '10');
+            if (debouncedSearchTerm) params.append('search', debouncedSearchTerm);
+
+            const res = await api.get(`${ADMIN_ENDPOINTS.FARMERS}?${params.toString()}`);
             if (res.data.success) {
-                setFarmers(res.data.data);
+                setFarmers(res.data.data.content);
+                setTotalPages(res.data.data.totalPages);
+                setTotalElements(res.data.data.totalElements);
             }
         } catch (err) {
             console.error(err);
@@ -256,7 +269,7 @@ const FarmerManager = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredFarmers.length === 0 ? (
+                            {farmers.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={5} className="text-center h-48 text-muted-foreground">
                                         <div className="flex flex-col items-center justify-center gap-2">
@@ -266,7 +279,7 @@ const FarmerManager = () => {
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                filteredFarmers.map((f) => (
+                                farmers.map((f) => (
                                     <TableRow key={f.id}>
                                         <TableCell className="font-medium">{f.name}</TableCell>
                                         <TableCell>{f.mobileNumber}</TableCell>
@@ -290,6 +303,28 @@ const FarmerManager = () => {
                         </TableBody>
                     </Table>
                 </CardContent>
+                {/* Pagination Controls */}
+                <div className="p-4 border-t flex items-center justify-end gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage(p => Math.max(0, p - 1))}
+                        disabled={page === 0}
+                    >
+                        Previous
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                        Page {page + 1} of {totalPages || 1}
+                    </span>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                        disabled={page >= totalPages - 1}
+                    >
+                        Next
+                    </Button>
+                </div>
             </Card>
 
             <Dialog open={open} onOpenChange={setOpen}>

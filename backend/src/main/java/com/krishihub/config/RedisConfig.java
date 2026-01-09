@@ -16,7 +16,8 @@ import java.time.Duration;
 
 @Configuration
 @lombok.extern.slf4j.Slf4j
-public class RedisConfig {
+@org.springframework.cache.annotation.EnableCaching
+public class RedisConfig implements org.springframework.cache.annotation.CachingConfigurer {
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
@@ -42,5 +43,30 @@ public class RedisConfig {
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
                 .build();
+    }
+
+    @Override
+    public org.springframework.cache.interceptor.CacheErrorHandler errorHandler() {
+        return new org.springframework.cache.interceptor.SimpleCacheErrorHandler() {
+            @Override
+            public void handleCacheGetError(RuntimeException exception, org.springframework.cache.Cache cache, Object key) {
+                log.warn("Redis Cache Get Error for key {}: {}", key, exception.getMessage());
+            }
+
+            @Override
+            public void handleCachePutError(RuntimeException exception, org.springframework.cache.Cache cache, Object key, Object value) {
+                log.warn("Redis Cache Put Error for key {}: {}", key, exception.getMessage());
+            }
+
+            @Override
+            public void handleCacheEvictError(RuntimeException exception, org.springframework.cache.Cache cache, Object key) {
+                log.warn("Redis Cache Evict Error for key {}: {}", key, exception.getMessage());
+            }
+
+            @Override
+            public void handleCacheClearError(RuntimeException exception, org.springframework.cache.Cache cache) {
+                log.warn("Redis Cache Clear Error: {}", exception.getMessage());
+            }
+        };
     }
 }

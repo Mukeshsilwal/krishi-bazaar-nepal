@@ -59,4 +59,14 @@ public interface MarketPriceRepository extends JpaRepository<MarketPrice, UUID> 
 
     @org.springframework.transaction.annotation.Transactional
     long deleteBySource(String source);
+
+    @Query("SELECT mp.priceDate as date, MIN(mp.minPrice) as min, MAX(mp.maxPrice) as max, AVG(mp.avgPrice) as avg " +
+            "FROM MarketPrice mp WHERE mp.cropName = :cropName AND mp.district = :district " +
+            "AND mp.priceDate BETWEEN :startDate AND :endDate " +
+            "GROUP BY mp.priceDate ORDER BY mp.priceDate")
+    List<com.krishihub.marketprice.dto.PriceStats> findPriceHistory(
+            @Param("cropName") String cropName,
+            @Param("district") String district,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
 }
