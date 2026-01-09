@@ -4,7 +4,9 @@ import marketPriceService from '../services/marketPriceService';
 import { TrendingUp, TrendingDown, Minus, Calculator, Bell, Loader2 } from 'lucide-react';
 import PriceAlerts from '../../../components/PriceAlerts';
 import SearchBar from '../components/SearchBar';
+import PriceCard from '../components/PriceCard';
 import { useLanguage } from '../../../context/LanguageContext';
+import { getCropIcon } from '../../../config/cropIcons';
 
 // Format source name for display
 const formatSource = (source: string) => {
@@ -214,38 +216,66 @@ const MarketPriceDashboard = () => {
                                     <div className="p-8 text-center text-gray-500">{t('market.empty')} {selectedDistrict}.</div>
                                 ) : (
                                     <>
-                                        <table className="min-w-full divide-y divide-gray-200">
-                                            <thead className="bg-gray-50">
-                                                <tr>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('market.table.commodity')}</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('market.table.unit')}</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('market.table.min')}</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('market.table.max')}</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('market.table.avg')}</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('market.table.source')}</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="bg-white divide-y divide-gray-200">
+                                        <>
+                                            {/* Desktop Table View */}
+                                            <div className="hidden md:block">
+                                                <table className="min-w-full divide-y divide-gray-200">
+                                                    <thead className="bg-gray-50">
+                                                        <tr>
+                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('market.table.commodity')}</th>
+                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('market.table.unit')}</th>
+                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('market.table.min')}</th>
+                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('market.table.max')}</th>
+                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('market.table.avg')}</th>
+                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('market.table.source')}</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="bg-white divide-y divide-gray-200">
+                                                        {prices.map((item: any) => (
+                                                            <tr
+                                                                key={`${item.id}-${item.cropName}`}
+                                                                onClick={() => setSelectedCrop(item.cropName)}
+                                                                className={`hover:bg-gray-50 cursor-pointer ${selectedCrop === item.cropName ? 'bg-green-50' : ''}`}
+                                                            >
+                                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex items-center gap-2">
+                                                                    <span className="text-xl">{getCropIcon(item.cropName)}</span>
+                                                                    {item.cropName}
+                                                                </td>
+                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.unit}</td>
+                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rs. {item.minPrice}</td>
+                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rs. {item.maxPrice}</td>
+                                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">Rs. {item.avgPrice}</td>
+                                                                <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                                                                    <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
+                                                                        {formatSource(item.source)}
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            {/* Mobile Card View */}
+                                            <div className="md:hidden space-y-3 pt-2">
                                                 {prices.map((item: any) => (
-                                                    <tr
-                                                        key={`${item.id}-${item.cropName}`}
-                                                        onClick={() => setSelectedCrop(item.cropName)}
-                                                        className={`hover:bg-gray-50 cursor-pointer ${selectedCrop === item.cropName ? 'bg-green-50' : ''}`}
-                                                    >
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.cropName}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.unit}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rs. {item.minPrice}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rs. {item.maxPrice}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">Rs. {item.avgPrice}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                                                            <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
-                                                                {formatSource(item.source)}
-                                                            </span>
-                                                        </td>
-                                                    </tr>
+                                                    <PriceCard key={`${item.id}-card`} price={{
+                                                        id: item.id,
+                                                        commodity: item.cropName,
+                                                        marketName: item.marketName, // Assuming item has marketName or derived from source
+                                                        // Actually `item` often has `marketName`? `getTodaysPrices` backend returns `MarketPriceDto`.
+                                                        // DTO has `marketName`. If source is used, we might need `itemName` or `source`?
+                                                        // Let's assume `marketName` is populated or fallback to `source`.
+                                                        // Looking at backend dto: `private String marketName;`. Yes.
+                                                        minPrice: item.minPrice,
+                                                        maxPrice: item.maxPrice,
+                                                        avgPrice: item.avgPrice,
+                                                        unit: item.unit,
+                                                        priceDate: item.priceDate
+                                                    }} />
                                                 ))}
-                                            </tbody>
-                                        </table>
+                                            </div>
+                                        </>
                                         {/* Sentinel for infinite scroll */}
                                         <div ref={loaderRef} className="h-10 w-full flex items-center justify-center p-4">
                                             {(loading || loadingMore) && (

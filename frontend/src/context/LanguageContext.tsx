@@ -157,6 +157,14 @@ const translations = {
         'marketplace.hero.title': 'ताजा कृषि उपज खोज्नुहोस्',
         'marketplace.hero.subtitle': 'किसानहरूसँग सिधै जोडिनुहोस् र ताजा तरकारी, फलफूल र अन्नको उत्कृष्ट मूल्य पाउनुहोस्।',
         'marketplace.search.placeholder': 'विशेष तरकारी, फलफूल खोज्नुहोस् (जस्तै: आलु, आँप)...',
+
+        // Hero Actions
+        'hero.action.sell': 'बाली बेच्नुहोस्',
+        'hero.action.sell.sub': 'धेरै ग्राहकसम्म पुग्नुहोस्',
+        'hero.action.price': 'बजार मूल्य',
+        'hero.action.price.sub': 'दैनिक भाउ',
+        'hero.action.buy': 'किन्नुहोस्',
+        'hero.action.buy.sub': 'ताजा उत्पादन',
     },
     en: {
         // Navbar
@@ -309,6 +317,12 @@ const translations = {
         'marketplace.hero.title': 'Find Fresh Agricultural Produce',
         'marketplace.hero.subtitle': 'Connect directly with farmers and get the best prices for fresh vegetables, fruits, and grains.',
         'marketplace.search.placeholder': 'Search for specific vegetables, fruits (e.g. Potato, Mango)...',
+        'hero.action.sell': 'Sell Crops',
+        'hero.action.sell.sub': 'Reach more buyers',
+        'hero.action.price': 'Check Prices',
+        'hero.action.price.sub': 'Today\'s market rates',
+        'hero.action.buy': 'Buy Produce',
+        'hero.action.buy.sub': 'Fresh from farm',
     },
 };
 

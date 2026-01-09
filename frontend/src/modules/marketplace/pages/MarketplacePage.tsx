@@ -3,6 +3,7 @@ import { useListings } from '../hooks/useListings';
 import { useNavigate } from 'react-router-dom';
 import listingService from '../services/listingService';
 import SearchBar from '../components/SearchBar';
+import VisualFilter from '../components/VisualFilter';
 import { useLanguage } from '../../../context/LanguageContext';
 
 export default function MarketplacePage() {
@@ -57,8 +58,22 @@ export default function MarketplacePage() {
                             onSearch={handleSearch}
                             suggestions={availableCrops}
                             placeholder={t('marketplace.search.placeholder')}
-                            className="w-full text-lg shadow-lg"
+                            className="w-full text-lg shadow-lg mb-8"
                         />
+
+                        <div className="mt-8">
+                            <p className="text-green-100 text-sm mb-4 font-medium uppercase tracking-wider opacity-90">Browse by Category</p>
+                            <VisualFilter
+                                onSelect={(cat) => {
+                                    // For now, setting cropName to category label 
+                                    // ideally backend supports category filter
+                                    // converting 'vegetables' -> 'vegetable' for singular match potential
+                                    const term = cat === 'vegetables' ? 'vegetable' : (cat === 'fruits' ? 'fruit' : cat);
+                                    setFilters({ ...filters, cropName: term });
+                                }}
+                                selectedCategory={filters.cropName.toLowerCase().includes('veg') ? 'vegetables' : (filters.cropName.toLowerCase().includes('fruit') ? 'fruits' : undefined)}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

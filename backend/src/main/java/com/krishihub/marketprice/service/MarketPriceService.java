@@ -98,6 +98,10 @@ public class MarketPriceService {
         return getPricesByDate(LocalDate.now(), pageable);
     }
 
+    public org.springframework.data.domain.Page<MarketPriceDto> getTodaysPrices(String district, int page, int size) {
+        return getTodaysPrices(district, null, page, size);
+    }
+
     public org.springframework.data.domain.Page<MarketPriceDto> getTodaysPrices(int page, int size) {
         return getTodaysPrices(null, null, page, size);
     }

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useMyListings } from '../hooks/useMyListings';
 import { useLanguage } from '../../../context/LanguageContext';
 import { ArrowLeft, Upload } from 'lucide-react';
@@ -7,7 +7,10 @@ import { useMasterData } from '../../../hooks/useMasterData';
 
 export default function CreateListingPage() {
     const navigate = useNavigate();
-    const { createListing, uploadImage } = useMyListings();
+    const { id } = useParams();
+    const isEditMode = !!id;
+
+    const { createListing, updateListing, getListingById, uploadImage } = useMyListings();
     const { t, language } = useLanguage();
 
     // Fetch Master Data
@@ -28,6 +31,36 @@ export default function CreateListingPage() {
         dailyQuantityLimit: '',
         orderCutoffTime: '',
     });
+
+    useEffect(() => {
+        if (isEditMode) {
+            const fetchListing = async () => {
+                try {
+                    setLoading(true);
+                    const data = await getListingById(id);
+                    setFormData({
+                        cropName: data.cropName || '',
+                        variety: data.variety || '',
+                        quantity: data.quantity || '',
+                        unit: data.unit || 'kg',
+                        pricePerUnit: data.pricePerUnit || '',
+                        location: data.location || '',
+                        description: data.description || '',
+                        harvestDate: data.harvestDate ? new Date(data.harvestDate).toISOString().split('T')[0] : '',
+                        harvestWindow: data.harvestWindow || '',
+                        dailyQuantityLimit: data.dailyQuantityLimit || '',
+                        orderCutoffTime: data.orderCutoffTime || '',
+                    });
+                } catch (err) {
+                    console.error(err);
+                    setError('Failed to load listing details');
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchListing();
+        }
+    }, [id]);
     const [imageFile, setImageFile] = useState(null);
 
     const handleChange = (e) => {
@@ -50,15 +83,20 @@ export default function CreateListingPage() {
         setLoading(true);
 
         try {
-            // Create the listing
-            const response = await createListing(formData);
-            const listingId = response.data?.id || response.id;
+            // Create or Update listing
+            let listingId = id;
+
+            if (isEditMode) {
+                await updateListing(id, formData);
+            } else {
+                const response = await createListing(formData);
+                listingId = response.data?.id || response.id;
+            }
 
             // Upload image if provided
             if (imageFile && listingId) {
                 await uploadImage(listingId, imageFile, true);
             }
-
 
             // Navigate back to my listings with a reload to ensure fresh data
             window.location.href = '/my-listings';
@@ -82,7 +120,7 @@ export default function CreateListingPage() {
                         {t('listings.back')}
                     </button>
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        {t('listings.create')}
+                        {isEditMode ? 'Edit Listing' : t('listings.create')}
                     </h1>
                     <p className="text-gray-600">{t('listings.subtitle')}</p>
                 </div>
@@ -319,7 +357,7 @@ export default function CreateListingPage() {
                             disabled={loading}
                             className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium disabled:opacity-50"
                         >
-                            {loading ? t('listings.form.submitting') : t('listings.form.submit')}
+                            {loading ? t('listings.form.submitting') : (isEditMode ? 'Update Listing' : t('listings.form.submit'))}
                         </button>
                     </div>
                 </form>

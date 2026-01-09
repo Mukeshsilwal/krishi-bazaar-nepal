@@ -99,6 +99,7 @@ function App() {
                 <Route path="/orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
                 <Route path="/my-listings" element={<ProtectedRoute><MyListingsPage /></ProtectedRoute>} />
                 <Route path="/create-listing" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
+                <Route path="/edit-listing/:id" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
                 <Route path="/orders" element={<ProtectedRoute><MyOrdersPage /></ProtectedRoute>} />
                 <Route path="/my-orders" element={<ProtectedRoute><MyOrdersPage /></ProtectedRoute>} />
                 <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />

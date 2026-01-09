@@ -77,6 +77,19 @@ export const useMyListings = () => {
         }
     };
 
+    const getListingById = async (id) => {
+        setLoading(true);
+        try {
+            const data = await listingService.getListing(id);
+            return data.data || data;
+        } catch (err) {
+            setError(err.message || 'Failed to fetch listing details');
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         fetchListings();
     }, []);
@@ -90,6 +103,7 @@ export const useMyListings = () => {
         updateListing,
         deleteListing,
         uploadImage,
+        getListingById,
         refetch: fetchListings,
     };
 };

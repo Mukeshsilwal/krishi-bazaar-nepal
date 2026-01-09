@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Play, Users, Banknote, MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowRight, Upload, TrendingUp, ShoppingCart } from "lucide-react";
 import heroImage from "@/assets/hero-farming.jpg";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -45,53 +46,37 @@ const HeroSection = () => {
             {t('hero.description')}
           </p>
 
-          {/* CTA Buttons - Larger for easier touch */}
-          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button variant="hero" size="2xl" className="group w-full sm:w-auto">
-              <span className="flex flex-col items-center leading-tight">
-                <span className="text-xl font-bold">{t('hero.cta.start')}</span>
-                <span className="text-sm opacity-80">{t('hero.cta.start.sub')}</span>
-              </span>
-              <ArrowRight className="ml-2 h-6 w-6 transition-transform group-hover:translate-x-1" />
-            </Button>
-            <Button variant="heroOutline" size="2xl" className="w-full sm:w-auto">
-              <Play className="mr-2 h-6 w-6" />
-              <span className="flex flex-col items-center leading-tight">
-                <span className="text-xl font-bold">{t('hero.cta.video')}</span>
-                <span className="text-sm opacity-80">{t('hero.cta.video.sub')}</span>
-              </span>
-            </Button>
-          </div>
+          {/* Action Grid - Action First Design */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 w-full max-w-5xl mx-auto px-4">
+            {/* Sell Card */}
+            <Link to="/my-listings" className="group bg-green-600 hover:bg-green-700 text-white p-6 rounded-2xl transition-all transform hover:-translate-y-1 shadow-lg hover:shadow-xl flex flex-col items-center border-2 border-green-500 relative overflow-hidden">
+              <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="bg-white/20 p-4 rounded-full mb-4 group-hover:scale-110 transition-transform">
+                <Upload className="w-8 h-8" />
+              </div>
+              <h3 className="text-2xl font-bold mb-1">{t('hero.action.sell')}</h3>
+              <p className="text-green-100 font-medium">{t('hero.action.sell.sub')}</p>
+            </Link>
 
-          {/* Stats - With icons for better understanding */}
-          <div className="mt-12 grid grid-cols-3 gap-4 md:gap-8">
-            <div className="rounded-2xl bg-primary-foreground/10 p-4 backdrop-blur-sm">
-              <Users className="mx-auto mb-2 h-8 w-8 text-secondary" />
-              <div className="text-2xl font-bold text-primary-foreground md:text-3xl lg:text-4xl">
-                ५०,०००+
+            {/* Price Card */}
+            <Link to="/#prices" onClick={() => document.getElementById('prices')?.scrollIntoView({ behavior: 'smooth' })} className="group bg-blue-600 hover:bg-blue-700 text-white p-6 rounded-2xl transition-all transform hover:-translate-y-1 shadow-lg hover:shadow-xl flex flex-col items-center border-2 border-blue-500 relative overflow-hidden">
+              <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="bg-white/20 p-4 rounded-full mb-4 group-hover:scale-110 transition-transform">
+                <TrendingUp className="w-8 h-8" />
               </div>
-              <div className="text-sm text-primary-foreground/70 md:text-base">
-                {t('hero.stat.farmers')}
+              <h3 className="text-2xl font-bold mb-1">{t('hero.action.price')}</h3>
+              <p className="text-blue-100 font-medium">{t('hero.action.price.sub')}</p>
+            </Link>
+
+            {/* Buy Card */}
+            <Link to="/#marketplace" onClick={() => document.getElementById('marketplace')?.scrollIntoView({ behavior: 'smooth' })} className="group bg-orange-500 hover:bg-orange-600 text-white p-6 rounded-2xl transition-all transform hover:-translate-y-1 shadow-lg hover:shadow-xl flex flex-col items-center border-2 border-orange-400 relative overflow-hidden">
+              <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="bg-white/20 p-4 rounded-full mb-4 group-hover:scale-110 transition-transform">
+                <ShoppingCart className="w-8 h-8" />
               </div>
-            </div>
-            <div className="rounded-2xl bg-primary-foreground/10 p-4 backdrop-blur-sm">
-              <Banknote className="mx-auto mb-2 h-8 w-8 text-secondary" />
-              <div className="text-2xl font-bold text-primary-foreground md:text-3xl lg:text-4xl">
-                २.५ करोड+
-              </div>
-              <div className="text-sm text-primary-foreground/70 md:text-base">
-                {t('hero.stat.trade')}
-              </div>
-            </div>
-            <div className="rounded-2xl bg-primary-foreground/10 p-4 backdrop-blur-sm">
-              <MapPin className="mx-auto mb-2 h-8 w-8 text-secondary" />
-              <div className="text-2xl font-bold text-primary-foreground md:text-3xl lg:text-4xl">
-                ७५+
-              </div>
-              <div className="text-sm text-primary-foreground/70 md:text-base">
-                {t('hero.stat.districts')}
-              </div>
-            </div>
+              <h3 className="text-2xl font-bold mb-1">{t('hero.action.buy')}</h3>
+              <p className="text-orange-100 font-medium">{t('hero.action.buy.sub')}</p>
+            </Link>
           </div>
         </div>
 
