@@ -21,6 +21,13 @@ spring:
     redis:
       url: ${REDIS_URL:${REDIS_HOST:redis://red-d5ccj5khg0os73e6993g:6379}}
 
+  activemq:
+    broker-url: ${ACTIVEMQ_BROKER_URL}
+    user: ${ACTIVEMQ_USER}
+    password: ${ACTIVEMQ_PASSWORD}
+    packages:
+      trust-all: true
+
   flyway:
     enabled: true
     baseline-on-migrate: true
