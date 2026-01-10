@@ -51,6 +51,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/market-prices/**").permitAll()
                         .requestMatchers("/api/weather/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/listings/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/agriculture-calendar/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
