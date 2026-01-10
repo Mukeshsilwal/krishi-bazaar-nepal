@@ -2,6 +2,7 @@ package com.krishihub.marketprice.controller;
 
 import com.krishihub.marketprice.entity.Market;
 import com.krishihub.marketprice.service.MarketService;
+import com.krishihub.shared.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,17 +18,17 @@ public class MarketController {
     private final MarketService marketService;
 
     @GetMapping
-    public ResponseEntity<List<Market>> getAllMarkets() {
-        return ResponseEntity.ok(marketService.getAllMarkets());
+    public ResponseEntity<ApiResponse<List<Market>>> getAllMarkets() {
+        return ResponseEntity.ok(ApiResponse.success(marketService.getAllMarkets()));
     }
 
     @PostMapping
-    public ResponseEntity<Market> createMarket(@RequestBody Market market) {
-        return ResponseEntity.ok(marketService.createMarket(market));
+    public ResponseEntity<ApiResponse<Market>> createMarket(@RequestBody Market market) {
+        return ResponseEntity.ok(ApiResponse.success("Market created successfully", marketService.createMarket(market)));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Market> getMarketById(@PathVariable UUID id) {
-        return ResponseEntity.ok(marketService.getMarketById(id));
+    public ResponseEntity<ApiResponse<Market>> getMarketById(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success(marketService.getMarketById(id)));
     }
 }

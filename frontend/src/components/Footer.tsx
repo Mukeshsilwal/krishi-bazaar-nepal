@@ -1,6 +1,8 @@
 import Logo from "./Logo";
 import { Facebook, Youtube, Phone, Mail, MapPin } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
+import { useEffect, useState } from "react";
+import api from "../services/api";
 
 const footerLinks = {
   platform: [
@@ -23,6 +25,21 @@ const footerLinks = {
 
 const Footer = () => {
   const { t, language } = useLanguage();
+  const [settings, setSettings] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await api.get('/public/settings');
+        if (res.data.success) {
+          setSettings(res.data.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch footer settings", error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   return (
     <footer id="about" className="bg-foreground text-primary-foreground">
@@ -34,7 +51,7 @@ const Footer = () => {
               <Logo />
             </div>
             <p className="mb-4 text-lg text-primary-foreground/90">
-              {t('footer.tagline')}
+              {settings.COMPANY_TAGLINE || t('footer.tagline')}
             </p>
             <p className="mb-6 max-w-sm text-sm text-primary-foreground/70">
               {t('footer.subtagline')}
@@ -42,37 +59,41 @@ const Footer = () => {
 
             {/* Contact Info - Larger touch targets */}
             <div className="space-y-4 text-base text-primary-foreground/70">
-              <a href="tel:+977-1-4000000" className="flex items-center gap-4 rounded-lg p-2 transition-colors hover:bg-primary-foreground/10">
+              <a href={`tel:${settings.COMPANY_PHONE || '+977-1-4XXXXXX'}`} className="flex items-center gap-4 rounded-lg p-2 transition-colors hover:bg-primary-foreground/10">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/20">
                   <Phone className="h-5 w-5 text-secondary" />
                 </div>
-                <span>+977-1-4XXXXXX</span>
+                <span>{settings.COMPANY_PHONE || '+977-1-4XXXXXX'}</span>
               </a>
-              <a href="mailto:info@kisansarathi.com.np" className="flex items-center gap-4 rounded-lg p-2 transition-colors hover:bg-primary-foreground/10">
+              <a href={`mailto:${settings.COMPANY_EMAIL || 'info@kisansarathi.com.np'}`} className="flex items-center gap-4 rounded-lg p-2 transition-colors hover:bg-primary-foreground/10">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/20">
                   <Mail className="h-5 w-5 text-secondary" />
                 </div>
-                <span>info@kisansarathi.com.np</span>
+                <span>{settings.COMPANY_EMAIL || 'info@kisansarathi.com.np'}</span>
               </a>
               <div className="flex items-center gap-4 p-2">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/20">
                   <MapPin className="h-5 w-5 text-secondary" />
                 </div>
-                <span>काठमाडौं, नेपाल</span>
+                <span>{settings.COMPANY_LOCATION || 'काठमाडौं, नेपाल'}</span>
               </div>
             </div>
 
             {/* Social Links - Larger */}
             <div className="mt-6 flex gap-4">
               <a
-                href="#"
+                href={settings.SOCIAL_FACEBOOK || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-foreground/10 transition-colors hover:bg-secondary"
                 aria-label="Facebook"
               >
                 <Facebook className="h-6 w-6" />
               </a>
               <a
-                href="#"
+                href={settings.SOCIAL_YOUTUBE || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-foreground/10 transition-colors hover:bg-secondary"
                 aria-label="YouTube"
               >
@@ -134,7 +155,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-primary-foreground/10 pt-8 md:flex-row">
           <p className="text-sm text-primary-foreground/50">
-            © २०२४ किसान सारथी। {t('footer.rights')}
+            © २०२४ {settings.COMPANY_NAME || 'किसान सारथी'}। {t('footer.rights')}
           </p>
           <div className="flex gap-6 text-sm text-primary-foreground/50">
             <a href="/admin/login" className="hover:text-primary-foreground">

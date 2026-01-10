@@ -49,12 +49,15 @@ const SettingsManager = () => {
 
     const handleUpdate = async (key: string, value: string) => {
         try {
-            // If saving all, probably use the base endpoint or mapped
-            // For now assuming individual or bulk
-            await api.post(ADMIN_ENDPOINTS.SETTINGS, settings); // This line was changed as per instruction
+            // Create updated list for API call
+            const updatedSettings = settings.map(s => s.key === key ? { ...s, value } : s);
+
+            await api.post(ADMIN_ENDPOINTS.SETTINGS, updatedSettings);
             toast.success("Settings saved");
+
             // Update local state
-            setSettings(prev => prev.map(s => s.key === key ? { ...s, value } : s));
+            setSettings(updatedSettings);
+
             // Clear draft if any
             const newEditing = { ...editing };
             delete newEditing[key];

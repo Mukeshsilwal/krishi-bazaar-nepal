@@ -2,15 +2,22 @@ package com.krishihub.admin.service;
 
 import com.krishihub.admin.dto.AdminDashboardStats;
 import com.krishihub.advisory.repository.AdvisoryDeliveryLogRepository;
+import com.krishihub.analytics.service.UserActivityService;
 import com.krishihub.auth.entity.User;
+import com.krishihub.auth.model.CustomUserDetails;
 import com.krishihub.auth.repository.UserRepository;
 import com.krishihub.diagnosis.repository.AIDiagnosisRepository;
 import com.krishihub.analytics.entity.UserActivity;
+import com.krishihub.knowledge.entity.Article;
 import com.krishihub.knowledge.entity.ArticleStatus;
 import com.krishihub.knowledge.repository.ArticleRepository;
 import com.krishihub.order.repository.OrderRepository;
 import com.krishihub.marketplace.repository.CropListingRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -31,7 +38,7 @@ public class AdminService {
     private final ArticleRepository articleRepository;
     private final AdvisoryDeliveryLogRepository advisoryLogRepository;
     private final AIDiagnosisRepository aiDiagnosisRepository;
-    private final com.krishihub.analytics.service.UserActivityService userActivityService;
+    private final UserActivityService userActivityService;
 
     public AdminDashboardStats getDashboardStats() {
         LocalDateTime todayStart = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
@@ -54,7 +61,7 @@ public class AdminService {
         ).toList();
 
         // Top Content
-        List<com.krishihub.knowledge.entity.Article> topArticles = articleRepository.findTop5ByOrderByViewsDesc();
+        List<Article> topArticles = articleRepository.findTop5ByOrderByViewsDesc();
         
         List<AdminDashboardStats.TopContentDto> topContentDtos = topArticles.stream().map(article ->
             AdminDashboardStats.TopContentDto.builder()
@@ -90,7 +97,7 @@ public class AdminService {
                 .build();
     }
 
-    public org.springframework.data.domain.Page<UserActivity> getAllActivities(org.springframework.data.domain.Pageable pageable) {
+    public Page<UserActivity> getAllActivities(Pageable pageable) {
         return userActivityService.getAllActivities(pageable);
     }
 
@@ -100,7 +107,7 @@ public class AdminService {
         return userRepository.findByVerifiedFalse();
     }
 
-    private final com.krishihub.admin.service.AuditService auditService;
+    private final AuditService auditService;
 
     public void approveUser(UUID userId) {
         User user = userRepository.findById(userId)
@@ -119,9 +126,9 @@ public class AdminService {
     
     private UUID getCurrentUserId() {
         try {
-            org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+           Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth != null && auth.getPrincipal() instanceof com.krishihub.auth.model.CustomUserDetails) {
-                return ((com.krishihub.auth.model.CustomUserDetails) auth.getPrincipal()).getId();
+                return ((CustomUserDetails) auth.getPrincipal()).getId();
             }
         } catch (Exception e) {
             // ignore

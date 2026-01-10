@@ -36,4 +36,13 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
                         @Param("region") String region,
                         @Param("crop") String crop,
                         Pageable pageable);
+        @Query("SELECT c FROM Content c WHERE c.status = :status AND " +
+               "(LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+               "LOWER(c.summary) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+               "ORDER BY c.updatedAt DESC")
+        java.util.List<Content> searchActiveContent(@Param("status") ContentStatus status, 
+                                                    @Param("keyword") String keyword, 
+                                                    Pageable pageable);
+
+        java.util.List<Content> findTop5ByStatusOrderByPublishedAtDesc(ContentStatus status);
 }

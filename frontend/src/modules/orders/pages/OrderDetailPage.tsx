@@ -299,8 +299,10 @@ export default function OrderDetailPage() {
                                 </button>
                             )}
 
+
+
                             {/* Buyer Actions */}
-                            {isBuyer && (order.status === 'CONFIRMED' || order.status === 'PAYMENT_PENDING') && (
+                            {isBuyer && (order.status === 'CONFIRMED' || order.status === 'PAYMENT_PENDING' || order.status === 'READY') && (
                                 <>
                                     <button
                                         onClick={() => handleInitiatePayment('ESEWA')}
@@ -317,16 +319,6 @@ export default function OrderDetailPage() {
                                         Pay with Khalti
                                     </button>
                                 </>
-                            )}
-
-                            {isBuyer && order.status === 'READY' && (
-                                <button
-                                    onClick={handleComplete}
-                                    disabled={actionLoading}
-                                    className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50"
-                                >
-                                    Mark as Completed
-                                </button>
                             )}
 
                             {/* Cancel Button */}

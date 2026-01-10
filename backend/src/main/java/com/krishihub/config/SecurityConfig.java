@@ -47,6 +47,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/public/settings").permitAll()
                         .requestMatchers("/api/market-prices/**").permitAll()
                         .requestMatchers("/api/weather/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/listings/**").permitAll()

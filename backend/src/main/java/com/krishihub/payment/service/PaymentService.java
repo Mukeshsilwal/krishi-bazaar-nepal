@@ -3,6 +3,8 @@ package com.krishihub.payment.service;
 import com.krishihub.auth.entity.User;
 import com.krishihub.auth.repository.UserRepository;
 import com.krishihub.auth.service.SmsService;
+import com.krishihub.marketplace.entity.CropListing;
+import com.krishihub.marketplace.repository.CropListingRepository;
 import com.krishihub.order.entity.Order;
 import com.krishihub.order.repository.OrderRepository;
 import com.krishihub.payment.dto.InitiatePaymentRequest;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.UUID;
 
@@ -32,6 +35,7 @@ public class PaymentService {
 
     private final TransactionRepository transactionRepository;
     private final OrderRepository orderRepository;
+    private final CropListingRepository cropListingRepository;
     private final UserRepository userRepository;
     private final EsewaPaymentService esewaService;
     private final KhaltiPaymentService khaltiService;
@@ -52,7 +56,8 @@ public class PaymentService {
 
         // Verify order status
         if (order.getStatus() != OrderStatus.CONFIRMED &&
-                order.getStatus() != OrderStatus.PAYMENT_PENDING) {
+                order.getStatus() != OrderStatus.PAYMENT_PENDING &&
+                order.getStatus() != OrderStatus.READY) {
             throw new BadRequestException("Order is not ready for payment");
         }
 
@@ -123,12 +128,23 @@ public class PaymentService {
 
     @Transactional
     public TransactionDto verifyPayment(UUID transactionId, String gatewayTransactionId) {
-        // Try to find by Transaction ID first, then by Order ID
-        Transaction transaction = transactionRepository.findById(transactionId)
-                .orElseGet(() -> transactionRepository.findByOrderIdAndPaymentStatus(
-                        transactionId, Transaction.PaymentStatus.PENDING)
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                                "Transaction not found for ID or Order ID: " + transactionId)));
+        // Try to find by Transaction ID first
+        Transaction transaction = transactionRepository.findById(transactionId).orElse(null);
+
+        if (transaction == null) {
+            // Assume transactionId might be an Order ID (eSewa sends Order ID as transaction_uuid)
+            java.util.List<Transaction> transactions = transactionRepository.findByOrderId(transactionId);
+            
+            if (transactions.isEmpty()) {
+                throw new ResourceNotFoundException("Transaction not found for ID or Order ID: " + transactionId);
+            }
+            
+            // Get the latest transaction for this order
+            transaction = transactions.stream()
+                    .sorted((t1, t2) -> t2.getCreatedAt().compareTo(t1.getCreatedAt()))
+                    .findFirst()
+                    .orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
+        }
 
         if (transaction.getPaymentStatus() == Transaction.PaymentStatus.COMPLETED) {
             return TransactionDto.fromEntity(transaction);
@@ -160,8 +176,18 @@ public class PaymentService {
 
             // Update order status
             Order order = transaction.getOrder();
-            order.setStatus(OrderStatus.PAID);
+            order.setStatus(OrderStatus.COMPLETED);
             orderRepository.save(order);
+
+            // Update crop listing quantity
+            CropListing listing = order.getListing();
+            BigDecimal newQuantity = listing.getQuantity().subtract(order.getQuantity());
+            listing.setQuantity(newQuantity.max(BigDecimal.ZERO));
+
+            if (listing.getQuantity().compareTo(BigDecimal.ZERO) == 0) {
+                listing.setStatus(CropListing.ListingStatus.SOLD);
+            }
+            cropListingRepository.save(listing);
 
             // Send notifications event
             eventPublisher.publishEvent(new PaymentCompletedEvent(this, transaction));

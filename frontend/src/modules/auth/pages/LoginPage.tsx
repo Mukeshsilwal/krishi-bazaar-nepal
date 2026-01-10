@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import authService from '../services/authService';
+import { useSettings } from '@/hooks/useSettings';
 
 export default function LoginPage() {
     const [step, setStep] = useState<'mobile' | 'otp'>('mobile');
@@ -9,6 +10,7 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const { login } = useAuth();
+    const { settings } = useSettings();
 
     const handleRequestOtp = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -53,7 +55,7 @@ export default function LoginPage() {
             <div className="min-h-full bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
                 <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
                     <div className="text-center mb-8">
-                        <h1 className="text-3xl font-bold text-green-600 mb-2">Kisan Sarathi</h1>
+                        <h1 className="text-3xl font-bold text-green-600 mb-2">{settings.COMPANY_NAME || 'Kisan Sarathi'}</h1>
                         <p className="text-gray-600">
                             {step === 'mobile' ? 'Enter your login details' : 'Enter OTP'}
                         </p>

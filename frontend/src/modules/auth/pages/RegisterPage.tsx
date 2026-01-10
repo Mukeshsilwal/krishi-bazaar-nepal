@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import authService from '../services/authService';
+import { useSettings } from '@/hooks/useSettings';
 
 export default function RegisterPage() {
     const [step, setStep] = useState<'form' | 'otp'>('form');
@@ -15,6 +16,7 @@ export default function RegisterPage() {
     const [otp, setOtp] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const { settings } = useSettings();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -59,7 +61,7 @@ export default function RegisterPage() {
             <div className="min-h-full bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
                 <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
                     <div className="text-center mb-8">
-                        <h1 className="text-3xl font-bold text-green-600 mb-2">Join Kisan Sarathi</h1>
+                        <h1 className="text-3xl font-bold text-green-600 mb-2">Join {settings.COMPANY_NAME || 'Kisan Sarathi'}</h1>
                         <p className="text-gray-600">
                             {step === 'form' ? 'Create your account' : 'Verify your mobile number'}
                         </p>

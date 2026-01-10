@@ -9,7 +9,7 @@ const adminService = {
 
     getPendingVendors: async () => {
         const response = await api.get(ADMIN_ENDPOINTS.VENDORS_PENDING);
-        return response.data;
+        return response.data.data;
     },
 
     getUserActivities: async (params) => {

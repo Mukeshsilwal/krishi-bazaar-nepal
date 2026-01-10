@@ -26,6 +26,7 @@ const translations = {
         'nav.register': 'दर्ता गर्नुहोस्',
         'nav.logout': 'लगआउट',
         'nav.more': 'थप',
+        'nav.calendar': 'कृषि क्यालेन्डर',
 
         // Hero Section
         'hero.badge': 'नेपालको #१ कृषि प्लेटफर्म',
@@ -185,6 +186,7 @@ const translations = {
         'nav.register': 'Register',
         'nav.logout': 'Logout',
         'nav.more': 'More',
+        'nav.calendar': 'Agri Calendar',
 
         // Hero Section
         'hero.badge': 'No. 1 Agri-Tech Platform in Nepal',

@@ -9,5 +9,6 @@ public enum OrderStatus {
     PAID, // Payment completed
     READY, // Ready for pickup
     COMPLETED, // Order completed
-    CANCELLED // Order cancelled
+    CANCELLED, // Order cancelled
+    FAILED // Payment or system failure
 }

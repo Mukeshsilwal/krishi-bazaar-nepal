@@ -2,6 +2,7 @@ package com.krishihub.advisory.controller;
 
 import com.krishihub.advisory.dto.AdvisoryResponse;
 import com.krishihub.advisory.service.AdvisoryService;
+import com.krishihub.shared.dto.ApiResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,22 +21,22 @@ public class AdvisoryController {
     private final AdvisoryService advisoryService;
 
     @GetMapping("/contextual")
-    public ResponseEntity<List<AdvisoryResponse>> getAdvisory(
+    public ResponseEntity<ApiResponse<List<AdvisoryResponse>>> getAdvisory(
             @RequestParam String context,
             @RequestParam String param) {
         try {
             com.krishihub.advisory.enums.AdvisoryContextType contextType = com.krishihub.advisory.enums.AdvisoryContextType
                     .valueOf(context.toUpperCase());
-            return ResponseEntity.ok(advisoryService.getContextualAdvisory(contextType, param));
+            return ResponseEntity.ok(ApiResponse.success(advisoryService.getContextualAdvisory(contextType, param)));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(ApiResponse.error("Invalid context type: " + context));
         }
     }
 
     @org.springframework.web.bind.annotation.PostMapping("/generate")
-    public ResponseEntity<Void> generateAdvisoryRules() {
+    public ResponseEntity<ApiResponse<Void>> generateAdvisoryRules() {
         UUID userId = UserContextHolder.getUserId();
         advisoryService.generateAdvisoryRules(userId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ApiResponse.success("Advisory rules generated successfully", null));
     }
 }

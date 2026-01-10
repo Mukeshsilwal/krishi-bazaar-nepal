@@ -5,6 +5,7 @@ import NotificationBell from './NotificationBell';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../modules/auth/context/AuthContext';
 import { useMessages } from '../hooks/useMessages';
+import { useSettings } from '../hooks/useSettings';
 import Logo from './Logo';
 import MoreMenu from './navigation/MoreMenu';
 
@@ -14,6 +15,7 @@ const Navbar = () => {
   const { language, setLanguage, t } = useLanguage();
   const { user, logout } = useAuth();
   const { unreadCount } = useMessages();
+  const { settings } = useSettings();
 
   const toggleLanguage = () => {
     setLanguage(language === 'ne' ? 'en' : 'ne');
@@ -32,7 +34,7 @@ const Navbar = () => {
           <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition flex-shrink-0">
             <Logo size={40} />
             <span className="text-lg font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent whitespace-nowrap">
-              Kisan Sarathi
+              {settings.COMPANY_NAME || 'Kisan Sarathi'}
             </span>
           </Link>
 
@@ -55,6 +57,12 @@ const Navbar = () => {
               className="text-gray-700 hover:text-green-600 font-medium transition px-1.5 py-2"
             >
               {t('nav.diagnosis') || 'Diagnosis'}
+            </Link>
+            <Link
+              to="/agriculture-calendar"
+              className="text-gray-700 hover:text-green-600 font-medium transition px-1.5 py-2"
+            >
+              {t('nav.calendar') || 'Calendar'}
             </Link>
 
             {/* More Menu - Secondary Navigation */}
@@ -255,6 +263,13 @@ const Navbar = () => {
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
               >
                 {t('nav.diagnosis') || 'Diagnosis'}
+              </Link>
+              <Link
+                to="/agriculture-calendar"
+                onClick={() => setIsOpen(false)}
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+              >
+                {t('nav.calendar') || 'Calendar'}
               </Link>
               {user && (
                 <>

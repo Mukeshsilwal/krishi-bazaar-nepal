@@ -26,7 +26,7 @@ export interface Article {
 const knowledgeService = {
     getCategories: async () => {
         const response = await api.get<KnowledgeCategory[]>(KNOWLEDGE_ENDPOINTS.CATEGORIES);
-        return response.data;
+        return (response.data as any).data;
     },
 
     getArticles: async (categoryId?: string, tag?: string, status?: string) => {
@@ -36,29 +36,29 @@ const knowledgeService = {
         if (status && status !== 'undefined') params.status = status;
 
         const response = await api.get<Article[]>(KNOWLEDGE_ENDPOINTS.ARTICLES, { params });
-        return response.data;
+        return (response.data as any).data;
     },
 
     getArticleById: async (id: string) => {
         if (!id || id === 'undefined') throw new Error('Invalid Article ID');
         const response = await api.get<Article>(KNOWLEDGE_ENDPOINTS.ARTICLE_BY_ID(id));
-        return response.data;
+        return (response.data as any).data;
     },
 
     // Admin Methods
     createCategory: async (category: Partial<KnowledgeCategory>) => {
         const response = await api.post<KnowledgeCategory>(KNOWLEDGE_ENDPOINTS.CATEGORIES, category);
-        return response.data;
+        return (response.data as any).data;
     },
 
     createArticle: async (article: Partial<Article>) => {
         const response = await api.post<Article>(KNOWLEDGE_ENDPOINTS.ARTICLES, article);
-        return response.data;
+        return (response.data as any).data;
     },
 
     updateArticle: async (id: string, article: Partial<Article>) => {
         const response = await api.put<Article>(KNOWLEDGE_ENDPOINTS.ARTICLE_BY_ID(id), article);
-        return response.data;
+        return (response.data as any).data;
     },
 
     deleteArticle: async (id: string) => {

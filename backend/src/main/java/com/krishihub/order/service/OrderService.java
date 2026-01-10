@@ -1,16 +1,15 @@
 package com.krishihub.order.service;
 
+import com.krishihub.agristore.entity.AgriProduct;
+import com.krishihub.agristore.repository.AgriProductRepository;
 import com.krishihub.auth.entity.User;
 import com.krishihub.auth.repository.UserRepository;
 
-
 import com.krishihub.marketplace.entity.CropListing;
 import com.krishihub.marketplace.repository.CropListingRepository;
-import com.krishihub.order.dto.CreateOrderRequest;
-import com.krishihub.order.dto.OrderDto;
-import com.krishihub.order.dto.OrderStatus;
-import com.krishihub.order.dto.UpdateOrderRequest;
+import com.krishihub.order.dto.*;
 import com.krishihub.order.entity.Order;
+import com.krishihub.order.entity.OrderItem;
 import com.krishihub.order.event.OrderCancelledEvent;
 import com.krishihub.order.event.OrderPlacedEvent;
 import com.krishihub.order.event.OrderStatusChangedEvent;
@@ -32,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -42,6 +43,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CropListingRepository listingRepository;
     private final UserRepository userRepository;
+    private final AgriProductRepository agriProductRepository;
     private final OrderStateValidator orderStateValidator;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -54,7 +56,35 @@ public class OrderService {
         if (buyer.getRole() != User.UserRole.BUYER && buyer.getRole() != User.UserRole.FARMER) {
             throw new BadRequestException("Only buyers and farmers can place orders");
         }
+        
+        // Use default if not provided
+        OrderSource source = request.getOrderSource() != null ? request.getOrderSource() : OrderSource.MARKETPLACE;
+        request.setOrderSource(source);
 
+        Order order;
+        if (source == OrderSource.MARKETPLACE) {
+            order = createMarketplaceOrder(buyer, request);
+        } else if (source == OrderSource.AGRI_STORE) {
+            order = createAgriStoreOrder(buyer, request);
+        } else {
+             throw new BadRequestException("Invalid order source");
+        }
+
+        Order savedOrder = orderRepository.save(order);
+
+        // Send notification event
+        eventPublisher.publishEvent(new OrderPlacedEvent(this, savedOrder));
+
+        log.info("Order created: {} by buyer: {} Source: {}", savedOrder.getId(), userId, source);
+
+        return OrderDto.fromEntity(savedOrder);
+    }
+    
+    private Order createMarketplaceOrder(User buyer, CreateOrderRequest request) {
+        if (request.getListingId() == null) {
+            throw new BadRequestException("Listing ID is required for Marketplace orders");
+        }
+    
         CropListing listing = listingRepository.findById(request.getListingId())
                 .orElseThrow(() -> new ResourceNotFoundException("Listing not found"));
 
@@ -123,21 +153,84 @@ public class OrderService {
                 .pickupLocation(
                         request.getPickupLocation() != null ? request.getPickupLocation() : listing.getLocation())
                 .notes(request.getNotes())
+                .orderSource(OrderSource.MARKETPLACE)
                 .build();
 
         if (request.getPickupDate() != null) {
             order.setPickupDate(LocalDate.parse(request.getPickupDate()));
         }
+        return order;
+    }
+    
+    private Order createAgriStoreOrder(User buyer, CreateOrderRequest request) {
+        if (request.getItems() == null || request.getItems().isEmpty()) {
+            throw new BadRequestException("Items are required for Agri Store orders");
+        }
+        
+        List<OrderItem> orderItems = new ArrayList<>();
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        
+        for (OrderItemDto itemDto : request.getItems()) {
+             AgriProduct product = agriProductRepository.findById(itemDto.getAgriProductId())
+                     .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + itemDto.getAgriProductId()));
+             
+             if (!product.getIsActive()) {
+                 throw new BadRequestException("Product is not active: " + product.getName());
+             }
+             
+             if (product.getStockQuantity() < itemDto.getQuantity().intValue()) {
+                 throw new BadRequestException("Insufficient stock for product: " + product.getName());
+             }
+             
+             BigDecimal itemTotal = product.getPrice().multiply(itemDto.getQuantity());
+             
+             OrderItem orderItem = OrderItem.builder()
+                     .agriProduct(product)
+                     .quantity(itemDto.getQuantity())
+                     .pricePerUnit(product.getPrice())
+                     .totalPrice(itemTotal)
+                     .build();
+             
+             orderItems.add(orderItem);
+             totalAmount = totalAmount.add(itemTotal);
+             
+             // Deduct stock immediately ? or wait for payment?
+             // Requirement says: "Decrease stock on: Order -> PAID"
+             // But we should reserve it or at least check it. 
+             // "Prevent checkout if stock insufficient" -> Checked above.
+        }
+        
+        Order order = Order.builder()
+                .buyer(buyer)
+                .quantity(BigDecimal.valueOf(orderItems.size())) // Total items count or sum of quantities? 
+                                                                 // Usually total items count for summary, or generic "1" order.
+                                                                 // Existing quantity field is BigDecimal... maybe sum of quantities?
+                                                                 // Let's use 1 for "Package" or sum. Let's use sum.
+                .totalAmount(totalAmount)
+                .status(OrderStatus.PENDING)
+                .pickupLocation(request.getPickupLocation()) // Required or default?
+                .notes(request.getNotes())
+                .orderSource(OrderSource.AGRI_STORE)
+                .build();
+                
+        // Calculate total quantity
+        BigDecimal totalQty = orderItems.stream()
+            .map(OrderItem::getQuantity)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        order.setQuantity(totalQty);
+        
+        if (request.getPickupDate() != null) {
+            order.setPickupDate(LocalDate.parse(request.getPickupDate()));
+        } else {
+            order.setPickupDate(LocalDate.now()); // Default to today/ASAP
+        }
 
-        Order savedOrder = orderRepository.save(order);
-
-        // Send notification event
-        eventPublisher.publishEvent(new OrderPlacedEvent(this, savedOrder));
-
-
-        log.info("Order created: {} by buyer: {}", savedOrder.getId(), userId);
-
-        return OrderDto.fromEntity(savedOrder);
+        // Link items
+        for (OrderItem item : orderItems) {
+            order.addItem(item);
+        }
+        
+        return order;
     }
 
     public OrderDto getOrderById(UUID id, UUID userId) {
@@ -149,8 +242,14 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (!order.getBuyer().getId().equals(user.getId()) &&
-                !order.getFarmer().getId().equals(user.getId())) {
-            throw new UnauthorizedException("You don't have access to this order");
+                (order.getFarmer() == null || !order.getFarmer().getId().equals(user.getId()))) {
+                // If farmer is null (AgriStore), only buyer (or Admin, handled by security) can see.
+                // But admin usually uses different endpoint or this one if Role is Admin. 
+                // Wait, Admin logic is separate usually.
+                // Assuming this is for USER app.
+             if (user.getRole() != User.UserRole.ADMIN) { // Allow admin if using this endpoint
+                throw new UnauthorizedException("You don't have access to this order");
+             }
         }
 
         return OrderDto.fromEntity(order);
@@ -168,7 +267,10 @@ public class OrderService {
         } else if ("farmer".equalsIgnoreCase(role)) {
             orders = orderRepository.findByFarmerId(user.getId(), pageable);
         } else {
-            // Return all orders (buyer + farmer)
+            // Return all orders (buyer + farmer) - logic might need check for null farmer
+            // existing findByBuyerIdOrFarmerId might fail if farmer_id is null in DB?
+            // "findByBuyerIdOrFarmerId" usually generates "... where buyer_id=? or farmer_id=?"
+            // If farmer_id is null on order, it just won't match the second condition, which is fine.
             orders = orderRepository.findByBuyerIdOrFarmerId(user.getId(), user.getId(), pageable);
         }
 
@@ -185,10 +287,11 @@ public class OrderService {
 
         // Verify access
         boolean isBuyer = order.getBuyer().getId().equals(user.getId());
-        boolean isFarmer = order.getFarmer().getId().equals(user.getId());
+        boolean isFarmer = order.getFarmer() != null && order.getFarmer().getId().equals(user.getId());
+        boolean isAdmin = user.getRole() == User.UserRole.ADMIN;
 
-        if (!isBuyer && !isFarmer) {
-            throw new UnauthorizedException("You don't have access to this order");
+        if (!isBuyer && !isFarmer && !isAdmin) {
+             throw new UnauthorizedException("You don't have access to this order");
         }
 
         // Update status if provided
@@ -205,6 +308,26 @@ public class OrderService {
 
             OrderStatus oldStatus = order.getStatus();
             order.setStatus(newStatus);
+            
+            // Stock Logic for Agri Store
+            if (order.getOrderSource() == OrderSource.AGRI_STORE) {
+                if (newStatus == OrderStatus.PAID) { 
+                     // Decrease Stock
+                     for (OrderItem item : order.getItems()) {
+                         AgriProduct p = item.getAgriProduct();
+                         p.setStockQuantity(p.getStockQuantity() - item.getQuantity().intValue());
+                         agriProductRepository.save(p);
+                     }
+                } else if ((oldStatus == OrderStatus.PAID) && (newStatus == OrderStatus.CANCELLED || newStatus == OrderStatus.FAILED)) {
+                     // Restore Stock
+                     for (OrderItem item : order.getItems()) {
+                         AgriProduct p = item.getAgriProduct();
+                         p.setStockQuantity(p.getStockQuantity() + item.getQuantity().intValue());
+                         agriProductRepository.save(p);
+                     }
+                }
+            }
+
 
             // Send notifications event
             eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order, oldStatus, newStatus));
@@ -237,16 +360,28 @@ public class OrderService {
 
         // Only buyer can cancel before confirmation, both can cancel after
         boolean isBuyer = order.getBuyer().getId().equals(user.getId());
-        boolean isFarmer = order.getFarmer().getId().equals(user.getId());
+        boolean isFarmer = order.getFarmer() != null && order.getFarmer().getId().equals(user.getId());
+        boolean isAdmin = user.getRole() == User.UserRole.ADMIN;
 
-        if (!isBuyer && !isFarmer) {
-            throw new UnauthorizedException("You don't have access to this order");
+        if (!isBuyer && !isFarmer && !isAdmin) {
+             throw new UnauthorizedException("You don't have access to this order");
         }
 
         // Validate cancellation
         orderStateValidator.validateTransition(order.getStatus(), OrderStatus.CANCELLED, user);
-
+        
+        OrderStatus oldStatus = order.getStatus();
         order.setStatus(OrderStatus.CANCELLED);
+        
+        // Restore stock if it was PAID
+        if (order.getOrderSource() == OrderSource.AGRI_STORE && oldStatus == OrderStatus.PAID) {
+             for (OrderItem item : order.getItems()) {
+                 AgriProduct p = item.getAgriProduct();
+                 p.setStockQuantity(p.getStockQuantity() + item.getQuantity().intValue());
+                 agriProductRepository.save(p);
+             }
+        }
+        
         orderRepository.save(order);
 
         // Send notification event

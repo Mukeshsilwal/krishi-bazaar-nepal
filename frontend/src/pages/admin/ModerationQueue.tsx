@@ -65,7 +65,7 @@ const ModerationQueue = () => {
             try {
                 const res = await api.get(KNOWLEDGE_ENDPOINTS.MODERATION_PENDING);
                 console.log('Moderation Queue Response:', res);
-                return res.data;
+                return res.data.data || [];
             } catch (err) {
                 console.error('Moderation Queue Fetch Error:', err);
                 throw err;

@@ -341,6 +341,14 @@ export const FEEDBACK_ENDPOINTS = {
     UPDATE_STATUS: (id) => `/admin/feedback/${id}/status`,
 };
 
+// ==================== Agriculture Calendar ====================
+
+export const AGRICULTURE_CALENDAR_ENDPOINTS = {
+    PUBLIC_BASE: '/agriculture-calendar',
+    ADMIN_BASE: '/admin/agriculture-calendar',
+    ADMIN_BY_ID: (id) => `/admin/agriculture-calendar/${id}`,
+};
+
 // ==================== Default Export ====================
 
 export default {
@@ -376,4 +384,5 @@ export default {
     ADMIN_MASTER_DATA: ADMIN_MASTER_DATA_ENDPOINTS,
     ADMIN_RBAC: ADMIN_RBAC_ENDPOINTS,
     FEEDBACK: FEEDBACK_ENDPOINTS,
+    AGRICULTURE_CALENDAR: AGRICULTURE_CALENDAR_ENDPOINTS,
 };

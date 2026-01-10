@@ -7,17 +7,17 @@ const marketPriceService = {
     // Markets
     getMarkets: async () => {
         const response = await api.get(MARKET_ENDPOINTS.BASE);
-        return response.data;
+        return response.data.data || response.data;
     },
 
     createMarket: async (data: any) => {
         const response = await api.post(MARKET_ENDPOINTS.BASE, data);
-        return response.data;
+        return response.data.data || response.data;
     },
 
     getMarketById: async (id: string) => {
         const response = await api.get(MARKET_ENDPOINTS.BY_ID(id));
-        return response.data;
+        return response.data.data || response.data;
     },
 
     // Market Prices

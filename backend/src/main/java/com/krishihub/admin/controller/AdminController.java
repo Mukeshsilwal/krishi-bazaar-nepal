@@ -36,13 +36,13 @@ public class AdminController {
     }
 
     @GetMapping("/vendors/pending")
-    public ResponseEntity<List<User>> getPendingVendors() {
-        return ResponseEntity.ok(adminService.getPendingVendors());
+    public ResponseEntity<ApiResponse<List<User>>> getPendingVendors() {
+        return ResponseEntity.ok(ApiResponse.success(adminService.getPendingVendors()));
     }
 
     @PostMapping("/users/{userId}/approve")
-    public ResponseEntity<Void> approveUser(@PathVariable UUID userId) {
+    public ResponseEntity<ApiResponse<Void>> approveUser(@PathVariable UUID userId) {
         adminService.approveUser(userId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ApiResponse.success("User approved successfully", null));
     }
 }

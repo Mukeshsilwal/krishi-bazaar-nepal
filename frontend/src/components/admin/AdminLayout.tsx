@@ -27,7 +27,8 @@ import {
   Tractor,
   BookOpenCheck,
   Database,
-  Activity
+  Activity,
+  Calendar
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -95,6 +96,12 @@ const AdminLayoutContent: React.FC = () => {
       labelNe: 'मौसम सल्लाह'
     },
     {
+      path: '/admin/agriculture-calendar',
+      icon: Calendar,
+      labelEn: 'Agri Calendar',
+      labelNe: 'कृषि क्यालेन्डर'
+    },
+    {
       path: '/admin/schemes',
       icon: FileText,
       labelEn: 'Govt Schemes',
@@ -153,6 +160,12 @@ const AdminLayoutContent: React.FC = () => {
       icon: Tractor,
       labelEn: 'Farmer Management',
       labelNe: 'किसान व्यवस्थापन'
+    },
+    {
+      path: '/admin/agri-products',
+      icon: Sprout,
+      labelEn: 'Agri Store',
+      labelNe: 'कृषि पसल'
     },
 
 

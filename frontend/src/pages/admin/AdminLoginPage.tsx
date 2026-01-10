@@ -16,10 +16,13 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { useSettings } from '@/hooks/useSettings';
+
 const AdminLoginPage = () => {
   const { language, setLanguage } = useLanguage();
   const { adminLogin } = useAuth();
   const navigate = useNavigate();
+  const { settings } = useSettings();
 
   const [formData, setFormData] = useState({
     identifier: '',
@@ -68,8 +71,8 @@ const AdminLoginPage = () => {
               <Sprout className="w-12 h-12 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Kisan Sarathi</h1>
-              <p className="text-lg text-muted-foreground">किसान सारथी</p>
+              <h1 className="text-2xl font-bold text-foreground">{settings.COMPANY_NAME || 'Kisan Sarathi'}</h1>
+              <p className="text-lg text-muted-foreground">{settings.COMPANY_TAGLINE || 'किसान सारथी'}</p>
             </div>
           </div>
 

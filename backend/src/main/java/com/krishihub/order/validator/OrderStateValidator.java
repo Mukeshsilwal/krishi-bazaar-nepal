@@ -15,12 +15,12 @@ public class OrderStateValidator {
 
     private static final Map<OrderStatus, Set<OrderStatus>> VALID_TRANSITIONS = Map.of(
             OrderStatus.PENDING, EnumSet.of(OrderStatus.CONFIRMED, OrderStatus.CANCELLED),
-            OrderStatus.CONFIRMED, EnumSet.of(OrderStatus.READY_FOR_HARVEST, OrderStatus.CANCELLED),
-            OrderStatus.READY_FOR_HARVEST, EnumSet.of(OrderStatus.HARVESTED, OrderStatus.CANCELLED),
-            OrderStatus.HARVESTED, EnumSet.of(OrderStatus.PAYMENT_PENDING, OrderStatus.CANCELLED),
-            OrderStatus.PAYMENT_PENDING, EnumSet.of(OrderStatus.PAID, OrderStatus.CANCELLED),
-            OrderStatus.PAID, EnumSet.of(OrderStatus.READY, OrderStatus.CANCELLED),
-            OrderStatus.READY, EnumSet.of(OrderStatus.COMPLETED),
+            OrderStatus.CONFIRMED, EnumSet.of(OrderStatus.READY_FOR_HARVEST, OrderStatus.HARVESTED, OrderStatus.PAYMENT_PENDING, OrderStatus.READY, OrderStatus.CANCELLED),
+            OrderStatus.READY_FOR_HARVEST, EnumSet.of(OrderStatus.HARVESTED, OrderStatus.PAYMENT_PENDING, OrderStatus.READY, OrderStatus.CANCELLED),
+            OrderStatus.HARVESTED, EnumSet.of(OrderStatus.PAYMENT_PENDING, OrderStatus.READY, OrderStatus.CANCELLED),
+            OrderStatus.PAYMENT_PENDING, EnumSet.of(OrderStatus.PAID, OrderStatus.READY, OrderStatus.CANCELLED),
+            OrderStatus.PAID, EnumSet.of(OrderStatus.READY, OrderStatus.COMPLETED, OrderStatus.CANCELLED),
+            OrderStatus.READY, EnumSet.of(OrderStatus.COMPLETED, OrderStatus.PAID),
             OrderStatus.COMPLETED, EnumSet.noneOf(OrderStatus.class),
             OrderStatus.CANCELLED, EnumSet.noneOf(OrderStatus.class)
     );

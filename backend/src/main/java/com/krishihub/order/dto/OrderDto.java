@@ -1,5 +1,6 @@
 package com.krishihub.order.dto;
 
+import com.krishihub.order.dto.OrderSource;
 import com.krishihub.order.entity.Order;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -52,28 +53,31 @@ public class OrderDto {
         private String district;
     }
 
+    private OrderSource orderSource;
+    private java.util.List<OrderItemDto> items;
+
     public static OrderDto fromEntity(Order order) {
         return OrderDto.builder()
                 .id(order.getId())
-                .listing(ListingInfo.builder()
+                .listing(order.getListing() != null ? ListingInfo.builder()
                         .id(order.getListing().getId())
                         .cropName(order.getListing().getCropName())
                         .unit(order.getListing().getUnit())
                         .pricePerUnit(order.getListing().getPricePerUnit())
                         .location(order.getListing().getLocation())
-                        .build())
+                        .build() : null)
                 .buyer(UserInfo.builder()
                         .id(order.getBuyer().getId())
                         .name(order.getBuyer().getName())
                         .mobileNumber(order.getBuyer().getMobileNumber())
                         .district(order.getBuyer().getDistrict())
                         .build())
-                .farmer(UserInfo.builder()
+                .farmer(order.getFarmer() != null ? UserInfo.builder()
                         .id(order.getFarmer().getId())
                         .name(order.getFarmer().getName())
                         .mobileNumber(order.getFarmer().getMobileNumber())
                         .district(order.getFarmer().getDistrict())
-                        .build())
+                        .build() : null)
                 .quantity(order.getQuantity())
                 .totalAmount(order.getTotalAmount())
                 .status(order.getStatus().name())
@@ -82,6 +86,14 @@ public class OrderDto {
                 .notes(order.getNotes())
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())
+                .orderSource(order.getOrderSource())
+                .items(order.getItems().stream().map(item -> OrderItemDto.builder()
+                        .id(item.getId())
+                        .agriProductId(item.getAgriProduct() != null ? item.getAgriProduct().getId() : null)
+                        .quantity(item.getQuantity())
+                        .pricePerUnit(item.getPricePerUnit())
+                        .totalPrice(item.getTotalPrice())
+                        .build()).collect(java.util.stream.Collectors.toList()))
                 .build();
     }
 }

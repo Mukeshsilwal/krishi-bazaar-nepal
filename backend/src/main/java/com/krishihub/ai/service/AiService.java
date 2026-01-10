@@ -4,12 +4,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.krishihub.ai.entity.AiRecommendation;
 import com.krishihub.ai.repository.AiRecommendationRepository;
+import com.krishihub.content.entity.Content;
+import com.krishihub.content.enums.ContentStatus;
+import com.krishihub.content.repository.ContentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -21,6 +27,9 @@ public class AiService {
         private final AiRecommendationRepository aiRecommendationRepository;
         private final WebClient openAiWebClient;
         private final ObjectMapper objectMapper;
+        private final ContentRepository contentRepository;
+
+        private final com.krishihub.diagnosis.repository.AIDiagnosisRepository aiDiagnosisRepository;
 
         @Value("${app.openai.model}")
         private String openAiModel;
@@ -30,6 +39,30 @@ public class AiService {
                         String query,
                         String imageUrl) {
                 log.info("Generating AI recommendation for farmer: {}", farmerId);
+
+                // 1. Fetch Local Context (RAG)
+                StringBuilder localContext = new StringBuilder();
+                    try {
+                        // Strategy: Fetch Recent Active Content (Context Stuffing)
+                        java.util.List<com.krishihub.content.entity.Content> contents = contentRepository.findTop5ByStatusOrderByPublishedAtDesc(
+                            com.krishihub.content.enums.ContentStatus.ACTIVE
+                        );
+                        
+                        if (!contents.isEmpty()) {
+                            localContext.append("\n\nRELEVANT LOCAL AGRICULTURAL KNOWLEDGE (Use this if applicable):\n");
+                            for (com.krishihub.content.entity.Content c : contents) {
+                                localContext.append("- Title: ").append(c.getTitle()).append("\n");
+                                localContext.append("  Summary: ").append(c.getSummary()).append("\n");
+                                if (c.getStructuredBody() != null) {
+                                     localContext.append("  Details: ").append(c.getStructuredBody().toString()).append("\n");
+                                }
+                                localContext.append("\n");
+                            }
+                        }
+                    } catch (Exception e) {
+                        log.warn("Failed to fetch local content context", e);
+                    }
+                // End RAG logic
 
                 String systemPrompt = """
                                 You are an expert agriculturalist and plant pathologist assisting farmers in Nepal.
@@ -48,7 +81,7 @@ public class AiService {
                                 }
 
                                 If unsure, use "Unknown" and explain in recommendation.
-                                """;
+                                """ + localContext.toString();
 
                 String userInput = (query != null ? query : "")
                                 + (imageUrl != null ? "\nImage URL: " + imageUrl : "");
@@ -88,7 +121,39 @@ public class AiService {
                                         .recommendation(json.path("recommendation").asText())
                                         .build();
 
-                        return aiRecommendationRepository.save(recommendation);
+                        AiRecommendation savedRec = aiRecommendationRepository.save(recommendation);
+
+                        // NEW: If Image exists, auto-create a Diagnosis for Admin Review
+                        if (imageUrl != null && !imageUrl.isBlank()) {
+                            try {
+                                com.fasterxml.jackson.databind.node.ObjectNode refNode = objectMapper.createObjectNode();
+                                refNode.put("imageUrl", imageUrl);
+                                
+                                com.fasterxml.jackson.databind.node.ObjectNode predNode = objectMapper.createObjectNode();
+                                predNode.put("disease", savedRec.getDiseaseDetected());
+                                predNode.put("score", savedRec.getConfidenceScore());
+                                
+                                com.fasterxml.jackson.databind.node.ArrayNode predsArray = objectMapper.createArrayNode();
+                                predsArray.add(predNode);
+
+                                com.krishihub.diagnosis.entity.AIDiagnosis diagnosis = com.krishihub.diagnosis.entity.AIDiagnosis.builder()
+                                    .farmerId(farmerId)
+                                    .cropType(savedRec.getCropName())
+                                    .district("Unknown") // Chat doesn't strictly require district yet
+                                    .inputType(com.krishihub.diagnosis.enums.DiagnosisInputType.IMAGE)
+                                    .inputReferences(refNode)
+                                    .aiPredictions(predsArray) // Needs to be array for frontend
+                                    .aiExplanation(savedRec.getRecommendation())
+                                    .reviewStatus(com.krishihub.diagnosis.enums.ReviewStatus.PENDING)
+                                    .build();
+                                
+                                aiDiagnosisRepository.save(diagnosis);
+                            } catch (Exception ex) {
+                                log.error("Failed to auto-create diagnosis for review", ex);
+                            }
+                        }
+
+                        return savedRec;
 
                 } catch (Exception e) {
                         log.error("OpenAI API failure", e);

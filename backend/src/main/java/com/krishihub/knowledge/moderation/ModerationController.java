@@ -1,5 +1,6 @@
 package com.krishihub.knowledge.moderation;
 
+import com.krishihub.shared.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,20 +17,20 @@ public class ModerationController {
     private final ModerationService moderationService;
 
     @GetMapping("/pending")
-    public ResponseEntity<List<ModerationQueue>> getPendingRequests() {
-        return ResponseEntity.ok(moderationService.getPendingRequests());
+    public ResponseEntity<ApiResponse<List<ModerationQueue>>> getPendingRequests() {
+        return ResponseEntity.ok(ApiResponse.success(moderationService.getPendingRequests()));
     }
 
     @PostMapping("/{id}/approve")
-    public ResponseEntity<Void> approveRequest(@PathVariable UUID id, @RequestParam UUID reviewerId) {
+    public ResponseEntity<ApiResponse<Void>> approveRequest(@PathVariable UUID id, @RequestParam UUID reviewerId) {
         moderationService.approveRequest(id, reviewerId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ApiResponse.success("Request approved", null));
     }
 
     @PostMapping("/{id}/reject")
-    public ResponseEntity<Void> rejectRequest(@PathVariable UUID id, @RequestParam UUID reviewerId,
+    public ResponseEntity<ApiResponse<Void>> rejectRequest(@PathVariable UUID id, @RequestParam UUID reviewerId,
             @RequestBody(required = false) String comments) {
         moderationService.rejectRequest(id, reviewerId, comments);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ApiResponse.success("Request rejected", null));
     }
 }

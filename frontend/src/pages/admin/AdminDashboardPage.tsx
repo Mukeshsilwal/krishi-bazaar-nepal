@@ -11,7 +11,8 @@ import {
   TrendingUp,
   Users,
   Eye,
-  Bug
+  Bug,
+  Sprout
 } from 'lucide-react';
 import adminService from '@/services/adminService';
 import { DashboardSkeleton } from '@/components/ui/skeletons';
@@ -244,6 +245,7 @@ const AdminDashboardPage = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { labelEn: 'Add Article', labelNe: 'लेख थप्नुहोस्', icon: FileText, path: '/admin/knowledge' },
+                { labelEn: 'Add Product', labelNe: 'उत्पादन थप्नुहोस्', icon: Sprout, path: '/admin/agri-products' },
                 { labelEn: 'Add Disease', labelNe: 'रोग थप्नुहोस्', icon: Bug, path: '/admin/diseases' },
                 { labelEn: 'Review AI', labelNe: 'AI समीक्षा', icon: CheckCircle, path: '/admin/ai-review' },
                 { labelEn: 'Send Alert', labelNe: 'सूचना पठाउनुहोस्', icon: AlertTriangle, path: '/admin/weather' },

@@ -3,6 +3,7 @@ package com.krishihub.order.entity;
 import com.krishihub.auth.entity.User;
 import com.krishihub.marketplace.entity.CropListing;
 import com.krishihub.order.dto.OrderStatus;
+import com.krishihub.order.dto.OrderSource;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -28,17 +29,31 @@ public class Order extends AuditableEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    // Determine the source of the order
+    @Enumerated(EnumType.STRING)
+    @Column(name = "order_source", nullable = false, length = 20)
+    @Builder.Default
+    private OrderSource orderSource = OrderSource.MARKETPLACE;
+
+    // Nullable because AGRI_STORE orders don't have a single listing
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "listing_id", nullable = false)
+    @JoinColumn(name = "listing_id")
     private CropListing listing;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "buyer_id", nullable = false)
     private User buyer;
 
+    // Nullable because AGRI_STORE orders might be fulfilled by system/admin, not a specific farmer user.
+    // However, for Marketplace it's required. We'll enforce this in validation, not DB constraint if hybrid.
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "farmer_id", nullable = false)
+    @JoinColumn(name = "farmer_id")
     private User farmer;
+
+    // Items for Agri Store orders. Marketplace orders might not use this (or could migrated later).
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private java.util.List<OrderItem> items = new java.util.ArrayList<>();
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal quantity;
@@ -59,6 +74,15 @@ public class Order extends AuditableEntity {
 
     @Column(columnDefinition = "TEXT")
     private String notes;
+    
+    // Helper to add items
+    public void addItem(OrderItem item) {
+        items.add(item);
+        item.setOrder(this);
+    }
 
-    // Audit fields inherited
+    public void removeItem(OrderItem item) {
+        items.remove(item);
+        item.setOrder(null);
+    }
 }

@@ -2,6 +2,7 @@ package com.krishihub.notification.controller;
 
 import com.krishihub.notification.entity.Notification;
 import com.krishihub.notification.service.NotificationService;
+import com.krishihub.shared.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,20 +19,20 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping
-    public ResponseEntity<List<Notification>> getUserNotifications() {
+    public ResponseEntity<ApiResponse<List<Notification>>> getUserNotifications() {
         UUID userId = UserContextHolder.getUserId();
-        return ResponseEntity.ok(notificationService.getUserNotifications(userId));
+        return ResponseEntity.ok(ApiResponse.success(notificationService.getUserNotifications(userId)));
     }
 
     @PutMapping("/{id}/read")
-    public ResponseEntity<Void> markAsRead(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> markAsRead(@PathVariable UUID id) {
         notificationService.markAsRead(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ApiResponse.success("Notification marked as read", null));
     }
 
     @GetMapping("/unread-count")
-    public ResponseEntity<Long> getUnreadCount() {
+    public ResponseEntity<ApiResponse<Long>> getUnreadCount() {
         UUID userId = UserContextHolder.getUserId();
-        return ResponseEntity.ok(notificationService.getUnreadCount(userId));
+        return ResponseEntity.ok(ApiResponse.success(notificationService.getUnreadCount(userId)));
     }
 }

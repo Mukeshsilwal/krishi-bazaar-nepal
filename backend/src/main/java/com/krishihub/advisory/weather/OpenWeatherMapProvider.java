@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -61,6 +62,7 @@ public class OpenWeatherMapProvider implements WeatherDataProvider {
 
     @Override
     @Cacheable(value = "currentWeather_v3", key = "#latitude + ',' + #longitude", unless = "#result == null")
+    @Async
     public Optional<WeatherData> getCurrentWeather(Double latitude, Double longitude) {
         return retryOperation(() -> fetchCurrentWeather(latitude, longitude), 3);
     }

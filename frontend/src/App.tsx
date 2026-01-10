@@ -17,7 +17,7 @@ const MarketplacePage = lazy(() => import('./modules/marketplace/pages/Marketpla
 const ListingDetailPage = lazy(() => import('./modules/marketplace/pages/ListingDetailPage'));
 const OrderDetailPage = lazy(() => import('./modules/orders/pages/OrderDetailPage'));
 // const PaymentRedirectPage = lazy(() => import('./modules/orders/pages/PaymentRedirectPage')); // Replaced
-const PaymentSuccessPage = lazy(() => import('./pages/PaymentSuccessPage'));
+const PaymentSuccessPage = lazy(() => import('./modules/orders/pages/PaymentSuccessPage'));
 const PaymentFailurePage = lazy(() => import('./pages/PaymentFailurePage'));
 const MyListingsPage = lazy(() => import('./modules/marketplace/pages/MyListingsPage'));
 const MyOrdersPage = lazy(() => import('./modules/orders/pages/MyOrdersPage'));
@@ -68,6 +68,15 @@ const ContentDashboard = lazy(() => import('./pages/admin/content/ContentDashboa
 const ContentEditor = lazy(() => import('./pages/admin/content/ContentEditor'));
 const MarketPriceManager = lazy(() => import('./pages/admin/MarketPriceManager'));
 
+// Agriculture Calendar
+const AgricultureCalendarPage = lazy(() => import('./features/agricultureCalendar/AgricultureCalendarPage'));
+const AdminAgricultureCalendarPage = lazy(() => import('./pages/admin/AdminAgricultureCalendarPage'));
+
+// Agri Store
+const AgriStorePage = lazy(() => import('./features/agriStore/AgriStorePage'));
+const ProductDetailPage = lazy(() => import('./features/agriStore/ProductDetailPage'));
+const AgriProductManager = lazy(() => import('./pages/admin/AgriProductManager'));
+
 function App() {
   return (
     <Router>
@@ -87,7 +96,12 @@ function App() {
                 <Route path="/logistics" element={<LogisticsDashboard />} />
                 <Route path="/knowledge" element={<KnowledgePage />} />
                 <Route path="/knowledge/:id" element={<ArticleDetailPage />} />
+
+                <Route path="/agriculture-calendar" element={<AgricultureCalendarPage />} />
                 <Route path="/diagnosis" element={<DiagnosticTool />} />
+
+                <Route path="/agri-store" element={<AgriStorePage />} />
+                <Route path="/agri-store/product/:id" element={<ProductDetailPage />} />
 
                 {/* Auth Routes */}
                 <Route path="/admin/login" element={<AdminLoginPage />} />
@@ -142,7 +156,10 @@ function App() {
                 <Route path="content" element={<ContentDashboard />} />
                 <Route path="content/:id" element={<ContentEditor />} />
                 <Route path="market-prices" element={<MarketPriceManager />} />
+                <Route path="agriculture-calendar" element={<AdminAgricultureCalendarPage />} />
                 <Route path="activities" element={<ActivityLogsPage />} />
+                <Route path="agri-products" element={<AgriProductManager />} />
+
               </Route>
             </Routes>
           </Suspense>

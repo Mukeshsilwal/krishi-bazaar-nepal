@@ -143,9 +143,13 @@ export const useMessages = (userId = null) => {
     useEffect(() => {
         // Skip for ADMIN role to prevent 401 errors
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-        console.log('[useMessages] Current user from localStorage:', user); // DEBUG LOG
-        if (user?.role === 'ADMIN') {
-            console.log('[useMessages] Skipping message fetch for ADMIN');
+
+        // Skip for unauthenticated users
+        if (!user || !user.mobileNumber) {
+            return;
+        }
+
+        if (user.role === 'ADMIN') {
             return;
         }
 

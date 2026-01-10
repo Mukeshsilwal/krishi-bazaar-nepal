@@ -20,20 +20,20 @@ public class PaymentCallbackController {
     private final PaymentService paymentService;
 
     @GetMapping("/esewa")
-    public ResponseEntity<String> handleEsewaCallback(
+    public ResponseEntity<ApiResponse<String>> handleEsewaCallback(
             @RequestParam("data") String data // eSewa V2 sends encoded data
             ) {
         log.info("Received eSewa callback: {}", data);
         // Implement V2 decoding if needed, or if this is failure/success url hit directly.
         // Assuming standard verification flow is preferred. 
-        return ResponseEntity.ok("eSewa callback received");
+        return ResponseEntity.ok(ApiResponse.success("eSewa callback received", "eSewa callback received"));
     }
 
     @GetMapping("/khalti")
-    public ResponseEntity<String> handleKhaltiCallback(
+    public ResponseEntity<ApiResponse<String>> handleKhaltiCallback(
             @RequestParam Map<String, String> data) {
         log.info("Received Khalti callback: {}", data);
-        return ResponseEntity.ok("Khalti callback received");
+        return ResponseEntity.ok(ApiResponse.success("Khalti callback received", "Khalti callback received"));
     }
     
     // Explicit server-to-server check

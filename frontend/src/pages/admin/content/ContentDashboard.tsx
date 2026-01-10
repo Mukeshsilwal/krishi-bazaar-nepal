@@ -30,7 +30,13 @@ const ContentDashboard = () => {
         setLoading(true);
         try {
             const page = await contentService.getContents(filters);
-            setContents(page.content);
+            console.log('ContentDashboard received page:', page);
+            if (page && page.content) {
+                setContents(page.content);
+            } else {
+                console.warn('Page content is missing/undefined', page);
+                setContents([]);
+            }
         } catch (error) {
             console.error("Failed to load content", error);
         } finally {

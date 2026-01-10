@@ -4,6 +4,7 @@ import com.krishihub.disease.dto.DiseaseDiagnosisResponse;
 import com.krishihub.disease.entity.Disease;
 import com.krishihub.disease.entity.Pesticide;
 import com.krishihub.disease.service.DiseaseService;
+import com.krishihub.shared.dto.ApiResponse;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -20,38 +21,38 @@ public class DiseaseController {
 
     // Public / Farmer Endpoints
     @GetMapping("/diagnose")
-    public ResponseEntity<List<DiseaseDiagnosisResponse>> diagnose(@RequestParam String symptom) {
-        return ResponseEntity.ok(diseaseService.diagnoseBySymptoms(symptom));
+    public ResponseEntity<ApiResponse<List<DiseaseDiagnosisResponse>>> diagnose(@RequestParam String symptom) {
+        return ResponseEntity.ok(ApiResponse.success(diseaseService.diagnoseBySymptoms(symptom)));
     }
 
     @GetMapping("/crop/{cropName}")
-    public ResponseEntity<List<DiseaseDiagnosisResponse>> getByCrop(@PathVariable String cropName) {
-        return ResponseEntity.ok(diseaseService.getDiseasesByCrop(cropName));
+    public ResponseEntity<ApiResponse<List<DiseaseDiagnosisResponse>>> getByCrop(@PathVariable String cropName) {
+        return ResponseEntity.ok(ApiResponse.success(diseaseService.getDiseasesByCrop(cropName)));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DiseaseDiagnosisResponse> getDiseaseDetails(@PathVariable UUID id) {
-        return ResponseEntity.ok(diseaseService.getDiseaseDetails(id));
+    public ResponseEntity<ApiResponse<DiseaseDiagnosisResponse>> getDiseaseDetails(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success(diseaseService.getDiseaseDetails(id)));
     }
 
     // Admin Endpoints
     @PostMapping
-    public ResponseEntity<Disease> createDisease(@RequestBody Disease disease) {
-        return ResponseEntity.ok(diseaseService.createDisease(disease));
+    public ResponseEntity<ApiResponse<Disease>> createDisease(@RequestBody Disease disease) {
+        return ResponseEntity.ok(ApiResponse.success("Disease created successfully", diseaseService.createDisease(disease)));
     }
 
     @PostMapping("/pesticides")
-    public ResponseEntity<Pesticide> createPesticide(@RequestBody Pesticide pesticide) {
-        return ResponseEntity.ok(diseaseService.createPesticide(pesticide));
+    public ResponseEntity<ApiResponse<Pesticide>> createPesticide(@RequestBody Pesticide pesticide) {
+        return ResponseEntity.ok(ApiResponse.success("Pesticide created successfully", diseaseService.createPesticide(pesticide)));
     }
 
     @GetMapping("/pesticides")
-    public ResponseEntity<List<Pesticide>> getAllPesticides() {
-        return ResponseEntity.ok(diseaseService.getAllPesticides());
+    public ResponseEntity<ApiResponse<List<Pesticide>>> getAllPesticides() {
+        return ResponseEntity.ok(ApiResponse.success(diseaseService.getAllPesticides()));
     }
 
     @PostMapping("/{diseaseId}/link-pesticide")
-    public ResponseEntity<Void> linkPesticide(
+    public ResponseEntity<ApiResponse<Void>> linkPesticide(
             @PathVariable UUID diseaseId,
             @RequestParam UUID pesticideId,
             @RequestParam String dosage,
@@ -59,12 +60,12 @@ public class DiseaseController {
             @RequestParam(defaultValue = "false") Boolean isPrimary) {
 
         diseaseService.linkPesticideToDisease(diseaseId, pesticideId, dosage, interval, isPrimary);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ApiResponse.success("Pesticide linked successfully", null));
     }
 
     @PostMapping("/feedback")
-    public ResponseEntity<Void> submitFeedback(@RequestBody com.krishihub.disease.dto.AdvisoryFeedbackDTO feedback) {
+    public ResponseEntity<ApiResponse<Void>> submitFeedback(@RequestBody com.krishihub.disease.dto.AdvisoryFeedbackDTO feedback) {
         advisoryService.submitFeedback(feedback);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ApiResponse.success("Feedback submitted successfully", null));
     }
 }

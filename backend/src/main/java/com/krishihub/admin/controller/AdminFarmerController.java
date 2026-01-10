@@ -1,5 +1,11 @@
 package com.krishihub.admin.controller;
 
+import com.krishihub.admin.dto.FarmerVerificationRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.krishihub.admin.dto.FarmerProfileDto;
@@ -9,6 +15,7 @@ import com.krishihub.shared.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,9 +29,9 @@ public class AdminFarmerController {
     private final AdminFarmerService farmerService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<org.springframework.data.domain.Page<User>>> getAllFarmers(
+    public ResponseEntity<ApiResponse<Page<User>>> getAllFarmers(
             @RequestParam(required = false) String search,
-            @org.springframework.data.web.PageableDefault(sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) org.springframework.data.domain.Pageable pageable) {
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success("Farmers fetched", farmerService.getAllFarmers(search, pageable)));
     }
 
@@ -35,13 +42,13 @@ public class AdminFarmerController {
 
     @PostMapping("/{id}/verify")
     public ResponseEntity<ApiResponse<Object>> verifyFarmer(@PathVariable UUID id,
-            @RequestBody com.krishihub.admin.dto.FarmerVerificationRequest request) {
+            @RequestBody FarmerVerificationRequest request) {
         return ResponseEntity
                 .ok(ApiResponse.success("Farmer verification updated", farmerService.verifyFarmer(id, request)));
     }
 
     @GetMapping("/export")
-    public void exportFarmers(jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
+    public void exportFarmers(HttpServletResponse response) throws java.io.IOException {
         response.setContentType("text/csv");
         response.setHeader("Content-Disposition", "attachment; filename=\"farmers.csv\"");
         farmerService.exportFarmers(response.getWriter());
@@ -49,7 +56,7 @@ public class AdminFarmerController {
 
     @PostMapping("/import")
     public ResponseEntity<ApiResponse<Object>> importFarmers(
-            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+            @RequestParam("file") MultipartFile file) {
         farmerService.importFarmers(file);
         return ResponseEntity.ok(ApiResponse.success("Farmers imported successfully", null));
     }
