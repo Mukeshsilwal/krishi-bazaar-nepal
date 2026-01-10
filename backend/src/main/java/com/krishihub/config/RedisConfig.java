@@ -30,8 +30,10 @@ public class RedisConfig implements org.springframework.cache.annotation.Caching
                 ObjectMapper.DefaultTyping.NON_FINAL,
                 com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY);
 
-        // Register Mixin for PageImpl
+        // Register Mixin for PageImpl, PageRequest, and Sort
         mapper.addMixIn(org.springframework.data.domain.PageImpl.class, PageMixin.class);
+        mapper.addMixIn(org.springframework.data.domain.PageRequest.class, PageRequestMixin.class);
+        mapper.addMixIn(org.springframework.data.domain.Sort.class, SortMixin.class);
 
         GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(mapper);
 
@@ -56,6 +58,27 @@ public class RedisConfig implements org.springframework.cache.annotation.Caching
                 @com.fasterxml.jackson.annotation.JsonProperty("content") java.util.List<?> content,
                 @com.fasterxml.jackson.annotation.JsonProperty("pageable") org.springframework.data.domain.Pageable pageable,
                 @com.fasterxml.jackson.annotation.JsonProperty("totalElements") long totalElements) {
+        }
+    }
+
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
+    @com.fasterxml.jackson.annotation.JsonTypeInfo(use = com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS, include = com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY)
+    abstract static class PageRequestMixin {
+        @com.fasterxml.jackson.annotation.JsonCreator
+        public PageRequestMixin(
+                @com.fasterxml.jackson.annotation.JsonProperty("pageNumber") int page,
+                @com.fasterxml.jackson.annotation.JsonProperty("pageSize") int size,
+                @com.fasterxml.jackson.annotation.JsonProperty("sort") org.springframework.data.domain.Sort sort) {
+        }
+    }
+
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
+    @com.fasterxml.jackson.annotation.JsonTypeInfo(use = com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS, include = com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY)
+    abstract static class SortMixin {
+        @com.fasterxml.jackson.annotation.JsonCreator
+        public static org.springframework.data.domain.Sort by(
+                @com.fasterxml.jackson.annotation.JsonProperty("orders") java.util.List<org.springframework.data.domain.Sort.Order> orders) {
+            return null;
         }
     }
 
