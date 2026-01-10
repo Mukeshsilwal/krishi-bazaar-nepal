@@ -298,10 +298,19 @@ public class AuthService {
         String accessToken = jwtUtil.generateToken(userDetails);
         com.krishihub.auth.entity.RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
         
-        eventPublisher.publishEvent(new ActivityEvent(this, user.getId(), "LOGIN_VERIFY", "User logged in via OTP", null));
+        try {
+            eventPublisher.publishEvent(new ActivityEvent(this, user.getId(), "LOGIN_VERIFY", "User logged in via OTP", null));
+        } catch (Exception e) {
+            log.error("Failed to publish activity event", e);
+        }
 
         // Enforce Single Login
-        checkAndSetLoginLock(user.getId());
+        try {
+            checkAndSetLoginLock(user.getId());
+        } catch (Exception e) {
+            log.error("Single login check failed", e);
+            // Don't fail the request if Redis is down
+        }
 
         log.info("User verified and logged in: {}", mobileNumber);
 
@@ -479,17 +488,28 @@ public class AuthService {
     }
 
     private void checkAndSetLoginLock(UUID userId) {
-        String key = "login:lock:" + userId;
-        if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
-             throw new ActiveSessionExistsException("User is already logged in on another device.");
+        try {
+            String key = "login:lock:" + userId;
+            if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
+                 throw new ActiveSessionExistsException("User is already logged in on another device.");
+            }
+            redisTemplate.opsForValue().set(key, "true", jwtExpiration, TimeUnit.MILLISECONDS);
+        } catch (ActiveSessionExistsException e) {
+            throw e; // Rethrow business exception
+        } catch (Exception e) {
+            log.error("Redis connection failed during login lock check", e);
+            // Proceed without lock if Redis is down
         }
-        redisTemplate.opsForValue().set(key, "true", jwtExpiration, TimeUnit.MILLISECONDS);
     }
 
     @Transactional
     public void logout(UUID userId) {
-        String key = "login:lock:" + userId;
-        redisTemplate.delete(key);
-        log.info("User logged out, lock released: {}", userId);
+        try {
+            String key = "login:lock:" + userId;
+            redisTemplate.delete(key);
+            log.info("User logged out, lock released: {}", userId);
+        } catch (Exception e) {
+             log.error("Redis failed during logout", e);
+        }
     }
 }
