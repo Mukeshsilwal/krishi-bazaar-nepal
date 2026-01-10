@@ -30,6 +30,9 @@ public class RedisConfig implements org.springframework.cache.annotation.Caching
                 ObjectMapper.DefaultTyping.NON_FINAL,
                 com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY);
 
+        // Register Mixin for PageImpl
+        mapper.addMixIn(org.springframework.data.domain.PageImpl.class, PageMixin.class);
+
         GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(mapper);
 
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
@@ -43,6 +46,17 @@ public class RedisConfig implements org.springframework.cache.annotation.Caching
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
                 .build();
+    }
+
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
+    @com.fasterxml.jackson.annotation.JsonTypeInfo(use = com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS, include = com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY)
+    abstract static class PageMixin {
+        @com.fasterxml.jackson.annotation.JsonCreator
+        public PageMixin(
+                @com.fasterxml.jackson.annotation.JsonProperty("content") java.util.List<?> content,
+                @com.fasterxml.jackson.annotation.JsonProperty("pageable") org.springframework.data.domain.Pageable pageable,
+                @com.fasterxml.jackson.annotation.JsonProperty("totalElements") long totalElements) {
+        }
     }
 
     @Override

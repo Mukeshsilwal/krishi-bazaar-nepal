@@ -12,9 +12,17 @@ export const useListings = (filters = {}) => {
         totalElements: 0,
     });
 
-    const fetchListings = async (page = 0) => {
+    // Track if we are specifically fetching the next page for infinite scroll
+    const [isFetchingNext, setIsFetchingNext] = useState(false);
+
+    const fetchListings = async (page = 0, options = { append: false }) => {
         try {
-            setLoading(true);
+            if (options.append) {
+                setIsFetchingNext(true);
+            } else {
+                setLoading(true);
+            }
+
             // Clean filters to remove empty strings
             const searchParams = { ...filters, page, size: pagination.size };
             Object.keys(searchParams).forEach(key => {
@@ -26,7 +34,15 @@ export const useListings = (filters = {}) => {
             const response = await listingService.searchListings(searchParams);
 
             if (response.success && response.data) {
-                setListings(response.data.content || []);
+                const newData = response.data.content || [];
+
+                setListings(prev => {
+                    if (options.append) {
+                        return [...prev, ...newData];
+                    }
+                    return newData;
+                });
+
                 setPagination({
                     page: response.data.pageable?.pageNumber ?? response.data.number ?? 0,
                     size: response.data.pageable?.pageSize ?? response.data.size ?? 20,
@@ -38,36 +54,47 @@ export const useListings = (filters = {}) => {
             setError(err.response?.data?.message || 'Failed to fetch listings');
         } finally {
             setLoading(false);
+            setIsFetchingNext(false);
         }
     };
 
     useEffect(() => {
-        fetchListings();
+        // Reset to page 0 when filters change
+        fetchListings(0, { append: false });
     }, [JSON.stringify(filters)]);
 
     const nextPage = () => {
         if (pagination.page < pagination.totalPages - 1) {
-            fetchListings(pagination.page + 1);
+            fetchListings(pagination.page + 1, { append: false });
         }
     };
 
     const prevPage = () => {
         if (pagination.page > 0) {
-            fetchListings(pagination.page - 1);
+            fetchListings(pagination.page - 1, { append: false });
+        }
+    };
+
+    const loadMore = () => {
+        if (!isFetchingNext && pagination.page < pagination.totalPages - 1) {
+            fetchListings(pagination.page + 1, { append: true });
         }
     };
 
     const refresh = () => {
-        fetchListings(pagination.page);
+        fetchListings(pagination.page, { append: false });
     };
 
     return {
         listings,
-        loading,
+        loading, // Initial load or filter change
+        isFetchingNext, // Infinite scroll loading state
         error,
         pagination,
-        nextPage,
-        prevPage,
+        nextPage, // Manual pagination (replace)
+        prevPage, // Manual pagination (replace)
+        loadMore, // Infinite scroll (append)
+        hasNextPage: pagination.page < pagination.totalPages - 1,
         refresh,
     };
 };

@@ -25,6 +25,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
         List<User> findByVerifiedFalse();
 
+        List<User> findByVerifiedFalseAndRoleIn(List<User.UserRole> roles);
+
         /**
          * Find users by district and role (for weather advisory targeting) - Case Insensitive & Trimmed
          */

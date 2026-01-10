@@ -45,7 +45,7 @@ class ImageUploadService {
                 onUploadProgress: (progressEvent) => {
                     // You could add a callback for progress here if needed
                     const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
-                    console.log(`Upload progress: ${percentCompleted}%`);
+
                 }
             });
 

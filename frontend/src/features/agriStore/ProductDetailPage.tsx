@@ -8,6 +8,7 @@ import { Leaf, ArrowLeft, ShoppingCart, Minus, Plus, Loader2 } from 'lucide-reac
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { toast } from 'sonner';
 import { useAuth } from '@/modules/auth/context/AuthContext';
+import { useCart } from '@/context/CartContext';
 import api from '@/services/api';
 
 const ProductDetailPage = () => {
@@ -17,7 +18,8 @@ const ProductDetailPage = () => {
     const [product, setProduct] = useState<AgriProduct | null>(null);
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
-    const [purchasing, setPurchasing] = useState(false);
+    const { addItem } = useCart();
+    const [adding, setAdding] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -44,42 +46,12 @@ const ProductDetailPage = () => {
         }
     };
 
-    const handleBuyNow = async () => {
-        if (!user) {
-            toast.error("Please login to purchase");
-            navigate('/login', { state: { from: `/agri-store/product/${id}` } });
-            return;
-        }
-
+    const handleAddToCart = () => {
         if (!product) return;
-
-        setPurchasing(true);
-        try {
-            // Create order directly for single item (Simplification for v1)
-            // In a real app, we'd add to cart context.
-            // But the prompt says "Checkout (existing order flow)". 
-            // We'll create the order and redirect to payment/order details.
-
-            const orderRequest = {
-                orderSource: 'AGRI_STORE',
-                pickupLocation: user.district || 'Default Location', // Or ask user
-                items: [
-                    {
-                        agriProductId: product.id,
-                        quantity: quantity
-                    }
-                ]
-            };
-
-            const response = await api.post('/orders', orderRequest);
-            toast.success("Order placed successfully!");
-            navigate(`/orders/${response.data.id}`);
-
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || "Failed to place order");
-        } finally {
-            setPurchasing(false);
-        }
+        setAdding(true);
+        addItem(product, quantity);
+        setAdding(false);
+        // Optional: Open cart or show toast (Toast handled in context)
     };
 
     if (loading) return <LoadingSpinner />;
@@ -139,11 +111,11 @@ const ProductDetailPage = () => {
                         </p>
                     </div>
 
-                    <Button size="lg" className="w-full md:w-auto px-12" onClick={handleBuyNow} disabled={purchasing || product.stockQuantity <= 0}>
-                        {purchasing ? <Loader2 className="h-5 w-5 animate-spin" /> : (
+                    <Button size="lg" className="w-full md:w-auto px-12" onClick={handleAddToCart} disabled={adding || product.stockQuantity <= 0}>
+                        {adding ? <Loader2 className="h-5 w-5 animate-spin" /> : (
                             <>
                                 <ShoppingCart className="mr-2 h-5 w-5" />
-                                Buy Now
+                                Add to Cart
                             </>
                         )}
                     </Button>

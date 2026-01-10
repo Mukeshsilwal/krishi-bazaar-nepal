@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import orderService from '../services/orderService';
 
 export const useOrders = (role = null) => {
-    console.log('[useOrders] Hook called with role:', role);
+
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     const fetchOrders = async () => {
-        console.log('[useOrders] fetchOrders called, role:', role);
+
         try {
             setLoading(true);
             const response = await orderService.getMyOrders(role);
@@ -26,7 +26,7 @@ export const useOrders = (role = null) => {
     };
 
     useEffect(() => {
-        console.log('[useOrders] useEffect triggered on mount');
+
         fetchOrders();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

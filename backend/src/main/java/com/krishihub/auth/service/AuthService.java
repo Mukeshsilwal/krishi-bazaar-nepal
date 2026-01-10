@@ -26,6 +26,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.UUID;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import com.krishihub.shared.exception.ActiveSessionExistsException;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +44,10 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final ApplicationEventPublisher eventPublisher;
     private final RefreshTokenService refreshTokenService;
+    private final StringRedisTemplate redisTemplate; // Redis Lock
+
+    @Value("${app.jwt.expiration:86400000}")
+    private long jwtExpiration;
 
     @Value("${app.otp.expiration}")
     private int otpExpiration;
@@ -234,6 +241,9 @@ public class AuthService {
 
         log.info("Admin logged in: {}", user.getMobileNumber());
 
+        // Enforce Single Login
+        checkAndSetLoginLock(user.getId());
+
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken.getToken())
@@ -289,6 +299,9 @@ public class AuthService {
         com.krishihub.auth.entity.RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
         
         eventPublisher.publishEvent(new ActivityEvent(this, user.getId(), "LOGIN_VERIFY", "User logged in via OTP", null));
+
+        // Enforce Single Login
+        checkAndSetLoginLock(user.getId());
 
         log.info("User verified and logged in: {}", mobileNumber);
 
@@ -463,5 +476,20 @@ public class AuthService {
         }
 
         return normalized;
+    }
+
+    private void checkAndSetLoginLock(UUID userId) {
+        String key = "login:lock:" + userId;
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
+             throw new ActiveSessionExistsException("User is already logged in on another device.");
+        }
+        redisTemplate.opsForValue().set(key, "true", jwtExpiration, TimeUnit.MILLISECONDS);
+    }
+
+    @Transactional
+    public void logout(UUID userId) {
+        String key = "login:lock:" + userId;
+        redisTemplate.delete(key);
+        log.info("User logged out, lock released: {}", userId);
     }
 }

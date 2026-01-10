@@ -63,32 +63,21 @@ const PesticideCMSPage = () => {
   useEffect(() => {
     setTitle('Pesticides & Medicine', 'कीटनाशक र औषधि');
   }, [setTitle]);
-  const [pesticides, setPesticides] = useState<Pesticide[]>([
-    {
-      id: '1',
-      nameEn: 'Carbendazim 50% WP',
-      nameNe: 'कार्बेन्डाजिम ५०% डब्ल्यूपी',
-      type: 'FUNGICIDE',
-      isOrganic: false,
-      activeIngredients: 'Carbendazim',
-      dosagePerLiter: '1-2g',
-      sprayIntervalDays: 7,
-      govtApprovalLicense: 'NPL-PEST-2024-001',
-      status: 'ACTIVE'
-    },
-    {
-      id: '2',
-      nameEn: 'Neem Oil Extract',
-      nameNe: 'नीम तेल अर्क',
-      type: 'INSECTICIDE',
-      isOrganic: true,
-      activeIngredients: 'Azadirachtin',
-      dosagePerLiter: '5ml',
-      sprayIntervalDays: 5,
-      govtApprovalLicense: 'NPL-ORG-2024-015',
-      status: 'ACTIVE'
-    },
-  ]);
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const data = await advisoryService.getAllPesticides();
+      setPesticides(data || []);
+    } catch (error) {
+      console.error("Failed to fetch pesticides", error);
+      toast.error("Failed to load pesticides");
+    }
+  };
+
+  const [pesticides, setPesticides] = useState<Pesticide[]>([]);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editingPesticide, setEditingPesticide] = useState<Partial<Pesticide>>({
@@ -110,8 +99,8 @@ const PesticideCMSPage = () => {
       } else {
         // Create new
         await advisoryService.createPesticide(editingPesticide);
-        setPesticides(prev => [...prev, { ...editingPesticide, id: Date.now().toString() } as Pesticide]);
         toast.success(language === 'ne' ? 'कीटनाशक थपियो' : 'Pesticide added');
+        loadData();
       }
       setIsEditing(false);
       setEditingPesticide({ type: 'FUNGICIDE', isOrganic: false });

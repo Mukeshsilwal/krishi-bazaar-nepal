@@ -43,11 +43,11 @@ public class WeatherAdvisoryService {
                     advisory.getRegion(), com.krishihub.auth.entity.User.UserRole.FARMER);
 
             if (farmers.isEmpty()) {
-                 System.out.println("No farmers found for district: " + advisory.getRegion());
+
                  return;
             }
 
-            System.out.println("Broadcasting advisory to " + farmers.size() + " farmers in " + advisory.getRegion());
+
 
             for (com.krishihub.auth.entity.User farmer : farmers) {
                 advisoryDeliveryLogService.logAdvisoryCreated(

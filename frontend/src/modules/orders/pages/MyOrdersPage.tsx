@@ -16,12 +16,11 @@ export default function MyOrdersPage() {
     const ordersArray = Array.isArray(orders) ? orders : [];
 
     // Debug logging
-    console.log('[MyOrdersPage] Current User:', user);
-    console.log('[MyOrdersPage] All Orders:', ordersArray);
+
 
     const buyerOrders = ordersArray.filter((order) => {
         const match = order.buyer?.id === user?.id;
-        console.log(`[MyOrdersPage] Buyer Filter: Order ${order.id} Buyer ${order.buyer?.id} vs User ${user?.id} -> ${match}`);
+
         return match;
     });
     const farmerOrders = ordersArray.filter((order) => order.farmer?.id === user?.id);

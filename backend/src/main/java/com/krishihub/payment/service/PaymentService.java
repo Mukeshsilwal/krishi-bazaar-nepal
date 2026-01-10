@@ -2,29 +2,24 @@ package com.krishihub.payment.service;
 
 import com.krishihub.auth.entity.User;
 import com.krishihub.auth.repository.UserRepository;
-import com.krishihub.auth.service.SmsService;
-import com.krishihub.marketplace.entity.CropListing;
-import com.krishihub.marketplace.repository.CropListingRepository;
+import com.krishihub.order.dto.OrderStatus;
 import com.krishihub.order.entity.Order;
 import com.krishihub.order.repository.OrderRepository;
 import com.krishihub.payment.dto.InitiatePaymentRequest;
 import com.krishihub.payment.dto.PaymentResponse;
 import com.krishihub.payment.dto.TransactionDto;
 import com.krishihub.payment.entity.Transaction;
+import com.krishihub.payment.event.PaymentCompletedEvent;
 import com.krishihub.payment.repository.TransactionRepository;
 import com.krishihub.shared.exception.BadRequestException;
 import com.krishihub.shared.exception.ResourceNotFoundException;
 import com.krishihub.shared.exception.UnauthorizedException;
-import com.krishihub.order.dto.OrderStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import com.krishihub.payment.event.PaymentCompletedEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
-import java.math.BigDecimal;
 import java.util.Map;
 import java.util.UUID;
 
@@ -35,11 +30,11 @@ public class PaymentService {
 
     private final TransactionRepository transactionRepository;
     private final OrderRepository orderRepository;
-    private final CropListingRepository cropListingRepository;
     private final UserRepository userRepository;
     private final EsewaPaymentService esewaService;
     private final KhaltiPaymentService khaltiService;
     private final ApplicationEventPublisher eventPublisher;
+    private final com.krishihub.order.service.OrderService orderService;
 
 
     public PaymentResponse initiatePayment(UUID userId, InitiatePaymentRequest request) {
@@ -64,8 +59,8 @@ public class PaymentService {
         // Check if payment already exists
         transactionRepository.findByOrderIdAndPaymentStatus(
                 order.getId(), Transaction.PaymentStatus.COMPLETED).ifPresent(t -> {
-                    throw new BadRequestException("Payment already completed for this order");
-                });
+            throw new BadRequestException("Payment already completed for this order");
+        });
 
         // Parse payment method
         Transaction.PaymentMethod paymentMethod;
@@ -134,11 +129,11 @@ public class PaymentService {
         if (transaction == null) {
             // Assume transactionId might be an Order ID (eSewa sends Order ID as transaction_uuid)
             java.util.List<Transaction> transactions = transactionRepository.findByOrderId(transactionId);
-            
+
             if (transactions.isEmpty()) {
                 throw new ResourceNotFoundException("Transaction not found for ID or Order ID: " + transactionId);
             }
-            
+
             // Get the latest transaction for this order
             transaction = transactions.stream()
                     .sorted((t1, t2) -> t2.getCreatedAt().compareTo(t1.getCreatedAt()))
@@ -174,20 +169,8 @@ public class PaymentService {
             transaction.setTransactionId(gatewayTransactionId);
             transactionRepository.save(transaction);
 
-            // Update order status
-            Order order = transaction.getOrder();
-            order.setStatus(OrderStatus.COMPLETED);
-            orderRepository.save(order);
-
-            // Update crop listing quantity
-            CropListing listing = order.getListing();
-            BigDecimal newQuantity = listing.getQuantity().subtract(order.getQuantity());
-            listing.setQuantity(newQuantity.max(BigDecimal.ZERO));
-
-            if (listing.getQuantity().compareTo(BigDecimal.ZERO) == 0) {
-                listing.setStatus(CropListing.ListingStatus.SOLD);
-            }
-            cropListingRepository.save(listing);
+            // Update order status via OrderService (handles stock reduction etc.)
+            orderService.updatePaymentStatus(transaction.getOrder().getId(), OrderStatus.PAID);
 
             // Send notifications event
             eventPublisher.publishEvent(new PaymentCompletedEvent(this, transaction));

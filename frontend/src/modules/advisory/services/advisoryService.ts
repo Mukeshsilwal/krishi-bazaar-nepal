@@ -66,6 +66,11 @@ const advisoryService = {
         return response.data;
     },
 
+    getAllDiseases: async () => {
+        const response = await api.get(DISEASE_ENDPOINTS.BASE);
+        return response.data;
+    },
+
     createDisease: async (disease: any) => {
         const response = await api.post(DISEASE_ENDPOINTS.BASE, disease);
         return response.data;

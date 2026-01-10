@@ -17,6 +17,7 @@ export const AUTH_ENDPOINTS = {
     ME: '/auth/me',
     FORGOT_PASSWORD: '/auth/forgot-password',
     RESET_PASSWORD: '/auth/reset-password',
+    LOGOUT: '/auth/logout',
 };
 
 // ==================== Marketplace & Listings ====================

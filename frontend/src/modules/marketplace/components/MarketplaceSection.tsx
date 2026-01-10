@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useListings } from '../hooks/useListings';
 import { useNavigate } from 'react-router-dom';
 import { useMasterData } from '../../../hooks/useMasterData';
@@ -20,7 +20,22 @@ export default function MarketplaceSection({ id }: MarketplaceSectionProps) {
         sortBy: 'created',
     });
 
-    const { listings, loading, pagination, nextPage, prevPage } = useListings(filters);
+    const { listings, loading, error, pagination, nextPage, prevPage, loadMore, hasNextPage, isFetchingNext } = useListings(filters);
+
+    // Infinite Scroll Observer
+    const observer = useRef<IntersectionObserver | null>(null);
+    const lastListingElementRef = useCallback((node: HTMLDivElement | null) => {
+        if (loading || isFetchingNext) return;
+        if (observer.current) observer.current.disconnect();
+
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasNextPage) {
+                loadMore();
+            }
+        });
+
+        if (node) observer.current.observe(node);
+    }, [loading, isFetchingNext, hasNextPage, loadMore]);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -179,6 +194,22 @@ export default function MarketplaceSection({ id }: MarketplaceSectionProps) {
                             )}
                         </>
                     )}
+
+                    {/* Infinite Scroll Loader & Sentinel */}
+                    {isFetchingNext && (
+                        <div className="flex justify-center items-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                        </div>
+                    )}
+
+                    {!hasNextPage && !loading && listings.length > 0 && (
+                        <div className="text-center py-8 text-gray-500 text-sm">
+                            End of results
+                        </div>
+                    )}
+
+                    {/* Invisible Sentinel for Intersection Observer */}
+                    <div ref={lastListingElementRef} className="h-4 w-full" />
                 </div>
             </div>
         </section>

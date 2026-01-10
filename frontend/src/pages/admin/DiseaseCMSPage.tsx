@@ -54,26 +54,24 @@ const DiseaseCMSPage = () => {
     setTitle('Disease & Pest', 'रोग र कीरा');
   }, [setTitle]);
 
-  const [diseases, setDiseases] = useState<Disease[]>([
-    {
-      id: '1',
-      nameEn: 'Rice Blast',
-      nameNe: 'धान झुल्सा',
-      descriptionEn: 'Diamond-shaped lesions on leaves, gray center with brown border',
-      descriptionNe: 'पातमा हीरा आकारको दाग, खैरो किनारासहित खरानी रंगको बीच',
-      riskLevel: 'HIGH',
-      affectedCrops: ['Rice', 'Wheat']
-    },
-    {
-      id: '2',
-      nameEn: 'Tomato Blight',
-      nameNe: 'गोलभेडा झुल्सिने',
-      descriptionEn: 'Brown spots on leaves, fruit rot, wilting',
-      descriptionNe: 'पातमा खैरो दागहरू, फल कुहिने, ओइलाउने',
-      riskLevel: 'CRITICAL',
-      affectedCrops: ['Tomato', 'Potato']
-    },
-  ]);
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const data = await advisoryService.getAllDiseases();
+      // Response might be wrapped in ApiResponse or direct list. 
+      // Check API. Usually api.js unwrap data if success.
+      // Assuming response.data is the list.
+      setDiseases(data);
+    } catch (error) {
+      console.error("Failed to fetch diseases", error);
+      toast.error("Failed to load diseases");
+    }
+  };
+
+  const [diseases, setDiseases] = useState<Disease[]>([]);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editingDisease, setEditingDisease] = useState<Partial<Disease>>({
@@ -110,6 +108,7 @@ const DiseaseCMSPage = () => {
         savedDisease = await advisoryService.createDisease(editingDisease);
         setDiseases(prev => [...prev, { ...savedDisease } as Disease]);
         toast.success(language === 'ne' ? 'रोग थपियो' : 'Disease added');
+        loadData(); // Reload to be safe/clean
       }
 
       // Link Pesticides

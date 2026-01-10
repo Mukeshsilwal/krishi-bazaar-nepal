@@ -50,13 +50,13 @@ export const contentService = {
             }
         });
         const response = await api.get(`${CONTENT_ENDPOINTS.BASE}?${params.toString()}`);
-        console.log('ContentService getContents raw response:', response);
+
         // Handle Spring Page response or custom ApiResponse wrapper
         if (response.data && response.data.data) {
-            console.log('Returning response.data.data:', response.data.data);
+
             return response.data.data;
         }
-        console.log('Returning response.data:', response.data);
+
         return response.data;
     },
 

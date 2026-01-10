@@ -79,4 +79,10 @@ public class AuthController {
         AuthResponse response = authService.refreshToken(request);
         return ResponseEntity.ok(ApiResponse.success("Token refreshed successfully", response));
     }
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<String>> logout() {
+        UUID userId = com.krishihub.common.context.UserContextHolder.getUserId();
+        authService.logout(userId);
+        return ResponseEntity.ok(ApiResponse.success("Logged out successfully"));
+    }
 }

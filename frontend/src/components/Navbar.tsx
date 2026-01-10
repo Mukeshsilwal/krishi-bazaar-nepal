@@ -4,6 +4,7 @@ import { Menu, X, User, LogOut, Package, ShoppingBag, MessageCircle, UserCircle 
 import NotificationBell from './NotificationBell';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../modules/auth/context/AuthContext';
+import { useCart } from '@/context/CartContext';
 import { useMessages } from '../hooks/useMessages';
 import { useSettings } from '../hooks/useSettings';
 import Logo from './Logo';
@@ -14,6 +15,7 @@ const Navbar = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { language, setLanguage, t } = useLanguage();
   const { user, logout } = useAuth();
+  const { totalItems } = useCart();
   const { unreadCount } = useMessages();
   const { settings } = useSettings();
 
@@ -122,6 +124,14 @@ const Navbar = () => {
             {/* User Menu or Auth Buttons */}
             {user ? (
               <div className="flex items-center gap-4">
+                <Link to="/cart" className="relative p-2 text-gray-700 hover:bg-gray-100 rounded-full transition">
+                  <ShoppingBag size={20} />
+                  {totalItems > 0 && (
+                    <span className="absolute top-0 right-0 bg-green-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center border-2 border-white">
+                      {totalItems}
+                    </span>
+                  )}
+                </Link>
                 <NotificationBell />
                 <div className="relative">
                   <button
@@ -192,7 +202,15 @@ const Navbar = () => {
                 </div>
               </div>
             ) : (
-              <div className="flex gap-3">
+              <div className="flex items-center gap-3">
+                <Link to="/cart" className="relative p-2 text-gray-700 hover:bg-gray-100 rounded-full transition mr-2">
+                  <ShoppingBag size={20} />
+                  {totalItems > 0 && (
+                    <span className="absolute top-0 right-0 bg-green-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center border-2 border-white">
+                      {totalItems}
+                    </span>
+                  )}
+                </Link>
                 <Link
                   to="/login"
                   className="text-gray-700 hover:text-green-600 font-medium transition"

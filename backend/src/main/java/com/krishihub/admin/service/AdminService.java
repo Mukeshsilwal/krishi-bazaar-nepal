@@ -102,9 +102,7 @@ public class AdminService {
     }
 
     public List<User> getPendingVendors() {
-        // Assuming getting unverified users with role VENDOR or FARMER
-        // For MVP, just returning all unverified
-        return userRepository.findByVerifiedFalse();
+        return userRepository.findByVerifiedFalseAndRoleIn(List.of(User.UserRole.VENDOR, User.UserRole.EXPERT));
     }
 
     private final AuditService auditService;

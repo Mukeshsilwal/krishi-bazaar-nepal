@@ -207,7 +207,7 @@ public class OrderService {
                                                                  // Existing quantity field is BigDecimal... maybe sum of quantities?
                                                                  // Let's use 1 for "Package" or sum. Let's use sum.
                 .totalAmount(totalAmount)
-                .status(OrderStatus.PENDING)
+                .status(OrderStatus.PAYMENT_PENDING) // Auto-confirm for AgriStore since stock verified
                 .pickupLocation(request.getPickupLocation()) // Required or default?
                 .notes(request.getNotes())
                 .orderSource(OrderSource.AGRI_STORE)
@@ -304,27 +304,43 @@ public class OrderService {
             }
 
             // Validate status transitions
-            orderStateValidator.validateTransition(order.getStatus(), newStatus, user);
+            orderStateValidator.validateTransition(order.getStatus(), newStatus);
 
             OrderStatus oldStatus = order.getStatus();
             order.setStatus(newStatus);
             
-            // Stock Logic for Agri Store
-            if (order.getOrderSource() == OrderSource.AGRI_STORE) {
-                if (newStatus == OrderStatus.PAID) { 
-                     // Decrease Stock
-                     for (OrderItem item : order.getItems()) {
-                         AgriProduct p = item.getAgriProduct();
-                         p.setStockQuantity(p.getStockQuantity() - item.getQuantity().intValue());
-                         agriProductRepository.save(p);
-                     }
-                } else if ((oldStatus == OrderStatus.PAID) && (newStatus == OrderStatus.CANCELLED || newStatus == OrderStatus.FAILED)) {
-                     // Restore Stock
-                     for (OrderItem item : order.getItems()) {
-                         AgriProduct p = item.getAgriProduct();
-                         p.setStockQuantity(p.getStockQuantity() + item.getQuantity().intValue());
-                         agriProductRepository.save(p);
-                     }
+            // Centralized Stock Logic
+            if (newStatus == OrderStatus.PAID) {
+                if (order.getOrderSource() == OrderSource.AGRI_STORE) {
+                    for (OrderItem item : order.getItems()) {
+                        AgriProduct p = item.getAgriProduct();
+                        p.setStockQuantity(p.getStockQuantity() - item.getQuantity().intValue());
+                        agriProductRepository.save(p);
+                    }
+                } else if (order.getOrderSource() == OrderSource.MARKETPLACE) {
+                    CropListing listing = order.getListing();
+                    BigDecimal newQuantity = listing.getQuantity().subtract(order.getQuantity());
+                    listing.setQuantity(newQuantity.max(BigDecimal.ZERO));
+                    if (listing.getQuantity().compareTo(BigDecimal.ZERO) == 0) {
+                        listing.setStatus(CropListing.ListingStatus.SOLD);
+                    }
+                    listingRepository.save(listing);
+                }
+            } else if ((oldStatus == OrderStatus.PAID) && (newStatus == OrderStatus.CANCELLED || newStatus == OrderStatus.FAILED)) {
+                if (order.getOrderSource() == OrderSource.AGRI_STORE) {
+                    for (OrderItem item : order.getItems()) {
+                        AgriProduct p = item.getAgriProduct();
+                        p.setStockQuantity(p.getStockQuantity() + item.getQuantity().intValue());
+                        agriProductRepository.save(p);
+                    }
+                } else if (order.getOrderSource() == OrderSource.MARKETPLACE) {
+                    CropListing listing = order.getListing();
+                    listing.setQuantity(listing.getQuantity().add(order.getQuantity()));
+                    // Re-activate if it was SOLD? Maybe.
+                    if (listing.getStatus() == CropListing.ListingStatus.SOLD) {
+                        listing.setStatus(CropListing.ListingStatus.ACTIVE);
+                    }
+                    listingRepository.save(listing);
                 }
             }
 
@@ -368,7 +384,7 @@ public class OrderService {
         }
 
         // Validate cancellation
-        orderStateValidator.validateTransition(order.getStatus(), OrderStatus.CANCELLED, user);
+        orderStateValidator.validateTransition(order.getStatus(), OrderStatus.CANCELLED);
         
         OrderStatus oldStatus = order.getStatus();
         order.setStatus(OrderStatus.CANCELLED);
@@ -391,4 +407,41 @@ public class OrderService {
         log.info("Order cancelled: {} by {}", id, userId);
     }
 
+    @Transactional
+    public void updatePaymentStatus(UUID orderId, OrderStatus status) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        // Validate transition
+        orderStateValidator.validateTransition(order.getStatus(), status);
+
+        OrderStatus oldStatus = order.getStatus();
+        order.setStatus(status);
+
+        // Centralized Stock Logic
+        if (status == OrderStatus.PAID) {
+            if (order.getOrderSource() == OrderSource.AGRI_STORE) {
+                for (OrderItem item : order.getItems()) {
+                    AgriProduct p = item.getAgriProduct();
+                    p.setStockQuantity(p.getStockQuantity() - item.getQuantity().intValue());
+                    agriProductRepository.save(p);
+                }
+            } else if (order.getOrderSource() == OrderSource.MARKETPLACE) {
+                CropListing listing = order.getListing();
+                BigDecimal newQuantity = listing.getQuantity().subtract(order.getQuantity());
+                listing.setQuantity(newQuantity.max(BigDecimal.ZERO));
+                if (listing.getQuantity().compareTo(BigDecimal.ZERO) == 0) {
+                    listing.setStatus(CropListing.ListingStatus.SOLD);
+                }
+                listingRepository.save(listing);
+            }
+        }
+
+        orderRepository.save(order);
+
+        // Send notifications event
+        eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order, oldStatus, status));
+
+        log.info("Order payment status updated: {} to {}", orderId, status);
+    }
 }

@@ -70,10 +70,16 @@ const authService = {
     },
 
     // Logout
-    logout: () => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
+    logout: async () => {
+        try {
+            await api.post(AUTH_ENDPOINTS.LOGOUT);
+        } catch (error) {
+            console.error('Logout failed on server', error);
+        } finally {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+        }
     },
 
     // Check if user is authenticated

@@ -30,7 +30,7 @@ const ContentDashboard = () => {
         setLoading(true);
         try {
             const page = await contentService.getContents(filters);
-            console.log('ContentDashboard received page:', page);
+
             if (page && page.content) {
                 setContents(page.content);
             } else {

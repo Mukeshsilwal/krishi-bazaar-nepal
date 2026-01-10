@@ -136,4 +136,18 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.error("Internal server error", errorResponse));
     }
+    @ExceptionHandler(com.krishihub.shared.exception.ActiveSessionExistsException.class)
+    public ResponseEntity<ApiResponse<ApiErrorResponse>> handleActiveSessionExists(
+            com.krishihub.shared.exception.ActiveSessionExistsException ex) {
+        log.warn("Active session exists: {}", ex.getMessage());
+
+        ApiErrorResponse errorResponse = new ApiErrorResponse(
+                "ACTIVE_SESSION_EXISTS",
+                ex.getMessage(),
+                ex.getUserMessage(),
+                Instant.now());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error("Active session exists", errorResponse));
+    }
 }
+

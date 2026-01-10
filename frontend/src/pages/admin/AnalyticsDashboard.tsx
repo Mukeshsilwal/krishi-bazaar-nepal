@@ -21,7 +21,7 @@ const AnalyticsDashboard = () => {
 
             // 1. Fetch System Stats
             try {
-                console.log("Fetching system stats...");
+
                 const statsRes = await api.get(ADMIN_ENDPOINTS.ANALYTICS_DASHBOARD);
                 if (statsRes.data.success) {
                     setStats(statsRes.data.data);
@@ -32,9 +32,9 @@ const AnalyticsDashboard = () => {
 
             // 2. Fetch Advisory Analytics (Donut Charts)
             try {
-                console.log("Fetching advisory analytics...");
+
                 const advisoryRes = await advisoryLogService.getAnalytics();
-                console.log("Advisory analytics received:", advisoryRes);
+
                 if (advisoryRes) {
                     setAdvisoryData(advisoryRes);
                 }
