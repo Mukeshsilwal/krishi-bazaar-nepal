@@ -28,7 +28,8 @@ import {
   BookOpenCheck,
   Database,
   Activity,
-  Calendar
+  Calendar,
+  Truck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -169,6 +170,12 @@ const AdminLayoutContent: React.FC = () => {
     },
 
 
+    {
+      path: '/admin/logistics',
+      icon: Truck,
+      labelEn: 'Logistics',
+      labelNe: 'रसद व्यवस्थापन'
+    },
     {
       path: '/admin/settings',
       icon: Settings,

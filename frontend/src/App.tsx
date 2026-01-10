@@ -61,6 +61,7 @@ const SupportPage = lazy(() => import('./pages/SupportPage'));
 const SettingsManager = lazy(() => import('./pages/admin/SettingsManager'));
 const WeatherAdvisoryManager = lazy(() => import('./pages/admin/WeatherAdvisoryManager'));
 const SchemeManager = lazy(() => import('./pages/admin/SchemeManager'));
+const AdminLogisticsPage = lazy(() => import('./pages/AdminLogisticsPage'));
 const UserManagement = lazy(() => import('./pages/admin/UserManagement'));
 const SourceManager = lazy(() => import('./pages/admin/SourceManager'));
 const ModerationQueue = lazy(() => import('./pages/admin/ModerationQueue'));
@@ -158,7 +159,9 @@ function App() {
                 <Route path="market-prices" element={<MarketPriceManager />} />
                 <Route path="agriculture-calendar" element={<AdminAgricultureCalendarPage />} />
                 <Route path="activities" element={<ActivityLogsPage />} />
+                <Route path="activities" element={<ActivityLogsPage />} />
                 <Route path="agri-products" element={<AgriProductManager />} />
+                <Route path="logistics" element={<AdminLogisticsPage />} />
 
               </Route>
             </Routes>

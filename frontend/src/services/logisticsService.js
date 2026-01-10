@@ -14,14 +14,24 @@ const logisticsService = {
         return response.data.data;
     },
 
-    // Logistics Orders
-    bookLogistics: async (data) => {
-        const response = await api.post(LOGISTICS_ENDPOINTS.BOOK, data);
+    getAllBookings: async () => {
+        const response = await api.get(`${COLD_STORAGE_ENDPOINTS.BASE}/bookings`);
         return response.data.data;
     },
 
-    getStatus: async (orderId) => {
-        const response = await api.get(LOGISTICS_ENDPOINTS.STATUS, { params: { orderId } });
+    bookStorage: async (coldStorageId, bookingData) => {
+        const response = await api.post(`${COLD_STORAGE_ENDPOINTS.BASE}/${coldStorageId}/book`, bookingData);
+        return response.data.data;
+    },
+
+    // Shipments
+    getShipmentByOrder: async (orderId) => {
+        const response = await api.get(LOGISTICS_ENDPOINTS.SHIPMENT_BY_ORDER(orderId));
+        return response.data.data;
+    },
+
+    trackShipment: async (trackingCode) => {
+        const response = await api.get(LOGISTICS_ENDPOINTS.TRACK_BY_CODE(trackingCode));
         return response.data.data;
     },
 

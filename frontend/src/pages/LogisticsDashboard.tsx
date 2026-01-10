@@ -10,6 +10,15 @@ const LogisticsDashboard = () => {
     const [trackingId, setTrackingId] = useState('');
     const [trackingResult, setTrackingResult] = useState<any>(null);
 
+    // New Booking State
+    const [showBookingModal, setShowBookingModal] = useState(false);
+    const [selectedStorage, setSelectedStorage] = useState<any>(null);
+    const [bookingData, setBookingData] = useState({
+        quantity: '',
+        startDate: '',
+        endDate: ''
+    });
+
     useEffect(() => {
         loadStorages();
     }, [district]);
@@ -26,17 +35,47 @@ const LogisticsDashboard = () => {
     const handleTrack = async (e) => {
         e.preventDefault();
         try {
-            const status = await logisticsService.getStatus(trackingId);
+            // Simple heuristic: if it contains 'TRK-', it's a tracking code
+            let status;
+            if (trackingId.includes('TRK-')) {
+                status = await logisticsService.trackShipment(trackingId);
+            } else {
+                status = await logisticsService.getShipmentByOrder(trackingId);
+            }
+            // Status is the full shipment object now
             setTrackingResult(status);
         } catch (error) {
             console.error("Error tracking", error);
-            setTrackingResult({ error: 'Order not found' });
+            setTrackingResult({ error: 'Shipment not found' });
+        }
+    };
+
+    const handleBookClick = (storage: any) => {
+        setSelectedStorage(storage);
+        setShowBookingModal(true);
+    };
+
+    const handleBookingSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            await logisticsService.bookStorage(selectedStorage.id, {
+                quantity: parseFloat(bookingData.quantity),
+                startDate: bookingData.startDate,
+                endDate: bookingData.endDate
+            });
+            alert("Booking request sent successfully!");
+            setShowBookingModal(false);
+            setBookingData({ quantity: '', startDate: '', endDate: '' });
+        } catch (error) {
+            console.error("Booking failed", error);
+            alert("Failed to book storage. Please try again.");
         }
     };
 
     return (
-        <div className="bg-gray-50 min-h-full">
+        <div className="bg-gray-50 min-h-full relative">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* ... existing header ... */}
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                         <Truck className="w-8 h-8 text-green-600" />
@@ -90,7 +129,10 @@ const LogisticsDashboard = () => {
                                         <p>Capacity: {storage.capacity} kg</p>
                                         <p>Rate: Rs. {storage.pricePerKgPerDay} /kg/day</p>
                                     </div>
-                                    <button className="mt-4 w-full bg-green-50 text-green-600 py-2 rounded-md hover:bg-green-100 font-medium transition">
+                                    <button
+                                        onClick={() => handleBookClick(storage)}
+                                        className="mt-4 w-full bg-green-50 text-green-600 py-2 rounded-md hover:bg-green-100 font-medium transition"
+                                    >
                                         Book Storage
                                     </button>
                                 </div>
@@ -126,14 +168,86 @@ const LogisticsDashboard = () => {
                                                 </div>
                                                 <div>
                                                     <p className="text-sm text-gray-500">Status</p>
-                                                    <p className="text-lg font-bold text-green-700">{trackingResult}</p>
+                                                    <p className="text-lg font-bold text-green-700">{trackingResult.status}</p>
                                                 </div>
                                             </div>
-                                            {/* Process Steps Visualization could go here */}
+                                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                                <div>
+                                                    <span className="text-gray-500">From:</span>
+                                                    <p className="font-medium">{trackingResult.sourceLocation}</p>
+                                                </div>
+                                                <div>
+                                                    <span className="text-gray-500">To:</span>
+                                                    <p className="font-medium">{trackingResult.destinationLocation}</p>
+                                                </div>
+                                                <div>
+                                                    <span className="text-gray-500">Estimated Delivery:</span>
+                                                    <p className="font-medium">{trackingResult.estimatedDelivery ? new Date(trackingResult.estimatedDelivery).toLocaleDateString() : 'N/A'}</p>
+                                                </div>
+                                                <div>
+                                                    <span className="text-gray-500">Tracking Code:</span>
+                                                    <p className="font-medium">{trackingResult.trackingCode}</p>
+                                                </div>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
                             )}
+                        </div>
+                    </div>
+                )}
+
+                {showBookingModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white p-6 rounded-lg w-full max-w-md">
+                            <h3 className="text-xl font-bold mb-4">Book Storage: {selectedStorage?.name}</h3>
+                            <form onSubmit={handleBookingSubmit} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Quantity (kg)</label>
+                                    <input
+                                        type="number"
+                                        required
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
+                                        value={bookingData.quantity}
+                                        onChange={(e) => setBookingData({ ...bookingData, quantity: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Start Date</label>
+                                    <input
+                                        type="date"
+                                        required
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
+                                        value={bookingData.startDate}
+                                        onChange={(e) => setBookingData({ ...bookingData, startDate: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">End Date</label>
+                                    <input
+                                        type="date"
+                                        required
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
+                                        value={bookingData.endDate}
+                                        onChange={(e) => setBookingData({ ...bookingData, endDate: e.target.value })}
+                                    />
+                                </div>
+                                <div className="flex justify-end gap-2 mt-6">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowBookingModal(false)}
+                                        className="px-4 py-2 border rounded-md hover:bg-gray-50"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                                    >
+                                        Confirm Booking
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 )}

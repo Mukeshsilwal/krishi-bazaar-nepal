@@ -193,16 +193,19 @@ export const LOGISTICS_ENDPOINTS = {
     PROVIDERS: '/logistics/providers',
     QUOTE: '/logistics/quote',
     BOOK: '/logistics/book',
-    TRACK: (id) => `/logistics/track/${id}`,
+    SHIPMENT_BY_ORDER: (orderId) => `/logistics/shipments/${orderId}`,
+    TRACK_BY_CODE: (code) => `/logistics/shipments/track/${code}`,
+    UPDATE_STATUS: (id) => `/logistics/shipments/${id}/status`,
+    // Legacy support
+    TRACK: (id) => `/logistics/shipments/track/${id}`,
     STATUS: '/logistics/status',
-    UPDATE_STATUS: (id) => `/logistics/${id}/status`,
 };
 
 export const COLD_STORAGE_ENDPOINTS = {
-    BASE: '/cold-storage',
-    BY_ID: (id) => `/cold-storage/${id}`,
-    NEARBY: '/cold-storage/nearby',
-    BOOK: '/cold-storage/book',
+    BASE: '/logistics/cold-storages',
+    BY_ID: (id) => `/logistics/cold-storages/${id}`,
+    NEARBY: '/logistics/cold-storages/nearby',
+    BOOK: '/logistics/cold-storages/book',
 };
 
 // ==================== Messaging & Notifications ====================
