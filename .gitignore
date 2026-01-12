@@ -1,0 +1,52 @@
+# Start of Monorepo Ignore
+node_modules
+dist
+build
+.turbo
+
+# IDEs
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Java / Spring Boot
+target/
+!.mvn/wrapper/maven-wrapper.jar
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/nbdist/
+/.nb-gradle/
+
+# Mobile / Expo
+.expo/
+web-build/
+
+# Misc
+*.txt
+!CMakeLists.txt
+!LICENSE.txt
