@@ -65,7 +65,7 @@
     "zod": "^3.25.76"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "4.6.1"
+    "@rollup/rollup-linux-x64-gnu": "4.54.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
