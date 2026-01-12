@@ -13,7 +13,9 @@
   },
   "optionalDependencies": {
     "@esbuild/linux-x64": "0.25.1",
-    "@rollup/rollup-linux-x64-gnu": "4.54.0"
+    "@rollup/rollup-linux-x64-gnu": "4.54.0",
+    "@swc/core-linux-x64-gnu": "1.10.0",
+    "@swc/core-linux-x64-musl": "1.10.0"
   },
   "packageManager": "npm@10.2.4",
   "workspaces": [
