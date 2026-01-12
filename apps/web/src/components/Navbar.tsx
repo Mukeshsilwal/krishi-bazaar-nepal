@@ -10,7 +10,11 @@ import { useSettings } from '../hooks/useSettings';
 import Logo from './Logo';
 import MoreMenu from './navigation/MoreMenu';
 
-const Navbar = () => {
+interface NavbarProps {
+  variant?: 'public' | 'dashboard';
+}
+
+const Navbar = ({ variant = 'public' }: NavbarProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { language, setLanguage, t } = useLanguage();
@@ -40,8 +44,8 @@ const Navbar = () => {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-4">
+          {/* Desktop Navigation Links */}
+          <div className={`hidden md:flex items-center gap-4 ${variant === 'dashboard' ? 'lg:hidden' : ''}`}>
             <Link
               to="/"
               className="text-gray-700 hover:text-green-600 font-medium transition px-1.5 py-2"
@@ -112,7 +116,10 @@ const Navbar = () => {
                 </Link>
               )}
             </MoreMenu>
+          </div>
 
+          {/* Right Side Actions (Language + Auth) - Always visible on Desktop */}
+          <div className="hidden md:flex items-center gap-4">
             {/* Language Switcher */}
             <button
               onClick={toggleLanguage}
@@ -182,12 +189,12 @@ const Navbar = () => {
                         )}
                       </Link>
                       <Link
-                        to="/profile"
+                        to="/settings"
                         onClick={() => setShowUserMenu(false)}
                         className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100"
                       >
                         <User size={18} />
-                        {t('dashboard.profile') || 'Profile'}
+                        {t('dashboard.settings') || 'Settings'}
                       </Link>
                       <hr className="my-2" />
                       <button

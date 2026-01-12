@@ -2,24 +2,25 @@ import Logo from "./Logo";
 import { Facebook, Youtube, Phone, Mail, MapPin } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { useEffect, useState } from "react";
+import { Link } from 'react-router-dom';
 import api from "../services/api";
 
 const footerLinks = {
   platform: [
-    { name: "उब्जनी बेच्नुहोस्", nameEn: "Sell Crops", href: "#" },
-    { name: "उब्जनी किन्नुहोस्", nameEn: "Buy Produce", href: "#" },
-    { name: "बजार भाउ", nameEn: "Market Prices", href: "#prices" },
-    { name: "कृषि पसल", nameEn: "Agri Store", href: "#" },
+    { name: "उब्जनी बेच्नुहोस्", nameEn: "Sell Crops", href: "/create-listing" },
+    { name: "उब्जनी किन्नुहोस्", nameEn: "Buy Produce", href: "/marketplace" },
+    { name: "बजार भाउ", nameEn: "Market Prices", href: "/market-prices" },
+    { name: "कृषि पसल", nameEn: "Agri Store", href: "/agri-store" },
   ],
   resources: [
-    { name: "सिक्ने केन्द्र", nameEn: "Learning Center", href: "#" },
-    { name: "खेती क्यालेन्डर", nameEn: "Farming Calendar", href: "#" },
-    { name: "मौसम अपडेट", nameEn: "Weather", href: "#" },
-    { name: "सोधिने प्रश्नहरू", nameEn: "FAQs", href: "#" },
+    { name: "सिक्ने केन्द्र", nameEn: "Learning Center", href: "/knowledge" },
+    { name: "खेती क्यालेन्डर", nameEn: "Farming Calendar", href: "/agriculture-calendar" },
+    { name: "मौसम अपडेट", nameEn: "Weather", href: "/weather" }, // Assuming a weather page exists or anchor
+    { name: "सोधिने प्रश्नहरू", nameEn: "FAQs", href: "/support" },
   ],
   company: [
-    { name: "हाम्रो बारेमा", nameEn: "About Us", href: "#about" },
-    { name: "सम्पर्क", nameEn: "Contact", href: "#" },
+    { name: "हाम्रो बारेमा", nameEn: "About Us", href: "/about" },
+    { name: "सम्पर्क", nameEn: "Contact", href: "/contact" },
   ],
 };
 
@@ -108,12 +109,12 @@ const Footer = () => {
             <ul className="space-y-3">
               {footerLinks.platform.map((link) => (
                 <li key={link.name}>
-                  <a
-                    href={link.href}
+                  <Link
+                    to={link.href}
                     className="block rounded-lg p-2 text-base text-primary-foreground/70 transition-colors hover:bg-primary-foreground/10 hover:text-secondary"
                   >
                     {language === 'ne' ? link.name : link.nameEn}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -124,12 +125,12 @@ const Footer = () => {
             <ul className="space-y-3">
               {footerLinks.resources.map((link) => (
                 <li key={link.name}>
-                  <a
-                    href={link.href}
+                  <Link
+                    to={link.href}
                     className="block rounded-lg p-2 text-base text-primary-foreground/70 transition-colors hover:bg-primary-foreground/10 hover:text-secondary"
                   >
                     {language === 'ne' ? link.name : link.nameEn}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -140,12 +141,12 @@ const Footer = () => {
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
-                  <a
-                    href={link.href}
+                  <Link
+                    to={link.href}
                     className="block rounded-lg p-2 text-base text-primary-foreground/70 transition-colors hover:bg-primary-foreground/10 hover:text-secondary"
                   >
                     {language === 'ne' ? link.name : link.nameEn}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -158,9 +159,9 @@ const Footer = () => {
             © २०२४ {settings.COMPANY_NAME || 'किसान सारथी'}। {t('footer.rights')}
           </p>
           <div className="flex gap-6 text-sm text-primary-foreground/50">
-            <a href="/admin/login" className="hover:text-primary-foreground">
+            <Link to="/admin/login" className="hover:text-primary-foreground">
               Admin Login
-            </a>
+            </Link>
             <a href="#" className="hover:text-primary-foreground">
               गोपनीयता नीति
             </a>

@@ -48,7 +48,15 @@ const CheckoutPage = () => {
             toast.success("Order placed successfully!");
             clearCart();
             // Redirect to the new order details page
-            navigate(`/orders/${response.data.id}`);
+            // API returns ApiResponse<OrderDto> so data is in response.data.data
+            const orderId = response.data.data?.id;
+            if (orderId) {
+                navigate(`/orders/${orderId}`);
+            } else {
+                // Fallback if structure is different or missing
+                console.warn("Order ID missing in response", response.data);
+                navigate('/orders');
+            }
 
         } catch (error: any) {
             console.error(error);

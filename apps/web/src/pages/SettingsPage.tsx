@@ -4,7 +4,7 @@ import { useAuth } from '../modules/auth/context/AuthContext';
 import { User, Mail, Phone, MapPin, Edit2, Save } from 'lucide-react';
 import imageUploadService from '../services/imageUploadService';
 
-export default function ProfilePage() {
+export default function SettingsPage() {
     const { t } = useLanguage();
     const { user, updateUser } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
@@ -16,21 +16,21 @@ export default function ProfilePage() {
         landSize: user?.landSize || '',
     });
 
-    const handleChange = (e) => {
+    const handleChange = (e: any) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value,
         });
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: any) => {
         e.preventDefault();
         try {
             await updateUser(formData);
             setIsEditing(false);
-            alert('Profile updated successfully!');
+            alert('Settings updated successfully!');
         } catch (err) {
-            alert('Failed to update profile');
+            alert('Failed to update settings');
         }
     };
 
@@ -51,10 +51,10 @@ export default function ProfilePage() {
                 {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        {t('dashboard.profile') || 'My Profile'}
+                        {t('dashboard.settings') || 'Settings'}
                     </h1>
                     <p className="text-gray-600">
-                        {t('profile.manage') || 'Manage your account information'}
+                        {t('settings.manage') || 'Manage your account and app preferences'}
                     </p>
                 </div>
 
@@ -84,10 +84,9 @@ export default function ProfilePage() {
                                 onChange={async (e) => {
                                     if (e.target.files && e.target.files[0]) {
                                         try {
-                                            // Assume import imageUploadService from '@/services/imageUploadService'
                                             const url = await imageUploadService.uploadImage(e.target.files[0], 'PROFILE');
-                                            setFormData(prev => ({ ...prev, profileImage: url }));
-                                            // Also update user context if needed or wait for save
+                                            // Ideally update user context here
+                                            alert('Image uploaded. Click save to persist if needed.');
                                         } catch (err) {
                                             console.error(err);
                                             alert('Failed to upload image');

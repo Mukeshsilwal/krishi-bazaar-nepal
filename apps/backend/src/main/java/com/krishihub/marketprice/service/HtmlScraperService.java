@@ -1,12 +1,14 @@
 package com.krishihub.marketprice.service;
 
 import com.krishihub.marketprice.dto.MarketPriceDto;
+import com.krishihub.service.SystemConfigService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class HtmlScraperService implements MarketPriceDataSource {
 
-    private final com.krishihub.service.SystemConfigService systemConfigService;
+    @Autowired
+    private SystemConfigService systemConfigService;
     private static final String DEFAULT_URL = "https://ramropatro.com/vegetable";
 
     @Override

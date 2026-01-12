@@ -8,7 +8,8 @@ import { CartProvider } from './context/CartContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingSpinner from './components/common/LoadingSpinner';
 
-const MainLayout = lazy(() => import('./components/layout/MainLayout'));
+const PublicLayout = lazy(() => import('./components/layout/PublicLayout'));
+const AppLayout = lazy(() => import('./components/layout/AppLayout'));
 
 // Pages
 const Index = lazy(() => import('./pages/Index'));
@@ -23,7 +24,7 @@ const PaymentFailurePage = lazy(() => import('./pages/PaymentFailurePage'));
 const MyListingsPage = lazy(() => import('./modules/marketplace/pages/MyListingsPage'));
 const MyOrdersPage = lazy(() => import('./modules/orders/pages/MyOrdersPage'));
 const ChatPage = lazy(() => import('./pages/ChatPage'));
-const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const CreateListingPage = lazy(() => import('./modules/marketplace/pages/CreateListingPage'));
 const MarketPriceDashboard = lazy(() => import('./modules/marketplace/pages/MarketPriceDashboard'));
 const LogisticsDashboard = lazy(() => import('./pages/LogisticsDashboard'));
@@ -90,38 +91,38 @@ function App() {
         <AuthProvider>
           <CartProvider>
             <Suspense fallback={<LoadingSpinner />}>
+              {/* SPA Layout Structure */}
               <Routes>
-                {/* Main App Layout */}
-                <Route element={<MainLayout />}>
-                  {/* Public Routes */}
-                  <Route path="/" element={<Index />} />
-                  <Route path="/marketplace" element={<MarketplacePage />} />
+                {/* Public / Auth Layout */}
+                <Route element={<PublicLayout />}>
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/admin/login" element={<AdminLoginPage />} />
+                  <Route path="/admin/register" element={<AdminRegisterPage />} />
+                  <Route path="/admin/forgot-password" element={<ForgotPasswordPage />} />
+                  <Route path="/admin/reset-password" element={<ResetPasswordPage />} />
+                </Route>
+
+                {/* App Shell Layout (Authenticated & Main App) */}
+                <Route element={<AppLayout />}>
+                  {/* Public facing pages that still use the App Shell (Sidebar/Nav) */}
+                  <Route path="/" element={<Index />} />
+                  <Route path="/marketplace" element={<MarketplacePage />} />
                   <Route path="/listing/:id" element={<ListingDetailPage />} />
                   <Route path="/market-prices" element={<MarketPriceDashboard />} />
                   <Route path="/logistics" element={<LogisticsDashboard />} />
                   <Route path="/knowledge" element={<KnowledgePage />} />
                   <Route path="/knowledge/:id" element={<ArticleDetailPage />} />
-
                   <Route path="/agriculture-calendar" element={<AgricultureCalendarPage />} />
                   <Route path="/diagnosis" element={<DiagnosticTool />} />
-
                   <Route path="/agri-store" element={<AgriStorePage />} />
                   <Route path="/agri-store/product/:id" element={<ProductDetailPage />} />
                   <Route path="/cart" element={<CartPage />} />
 
-                  {/* Auth Routes */}
-                  <Route path="/admin/login" element={<AdminLoginPage />} />
-                  <Route path="/admin/register" element={<AdminRegisterPage />} />
-                  <Route path="/admin/forgot-password" element={<ForgotPasswordPage />} />
-                  <Route path="/admin/reset-password" element={<ResetPasswordPage />} />
-
-                  {/* Protected User Routes */}
+                  {/* Protected Routes */}
                   <Route path="/orders/esewa-redirect" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />
                   <Route path="/payment/success" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />
                   <Route path="/payment/failure" element={<ProtectedRoute><PaymentFailurePage /></ProtectedRoute>} />
-                  <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
                   <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
                   <Route path="/orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
                   <Route path="/my-listings" element={<ProtectedRoute><MyListingsPage /></ProtectedRoute>} />
@@ -131,7 +132,8 @@ function App() {
                   <Route path="/my-orders" element={<ProtectedRoute><MyOrdersPage /></ProtectedRoute>} />
                   <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
                   <Route path="/chat/:userId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
-                  <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                  <Route path="/profile" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+                  <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
                   <Route path="/finance" element={<ProtectedRoute><FinanceDashboard /></ProtectedRoute>} />
                   <Route path="/ai-assistant" element={<ProtectedRoute><AiAssistant /></ProtectedRoute>} />
                   <Route path="/notifications" element={<ProtectedRoute><NotificationList /></ProtectedRoute>} />
