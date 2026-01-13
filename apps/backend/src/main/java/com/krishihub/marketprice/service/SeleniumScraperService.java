@@ -12,6 +12,8 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
@@ -24,9 +26,16 @@ import java.util.List;
 /**
  * Selenium-based scraper for JavaScript-rendered vegetable price pages.
  * Uses headless Chrome to render dynamic content from RamroPatro.
+ * 
+ * IMPORTANT: This service requires Chrome/Chromium to be installed on the server.
+ * For serverless or container deployments without Chrome, disable via:
+ *   market.scraper.selenium.enabled=false
+ * 
+ * The system will fallback to KalimatiScraperService (HTTP-based) when this is disabled.
  */
 @Service
 @Slf4j
+@ConditionalOnProperty(name = "market.scraper.selenium.enabled", havingValue = "true", matchIfMissing = false)
 public class SeleniumScraperService implements MarketPriceDataSource {
 
     @Autowired
@@ -34,16 +43,29 @@ public class SeleniumScraperService implements MarketPriceDataSource {
     
     private static final String DEFAULT_URL = "https://ramropatro.com/vegetable";
     private static final String SOURCE_ID = "RAMROPATRO_SCRAPER";
+    
+    private boolean chromeAvailable = false;
 
     @PostConstruct
     public void init() {
-        // Setup ChromeDriver automatically
-        WebDriverManager.chromedriver().setup();
-        log.info("ChromeDriver initialized via WebDriverManager");
+        try {
+            // Setup ChromeDriver automatically
+            WebDriverManager.chromedriver().setup();
+            chromeAvailable = true;
+            log.info("ChromeDriver initialized via WebDriverManager");
+        } catch (Exception e) {
+            log.warn("ChromeDriver setup failed - Selenium scraper will be inactive: {}", e.getMessage());
+            chromeAvailable = false;
+        }
     }
 
     @Override
     public List<MarketPriceDto> fetchPrices() {
+        if (!chromeAvailable) {
+            log.info("Selenium scraper skipped - Chrome not available. Use KalimatiScraperService instead.");
+            return new ArrayList<>();
+        }
+        
         String targetUrl = systemConfigService.getString("market.scraper.url", DEFAULT_URL);
         log.info("Fetching prices from {} using Selenium headless browser", targetUrl);
         
@@ -124,7 +146,8 @@ public class SeleniumScraperService implements MarketPriceDataSource {
             log.info("Successfully scraped {} vegetable prices using Selenium", prices.size());
 
         } catch (Exception e) {
-            log.error("Selenium scraping failed: {}", e.getMessage(), e);
+            log.error("Selenium scraping failed: {}", e.getMessage());
+            // Don't log full stack trace - it's verbose and expected in serverless environments
         } finally {
             if (driver != null) {
                 try {
@@ -154,3 +177,4 @@ public class SeleniumScraperService implements MarketPriceDataSource {
         return SOURCE_ID;
     }
 }
+

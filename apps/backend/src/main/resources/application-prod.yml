@@ -122,3 +122,16 @@ weather:
   openweathermap:
     api-key: cc1f6ee6c3d30d4276544a101c0607ad
     base-url: https://api.openweathermap.org/data/2.5
+
+# =======================
+# Market Price Scraper Configuration
+# =======================
+market:
+  scraper:
+    # Selenium requires Chrome/Chromium installed - disabled for serverless deployments
+    selenium:
+      enabled: false
+    # Kalimati HTTP scraper works without browser dependencies
+    kalimati:
+      enabled: true
+
