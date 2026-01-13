@@ -1,36 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
-import marketPriceService from '@/modules/marketplace/services/marketPriceService';
 import { ArrowUp, ArrowDown, Minus, Filter } from 'lucide-react';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { getCropImage } from '@/config/cropAssets';
+import { useMarketPrices } from '@/hooks/useMarketPrices';
 import { Link } from 'react-router-dom';
 
 const MarketStats = () => {
     const { language } = useLanguage();
-    const [prices, setPrices] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchPrices = async () => {
-            try {
-                // Fetch today's prices
-                const data = await marketPriceService.getTodaysPrices('Kathmandu', undefined, 0, 5);
-                const priceList = data.content || data;
-                setPrices(Array.isArray(priceList) ? priceList.slice(0, 5) : []);
-            } catch (error) {
-                console.error("Failed to fetch market prices", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchPrices();
-    }, []);
+    const { data: prices, isLoading, error } = useMarketPrices();
 
     // Helper to render trend
-    // Since backend might not return 'trend' yet, we show N/A or hiding it if it's 0 to avoid misinformation.
-    // For now, if no trend data, we return null to keep UI clean.
     const renderTrend = (trendValue: number | undefined) => {
         if (trendValue === undefined || trendValue === null) return <span className="text-gray-400 text-xs">-</span>;
         if (trendValue === 0) return <span className="text-gray-400 flex items-center text-xs"><Minus size={14} className="mr-1" /> 0%</span>;
@@ -38,7 +17,16 @@ const MarketStats = () => {
         return <span className="text-red-500 flex items-center text-xs"><ArrowDown size={14} className="mr-1" /> {Math.abs(trendValue)}%</span>;
     };
 
-    if (loading) return <div className="p-8 flex justify-center"><LoadingSpinner /></div>;
+    if (isLoading) return <div className="p-8 flex justify-center"><LoadingSpinner /></div>;
+
+    // Graceful error handling in UI
+    if (error) return (
+        <div className="p-8 text-center text-red-500 bg-red-50 rounded-xl">
+            <p>{language === 'ne' ? 'बजार मूल्य लोड गर्न असफल भयो' : 'Failed to load market prices.'}</p>
+        </div>
+    );
+
+    const displayPrices = Array.isArray(prices) ? prices.slice(0, 5) : [];
 
     return (
         <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -74,10 +62,10 @@ const MarketStats = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
-                        {prices.length > 0 ? (
-                            prices.map((item, index) => {
-                                const cropName = item.commodityName || item.customCropName || 'unknown';
-                                const imageUrl = getCropImage(cropName);
+                        {displayPrices.length > 0 ? (
+                            displayPrices.map((item: any, index: number) => {
+                                // Fallback image if backend doesn't send one (though backend logic handles it)
+                                const imageUrl = item.imageUrl || 'https://images.unsplash.com/photo-1595855709915-f65b907afa0a?w=500&auto=format&fit=crop&q=60';
 
                                 return (
                                     <tr key={index} className="hover:bg-gray-50/50 transition-colors">
@@ -86,11 +74,9 @@ const MarketStats = () => {
                                                 <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center mr-3 overflow-hidden shadow-sm border border-gray-100">
                                                     <img
                                                         src={imageUrl}
-                                                        alt={cropName}
+                                                        alt={item.commodityName || 'Crop'}
                                                         className="w-full h-full object-cover"
-                                                        onError={(e) => {
-                                                            e.currentTarget.src = getCropImage('default'); // Fallback
-                                                        }}
+                                                        loading="lazy"
                                                     />
                                                 </div>
                                                 <div>

@@ -27,11 +27,18 @@ public class MarketPriceService {
 
     private final MarketPriceRepository priceRepository;
     private final MarketPriceAuditRepository auditRepository;
+    private final VegetableImageProvider imageProvider;
+
+    private MarketPriceDto mapToDto(MarketPrice price) {
+        MarketPriceDto dto = MarketPriceDto.fromEntity(price);
+        dto.setImageUrl(imageProvider.getImageUrl(price.getCropName()));
+        return dto;
+    }
 
     public List<MarketPriceDto> getPricesByCropAndDistrict(String cropName, String district) {
         List<MarketPrice> prices = priceRepository.findByCropAndDistrict(cropName, district);
         return prices.stream()
-                .map(MarketPriceDto::fromEntity)
+                .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
@@ -43,13 +50,13 @@ public class MarketPriceService {
                     "No price data found for " + cropName + " in " + district);
         }
 
-        return MarketPriceDto.fromEntity(prices.get(0)); // Already sorted by date DESC
+        return mapToDto(prices.get(0)); // Already sorted by date DESC
     }
 
     public org.springframework.data.domain.Page<MarketPriceDto> getPricesByDate(LocalDate date,
             org.springframework.data.domain.Pageable pageable) {
         org.springframework.data.domain.Page<MarketPrice> pricesPage = priceRepository.findByDate(date, pageable);
-        return pricesPage.map(MarketPriceDto::fromEntity);
+        return pricesPage.map(this::mapToDto);
     }
 
     public List<MarketPriceDto> getPricesByDate(LocalDate date) {
@@ -61,7 +68,7 @@ public class MarketPriceService {
         // Easiest is to call repo with Pageable.unpaged()
         return priceRepository.findByDate(date, org.springframework.data.domain.Pageable.unpaged())
                 .stream()
-                .map(MarketPriceDto::fromEntity)
+                .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
@@ -81,7 +88,7 @@ public class MarketPriceService {
             }
 
             if (todaysPrices.hasContent()) {
-                return todaysPrices.map(MarketPriceDto::fromEntity);
+                return todaysPrices.map(this::mapToDto);
             }
 
             // 2. If no prices for today, try fallback to latest available date
@@ -92,11 +99,11 @@ public class MarketPriceService {
                 if (latestDate != null) {
                     log.info("No prices found for today in {}. Falling back to latest date: {}", district, latestDate);
                     return priceRepository.findByDistrictAndPriceDate(district, latestDate, pageable)
-                            .map(MarketPriceDto::fromEntity);
+                            .map(this::mapToDto);
                 }
             }
             
-            return todaysPrices.map(MarketPriceDto::fromEntity); // Empty page
+            return todaysPrices.map(this::mapToDto); // Empty page
         }
 
         // Fallback for all districts
@@ -156,7 +163,7 @@ public class MarketPriceService {
 
             log.info("Market price updated: {} in {} on {}",
                     saved.getCropName(), saved.getDistrict(), saved.getPriceDate());
-            return MarketPriceDto.fromEntity(saved);
+            return mapToDto(saved);
         }
 
         MarketPrice price = MarketPrice.builder()
@@ -174,7 +181,7 @@ public class MarketPriceService {
         log.info("Market price added: {} in {} on {}",
                 saved.getCropName(), saved.getDistrict(), saved.getPriceDate());
 
-        return MarketPriceDto.fromEntity(saved);
+        return mapToDto(saved);
     }
 
     @Transactional
@@ -199,7 +206,7 @@ public class MarketPriceService {
     public MarketPriceDto getPreviousPrice(String cropName, String district, LocalDate date) {
         MarketPrice previous = priceRepository.findFirstByCropNameAndDistrictAndPriceDateBeforeOrderByPriceDateDesc(
                 cropName, district, date);
-        return previous != null ? MarketPriceDto.fromEntity(previous) : null;
+        return previous != null ? mapToDto(previous) : null;
     }
 
     public List<PriceStats> getPriceHistory(String cropName, String district, LocalDate startDate, LocalDate endDate) {

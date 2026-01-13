@@ -30,10 +30,14 @@ public class RedisConfig implements org.springframework.cache.annotation.Caching
                 ObjectMapper.DefaultTyping.NON_FINAL,
                 com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY);
 
-        // Register Mixin for PageImpl, PageRequest, and Sort
+        // Register Mixin for PageImpl and PageRequest
         mapper.addMixIn(org.springframework.data.domain.PageImpl.class, PageMixin.class);
         mapper.addMixIn(org.springframework.data.domain.PageRequest.class, PageRequestMixin.class);
-        mapper.addMixIn(org.springframework.data.domain.Sort.class, SortMixin.class);
+        
+        // Register Custom Deserializer for Sort via Module
+        com.fasterxml.jackson.databind.module.SimpleModule sortModule = new com.fasterxml.jackson.databind.module.SimpleModule();
+        sortModule.addDeserializer(org.springframework.data.domain.Sort.class, new SortDeserializer());
+        mapper.registerModule(sortModule);
 
         GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(mapper);
 
@@ -72,13 +76,27 @@ public class RedisConfig implements org.springframework.cache.annotation.Caching
         }
     }
 
-    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
-    @com.fasterxml.jackson.annotation.JsonTypeInfo(use = com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS, include = com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY)
-    abstract static class SortMixin {
-        @com.fasterxml.jackson.annotation.JsonCreator
-        public static org.springframework.data.domain.Sort by(
-                @com.fasterxml.jackson.annotation.JsonProperty("orders") java.util.List<org.springframework.data.domain.Sort.Order> orders) {
-            return null;
+    // Custom Sort Deserializer to handle "orders must not be null" issue
+    static class SortDeserializer extends com.fasterxml.jackson.databind.JsonDeserializer<org.springframework.data.domain.Sort> {
+        @Override
+        public org.springframework.data.domain.Sort deserialize(com.fasterxml.jackson.core.JsonParser p, com.fasterxml.jackson.databind.DeserializationContext ctxt) throws java.io.IOException {
+            com.fasterxml.jackson.databind.JsonNode node = p.getCodec().readTree(p);
+            if (node.has("orders") && node.get("orders").isArray()) {
+                java.util.List<org.springframework.data.domain.Sort.Order> orders = new java.util.ArrayList<>();
+                for (com.fasterxml.jackson.databind.JsonNode orderNode : node.get("orders")) {
+                     String property = orderNode.has("property") ? orderNode.get("property").asText() : null;
+                     String directionStr = orderNode.has("direction") ? orderNode.get("direction").asText() : "ASC";
+                     
+                     if (property != null) {
+                         org.springframework.data.domain.Sort.Direction direction = org.springframework.data.domain.Sort.Direction.fromString(directionStr);
+                         orders.add(new org.springframework.data.domain.Sort.Order(direction, property));
+                     }
+                }
+                if (!orders.isEmpty()) {
+                    return org.springframework.data.domain.Sort.by(orders);
+                }
+            }
+            return org.springframework.data.domain.Sort.unsorted();
         }
     }
 

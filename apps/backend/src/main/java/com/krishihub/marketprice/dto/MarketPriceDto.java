@@ -25,6 +25,7 @@ public class MarketPriceDto {
     private String unit;
     private LocalDate priceDate;
     private String source;
+    private String imageUrl;
 
     public static MarketPriceDto fromEntity(MarketPrice price) {
         return MarketPriceDto.builder()

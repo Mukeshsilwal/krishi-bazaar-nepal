@@ -25,7 +25,7 @@ const MarketPriceManager = () => {
         setLoading(true);
         try {
             // Fetch with specific district and large page size for admin view
-            const data = await marketPriceService.getTodaysPrices(searchDistrict, 0, 500);
+            const data = await marketPriceService.getTodaysPrices(searchDistrict, '', 0, 500);
             const items = Array.isArray(data) ? data : (data.content || []);
             // Backend already filters by district if provided, but we can trust it.
             setPrices(items);
@@ -105,6 +105,7 @@ const MarketPriceManager = () => {
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Crop</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">District</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Min</th>
@@ -117,20 +118,34 @@ const MarketPriceManager = () => {
                         <tbody className="divide-y divide-gray-200">
                             {prices.length === 0 ? (
                                 <tr>
-                                    <td colSpan={7} className="px-6 py-4 text-center text-gray-500">No records found</td>
+                                    <td colSpan={8} className="px-6 py-4 text-center text-gray-500">No records found</td>
                                 </tr>
                             ) : (
-                                prices.map((price: any) => (
-                                    <tr key={price.id}>
-                                        <td className="px-6 py-4">{price.cropName}</td>
-                                        <td className="px-6 py-4">{price.district}</td>
-                                        <td className="px-6 py-4">{price.minPrice}</td>
-                                        <td className="px-6 py-4">{price.maxPrice}</td>
-                                        <td className="px-6 py-4 font-bold">{price.avgPrice}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-500">{price.source}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-500">{price.priceDate}</td>
-                                    </tr>
-                                ))
+                                prices.map((price: any) => {
+                                    // Backend now provides imageUrl
+                                    const imageUrl = price.imageUrl || 'https://images.unsplash.com/photo-1595855709915-f65b907afa0a?w=500&auto=format&fit=crop&q=60';
+                                    return (
+                                        <tr key={price.id}>
+                                            <td className="px-6 py-4">
+                                                <div className="h-10 w-10 rounded-full bg-gray-100 overflow-hidden border border-gray-200">
+                                                    <img
+                                                        src={imageUrl}
+                                                        alt={price.cropName}
+                                                        className="h-full w-full object-cover"
+                                                        loading="lazy"
+                                                    />
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 font-medium text-gray-900">{price.cropName}</td>
+                                            <td className="px-6 py-4">{price.district}</td>
+                                            <td className="px-6 py-4">{price.minPrice}</td>
+                                            <td className="px-6 py-4">{price.maxPrice}</td>
+                                            <td className="px-6 py-4 font-bold text-green-600">{price.avgPrice}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-500">{price.source}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-500">{price.priceDate}</td>
+                                        </tr>
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>
