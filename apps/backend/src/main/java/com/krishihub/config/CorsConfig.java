@@ -45,7 +45,10 @@ public class CorsConfig {
         configuration.setAllowedOriginPatterns(origins); // Use patterns instead of origins for better compatibility
 
         // Parse allowed methods
-        List<String> methods = Arrays.asList(allowedMethods.split(","));
+        List<String> methods = new java.util.ArrayList<>(Arrays.asList(allowedMethods.split(",")));
+        if (!methods.contains("PATCH")) {
+            methods.add("PATCH");
+        }
         configuration.setAllowedMethods(methods);
 
         // Set allowed headers

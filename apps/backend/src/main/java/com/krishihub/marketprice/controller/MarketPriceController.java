@@ -65,20 +65,10 @@ public class MarketPriceController {
                     page, size);
             return ResponseEntity.ok(ApiResponse.success(pricesPage));
         } else {
-            // Note: Legacy unpaginated endpoint currently returns ALL districts (dashboard
-            // was filtering client side).
-            // To maintain compatibility but allow filtering if param passed:
-            List<MarketPriceDto> prices = priceService.getTodaysPrices();
-            // If district provided, filter manually? Or just rely on pagination for
-            // district filtering.
-            // Given the dashboard change, we likely always want pagination now.
-            // But for safety:
-            if (district != null) {
-                // Simple stream filter for legacy mode if ever used
-                return ResponseEntity.ok(ApiResponse.success(
-                        prices.stream().filter(p -> p.getDistrict().equals(district)).toList()));
-            }
-            return ResponseEntity.ok(ApiResponse.success(prices));
+             // Legacy unpaginated endpoint
+             // Delegating logic to service to avoid filtering in controller
+             List<MarketPriceDto> prices = priceService.getTodaysPricesList(district);
+             return ResponseEntity.ok(ApiResponse.success(prices));
         }
     }
 
@@ -112,10 +102,8 @@ public class MarketPriceController {
 
     @GetMapping("/analytics")
     public ResponseEntity<ApiResponse<List<MarketPriceAnalyticsDto>>> getAnalytics() {
-        // This would ideally be a service method doing complex aggregation.
-        // For now, returning empty list or simple mock to satisfy contract.
-        // In real implementation: priceService.getAnalytics();
-        return ResponseEntity.ok(ApiResponse.success(java.util.Collections.emptyList()));
+        List<MarketPriceAnalyticsDto> analytics = priceService.getAnalytics();
+        return ResponseEntity.ok(ApiResponse.success(analytics));
     }
 
     @PostMapping("/override")

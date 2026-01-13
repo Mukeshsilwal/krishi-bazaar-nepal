@@ -4,9 +4,7 @@ import com.krishihub.analytics.event.ActivityEvent;
 import org.springframework.context.ApplicationEventPublisher;
 
 import com.krishihub.auth.dto.*;
-import com.krishihub.auth.entity.OtpVerification;
 import com.krishihub.auth.entity.User;
-import com.krishihub.auth.repository.OtpVerificationRepository;
 import com.krishihub.auth.repository.UserRepository;
 import com.krishihub.auth.security.JwtUtil;
 import com.krishihub.notification.dto.MessageRequest;
@@ -24,11 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Random;
 import java.util.UUID;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import com.krishihub.shared.exception.ActiveSessionExistsException;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -36,26 +30,21 @@ import java.util.concurrent.TimeUnit;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final OtpVerificationRepository otpRepository;
+    private final OtpService otpService; // Decomposed Service
+    private final SessionManagementService sessionManagementService; // Decomposed Service
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
-    private final SmsService smsService;
+    // SmsService dependency removed
     private final NotificationOrchestrator notificationOrchestrator;
     private final PasswordEncoder passwordEncoder;
     private final ApplicationEventPublisher eventPublisher;
     private final RefreshTokenService refreshTokenService;
-    private final StringRedisTemplate redisTemplate; // Redis Lock
-    private final com.krishihub.service.SystemConfigService systemConfigService;
-
-    // Dynamic Configs replaced @Value fields
 
     @Transactional
     public String register(RegisterRequest request) {
         log.info("AuthService: Register request received for mobile: {}", request.getMobileNumber());
-        // Normalize mobile number
         String mobileNumber = normalizeMobileNumber(request.getMobileNumber());
 
-        // Check if user already exists
         if (userRepository.existsByMobileNumber(mobileNumber)) {
             throw new BadRequestException("User with this mobile number already exists");
         }
@@ -64,7 +53,6 @@ public class AuthService {
             throw new BadRequestException("User with this email already exists");
         }
 
-        // Validate role
         User.UserRole role;
         try {
             role = User.UserRole.valueOf(request.getRole().toUpperCase());
@@ -75,7 +63,6 @@ public class AuthService {
             throw new BadRequestException("Invalid role. Must be FARMER, BUYER, or VENDOR");
         }
 
-        // Create user
         User user = User.builder()
                 .mobileNumber(mobileNumber)
                 .email(request.getEmail())
@@ -86,7 +73,6 @@ public class AuthService {
                 .verified(false)
                 .build();
 
-        // Set land size for farmers
         if (role == User.UserRole.FARMER && request.getLandSize() != null) {
             try {
                 user.setLandSize(new BigDecimal(request.getLandSize()));
@@ -97,11 +83,9 @@ public class AuthService {
 
         userRepository.save(user);
 
-        // Generate and send OTP
-        String otp = generateOtp();
-        saveOtp(mobileNumber, otp);
+        String otp = otpService.generateOtp();
+        otpService.saveOtp(mobileNumber, otp);
 
-        // Send OTP via Email
         try {
             MessageRequest emailRequest = MessageRequest.builder()
                     .type(MessageType.EMAIL)
@@ -113,9 +97,7 @@ public class AuthService {
             log.info("Registration OTP sent to email {}", request.getEmail());
         } catch (Exception e) {
             log.error("Failed to send email OTP", e);
-            // Fallback to SMS if email fails? Or just log error?
-            // For now fallback to SMS as backup
-            smsService.sendOtp(mobileNumber, otp);
+            sendSmsOtp(mobileNumber, otp);
         }
         
         eventPublisher.publishEvent(new ActivityEvent(this, user.getId(), "REGISTER", "User registered via " + request.getMobileNumber(), null));
@@ -140,10 +122,8 @@ public class AuthService {
         }
 
         String mobileNumber = user.getMobileNumber();
-
-        // Generate and send OTP
-        String otp = generateOtp();
-        saveOtp(mobileNumber, otp);
+        String otp = otpService.generateOtp();
+        otpService.saveOtp(mobileNumber, otp);
 
         if (user.getEmail() != null && !user.getEmail().isEmpty()) {
             try {
@@ -157,10 +137,10 @@ public class AuthService {
                 log.info("Login OTP sent to email {}", user.getEmail());
             } catch (Exception e) {
                 log.error("Failed to send login email OTP to {}", user.getEmail(), e);
-                smsService.sendOtp(mobileNumber, otp);
+                sendSmsOtp(mobileNumber, otp);
             }
         } else {
-            smsService.sendOtp(mobileNumber, otp);
+            sendSmsOtp(mobileNumber, otp);
         }
 
         log.info("OTP sent for login: {}", mobileNumber);
@@ -172,12 +152,10 @@ public class AuthService {
 
     @Transactional
     public String registerAdmin(AdminRegisterRequest request) {
-        // Validate Secret Key
         if (!request.getAdminSecret().equals(adminSecretKey)) {
             throw new BadRequestException("Invalid Admin Secret Key");
         }
 
-        // Normalize mobile
         String mobileNumber = normalizeMobileNumber(request.getMobileNumber());
 
         if (userRepository.existsByMobileNumber(mobileNumber)) {
@@ -190,7 +168,7 @@ public class AuthService {
                 .name(request.getName())
                 .role(User.UserRole.ADMIN)
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .verified(true) // Admins are auto-verified by secret
+                .verified(true)
                 .district("Headquarters")
                 .ward("0")
                 .createdAt(LocalDateTime.now())
@@ -206,7 +184,6 @@ public class AuthService {
 
     @Transactional
     public AuthResponse loginAdmin(AdminLoginRequest request) {
-        // Normalize mobile number (if used as identifier) or check email
         User user;
         if (request.getIdentifier().contains("@")) {
              user = userRepository.findByEmail(request.getIdentifier())
@@ -216,17 +193,14 @@ public class AuthService {
                     .orElseThrow(() -> new ResourceNotFoundException("Admin not found"));
         }
 
-        // Check if user is admin
         if (user.getRole() != User.UserRole.ADMIN) {
             throw new BadRequestException("User is not an admin");
         }
 
-        // Verify password
         if (user.getPasswordHash() == null || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new BadRequestException("Invalid credentials");
         }
 
-        // Generate JWT tokens
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getMobileNumber());
         String accessToken = jwtUtil.generateToken(userDetails);
         com.krishihub.auth.entity.RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
@@ -235,8 +209,7 @@ public class AuthService {
 
         log.info("Admin logged in: {}", user.getMobileNumber());
 
-        // Enforce Single Login
-        checkAndSetLoginLock(user.getId());
+        sessionManagementService.checkAndSetLoginLock(user.getId());
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
@@ -259,26 +232,8 @@ public class AuthService {
             mobileNumber = normalizeMobileNumber(identifier);
         }
 
-        // Find latest OTP
-        OtpVerification otpVerification = otpRepository
-                .findTopByMobileNumberAndVerifiedFalseOrderByCreatedAtDesc(mobileNumber)
-                .orElseThrow(() -> new BadRequestException("No OTP found for this mobile number"));
+        otpService.verifyOtp(mobileNumber, request.getOtp());
 
-        // Check if OTP is expired
-        if (otpVerification.isExpired()) {
-            throw new BadRequestException("OTP has expired. Please request a new one");
-        }
-
-        // Verify OTP
-        if (!otpVerification.getOtp().equals(request.getOtp())) {
-            throw new BadRequestException("Invalid OTP");
-        }
-
-        // Mark OTP as verified
-        otpVerification.setVerified(true);
-        otpRepository.save(otpVerification);
-
-        // Mark user as verified
         User user = userRepository.findByMobileNumber(mobileNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -287,7 +242,6 @@ public class AuthService {
             userRepository.save(user);
         }
 
-        // Generate JWT tokens
         UserDetails userDetails = userDetailsService.loadUserByUsername(mobileNumber);
         String accessToken = jwtUtil.generateToken(userDetails);
         com.krishihub.auth.entity.RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
@@ -298,13 +252,7 @@ public class AuthService {
             log.error("Failed to publish activity event", e);
         }
 
-        // Enforce Single Login
-        try {
-            checkAndSetLoginLock(user.getId());
-        } catch (Exception e) {
-            log.error("Single login check failed", e);
-            // Don't fail the request if Redis is down
-        }
+        sessionManagementService.checkAndSetLoginLock(user.getId());
 
         log.info("User verified and logged in: {}", mobileNumber);
 
@@ -349,29 +297,6 @@ public class AuthService {
         return UserDto.fromEntity(user);
     }
 
-    private String generateOtp() {
-        int length = systemConfigService.getInt("auth.otp.length", 6);
-        Random random = new Random();
-        StringBuilder otp = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            otp.append(random.nextInt(10));
-        }
-        return otp.toString();
-    }
-
-    private void saveOtp(String mobileNumber, String otp) {
-        log.info("=== DEVELOPMENT OTP for {}: {} ===", mobileNumber, otp);
-        int validity = systemConfigService.getInt("auth.otp.validity_sec", 300);
-        OtpVerification otpVerification = OtpVerification.builder()
-                .mobileNumber(mobileNumber)
-                .otp(otp)
-                .expiresAt(LocalDateTime.now().plusSeconds(validity))
-                .verified(false)
-                .build();
-
-        otpRepository.save(otpVerification);
-    }
-
     @Transactional
     public String initiateForgotPassword(ForgotPasswordRequest request) {
         String mobileNumber = normalizeMobileNumber(request.getMobileNumber());
@@ -383,10 +308,9 @@ public class AuthService {
             throw new BadRequestException("Forgot password is only available for Admins");
         }
 
-        String otp = generateOtp();
-        saveOtp(mobileNumber, otp);
+        String otp = otpService.generateOtp();
+        otpService.saveOtp(mobileNumber, otp);
 
-        // Send OTP via Email if available
         if (user.getEmail() != null && !user.getEmail().isEmpty()) {
             try {
                 MessageRequest emailRequest = MessageRequest.builder()
@@ -401,8 +325,7 @@ public class AuthService {
                 log.error("Failed to send forgot password email", e);
             }
         } else {
-            // Fallback to SMS or simulated SMS
-            smsService.sendOtp(mobileNumber, otp);
+            sendSmsOtp(mobileNumber, otp);
             log.info("Forgot password OTP sent to mobile {}", mobileNumber);
         }
 
@@ -413,24 +336,8 @@ public class AuthService {
     public String resetPassword(ResetPasswordRequest request) {
         String mobileNumber = normalizeMobileNumber(request.getMobileNumber());
 
-        // Verify OTP
-        OtpVerification otpVerification = otpRepository
-                .findTopByMobileNumberAndVerifiedFalseOrderByCreatedAtDesc(mobileNumber)
-                .orElseThrow(() -> new BadRequestException("Invalid or expired OTP"));
+        otpService.verifyOtp(mobileNumber, request.getOtp());
 
-        if (otpVerification.isExpired()) {
-            throw new BadRequestException("OTP has expired");
-        }
-
-        if (!otpVerification.getOtp().equals(request.getOtp())) {
-            throw new BadRequestException("Invalid OTP");
-        }
-
-        // Mark OTP as used
-        otpVerification.setVerified(true);
-        otpRepository.save(otpVerification);
-
-        // Update Password
         User user = userRepository.findByMobileNumber(mobileNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -461,52 +368,34 @@ public class AuthService {
                 .orElseThrow(() -> new ResourceNotFoundException("Refresh token is not in database!"));
     }
 
-    private String normalizeMobileNumber(String mobileNumber) {
-        // Remove spaces and special characters
-        String normalized = mobileNumber.replaceAll("[^0-9+]", "");
+    private void sendSmsOtp(String mobileNumber, String otp) {
+        String message = String.format("Your Kisan Sarathi verification code is: %s. Valid for 5 minutes.", otp);
+        try {
+            notificationOrchestrator.send(MessageRequest.builder()
+                    .type(MessageType.SMS)
+                    .recipient(mobileNumber)
+                    .content(message)
+                    .build());
+        } catch (Exception e) {
+            log.error("Failed to send SMS OTP to {}", mobileNumber, e);
+        }
+    }
 
-        // If starts with +977, keep it
+    private String normalizeMobileNumber(String mobileNumber) {
+        String normalized = mobileNumber.replaceAll("[^0-9+]", "");
         if (normalized.startsWith("+977")) {
             return normalized;
         }
-
-        // If starts with 977, add +
         if (normalized.startsWith("977")) {
             return "+" + normalized;
         }
-
-        // If 10 digits, add +977
         if (normalized.length() == 10) {
             return "+977" + normalized;
         }
-
         return normalized;
     }
 
-    private void checkAndSetLoginLock(UUID userId) {
-        try {
-            String key = "login:lock:" + userId;
-            if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
-                 throw new ActiveSessionExistsException("User is already logged in on another device.");
-            }
-            long jwtExp = systemConfigService.getLong("auth.jwt.expiration_ms", 86400000L);
-            redisTemplate.opsForValue().set(key, "true", jwtExp, TimeUnit.MILLISECONDS);
-        } catch (ActiveSessionExistsException e) {
-            throw e; // Rethrow business exception
-        } catch (Exception e) {
-            log.error("Redis connection failed during login lock check", e);
-            // Proceed without lock if Redis is down
-        }
-    }
-
-    @Transactional
     public void logout(UUID userId) {
-        try {
-            String key = "login:lock:" + userId;
-            redisTemplate.delete(key);
-            log.info("User logged out, lock released: {}", userId);
-        } catch (Exception e) {
-             log.error("Redis failed during logout", e);
-        }
+        sessionManagementService.logout(userId);
     }
 }

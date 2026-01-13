@@ -1,8 +1,9 @@
 package com.krishihub.notification.listener;
 
-import com.krishihub.auth.service.SmsService;
+import com.krishihub.notification.dto.MessageRequest;
+import com.krishihub.notification.enums.MessageType;
+import com.krishihub.notification.service.NotificationOrchestrator;
 import com.krishihub.order.dto.OrderStatus;
-import com.krishihub.order.entity.Order;
 import com.krishihub.order.event.OrderCancelledEvent;
 import com.krishihub.order.event.OrderPlacedEvent;
 import com.krishihub.order.event.OrderStatusChangedEvent;
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class NotificationEventListener {
 
-    private final SmsService smsService;
+    private final NotificationOrchestrator notificationOrchestrator;
     private final com.krishihub.order.repository.OrderRepository orderRepository;
 
     @Async
@@ -105,8 +106,12 @@ public class NotificationEventListener {
 
     private void sendSms(String to, String message) {
         try {
-            smsService.sendNotification(to, message);
-            log.info("SMS sent to {}: {}", to, message);
+            notificationOrchestrator.send(MessageRequest.builder()
+                    .type(MessageType.SMS)
+                    .recipient(to)
+                    .content(message)
+                    .build());
+            log.info("SMS request sent to orchestrator for {}", to);
         } catch (Exception e) {
             log.error("Failed to send SMS to {}", to, e);
         }

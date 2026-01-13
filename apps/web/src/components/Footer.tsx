@@ -1,9 +1,8 @@
 import Logo from "./Logo";
 import { Facebook, Youtube, Phone, Mail, MapPin } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
-import { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
-import api from "../services/api";
+import { useSettings } from "@/context/SettingsContext";
 
 const footerLinks = {
   platform: [
@@ -26,21 +25,7 @@ const footerLinks = {
 
 const Footer = () => {
   const { t, language } = useLanguage();
-  const [settings, setSettings] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const res = await api.get('/public/settings');
-        if (res.data.success) {
-          setSettings(res.data.data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch footer settings", error);
-      }
-    };
-    fetchSettings();
-  }, []);
+  const { settings } = useSettings();
 
   return (
     <footer id="about" className="bg-foreground text-primary-foreground">

@@ -30,6 +30,22 @@ public class SystemSettingService {
         createSetting("COMPANY_LOGO", "/logo.png", "Company Logo URL", SystemSetting.SettingType.STRING, true);
         createSetting("SOCIAL_FACEBOOK", "https://facebook.com/kisansarathi", "Facebook Link", SystemSetting.SettingType.STRING, true);
         createSetting("SOCIAL_YOUTUBE", "https://youtube.com/kisansarathi", "YouTube Link", SystemSetting.SettingType.STRING, true);
+
+        // Hero Section
+        createSetting("HERO_TITLE_PREFIX", "Farmers' Companion,", "Hero Title Prefix", SystemSetting.SettingType.STRING, true);
+        createSetting("HERO_TITLE_SUFFIX", "Nepal's Progress", "Hero Title Suffix", SystemSetting.SettingType.STRING, true);
+        createSetting("HERO_SUBTITLE", "Get the right price for your produce. Connect directly with buyers.", "Hero Subtitle", SystemSetting.SettingType.STRING, true);
+        createSetting("HERO_DESCRIPTION", "Krishi Sarathi connects farmers directly with markets. Sell crops, buy seeds/fertilizers, and get expert advice—all in one place.", "Hero Description", SystemSetting.SettingType.STRING, true);
+
+        // About Page
+        createSetting("ABOUT_TITLE", "Empowering Nepal's Agriculture", "About Page Title", SystemSetting.SettingType.STRING, true);
+        createSetting("ABOUT_SUBTITLE", "Krishi Bazaar is a comprehensive digital platform connecting farmers directly with buyers.", "About Page Subtitle", SystemSetting.SettingType.STRING, true);
+        createSetting("ABOUT_MISSION_DESC", "To revolutionize the agricultural landscape of Nepal by leveraging technology.", "Mission Description", SystemSetting.SettingType.STRING, true);
+        createSetting("ABOUT_VISION_DESC", "A transparent, efficient, and sustainable agricultural ecosystem.", "Vision Description", SystemSetting.SettingType.STRING, true);
+        
+        // Contact Page
+        createSetting("CONTACT_TITLE", "Get in Touch", "Contact Page Title", SystemSetting.SettingType.STRING, true);
+        createSetting("CONTACT_SUBTITLE", "Have questions about Krishi Bazaar? We're here to help you grow.", "Contact Page Subtitle", SystemSetting.SettingType.STRING, true);
     }
 
     private void createSetting(String key, String value, String description, SystemSetting.SettingType type, boolean isPublic) {
@@ -63,12 +79,10 @@ public class SystemSettingService {
         }
         return repository.findAll();
     }
-    
-    @Transactional
-    public SystemSetting updateSetting(String key, String value) {
-        SystemSetting setting = repository.findByKey(key)
-                .orElseThrow(() -> new RuntimeException("Setting not found: " + key));
-        setting.setValue(value);
-        return repository.save(setting);
+
+    public String getSettingValue(String key, String defaultValue) {
+        return repository.findByKey(key)
+                .map(SystemSetting::getValue)
+                .orElse(defaultValue);
     }
 }

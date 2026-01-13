@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, User, LogOut, Package, ShoppingBag, MessageCircle, UserCircle } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../modules/auth/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { useMessages } from '../hooks/useMessages';
-import { useSettings } from '../hooks/useSettings';
+import { useSettings } from '@/context/SettingsContext';
 import Logo from './Logo';
 import MoreMenu from './navigation/MoreMenu';
 
@@ -15,10 +15,13 @@ interface NavbarProps {
 }
 
 const Navbar = ({ variant = 'public' }: NavbarProps) => {
+  const { user, logout } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
+  const { getSetting } = useSettings();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const { language, setLanguage, t } = useLanguage();
-  const { user, logout } = useAuth();
   const { totalItems } = useCart();
   const { unreadCount } = useMessages();
   const { settings } = useSettings();

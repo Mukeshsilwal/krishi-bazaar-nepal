@@ -1,19 +1,17 @@
 package com.krishihub.order.service;
 
-import com.krishihub.agristore.entity.AgriProduct;
 import com.krishihub.agristore.repository.AgriProductRepository;
 import com.krishihub.auth.entity.User;
 import com.krishihub.auth.repository.UserRepository;
 
-import com.krishihub.marketplace.entity.CropListing;
 import com.krishihub.marketplace.repository.CropListingRepository;
 import com.krishihub.order.dto.*;
 import com.krishihub.order.entity.Order;
-import com.krishihub.order.entity.OrderItem;
 import com.krishihub.order.event.OrderCancelledEvent;
 import com.krishihub.order.event.OrderPlacedEvent;
 import com.krishihub.order.event.OrderStatusChangedEvent;
 import com.krishihub.order.repository.OrderRepository;
+import com.krishihub.order.service.strategy.OrderProcessingStrategy;
 import com.krishihub.order.validator.OrderStateValidator;
 import com.krishihub.shared.exception.BadRequestException;
 import com.krishihub.shared.exception.ResourceNotFoundException;
@@ -29,10 +27,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -41,12 +39,28 @@ import java.util.UUID;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final CropListingRepository listingRepository;
     private final UserRepository userRepository;
-    private final AgriProductRepository agriProductRepository;
     private final OrderStateValidator orderStateValidator;
     private final ApplicationEventPublisher eventPublisher;
 
+    private final List<OrderProcessingStrategy> orderStrategies;
+    private Map<OrderSource, OrderProcessingStrategy> strategyMap;
+
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        strategyMap = new EnumMap<>(OrderSource.class);
+        for (OrderProcessingStrategy strategy : orderStrategies) {
+            strategyMap.put(strategy.getOrderSource(), strategy);
+        }
+    }
+
+    private OrderProcessingStrategy getStrategy(OrderSource source) {
+        OrderProcessingStrategy strategy = strategyMap.get(source);
+        if (strategy == null) {
+            throw new BadRequestException("Order source not supported: " + source);
+        }
+        return strategy;
+    }
 
     @Transactional
     public OrderDto createOrder(UUID userId, CreateOrderRequest request) {
@@ -61,14 +75,7 @@ public class OrderService {
         OrderSource source = request.getOrderSource() != null ? request.getOrderSource() : OrderSource.MARKETPLACE;
         request.setOrderSource(source);
 
-        Order order;
-        if (source == OrderSource.MARKETPLACE) {
-            order = createMarketplaceOrder(buyer, request);
-        } else if (source == OrderSource.AGRI_STORE) {
-            order = createAgriStoreOrder(buyer, request);
-        } else {
-             throw new BadRequestException("Invalid order source");
-        }
+        Order order = getStrategy(source).createOrder(buyer, request);
 
         Order savedOrder = orderRepository.save(order);
 
@@ -80,159 +87,6 @@ public class OrderService {
         return OrderDto.fromEntity(savedOrder);
     }
     
-    private Order createMarketplaceOrder(User buyer, CreateOrderRequest request) {
-        if (request.getListingId() == null) {
-            throw new BadRequestException("Listing ID is required for Marketplace orders");
-        }
-    
-        CropListing listing = listingRepository.findById(request.getListingId())
-                .orElseThrow(() -> new ResourceNotFoundException("Listing not found"));
-
-        // Validate listing is active
-        if (listing.getStatus() != CropListing.ListingStatus.ACTIVE) {
-            throw new BadRequestException("This listing is no longer available");
-        }
-
-        // Validate quantity
-        if (request.getQuantity().compareTo(listing.getQuantity()) > 0) {
-            throw new BadRequestException("Requested quantity exceeds available quantity");
-        }
-
-        // Validate Harvest Date & Window
-        LocalDate pickupDate = request.getPickupDate() != null ? LocalDate.parse(request.getPickupDate())
-                : LocalDate.now();
-        if (listing.getHarvestDate() != null) {
-            if (pickupDate.isBefore(listing.getHarvestDate())) {
-                throw new BadRequestException("Order date cannot be before harvest date: " + listing.getHarvestDate());
-            }
-            if (listing.getHarvestWindow() != null) {
-                LocalDate maxDate = listing.getHarvestDate().plusDays(listing.getHarvestWindow());
-                if (pickupDate.isAfter(maxDate)) {
-                    throw new BadRequestException("Order date is outside harvest window. Available until: " + maxDate);
-                }
-            }
-        }
-
-        // Validate Cutoff Time
-        if (listing.getOrderCutoffTime() != null && pickupDate.equals(LocalDate.now())) {
-            if (java.time.LocalTime.now().isAfter(listing.getOrderCutoffTime())) {
-                throw new BadRequestException(
-                        "Orders for today are closed. Cutoff time was: " + listing.getOrderCutoffTime());
-            }
-        }
-
-        // Validate Daily Quantity Limit
-        if (listing.getDailyQuantityLimit() != null) {
-            BigDecimal currentDailyTotal = orderRepository.sumQuantityByListingIdAndPickupDate(listing.getId(),
-                    pickupDate);
-            if (currentDailyTotal == null) {
-                currentDailyTotal = BigDecimal.ZERO;
-            }
-            if (currentDailyTotal.add(request.getQuantity()).compareTo(listing.getDailyQuantityLimit()) > 0) {
-                throw new BadRequestException("Daily quantity limit exceeded for " + pickupDate + ". Remaining: "
-                        + listing.getDailyQuantityLimit().subtract(currentDailyTotal));
-            }
-        }
-
-        // Prevent farmer from ordering their own listing
-        if (listing.getFarmer().getId().equals(buyer.getId())) {
-            throw new BadRequestException("You cannot order your own listing");
-        }
-
-        // Calculate total amount
-        BigDecimal totalAmount = listing.getPricePerUnit().multiply(request.getQuantity());
-
-        // Create order
-        Order order = Order.builder()
-                .listing(listing)
-                .buyer(buyer)
-                .farmer(listing.getFarmer())
-                .quantity(request.getQuantity())
-                .totalAmount(totalAmount)
-                .status(OrderStatus.PENDING)
-                .pickupLocation(
-                        request.getPickupLocation() != null ? request.getPickupLocation() : listing.getLocation())
-                .notes(request.getNotes())
-                .orderSource(OrderSource.MARKETPLACE)
-                .build();
-
-        if (request.getPickupDate() != null) {
-            order.setPickupDate(LocalDate.parse(request.getPickupDate()));
-        }
-        return order;
-    }
-    
-    private Order createAgriStoreOrder(User buyer, CreateOrderRequest request) {
-        if (request.getItems() == null || request.getItems().isEmpty()) {
-            throw new BadRequestException("Items are required for Agri Store orders");
-        }
-        
-        List<OrderItem> orderItems = new ArrayList<>();
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        
-        for (OrderItemDto itemDto : request.getItems()) {
-             AgriProduct product = agriProductRepository.findById(itemDto.getAgriProductId())
-                     .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + itemDto.getAgriProductId()));
-             
-             if (!product.getIsActive()) {
-                 throw new BadRequestException("Product is not active: " + product.getName());
-             }
-             
-             if (product.getStockQuantity() < itemDto.getQuantity().intValue()) {
-                 throw new BadRequestException("Insufficient stock for product: " + product.getName());
-             }
-             
-             BigDecimal itemTotal = product.getPrice().multiply(itemDto.getQuantity());
-             
-             OrderItem orderItem = OrderItem.builder()
-                     .agriProduct(product)
-                     .quantity(itemDto.getQuantity())
-                     .pricePerUnit(product.getPrice())
-                     .totalPrice(itemTotal)
-                     .build();
-             
-             orderItems.add(orderItem);
-             totalAmount = totalAmount.add(itemTotal);
-             
-             // Deduct stock immediately ? or wait for payment?
-             // Requirement says: "Decrease stock on: Order -> PAID"
-             // But we should reserve it or at least check it. 
-             // "Prevent checkout if stock insufficient" -> Checked above.
-        }
-        
-        Order order = Order.builder()
-                .buyer(buyer)
-                .quantity(BigDecimal.valueOf(orderItems.size())) // Total items count or sum of quantities? 
-                                                                 // Usually total items count for summary, or generic "1" order.
-                                                                 // Existing quantity field is BigDecimal... maybe sum of quantities?
-                                                                 // Let's use 1 for "Package" or sum. Let's use sum.
-                .totalAmount(totalAmount)
-                .status(OrderStatus.PAYMENT_PENDING) // Auto-confirm for AgriStore since stock verified
-                .pickupLocation(request.getPickupLocation()) // Required or default?
-                .notes(request.getNotes())
-                .orderSource(OrderSource.AGRI_STORE)
-                .build();
-                
-        // Calculate total quantity
-        BigDecimal totalQty = orderItems.stream()
-            .map(OrderItem::getQuantity)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-        order.setQuantity(totalQty);
-        
-        if (request.getPickupDate() != null) {
-            order.setPickupDate(LocalDate.parse(request.getPickupDate()));
-        } else {
-            order.setPickupDate(LocalDate.now()); // Default to today/ASAP
-        }
-
-        // Link items
-        for (OrderItem item : orderItems) {
-            order.addItem(item);
-        }
-        
-        return order;
-    }
-
     public OrderDto getOrderById(UUID id, UUID userId) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
@@ -243,11 +97,7 @@ public class OrderService {
 
         if (!order.getBuyer().getId().equals(user.getId()) &&
                 (order.getFarmer() == null || !order.getFarmer().getId().equals(user.getId()))) {
-                // If farmer is null (AgriStore), only buyer (or Admin, handled by security) can see.
-                // But admin usually uses different endpoint or this one if Role is Admin. 
-                // Wait, Admin logic is separate usually.
-                // Assuming this is for USER app.
-             if (user.getRole() != User.UserRole.ADMIN) { // Allow admin if using this endpoint
+             if (user.getRole() != User.UserRole.ADMIN) { 
                 throw new UnauthorizedException("You don't have access to this order");
              }
         }
@@ -267,10 +117,6 @@ public class OrderService {
         } else if ("farmer".equalsIgnoreCase(role)) {
             orders = orderRepository.findByFarmerId(user.getId(), pageable);
         } else {
-            // Return all orders (buyer + farmer) - logic might need check for null farmer
-            // existing findByBuyerIdOrFarmerId might fail if farmer_id is null in DB?
-            // "findByBuyerIdOrFarmerId" usually generates "... where buyer_id=? or farmer_id=?"
-            // If farmer_id is null on order, it just won't match the second condition, which is fine.
             orders = orderRepository.findByBuyerIdOrFarmerId(user.getId(), user.getId(), pageable);
         }
 
@@ -309,41 +155,14 @@ public class OrderService {
             OrderStatus oldStatus = order.getStatus();
             order.setStatus(newStatus);
             
-            // Centralized Stock Logic
-            if (newStatus == OrderStatus.PAID) {
-                if (order.getOrderSource() == OrderSource.AGRI_STORE) {
-                    for (OrderItem item : order.getItems()) {
-                        AgriProduct p = item.getAgriProduct();
-                        p.setStockQuantity(p.getStockQuantity() - item.getQuantity().intValue());
-                        agriProductRepository.save(p);
-                    }
-                } else if (order.getOrderSource() == OrderSource.MARKETPLACE) {
-                    CropListing listing = order.getListing();
-                    BigDecimal newQuantity = listing.getQuantity().subtract(order.getQuantity());
-                    listing.setQuantity(newQuantity.max(BigDecimal.ZERO));
-                    if (listing.getQuantity().compareTo(BigDecimal.ZERO) == 0) {
-                        listing.setStatus(CropListing.ListingStatus.SOLD);
-                    }
-                    listingRepository.save(listing);
-                }
-            } else if ((oldStatus == OrderStatus.PAID) && (newStatus == OrderStatus.CANCELLED || newStatus == OrderStatus.FAILED)) {
-                if (order.getOrderSource() == OrderSource.AGRI_STORE) {
-                    for (OrderItem item : order.getItems()) {
-                        AgriProduct p = item.getAgriProduct();
-                        p.setStockQuantity(p.getStockQuantity() + item.getQuantity().intValue());
-                        agriProductRepository.save(p);
-                    }
-                } else if (order.getOrderSource() == OrderSource.MARKETPLACE) {
-                    CropListing listing = order.getListing();
-                    listing.setQuantity(listing.getQuantity().add(order.getQuantity()));
-                    // Re-activate if it was SOLD? Maybe.
-                    if (listing.getStatus() == CropListing.ListingStatus.SOLD) {
-                        listing.setStatus(CropListing.ListingStatus.ACTIVE);
-                    }
-                    listingRepository.save(listing);
-                }
-            }
+            // Centralized Stock Logic -> Delegated to Strategy
+            OrderProcessingStrategy strategy = getStrategy(order.getOrderSource());
 
+            if (newStatus == OrderStatus.PAID) {
+                strategy.handlePaymentCompletion(order);
+            } else if ((oldStatus == OrderStatus.PAID) && (newStatus == OrderStatus.CANCELLED || newStatus == OrderStatus.FAILED)) {
+                strategy.handleOrderCancellation(order);
+            }
 
             // Send notifications event
             eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order, oldStatus, newStatus));
@@ -389,13 +208,9 @@ public class OrderService {
         OrderStatus oldStatus = order.getStatus();
         order.setStatus(OrderStatus.CANCELLED);
         
-        // Restore stock if it was PAID
-        if (order.getOrderSource() == OrderSource.AGRI_STORE && oldStatus == OrderStatus.PAID) {
-             for (OrderItem item : order.getItems()) {
-                 AgriProduct p = item.getAgriProduct();
-                 p.setStockQuantity(p.getStockQuantity() + item.getQuantity().intValue());
-                 agriProductRepository.save(p);
-             }
+        // Restore stock if it was PAID -> Delegated to Strategy
+        if (oldStatus == OrderStatus.PAID) {
+             getStrategy(order.getOrderSource()).handleOrderCancellation(order);
         }
         
         orderRepository.save(order);
@@ -418,25 +233,21 @@ public class OrderService {
         OrderStatus oldStatus = order.getStatus();
         order.setStatus(status);
 
-        // Centralized Stock Logic
-        if (status == OrderStatus.PAID) {
-            if (order.getOrderSource() == OrderSource.AGRI_STORE) {
-                for (OrderItem item : order.getItems()) {
-                    AgriProduct p = item.getAgriProduct();
-                    p.setStockQuantity(p.getStockQuantity() - item.getQuantity().intValue());
-                    agriProductRepository.save(p);
-                }
-            } else if (order.getOrderSource() == OrderSource.MARKETPLACE) {
-                CropListing listing = order.getListing();
-                BigDecimal newQuantity = listing.getQuantity().subtract(order.getQuantity());
-                listing.setQuantity(newQuantity.max(BigDecimal.ZERO));
-                if (listing.getQuantity().compareTo(BigDecimal.ZERO) == 0) {
-                    listing.setStatus(CropListing.ListingStatus.SOLD);
-                }
-                listingRepository.save(listing);
-            }
-        }
+        // Centralized Stock Logic -> Delegated to Strategy
+        OrderProcessingStrategy strategy = getStrategy(order.getOrderSource());
 
+        if (status == OrderStatus.PAID) {
+             strategy.handlePaymentCompletion(order);
+        }
+        // Note: For cancellation/failure from payment status update, we might also need handling if we revert PAID to something else.
+        // But usually updatePaymentStatus is PENDING -> PAID or PENDING -> FAILED.
+        // If we move from PAID -> REFUNDED/FAILED, we should probably handle cancellation.
+        // The original code handled PENDING -> PAID only explicitly in updatePaymentStatus method body shown in step 371?
+        // Step 371 `updatePaymentStatus` handled stock deduction for PAID.
+        // It did NOT handle reversal if status was changed AWAY from PAID. 
+        // Logic in `updateOrderStatus` DID handle (old=PAID && new=CANCELLED/FAILED).
+        // Let's stick to original behavior + delegating PAID logic.
+        
         orderRepository.save(order);
 
         // Send notifications event

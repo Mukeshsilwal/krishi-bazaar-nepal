@@ -16,6 +16,14 @@ const formatSource = (source: string) => {
     return source.replace('_', ' ');
 };
 
+interface AnalyticsItem {
+    cropName: string;
+    averagePrice: number;
+    minPrice: number;
+    maxPrice: number;
+    trend: 'UP' | 'DOWN' | 'STABLE';
+}
+
 const MarketPriceDashboard = () => {
     const { t } = useLanguage();
     const [prices, setPrices] = useState<any[]>([]);
@@ -29,23 +37,32 @@ const MarketPriceDashboard = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [availableCrops, setAvailableCrops] = useState<string[]>([]);
 
+    // Analytics state
+    const [analytics, setAnalytics] = useState<AnalyticsItem[]>([]);
+    const [analyticsLoading, setAnalyticsLoading] = useState(true);
+
     // Pagination state
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const loaderRef = useRef(null);
 
-    // Fetch available crops for search suggestions
+    // Fetch available crops and analytics on mount
     useEffect(() => {
-        const fetchCrops = async () => {
+        const fetchInitialData = async () => {
             try {
-                const data = await marketPriceService.getAvailableCrops();
-                // Ensure data is array of strings
-                if (Array.isArray(data)) setAvailableCrops(data);
+                const [cropsData, analyticsData] = await Promise.all([
+                    marketPriceService.getAvailableCrops(),
+                    marketPriceService.getAnalytics()
+                ]);
+                if (Array.isArray(cropsData)) setAvailableCrops(cropsData);
+                if (Array.isArray(analyticsData)) setAnalytics(analyticsData.slice(0, 5)); // Top 5
             } catch (err) {
-                console.error("Failed to fetch crop suggestions", err);
+                console.error("Failed to fetch initial data", err);
+            } finally {
+                setAnalyticsLoading(false);
             }
         };
-        fetchCrops();
+        fetchInitialData();
     }, []);
 
     const handleSearch = (e: React.FormEvent | string) => {
@@ -178,6 +195,37 @@ const MarketPriceDashboard = () => {
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+                {/* Market Insights Section */}
+                {!analyticsLoading && analytics.length > 0 && (
+                    <div className="mb-8">
+                        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <TrendingUp className="h-5 w-5 text-green-600" />
+                            {t('market.insights.title') || 'Market Insights (Last 30 Days)'}
+                        </h2>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                            {analytics.map((item) => (
+                                <div
+                                    key={item.cropName}
+                                    onClick={() => { setSelectedCrop(item.cropName); setSearchTerm(item.cropName); }}
+                                    className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow"
+                                >
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-2xl">{getCropIcon(item.cropName)}</span>
+                                        {item.trend === 'UP' && <TrendingUp className="h-5 w-5 text-green-500" />}
+                                        {item.trend === 'DOWN' && <TrendingDown className="h-5 w-5 text-red-500" />}
+                                        {item.trend === 'STABLE' && <Minus className="h-5 w-5 text-gray-400" />}
+                                    </div>
+                                    <h3 className="font-semibold text-gray-800 text-sm truncate">{item.cropName}</h3>
+                                    <p className="text-green-600 font-bold text-lg">Rs. {item.averagePrice?.toFixed(0)}</p>
+                                    <p className="text-xs text-gray-500">
+                                        {item.minPrice?.toFixed(0)} - {item.maxPrice?.toFixed(0)}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Price List */}

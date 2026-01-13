@@ -27,4 +27,8 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> error(String message, T data) {
         return new ApiResponse<T>(false, message, data);
     }
+
+    public String getStatus() {
+        return success ? "SUCCESS" : "ERROR";
+    }
 }

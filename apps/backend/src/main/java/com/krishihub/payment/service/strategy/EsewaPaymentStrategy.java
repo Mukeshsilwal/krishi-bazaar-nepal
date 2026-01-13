@@ -1,10 +1,11 @@
-package com.krishihub.payment.service;
+package com.krishihub.payment.service.strategy;
 
 import com.krishihub.payment.config.EsewaProperties;
+import com.krishihub.payment.entity.Transaction;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -17,27 +18,29 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@Service
+@Component
 @RequiredArgsConstructor
 @Slf4j
-public class EsewaPaymentService {
+public class EsewaPaymentStrategy implements PaymentStrategy {
 
     private final EsewaProperties esewaProperties;
     private final RestTemplate restTemplate;
 
     private static final String HMAC_SHA256 = "HmacSHA256";
 
-    /**
-     * Initiate payment with eSewa V2 API
-     * Returns HTML form for auto-submission to eSewa gateway
-     */
-    public Map<String, Object> initiatePayment(UUID orderId, BigDecimal amount) {
+    @Override
+    public Transaction.PaymentMethod getPaymentMethod() {
+        return Transaction.PaymentMethod.ESEWA;
+    }
+
+    @Override
+    public PaymentInitiationResult initiatePayment(UUID orderId, BigDecimal amount) {
         try {
             // Calculate amounts
             double amt = amount.doubleValue();
             double taxAmt = 0.0;
-            double psc = 0.0; // product_service_charge
-            double pdc = 0.0; // product_delivery_charge
+            double psc = 0.0;
+            double pdc = 0.0;
             double tAmt = amt + taxAmt + psc + pdc;
 
             String pid = orderId.toString();
@@ -45,13 +48,10 @@ public class EsewaPaymentService {
             String su = buildCallbackUrl(esewaProperties.getSuccessUrl(), pid);
             String fu = buildCallbackUrl(esewaProperties.getFailureUrl(), pid);
 
-            // V2 API signature format:
-            // HMAC_SHA256(total_amount,transaction_uuid,product_code)
             String signature = generateEsewaV2Signature(tAmt, pid, scd, esewaProperties.getSecretKey());
 
             log.info("eSewa Payment Initiation - Transaction ID: {}, Amount: {}, Signature generated", pid, tAmt);
 
-            // Build HTML auto-submit form for v2 API
             String htmlForm = """
                     <html>
                       <body onload="document.forms[0].submit()">
@@ -90,8 +90,11 @@ public class EsewaPaymentService {
             responseData.put("amount", amt);
             responseData.put("totalAmount", tAmt);
 
-            log.info("Payment form generated successfully for order: {}", orderId);
-            return responseData;
+            return PaymentInitiationResult.builder()
+                    .transactionId(pid) // For eSewa, Order ID is used as Transaction ID initially
+                    .paymentUrl("esewa-redirect") // Placeholder
+                    .paymentData(responseData)
+                    .build();
 
         } catch (Exception e) {
             log.error("Error initiating eSewa payment", e);
@@ -99,54 +102,7 @@ public class EsewaPaymentService {
         }
     }
 
-    /**
-     * Generates eSewa V2 API signature
-     * Format: Base64(HMAC_SHA256(secret,
-     * "total_amount=X,transaction_uuid=Y,product_code=Z"))
-     */
-    private String generateEsewaV2Signature(double totalAmount, String transactionUuid, String productCode,
-            String secretKey) throws Exception {
-        String amtStr = trimAmount(totalAmount);
-
-        String message = String.format("total_amount=%s,transaction_uuid=%s,product_code=%s",
-                amtStr, transactionUuid, productCode);
-
-        log.debug("Signature message: {}", message);
-
-        Mac mac = Mac.getInstance(HMAC_SHA256);
-        SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), HMAC_SHA256);
-        mac.init(secretKeySpec);
-        byte[] rawHmac = mac.doFinal(message.getBytes(StandardCharsets.UTF_8));
-
-        String signature = Base64.getEncoder().encodeToString(rawHmac);
-        log.debug("Generated signature: {}", signature);
-
-        return signature;
-    }
-
-    /**
-     * Ensures numeric formatting is consistent
-     */
-    private String trimAmount(double value) {
-        BigDecimal bd = BigDecimal.valueOf(value).stripTrailingZeros();
-        return bd.toPlainString();
-    }
-
-    /**
-     * Basic HTML escape for values inserted into attributes
-     */
-    private String htmlEscape(String s) {
-        if (s == null)
-            return "";
-        return s.replace("&", "&amp;")
-                .replace("\"", "&quot;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;");
-    }
-
-    /**
-     * Verify payment with eSewa
-     */
+    @Override
     public boolean verifyPayment(String transactionId, BigDecimal amount) {
         try {
             String url = UriComponentsBuilder
@@ -176,18 +132,38 @@ public class EsewaPaymentService {
         }
     }
 
-    /**
-     * Build callback URL with transaction ID parameter
-     */
+    private String generateEsewaV2Signature(double totalAmount, String transactionUuid, String productCode,
+            String secretKey) throws Exception {
+        String amtStr = trimAmount(totalAmount);
+        String message = String.format("total_amount=%s,transaction_uuid=%s,product_code=%s",
+                amtStr, transactionUuid, productCode);
+
+        Mac mac = Mac.getInstance(HMAC_SHA256);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), HMAC_SHA256);
+        mac.init(secretKeySpec);
+        byte[] rawHmac = mac.doFinal(message.getBytes(StandardCharsets.UTF_8));
+        return Base64.getEncoder().encodeToString(rawHmac);
+    }
+
+    private String trimAmount(double value) {
+        BigDecimal bd = BigDecimal.valueOf(value).stripTrailingZeros();
+        return bd.toPlainString();
+    }
+
+    private String htmlEscape(String s) {
+        if (s == null) return "";
+        return s.replace("&", "&amp;")
+                .replace("\"", "&quot;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
+    }
+
     private String buildCallbackUrl(String baseUrl, String transactionId) {
         return baseUrl.contains("?")
                 ? baseUrl + "&txnId=" + transactionId
                 : baseUrl + "?txnId=" + transactionId;
     }
 
-    /**
-     * Parse eSewa verification response
-     */
     private VerificationResult parseVerificationResponse(String response) {
         VerificationResult result = new VerificationResult();
         result.setRawResponse(response);
@@ -209,84 +185,36 @@ public class EsewaPaymentService {
         } else {
             result.setFailureReason(extractFailureReason(response));
         }
-
         return result;
     }
 
-    /**
-     * Extract reference ID from verification response
-     */
     private String extractRefId(String response) {
         try {
             int idx = response.indexOf("ref_id");
-            if (idx == -1)
-                return "N/A";
+            if (idx == -1) return "N/A";
             int start = idx + 8;
             int end = response.indexOf("\"", start);
-            if (end == -1)
-                end = response.length();
+            if (end == -1) end = response.length();
             return response.substring(start, end).trim();
         } catch (Exception e) {
-            log.warn("Failed to extract ref_id from response", e);
             return "N/A";
         }
     }
 
-    /**
-     * Extract failure reason from verification response
-     */
     private String extractFailureReason(String response) {
         response = response.toLowerCase();
-        if (response.contains("insufficient"))
-            return "Insufficient balance";
-        if (response.contains("invalid"))
-            return "Invalid transaction or credentials";
-        if (response.contains("expired"))
-            return "Transaction expired";
-        if (response.contains("cancelled"))
-            return "Cancelled by user";
+        if (response.contains("insufficient")) return "Insufficient balance";
+        if (response.contains("invalid")) return "Invalid transaction or credentials";
+        if (response.contains("expired")) return "Transaction expired";
+        if (response.contains("cancelled")) return "Cancelled by user";
         return "Payment verification failed";
     }
 
-    /**
-     * Inner class to hold verification result
-     */
+    @lombok.Data
     private static class VerificationResult {
         private boolean success;
         private String refId;
         private String failureReason;
         private String rawResponse;
-
-        public boolean isSuccess() {
-            return success;
-        }
-
-        public void setSuccess(boolean success) {
-            this.success = success;
-        }
-
-        public String getRefId() {
-            return refId;
-        }
-
-        public void setRefId(String refId) {
-            this.refId = refId;
-        }
-
-        public String getFailureReason() {
-            return failureReason;
-        }
-
-        public void setFailureReason(String failureReason) {
-            this.failureReason = failureReason;
-        }
-
-        public String getRawResponse() {
-            return rawResponse;
-        }
-
-        public void setRawResponse(String rawResponse) {
-            this.rawResponse = rawResponse;
-        }
     }
 }

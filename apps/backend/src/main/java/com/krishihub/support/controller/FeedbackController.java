@@ -28,7 +28,7 @@ public class FeedbackController {
         // entity
         // For now, let's look up by username or if we have ID in token principal
         // Simpler: assume we can get ID from userDetails or lookup
-        UUID userId = ((User) userDetails).getId();
+        UUID userId = ((com.krishihub.auth.model.CustomUserDetails) userDetails).getId();
 
         return ResponseEntity.ok(ApiResponse.success("Feedback submitted",
                 feedbackService.submitFeedback(userId, request.getType(), request.getMessage())));

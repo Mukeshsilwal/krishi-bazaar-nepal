@@ -18,7 +18,12 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+/**
+ * DEPRECATED: Replaced by SeleniumScraperService which supports JavaScript rendering.
+ * JSoup cannot execute JavaScript, so this service fails on dynamic pages like RamroPatro.
+ * Keeping this file for reference but not as an active bean.
+ */
+// @Service - Disabled in favor of SeleniumScraperService
 @Slf4j
 public class HtmlScraperService implements MarketPriceDataSource {
 

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/services/api';
-import { ADMIN_ENDPOINTS } from '@/config/endpoints';
 import { toast } from 'sonner';
 import {
     Card,
@@ -18,91 +17,93 @@ import { TableSkeleton } from '@/components/ui/skeletons';
 import PageHeader from '@/components/admin/PageHeader';
 import { Save, RefreshCw } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 
-interface SystemConfig {
+interface SystemSetting {
+    id: string;
     key: string;
     value: string;
     description: string;
     type: 'STRING' | 'NUMBER' | 'BOOLEAN' | 'JSON';
-    category: string;
-    editable: boolean;
+    public: boolean;
 }
 
 const SettingsManager = () => {
-    const [configs, setConfigs] = useState<SystemConfig[]>([]);
+    const [settings, setSettings] = useState<SystemSetting[]>([]);
     const [loading, setLoading] = useState(true);
     const [editing, setEditing] = useState<Record<string, string>>({});
-    const [saving, setSaving] = useState<Record<string, boolean>>({});
+    const [saving, setSaving] = useState(false);
 
     useEffect(() => {
-        fetchConfigs();
+        fetchSettings();
     }, []);
 
-    const fetchConfigs = async () => {
+    const fetchSettings = async () => {
         setLoading(true);
         try {
-            const res = await api.get(ADMIN_ENDPOINTS.SETTINGS);
+            const res = await api.get('/admin/settings');
             if (res.data.success) {
-                setConfigs(res.data.data);
+                setSettings(res.data.data);
             }
         } catch (err) {
             console.error(err);
-            toast.error("Failed to load system configurations");
+            toast.error("Failed to load settings");
         } finally {
             setLoading(false);
         }
     };
 
-    const handleUpdate = async (key: string, value: string) => {
-        setSaving(prev => ({ ...prev, [key]: true }));
+    const handleUpdate = async () => {
+        setSaving(true);
         try {
-            const res = await api.put(ADMIN_ENDPOINTS.SETTING_BY_KEY(key), { value });
+            const res = await api.post('/admin/settings', settings);
             if (res.data.success) {
-                toast.success("Configuration updated successfully");
-                // Update local state
-                setConfigs(prev => prev.map(c => c.key === key ? { ...c, value } : c));
-                // Clear editing state
-                setEditing(prev => {
-                    const next = { ...prev };
-                    delete next[key];
-                    return next;
-                });
+                toast.success("Settings updated successfully");
+                setSettings(res.data.data);
+                setEditing({});
             }
         } catch (err) {
             console.error(err);
-            toast.error("Failed to update configuration");
+            toast.error("Failed to update settings");
         } finally {
-            setSaving(prev => ({ ...prev, [key]: false }));
+            setSaving(false);
         }
     };
 
-    const handleInputChange = (key: string, value: string) => {
-        setEditing(prev => ({ ...prev, [key]: value }));
+    const handleChange = (index: number, value: string) => {
+        const newSettings = [...settings];
+        newSettings[index].value = value;
+        setSettings(newSettings);
+        setEditing(prev => ({ ...prev, [newSettings[index].key]: value }));
     };
 
-    const getUniqueCategories = () => {
-        const categories = new Set(configs.map(c => c.category || 'OTHER'));
-        return Array.from(categories).sort();
-    };
+    // Group settings by prefix (first word)
+    const groupedSettings = settings.reduce((acc, setting) => {
+        const prefix = setting.key.split('_')[0];
+        if (!acc[prefix]) acc[prefix] = [];
+        acc[prefix].push(setting);
+        return acc;
+    }, {} as Record<string, SystemSetting[]>);
 
-    const filteredConfigs = (category: string) => {
-        return configs.filter(c => (c.category || 'OTHER') === category);
-    };
+    const categories = Object.keys(groupedSettings).sort();
 
     if (loading) return <div className="p-6"><TableSkeleton /></div>;
-
-    const categories = getUniqueCategories();
 
     return (
         <div className="space-y-6">
             <PageHeader
                 title="System Configuration"
-                description="Manage global application settings, thresholds, and feature flags."
+                description="Manage global application settings, thresholds, and content."
                 breadcrumbs={[{ label: 'Settings' }]}
                 actions={
-                    <Button variant="outline" size="sm" onClick={fetchConfigs}>
-                        <RefreshCw className="h-4 w-4 mr-2" /> Refresh
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={fetchSettings}>
+                            <RefreshCw className="h-4 w-4 mr-2" /> Refresh
+                        </Button>
+                        <Button size="sm" onClick={handleUpdate} disabled={saving}>
+                            <Save className="h-4 w-4 mr-2" /> {saving ? 'Saving...' : 'Save Changes'}
+                        </Button>
+                    </div>
                 }
             />
 
@@ -115,53 +116,40 @@ const SettingsManager = () => {
 
                 {categories.map(category => (
                     <TabsContent key={category} value={category} className="space-y-4">
-                        {filteredConfigs(category).map((config) => (
-                            <Card key={config.key}>
-                                <CardHeader className="pb-4">
-                                    <div className="flex items-center justify-between">
-                                        <div className="space-y-1">
-                                            <div className="flex items-center gap-2">
-                                                <CardTitle className="text-base font-medium">{config.key}</CardTitle>
-                                                {!config.editable && <Badge variant="secondary">Read Only</Badge>}
+                        {groupedSettings[category].map((setting) => {
+                            const realIndex = settings.findIndex(s => s.key === setting.key);
+                            return (
+                                <Card key={setting.key}>
+                                    <CardHeader className="pb-4">
+                                        <div className="flex items-center justify-between">
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-2">
+                                                    <CardTitle className="text-base font-medium">{setting.key}</CardTitle>
+                                                    {setting.public && <Badge variant="outline">Public</Badge>}
+                                                </div>
+                                                <CardDescription>{setting.description}</CardDescription>
                                             </div>
-                                            <CardDescription>{config.description}</CardDescription>
                                         </div>
-                                        {config.type === 'BOOLEAN' && config.editable && (
-                                            <Switch
-                                                checked={config.value === 'true'}
-                                                onCheckedChange={(checked) => handleUpdate(config.key, String(checked))}
-                                                disabled={saving[config.key]}
-                                            />
-                                        )}
-                                    </div>
-                                </CardHeader>
-                                {(config.type !== 'BOOLEAN' || !config.editable) && (
+                                    </CardHeader>
                                     <CardContent>
-                                        <div className="flex gap-2">
-                                            <div className="flex-1">
-                                                <Label className="sr-only">Value</Label>
-                                                <Input
-                                                    value={editing[config.key] ?? config.value}
-                                                    onChange={(e) => handleInputChange(config.key, e.target.value)}
-                                                    disabled={!config.editable || saving[config.key]}
-                                                    type={config.type === 'NUMBER' ? 'number' : 'text'}
+                                        <div className="space-y-2">
+                                            {setting.value.length > 100 || setting.key.includes('DESCRIPTION') || setting.key.includes('DESC') ? (
+                                                <Textarea
+                                                    value={setting.value}
+                                                    onChange={(e) => handleChange(realIndex, e.target.value)}
+                                                    className="min-h-[100px]"
                                                 />
-                                            </div>
-                                            {config.editable && editing[config.key] !== undefined && editing[config.key] !== config.value && (
-                                                <Button
-                                                    size="sm"
-                                                    onClick={() => handleUpdate(config.key, editing[config.key])}
-                                                    disabled={saving[config.key]}
-                                                >
-                                                    {saving[config.key] ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-                                                    Save
-                                                </Button>
+                                            ) : (
+                                                <Input
+                                                    value={setting.value}
+                                                    onChange={(e) => handleChange(realIndex, e.target.value)}
+                                                />
                                             )}
                                         </div>
                                     </CardContent>
-                                )}
-                            </Card>
-                        ))}
+                                </Card>
+                            );
+                        })}
                     </TabsContent>
                 ))}
             </Tabs>

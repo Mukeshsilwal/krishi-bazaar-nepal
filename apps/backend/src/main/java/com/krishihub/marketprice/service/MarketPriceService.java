@@ -122,6 +122,17 @@ public class MarketPriceService {
         return getPricesByDate(LocalDate.now());
     }
 
+    public List<MarketPriceDto> getTodaysPricesList(String district) {
+        if (district == null || district.isEmpty()) {
+            return getTodaysPrices();
+        }
+        // Use unpaged pageable to get list behavior from the Page-returning repository method
+        return priceRepository.findByDistrictAndPriceDate(district, LocalDate.now(), org.springframework.data.domain.Pageable.unpaged())
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
     @Cacheable(value = "availableCrops")
     public List<String> getAvailableCrops() {
         return priceRepository.findDistinctCropNames();
@@ -211,5 +222,54 @@ public class MarketPriceService {
 
     public List<PriceStats> getPriceHistory(String cropName, String district, LocalDate startDate, LocalDate endDate) {
         return priceRepository.findPriceHistory(cropName, district, startDate, endDate);
+    }
+
+    @Cacheable(value = "marketPriceAnalytics")
+    public List<com.krishihub.marketprice.dto.MarketPriceAnalyticsDto> getAnalytics() {
+        List<String> crops = priceRepository.findDistinctCropNames();
+        List<String> districts = priceRepository.findDistinctDistricts(); // Ideally we might aggregate per district or global. Let's do Global Crop Average for now.
+        
+        // Use a "National" or most common district? Or just average across the main district "Kathmandu" for better consistency if multi-district is complex.
+        // For simplicity and user value, let's pick "Kathmandu" as the benchmark if it exists, otherwise the first available.
+        String benchmarkDistrict = districts.contains("Kathmandu") ? "Kathmandu" : (districts.isEmpty() ? "Unknown" : districts.get(0));
+
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(30);
+
+        return crops.stream().map(crop -> {
+            List<PriceStats> history = priceRepository.findPriceHistory(crop, benchmarkDistrict, startDate, endDate);
+            
+            if (history.isEmpty()) return null;
+
+            double min = history.stream().mapToDouble(PriceStats::getMin).min().orElse(0.0);
+            double max = history.stream().mapToDouble(PriceStats::getMax).max().orElse(0.0);
+            double avg = history.stream().mapToDouble(PriceStats::getAvg).average().orElse(0.0);
+
+            // Trend Calculation (Last 7 days vs Previous 7 days)
+            String trend = "STABLE";
+            if (history.size() >= 2) {
+                double recentAvg = history.stream()
+                        .filter(s -> s.getDate().isAfter(endDate.minusDays(7)))
+                        .mapToDouble(PriceStats::getAvg).average().orElse(0.0);
+                
+                double oldAvg = history.stream()
+                        .filter(s -> s.getDate().isBefore(endDate.minusDays(7)))
+                        .mapToDouble(PriceStats::getAvg).average().orElse(0.0);
+
+                if (oldAvg > 0) {
+                    double change = (recentAvg - oldAvg) / oldAvg;
+                    if (change > 0.05) trend = "UP";
+                    else if (change < -0.05) trend = "DOWN";
+                }
+            }
+
+            return com.krishihub.marketprice.dto.MarketPriceAnalyticsDto.builder()
+                    .cropName(crop)
+                    .minPrice(java.math.BigDecimal.valueOf(min))
+                    .maxPrice(java.math.BigDecimal.valueOf(max))
+                    .averagePrice(java.math.BigDecimal.valueOf(avg))
+                    .trend(trend)
+                    .build();
+        }).filter(java.util.Objects::nonNull).collect(Collectors.toList());
     }
 }

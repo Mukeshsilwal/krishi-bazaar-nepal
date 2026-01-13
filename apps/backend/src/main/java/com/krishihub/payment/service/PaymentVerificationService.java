@@ -2,11 +2,15 @@ package com.krishihub.payment.service;
 
 import com.krishihub.payment.entity.Transaction;
 import com.krishihub.payment.repository.TransactionRepository;
+import com.krishihub.payment.service.strategy.PaymentStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -15,9 +19,21 @@ import java.util.Optional;
 public class PaymentVerificationService {
 
     private final TransactionRepository transactionRepository;
-    private final EsewaPaymentService esewaService;
-    private final KhaltiPaymentService khaltiService;
     private final PaymentService paymentService;
+    private final List<PaymentStrategy> paymentStrategies;
+    private Map<Transaction.PaymentMethod, PaymentStrategy> strategyMap;
+
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        strategyMap = new EnumMap<>(Transaction.PaymentMethod.class);
+        for (PaymentStrategy strategy : paymentStrategies) {
+            strategyMap.put(strategy.getPaymentMethod(), strategy);
+        }
+    }
+
+    private PaymentStrategy getStrategy(Transaction.PaymentMethod method) {
+        return strategyMap.get(method);
+    }
 
     /**
      * Verifies a single transaction with the gateway.
@@ -31,35 +47,33 @@ public class PaymentVerificationService {
 
         try {
             boolean verified = false;
-            String gatewayTxnId = transaction.getTransactionId(); // May be null initially for eSewa
+            String gatewayTxnId = transaction.getTransactionId(); 
+            PaymentStrategy strategy = getStrategy(transaction.getPaymentMethod());
 
-            if (transaction.getPaymentMethod() == Transaction.PaymentMethod.ESEWA) {
-                // For eSewa, we often use the Order ID or a unique ref generated during initiation as 'pid'
-                // The transaction.getOrder().getId() is used as PID in EsewaPaymentService
-                String pid = transaction.getOrder().getId().toString();
-                verified = esewaService.verifyPayment(pid, transaction.getAmount());
-            } else if (transaction.getPaymentMethod() == Transaction.PaymentMethod.KHALTI) {
-                if (gatewayTxnId != null) {
-                    verified = khaltiService.verifyPayment(gatewayTxnId);
-                }
+            if (strategy != null) {
+                 String verifyId = gatewayTxnId;
+                 if (transaction.getPaymentMethod() == Transaction.PaymentMethod.ESEWA) {
+                     // eSewa fallback logic
+                     verifyId = transaction.getOrder().getId().toString();
+                 }
+                 
+                 // If ID is still null (e.g. Khalti init failed and no PIDX saved), we can't verify
+                 if (verifyId != null) {
+                    verified = strategy.verifyPayment(verifyId, transaction.getAmount());
+                 }
             }
 
             if (verified) {
-                // We use PaymentService to finalize because it handles Order Status update & Events
-                // But PaymentService.verifyPayment takes a "gatewayTransactionId" which we might need to fetch/assume.
-                // For reconciliation, we might reuse PaymentService or call logic here.
-                // Reuse PaymentService.verifyPayment to ensure DRY.
-                // But PaymentService.verifyPayment requires 'gatewayTransactionId' param which eSewa verification gives back as RefID
-                
-                // We need to fetch the RefID/Pidx from the verification result if possible.
-                // My EsewaPaymentService.verifyPayment returns boolean, logging RefID but not returning it.
-                // I might need to refactor EsewaPaymentService to return more details or just pass a placeholder if not critical for now.
-                
-                 paymentService.verifyPayment(transaction.getId(), "RECONCILED-" + System.currentTimeMillis());
+                 // Reuse PaymentService to finalize
+                 // We pass the ID we used for verification as the gateway ID
+                 String confirmId = gatewayTxnId;
+                 if (transaction.getPaymentMethod() == Transaction.PaymentMethod.ESEWA) {
+                     confirmId = transaction.getOrder().getId().toString();
+                 }
+                 
+                 paymentService.verifyPayment(transaction.getId(), confirmId);
                  return true;
             } else {
-                 // Check if expired? If too old, mark FAILED?
-                 // For now, just log.
                  log.debug("Verification failed for txn {}", transaction.getId());
             }
 

@@ -1,6 +1,5 @@
 package com.krishihub.support.entity;
 
-import com.krishihub.auth.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,48 +12,34 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "feedback")
+@Table(name = "contact_messages")
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Feedback {
+public class ContactMessage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private User user;
-
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private FeedbackType type;
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
+
+    @Column(nullable = false)
+    private String email;
+
+    @Column(nullable = false)
+    private String subject;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String message;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @Builder.Default
-    private FeedbackStatus status = FeedbackStatus.OPEN;
-
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    public enum FeedbackType {
-        ISSUE,
-        SUGGESTION,
-        OTHER
-    }
-
-    public enum FeedbackStatus {
-        OPEN,
-        RESOLVED,
-        REJECTED
-    }
 }

@@ -3,7 +3,7 @@ import WeatherCard from '@/features/dashboard/components/WeatherCard';
 import StatCard from '@/features/dashboard/components/StatCard';
 import MarketStats from '@/features/dashboard/components/MarketStats';
 import AdvisoryWidget from '@/features/dashboard/components/AdvisoryWidget';
-import { Sprout, Wheat, ShoppingBag, ExternalLink } from 'lucide-react';
+import { Sprout, ShoppingBag, ExternalLink } from 'lucide-react';
 import { useAuth } from '@/modules/auth/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import marketPriceService from '@/modules/marketplace/services/marketPriceService';
@@ -11,13 +11,14 @@ import orderService from '@/modules/orders/services/orderService';
 import financeService from '@/services/financeService';
 import { Link } from 'react-router-dom';
 
+import { useSettings } from '@/context/SettingsContext';
+
 const Index = () => {
   const { user } = useAuth();
   const { language } = useLanguage();
+  const { getSetting } = useSettings();
 
   // State for dynamic data
-  const [applePrice, setApplePrice] = useState<{ price: string, unit: string, trend: number } | null>(null);
-  const [wheatPrice, setWheatPrice] = useState<{ price: string, unit: string, trend: number } | null>(null);
   const [pendingOrdersCount, setPendingOrdersCount] = useState<number>(0);
   const [latestScheme, setLatestScheme] = useState<any>(null);
 
@@ -25,28 +26,7 @@ const Index = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // 1. Fetch Market Prices (Apple & Wheat as examples for summary)
-        // Defaulting to Kathmandu for dashboard summary
-        const apple = await marketPriceService.getLatestPrice('Apple', 'Kathmandu');
-        const wheat = await marketPriceService.getLatestPrice('Wheat', 'Kathmandu');
-
-        if (apple) {
-          setApplePrice({
-            price: `Rs ${apple.avgPrice || apple.price || 'N/A'}`,
-            unit: `Per ${apple.unit || 'Kg'}`,
-            trend: 0 // Backend doesn't explicitly return trend percentage yet, defaulting to 0
-          });
-        }
-
-        if (wheat) {
-          setWheatPrice({
-            price: `Rs ${wheat.avgPrice || wheat.price || 'N/A'}`,
-            unit: `Per ${wheat.unit || 'Kg'}`,
-            trend: 0
-          });
-        }
-
-        // 2. Fetch Pending Orders Count
+        // 1. Fetch Pending Orders Count
         if (user) {
           const orders = await orderService.getMyOrders(user.role, 0, 10);
           // Assuming orders API returns a paginated response with totalElements or content array
@@ -101,23 +81,8 @@ const Index = () => {
         </div>
 
         {/* Stats - Takes remaining space */}
-        <div className="md:col-span-7 lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-6 h-[220px]">
-          <StatCard
-            titleEn="Apple Price"
-            titleNe="स्याउ मूल्य"
-            value={applePrice?.price || "N/A"}
-            subValue={applePrice?.unit || "Per Kg"}
-            trend={applePrice?.trend || 0}
-            icon={<Sprout size={24} />}
-          />
-          <StatCard
-            titleEn="Wheat Price"
-            titleNe="गहुँ मूल्य"
-            value={wheatPrice?.price || "N/A"}
-            subValue={wheatPrice?.unit || "Per Quintal"}
-            trend={wheatPrice?.trend || 0}
-            icon={<Wheat size={24} />}
-          />
+        {/* Stats - Takes remaining space */}
+        <div className="md:col-span-7 lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-6 h-[220px]">
           <StatCard
             titleEn="My Orders"
             titleNe="मेरो अर्डरहरू"
@@ -175,11 +140,13 @@ const Index = () => {
       {/* Bottom Banner */}
       <div className="bg-green-700 rounded-3xl p-8 text-white flex flex-col md:flex-row items-center justify-between relative overflow-hidden">
         <div className="relative z-10 max-w-lg">
-          <h2 className="text-2xl font-bold mb-2">Sell Your Crops Online</h2>
-          <p className="text-green-100 mb-6">Connect directly with buyers and get the best price for your produce.</p>
-          <button className="bg-white text-green-800 px-6 py-2.5 rounded-lg font-bold hover:bg-green-50 transition-colors">
-            Start Selling
-          </button>
+          <h2 className="text-2xl font-bold mb-2">
+            {getSetting('HERO_TITLE_PREFIX', "Farmers' Companion,")} <span className="text-green-300">{getSetting('HERO_TITLE_SUFFIX', "Nepal's Progress")}</span>
+          </h2>
+          <p className="text-green-100 mb-6">{getSetting('HERO_DESCRIPTION', "Krishi Sarathi connects farmers directly with markets.")}</p>
+          <Link to="/marketplace/create" className="bg-white text-green-800 px-6 py-2.5 rounded-lg font-bold hover:bg-green-50 transition-colors inline-block">
+            {language === 'ne' ? 'बेच्न सुरु गर्नुहोस्' : 'Start Selling'}
+          </Link>
         </div>
 
         {/* Decoration */}

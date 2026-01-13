@@ -69,6 +69,7 @@ const translations = {
         'dashboard.myOrders': 'मेरो अर्डर',
         'dashboard.chat': 'च्याट',
         'dashboard.profile': 'प्रोफाइल',
+        'dashboard.settings': 'सेटिङ्स',
 
         // Orders
         'orders.manage': 'आफ्नो अर्डरहरू हेर्नुहोस् र व्यवस्थापन गर्नुहोस्',
@@ -82,6 +83,9 @@ const translations = {
         'profile.verificationStatus': 'प्रमाणीकरण स्थिति',
         'profile.verified': 'प्रमाणित',
         'profile.pending': 'लम्बित',
+
+        // Settings
+        'settings.manage': 'आफ्नो खाता र एप प्राथमिकताहरू व्यवस्थापन गर्नुहोस्',
 
         // Listings
         'listings.create': 'नयाँ सूची सिर्जना गर्नुहोस्',
@@ -166,6 +170,52 @@ const translations = {
         'hero.action.price.sub': 'दैनिक भाउ',
         'hero.action.buy': 'किन्नुहोस्',
         'hero.action.buy.sub': 'ताजा उत्पादन',
+
+        // About Page
+        'about.title': 'नेपालको कृषिलाई सशक्त बनाउँदै',
+        'about.subtitle': 'कृषि बजार कृषकलाई सिधै खरिदकर्तासँग जोड्ने, उचित मूल्य सुनिश्चित गर्ने र नोक्सानी कम गर्ने एक विस्तृत डिजिटल प्लेटफर्म हो।',
+        'about.mission.title': 'हाम्रो मिशन',
+        'about.mission.desc': 'प्रविधिको प्रयोग गरी बिचौलिया हटाउने, वास्तविक समयको बजार तथ्याङ्क प्रदान गर्ने र हरेक किसानलाई डिजिटल अर्थतन्त्रमा सफल हुन आवश्यक उपकरणहरू प्रदान गरी नेपालको कृषि क्षेत्रमा क्रान्ति ल्याउने।',
+        'about.vision.title': 'हाम्रो दृष्टिकोण',
+        'about.vision.desc': 'एक पारदर्शी, प्रभावकारी र दिगो कृषि पारिस्थितिक प्रणाली जहाँ किसानहरूले आफ्नो उत्पादनको उत्तम मूल्य पाउँछन् र उपभोक्ताहरूले उचित मूल्यमा ताजा, गुणस्तरीय उत्पादनहरू पाउँछन्।',
+        'about.why.title': 'हामीलाई किन रोज्ने?',
+        'about.why.1.title': 'प्रत्यक्ष सम्पर्क',
+        'about.why.1.desc': 'अनावश्यक मध्यस्थकर्ताहरूलाई पन्छाउँदै किसान र खरिदकर्ताहरूसँग सिधै जोडिनुहोस्।',
+        'about.why.2.title': 'उचित बजार मूल्य',
+        'about.why.2.desc': 'कालिमाटी र अन्य बजारका वास्तविक समयका मूल्यहरू र प्रवृत्तिहरू हेरेर सही निर्णय लिनुहोस्।',
+        'about.why.3.title': 'प्रभावकारी रसद',
+        'about.why.3.desc': 'एकीकृत शीत भण्डार बुकिङ र यातायात रसद सहयोग।',
+        'about.why.4.title': 'गुणस्तर सुनिश्चितता',
+        'about.why.4.desc': 'प्रमाणित किसानहरू र गुणस्तर जाँचहरू जसले तपाईंलाई उत्तम उत्पादन प्राप्त गर्न सुनिश्चित गर्दछ।',
+        'about.cta.title': 'आफ्नो कृषि व्यवसाय परिवर्तन गर्न तयार हुनुहुन्छ?',
+        'about.cta.subtitle': 'आफ्नो व्यवसाय बढाउन पहिले नै कृषि बजार प्रयोग गरिरहेका हजारौं किसान र खरिदकर्ताहरूसँग जोडिनुहोस्।',
+        'about.cta.join': 'अहिले जोडिनुहोस्',
+        'about.cta.explore': 'बजार अन्वेषण गर्नुहोस्',
+
+        // Contact Page
+        'contact.title': 'सम्पर्कमा रहनुहोस्',
+        'contact.subtitle': 'कृषि बजारको बारेमा प्रश्नहरू छन्? हामी तपाईंलाई मद्दत गर्न यहाँ छौं।',
+        'contact.visit': 'हामीलाई भेट्नुहोस्',
+        'contact.email': 'हामीलाई इमेल गर्नुहोस्',
+        'contact.call': 'हामीलाई कल गर्नुहोस्',
+        'contact.form.title': 'हामीलाई सन्देश पठाउनुहोस्',
+        'contact.form.subtitle': 'तलको फारम भर्नुहोस् र हाम्रो टोलीले तपाईंलाई सम्पर्क गर्नेछ।',
+        'contact.form.firstName': 'नाम',
+        'contact.form.lastName': 'थर',
+        'contact.form.email': 'इमेल',
+        'contact.form.subject': 'विषय',
+        'contact.form.message': 'सन्देश',
+        'contact.form.send': 'सन्देश पठाउनुहोस्',
+        'contact.form.sending': 'पठाउँदै...',
+        'contact.info.visitUs': 'हामीलाई भेट्नुहोस्',
+        'contact.info.callUs': 'हामीलाई कल गर्नुहोस्',
+        'contact.info.available': 'सहयोगको लागि उपलब्ध',
+        'contact.info.emailUs': 'हामीलाई इमेल गर्नुहोस्',
+        'contact.info.response': 'हामी २४ घण्टा भित्र जवाफ दिनेछौं',
+        'contact.success': 'सन्देश सफलतापूर्वक पठाइयो!',
+        'contact.success.desc': 'हामीलाई सम्पर्क गर्नुभएकोमा धन्यवाद। हामी तपाईंलाई छिट्टै सम्पर्क गर्नेछौं।',
+        'contact.error': 'सन्देश पठाउन असफल भयो',
+        'contact.error.desc': 'कृपया केही समयपछि पुनः प्रयास गर्नुहोस् वा हामीलाई फोन मार्फत सम्पर्क गर्नुहोस्।',
     },
     en: {
         // Navbar
@@ -224,11 +274,11 @@ const translations = {
         'footer.subtagline': 'Empowering Nepali farmers with technology.',
         'footer.rights': 'All rights reserved.',
 
-        // Dashboard keys
         'dashboard.myListings': 'My Listings',
         'dashboard.myOrders': 'My Orders',
         'dashboard.chat': 'Chat',
         'dashboard.profile': 'Profile',
+        'dashboard.settings': 'Settings',
 
         // Orders
         'orders.manage': 'View and manage your orders',
@@ -242,6 +292,9 @@ const translations = {
         'profile.verificationStatus': 'Verification Status',
         'profile.verified': 'Verified',
         'profile.pending': 'Pending',
+
+        // Settings
+        'settings.manage': 'Manage your account and app preferences',
 
         // Listings
         'listings.manage': 'Manage your crop listings',
@@ -325,6 +378,52 @@ const translations = {
         'hero.action.price.sub': 'Today\'s market rates',
         'hero.action.buy': 'Buy Produce',
         'hero.action.buy.sub': 'Fresh from farm',
+
+        // About Page
+        'about.title': 'Empowering Nepal\'s Agriculture',
+        'about.subtitle': 'Krishi Bazaar is a comprehensive digital platform connecting farmers directly with buyers, ensuring fair prices and reducing wastage.',
+        'about.mission.title': 'Our Mission',
+        'about.mission.desc': 'To revolutionize the agricultural landscape of Nepal by leveraging technology to eliminate middlemen, provide real-time market data, and empower every farmer with the tools they need to succeed in a digital economy.',
+        'about.vision.title': 'Our Vision',
+        'about.vision.desc': 'A transparent, efficient, and sustainable agricultural ecosystem where farmers get the best value for their produce and consumers get fresh, quality products at fair prices.',
+        'about.why.title': 'Why Choose Us?',
+        'about.why.1.title': 'Direct Connection',
+        'about.why.1.desc': 'Connect directly with farmers and buyers, bypassing unnecessary intermediaries.',
+        'about.why.2.title': 'Fair Market Prices',
+        'about.why.2.desc': 'Access real-time mandi prices and trends to make informed buying and selling decisions.',
+        'about.why.3.title': 'Efficient Logistics',
+        'about.why.3.desc': 'Integrated cold storage booking and transport logistics support.',
+        'about.why.4.title': 'Quality Assurance',
+        'about.why.4.desc': 'Verified farmers and quality checks to ensure you get the best produce.',
+        'about.cta.title': 'Ready to Transform Your Agri-Business?',
+        'about.cta.subtitle': 'Join thousands of farmers and buyers already using Krishi Bazaar to grow their business.',
+        'about.cta.join': 'Join Now',
+        'about.cta.explore': 'Explore Marketplace',
+
+        // Contact Page
+        'contact.title': 'Get in Touch',
+        'contact.subtitle': 'Have questions about Krishi Bazaar? We\'re here to help you grow.',
+        'contact.visit': 'Visit Us',
+        'contact.email': 'Email Us',
+        'contact.call': 'Call Us',
+        'contact.form.title': 'Send us a Message',
+        'contact.form.subtitle': 'Fill out the form below and our team will reach out.',
+        'contact.form.firstName': 'First Name',
+        'contact.form.lastName': 'Last Name',
+        'contact.form.email': 'Email',
+        'contact.form.subject': 'Subject',
+        'contact.form.message': 'Message',
+        'contact.form.send': 'Send Message',
+        'contact.form.sending': 'Sending...',
+        'contact.info.visitUs': 'Visit Us',
+        'contact.info.callUs': 'Call Us',
+        'contact.info.available': 'Available for support',
+        'contact.info.emailUs': 'Email Us',
+        'contact.info.response': 'We\'ll respond within 24 hours',
+        'contact.success': 'Message sent successfully!',
+        'contact.success.desc': 'Thank you for contacting us. We\'ll get back to you shortly.',
+        'contact.error': 'Failed to send message',
+        'contact.error.desc': 'Please try again later or contact us via phone.',
     },
 };
 

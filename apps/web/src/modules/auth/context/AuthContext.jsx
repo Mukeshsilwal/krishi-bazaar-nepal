@@ -12,6 +12,18 @@ export const AuthProvider = ({ children }) => {
         const storedUser = authService.getUser();
         if (storedUser) {
             setUser(storedUser);
+
+            // Refresh user data from server to get latest fields (like createdAt)
+            authService.getCurrentUser()
+                .then(response => {
+                    if (response.success && response.data) {
+                        setUser(response.data);
+                        localStorage.setItem('user', JSON.stringify(response.data));
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed to refresh user data:', err);
+                });
         }
         setLoading(false);
     }, []);
