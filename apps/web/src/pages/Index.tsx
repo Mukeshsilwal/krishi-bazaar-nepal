@@ -3,7 +3,7 @@ import WeatherCard from '@/features/dashboard/components/WeatherCard';
 import StatCard from '@/features/dashboard/components/StatCard';
 import MarketStats from '@/features/dashboard/components/MarketStats';
 import AdvisoryWidget from '@/features/dashboard/components/AdvisoryWidget';
-import { Sprout, ShoppingBag, ExternalLink } from 'lucide-react';
+import { Sprout, ShoppingBag, ExternalLink, MapPin } from 'lucide-react';
 import { useAuth } from '@/modules/auth/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import marketPriceService from '@/modules/marketplace/services/marketPriceService';
@@ -52,11 +52,13 @@ const Index = () => {
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (language === 'ne') {
-      return 'नमस्ते';
+      if (hour >= 5 && hour < 12) return 'शुभ प्रभात ☀️';
+      if (hour >= 12 && hour < 18) return 'शुभ दिन 🌤';
+      return 'शुभ सन्ध्या 🌙';
     }
-    if (hour < 12) return 'Good Morning';
-    if (hour < 18) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour >= 5 && hour < 12) return 'Good Morning ☀️';
+    if (hour >= 12 && hour < 18) return 'Good Afternoon 🌤';
+    return 'Good Evening 🌙';
   };
 
   return (
@@ -66,7 +68,11 @@ const Index = () => {
         <h1 className="text-3xl font-bold text-gray-900">
           {getGreeting()}, <span className="text-green-700">{user?.name || (language === 'ne' ? 'किसान मित्र' : 'Farmer Friend')}!</span>
         </h1>
-        <p className="text-gray-500 mt-2">
+        <div className="flex items-center gap-1.5 text-gray-500 mt-2">
+          <MapPin size={16} className="text-green-600" />
+          <span>{user?.district || (language === 'ne' ? 'नेपाल' : 'Nepal')}</span>
+        </div>
+        <p className="text-gray-500 mt-1">
           {language === 'ne'
             ? 'आजको बजार मूल्य र कृषि जानकारी यहाँ पाउनुहोस्'
             : 'Find today\'s market prices and agri-updates here.'}
@@ -90,6 +96,9 @@ const Index = () => {
             subValue={language === 'ne' ? "कुल अर्डरहरू" : "Total Orders"}
             variant="primary"
             icon={<ShoppingBag size={24} />}
+            emptyStateLink="/marketplace"
+            emptyStateTextEn="Explore the marketplace →"
+            emptyStateTextNe="बजार हेर्नुहोस् →"
           />
         </div>
       </div>

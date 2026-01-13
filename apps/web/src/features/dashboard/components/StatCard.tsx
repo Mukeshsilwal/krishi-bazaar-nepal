@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { Link } from 'react-router-dom';
 
 interface StatCardProps {
     titleEn: string;
@@ -10,6 +11,10 @@ interface StatCardProps {
     trend?: number;
     icon: React.ReactNode;
     variant?: 'default' | 'primary';
+    loading?: boolean;
+    emptyStateLink?: string;
+    emptyStateTextEn?: string;
+    emptyStateTextNe?: string;
 }
 
 const StatCard: React.FC<StatCardProps> = ({
@@ -19,10 +24,33 @@ const StatCard: React.FC<StatCardProps> = ({
     subValue,
     trend,
     icon,
-    variant = 'default'
+    variant = 'default',
+    loading = false,
+    emptyStateLink,
+    emptyStateTextEn,
+    emptyStateTextNe
 }) => {
     const { language } = useLanguage();
     const isPrimary = variant === 'primary';
+
+    // Skeleton loading state
+    if (loading) {
+        return (
+            <div className={`rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-full shadow-sm animate-pulse ${isPrimary ? 'bg-green-700' : 'bg-white'}`}>
+                <div className="flex justify-between items-start mb-4">
+                    <div className={`p-3 rounded-xl ${isPrimary ? 'bg-white/20' : 'bg-gray-200'} w-12 h-12`}></div>
+                </div>
+                <div>
+                    <div className={`h-4 rounded w-20 mb-2 ${isPrimary ? 'bg-white/20' : 'bg-gray-200'}`}></div>
+                    <div className={`h-8 rounded w-16 mb-1 ${isPrimary ? 'bg-white/30' : 'bg-gray-300'}`}></div>
+                    <div className={`h-3 rounded w-24 ${isPrimary ? 'bg-white/20' : 'bg-gray-200'}`}></div>
+                </div>
+            </div>
+        );
+    }
+
+    // Empty state when value is "0" and empty state link is provided
+    const showEmptyState = value === '0' && emptyStateLink;
 
     return (
         <div className={`rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-full shadow-sm ${isPrimary ? 'bg-green-700 text-white' : 'bg-white text-gray-800'
@@ -45,7 +73,14 @@ const StatCard: React.FC<StatCardProps> = ({
                     {language === 'ne' ? titleNe : titleEn}
                 </h4>
                 <div className="text-2xl font-bold">{value}</div>
-                {subValue && (
+                {showEmptyState ? (
+                    <Link
+                        to={emptyStateLink}
+                        className={`text-xs mt-2 inline-flex items-center gap-1 hover:underline ${isPrimary ? 'text-green-200' : 'text-green-600'}`}
+                    >
+                        {language === 'ne' ? (emptyStateTextNe || 'बजार हेर्नुहोस् →') : (emptyStateTextEn || 'Explore marketplace →')} 🌱
+                    </Link>
+                ) : subValue && (
                     <div className={`text-xs mt-1 ${isPrimary ? 'text-green-200' : 'text-gray-400'}`}>
                         {subValue}
                     </div>
@@ -56,3 +91,4 @@ const StatCard: React.FC<StatCardProps> = ({
 };
 
 export default StatCard;
+

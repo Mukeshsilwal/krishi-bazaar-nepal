@@ -27,8 +27,29 @@ const WeatherCard = () => {
     }, [district]);
 
     if (loading) return (
-        <div className="bg-blue-600 rounded-3xl p-6 text-white h-[200px] animate-pulse flex items-center justify-center">
-            <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+        <div className="bg-gradient-to-br from-blue-600 to-blue-500 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden h-full animate-pulse">
+            <div className="relative z-10 flex flex-col h-full justify-between">
+                {/* Header skeleton */}
+                <div className="flex justify-between items-start">
+                    <div>
+                        <div className="h-4 bg-white/20 rounded w-24 mb-2"></div>
+                        <div className="h-10 bg-white/30 rounded w-16 mb-1"></div>
+                        <div className="h-3 bg-white/20 rounded w-20"></div>
+                    </div>
+                    <div className="bg-white/20 p-3 rounded-2xl w-14 h-14"></div>
+                </div>
+
+                {/* Details skeleton */}
+                <div className="grid grid-cols-2 gap-4 mt-6">
+                    <div className="bg-white/10 rounded-xl p-3 h-16"></div>
+                    <div className="bg-white/10 rounded-xl p-3 h-16"></div>
+                </div>
+
+                {/* Footer skeleton */}
+                <div className="mt-4 pt-4 border-t border-white/10">
+                    <div className="h-3 bg-white/20 rounded w-32"></div>
+                </div>
+            </div>
         </div>
     );
 
