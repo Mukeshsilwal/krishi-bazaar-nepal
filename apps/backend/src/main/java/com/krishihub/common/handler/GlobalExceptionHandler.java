@@ -4,6 +4,7 @@ import com.krishihub.common.error.ApiErrorResponse;
 import com.krishihub.common.error.ErrorCode;
 import com.krishihub.common.exception.BusinessException;
 import com.krishihub.shared.dto.ApiResponse;
+import com.krishihub.shared.exception.ActiveSessionExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -136,9 +137,9 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.error("Internal server error", errorResponse));
     }
-    @ExceptionHandler(com.krishihub.shared.exception.ActiveSessionExistsException.class)
+    @ExceptionHandler(ActiveSessionExistsException.class)
     public ResponseEntity<ApiResponse<ApiErrorResponse>> handleActiveSessionExists(
-            com.krishihub.shared.exception.ActiveSessionExistsException ex) {
+            ActiveSessionExistsException ex) {
         log.warn("Active session exists: {}", ex.getMessage());
 
         ApiErrorResponse errorResponse = new ApiErrorResponse(
