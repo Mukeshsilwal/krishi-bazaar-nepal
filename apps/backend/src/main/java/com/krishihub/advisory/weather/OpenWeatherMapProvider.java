@@ -3,6 +3,7 @@ package com.krishihub.advisory.weather;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.krishihub.advisory.weather.model.WeatherData;
+import com.krishihub.config.properties.WeatherProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 // import org.springframework.beans.factory.annotation.Value; removed
@@ -28,7 +29,7 @@ public class OpenWeatherMapProvider implements  WeatherDataProvider {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    private final com.krishihub.config.properties.WeatherProperties weatherProperties;
+    private final WeatherProperties weatherProperties;
 
     // Nepal district coordinates mapping (sample - can be expanded)
     private static final Map<String, double[]> DISTRICT_COORDINATES = Map.ofEntries(
