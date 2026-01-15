@@ -31,17 +31,14 @@ public class WeatherProperties {
     @Getter
     @Setter
     public static class Ingestion {
-        @NotBlank(message = "Cron expression must not be blank")
-        private String cron;
+        private String cron = "0 0 */6 * * *"; // Default: every 6 hours
     }
 
     @Getter
     @Setter
     public static class OpenWeatherMap {
-        @NotBlank(message = "API key must not be blank")
-        private String apiKey;
+        private String apiKey = "";
 
-        @NotBlank(message = "Base URL must not be blank")
-        private String baseUrl;
+        private String baseUrl = "https://api.openweathermap.org/data/2.5";
     }
 }
