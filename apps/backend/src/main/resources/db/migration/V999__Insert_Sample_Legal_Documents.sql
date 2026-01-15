@@ -1,3 +1,21 @@
+-- Create legal_documents table
+CREATE TABLE IF NOT EXISTS legal_documents (
+    id UUID PRIMARY KEY,
+    type VARCHAR(50) NOT NULL,
+    version VARCHAR(20) NOT NULL,
+    title_en VARCHAR(200) NOT NULL,
+    title_ne VARCHAR(200) NOT NULL,
+    content_en TEXT NOT NULL,
+    content_ne TEXT NOT NULL,
+    effective_date DATE NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by UUID,
+    updated_by UUID,
+    CONSTRAINT uk_legal_doc_type_version UNIQUE (type, version)
+);
+
 -- Insert sample Privacy Policy
 INSERT INTO legal_documents (id, type, version, title_en, title_ne, content_en, content_ne, effective_date, is_active, created_at, updated_at)
 VALUES (
