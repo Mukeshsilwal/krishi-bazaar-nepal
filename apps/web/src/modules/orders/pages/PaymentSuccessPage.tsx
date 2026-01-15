@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
 import paymentService from '../../../services/paymentService'; // Adjust path if needed
 
 export default function PaymentSuccessPage() {
@@ -9,8 +9,10 @@ export default function PaymentSuccessPage() {
     const [receipt, setReceipt] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
 
+    const params = useParams(); // params.txnId
     // Extract params
-    const txnId = searchParams.get('txnId');
+    // Priority: Path Variable -> Query Param 'txnId' -> Query Param 'oid' (eSewa fallback)
+    const txnId = params.txnId || searchParams.get('txnId') || searchParams.get('oid');
     const data = searchParams.get('data');
 
     useEffect(() => {

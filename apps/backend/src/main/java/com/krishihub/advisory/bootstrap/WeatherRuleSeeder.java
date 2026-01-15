@@ -96,7 +96,7 @@ public class WeatherRuleSeeder implements CommandLineRunner {
                 .isActive(true)
                 .version(1)
                 .priority(80)
-                .effectiveFrom(com.krishihub.common.util.DateTimeProvider.now())
+                .effectiveFrom(com.krishihub.common.util.DateUtil.nowUtc())
                 .createdBy(SYSTEM_USER_ID)
                 .build();
     }
@@ -141,7 +141,7 @@ public class WeatherRuleSeeder implements CommandLineRunner {
                 .isActive(true)
                 .version(1)
                 .priority(95)
-                .effectiveFrom(com.krishihub.common.util.DateTimeProvider.now())
+                .effectiveFrom(com.krishihub.common.util.DateUtil.nowUtc())
                 .createdBy(SYSTEM_USER_ID)
                 .build();
     }
@@ -181,7 +181,7 @@ public class WeatherRuleSeeder implements CommandLineRunner {
                 .isActive(true)
                 .version(1)
                 .priority(85)
-                .effectiveFrom(com.krishihub.common.util.DateTimeProvider.now())
+                .effectiveFrom(com.krishihub.common.util.DateUtil.nowUtc())
                 .createdBy(SYSTEM_USER_ID)
                 .build();
     }
@@ -216,7 +216,7 @@ public class WeatherRuleSeeder implements CommandLineRunner {
                 .isActive(true)
                 .version(1)
                 .priority(60)
-                .effectiveFrom(com.krishihub.common.util.DateTimeProvider.now())
+                .effectiveFrom(com.krishihub.common.util.DateUtil.nowUtc())
                 .createdBy(SYSTEM_USER_ID)
                 .build();
     }
@@ -251,7 +251,7 @@ public class WeatherRuleSeeder implements CommandLineRunner {
                 .isActive(true)
                 .version(1)
                 .priority(100)
-                .effectiveFrom(com.krishihub.common.util.DateTimeProvider.now())
+                .effectiveFrom(com.krishihub.common.util.DateUtil.nowUtc())
                 .createdBy(SYSTEM_USER_ID)
                 .build();
     }
@@ -286,7 +286,7 @@ public class WeatherRuleSeeder implements CommandLineRunner {
                 .isActive(true)
                 .version(1)
                 .priority(70)
-                .effectiveFrom(com.krishihub.common.util.DateTimeProvider.now())
+                .effectiveFrom(com.krishihub.common.util.DateUtil.nowUtc())
                 .createdBy(SYSTEM_USER_ID)
                 .build();
     }
@@ -321,7 +321,7 @@ public class WeatherRuleSeeder implements CommandLineRunner {
                 .isActive(true)
                 .version(1)
                 .priority(100)
-                .effectiveFrom(com.krishihub.common.util.DateTimeProvider.now())
+                .effectiveFrom(com.krishihub.common.util.DateUtil.nowUtc())
                 .createdBy(SYSTEM_USER_ID)
                 .build();
     }
@@ -356,7 +356,7 @@ public class WeatherRuleSeeder implements CommandLineRunner {
                 .isActive(true)
                 .version(1)
                 .priority(90)
-                .effectiveFrom(com.krishihub.common.util.DateTimeProvider.now())
+                .effectiveFrom(com.krishihub.common.util.DateUtil.nowUtc())
                 .createdBy(SYSTEM_USER_ID)
                 .build();
     }

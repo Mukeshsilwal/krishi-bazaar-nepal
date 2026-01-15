@@ -1,10 +1,26 @@
 package com.krishihub.config;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CachingConfigurer;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -15,9 +31,9 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.time.Duration;
 
 @Configuration
-@lombok.extern.slf4j.Slf4j
-@org.springframework.cache.annotation.EnableCaching
-public class RedisConfig implements org.springframework.cache.annotation.CachingConfigurer {
+@Slf4j
+@EnableCaching
+public class RedisConfig implements CachingConfigurer {
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
@@ -26,17 +42,17 @@ public class RedisConfig implements org.springframework.cache.annotation.Caching
 
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         mapper.activateDefaultTyping(
-                com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator.instance,
+                LaissezFaireSubTypeValidator.instance,
                 ObjectMapper.DefaultTyping.NON_FINAL,
-                com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY);
+                JsonTypeInfo.As.PROPERTY);
 
         // Register Mixin for PageImpl and PageRequest
-        mapper.addMixIn(org.springframework.data.domain.PageImpl.class, PageMixin.class);
-        mapper.addMixIn(org.springframework.data.domain.PageRequest.class, PageRequestMixin.class);
+        mapper.addMixIn(PageImpl.class, PageMixin.class);
+        mapper.addMixIn(PageRequest.class, PageRequestMixin.class);
         
         // Register Custom Deserializer for Sort via Module
-        com.fasterxml.jackson.databind.module.SimpleModule sortModule = new com.fasterxml.jackson.databind.module.SimpleModule();
-        sortModule.addDeserializer(org.springframework.data.domain.Sort.class, new SortDeserializer());
+        SimpleModule sortModule = new SimpleModule();
+        sortModule.addDeserializer(Sort.class, new SortDeserializer());
         mapper.registerModule(sortModule);
 
         GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(mapper);
@@ -54,32 +70,32 @@ public class RedisConfig implements org.springframework.cache.annotation.Caching
                 .build();
     }
 
-    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
-    @com.fasterxml.jackson.annotation.JsonTypeInfo(use = com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS, include = com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY)
     abstract static class PageMixin {
-        @com.fasterxml.jackson.annotation.JsonCreator
+        @JsonCreator
         public PageMixin(
-                @com.fasterxml.jackson.annotation.JsonProperty("content") java.util.List<?> content,
-                @com.fasterxml.jackson.annotation.JsonProperty("pageable") org.springframework.data.domain.Pageable pageable,
-                @com.fasterxml.jackson.annotation.JsonProperty("totalElements") long totalElements) {
+                @JsonProperty("content") java.util.List<?> content,
+                @JsonProperty("pageable") Pageable pageable,
+                @JsonProperty("totalElements") long totalElements) {
         }
     }
 
-    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
-    @com.fasterxml.jackson.annotation.JsonTypeInfo(use = com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS, include = com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY)
     abstract static class PageRequestMixin {
-        @com.fasterxml.jackson.annotation.JsonCreator
+        @JsonCreator
         public PageRequestMixin(
-                @com.fasterxml.jackson.annotation.JsonProperty("pageNumber") int page,
-                @com.fasterxml.jackson.annotation.JsonProperty("pageSize") int size,
-                @com.fasterxml.jackson.annotation.JsonProperty("sort") org.springframework.data.domain.Sort sort) {
+                @JsonProperty("pageNumber") int page,
+                @JsonProperty("pageSize") int size,
+                @JsonProperty("sort") Sort sort) {
         }
     }
 
     // Custom Sort Deserializer to handle "orders must not be null" issue
-    static class SortDeserializer extends com.fasterxml.jackson.databind.JsonDeserializer<org.springframework.data.domain.Sort> {
+    static class SortDeserializer extends JsonDeserializer<Sort> {
         @Override
-        public org.springframework.data.domain.Sort deserialize(com.fasterxml.jackson.core.JsonParser p, com.fasterxml.jackson.databind.DeserializationContext ctxt) throws java.io.IOException {
+        public Sort deserialize(JsonParser p, DeserializationContext ctxt) throws java.io.IOException {
             com.fasterxml.jackson.databind.JsonNode node = p.getCodec().readTree(p);
             if (node.has("orders") && node.get("orders").isArray()) {
                 java.util.List<org.springframework.data.domain.Sort.Order> orders = new java.util.ArrayList<>();

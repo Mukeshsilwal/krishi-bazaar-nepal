@@ -99,7 +99,7 @@ public class ContentService {
         changeStatus(id, ContentStatus.ACTIVE, userId, "Published");
         // Update publishedAt
         repository.findById(id).ifPresent(c -> {
-            c.setPublishedAt(com.krishihub.common.util.DateTimeProvider.now());
+            c.setPublishedAt(com.krishihub.common.util.DateUtil.nowUtc());
             c.setReviewedBy(userId);
             repository.save(c);
         });

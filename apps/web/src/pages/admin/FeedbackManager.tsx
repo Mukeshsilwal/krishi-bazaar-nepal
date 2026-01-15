@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { format } from 'date-fns';
+import { formatDate } from '@krishihub/common-utils';
 
 import api from '@/services/api';
 import { FEEDBACK_ENDPOINTS } from '@/config/endpoints';
@@ -85,7 +85,7 @@ const FeedbackManager = () => {
                     <TableBody>
                         {feedbacks.map((item) => (
                             <TableRow key={item.id}>
-                                <TableCell>{format(new Date(item.createdAt), 'MMM d, yyyy')}</TableCell>
+                                <TableCell>{formatDate(item.createdAt)}</TableCell>
                                 <TableCell>
                                     <div className="font-medium">{item.user?.name || 'Unknown'}</div>
                                     <div className="text-xs text-muted-foreground">{item.user?.mobileNumber}</div>

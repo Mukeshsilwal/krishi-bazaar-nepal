@@ -92,7 +92,7 @@ public class ContextBuilderService {
                 .isMonsoonsoon(isMonsoonsoon())
                 .riskLevel(assessRiskLevel(signals, primarySignal))
                 .identifiedRisks(identifyRisks(signals, primaryCrop))
-                .contextCreatedAt(com.krishihub.common.util.DateTimeProvider.now())
+                .contextCreatedAt(com.krishihub.common.util.DateUtil.nowUtc())
                 .contextSource("ContextBuilderService")
                 .build();
 
@@ -196,7 +196,7 @@ public class ContextBuilderService {
         if (plantingDate == null) {
             return 0;
         }
-        long diffInMillies = Math.abs(com.krishihub.common.util.DateTimeProvider.now().getTime() - plantingDate.getTime());
+        long diffInMillies = Math.abs(com.krishihub.common.util.DateUtil.nowUtc().getTime() - plantingDate.getTime());
         return (int) java.util.concurrent.TimeUnit.DAYS.convert(diffInMillies, java.util.concurrent.TimeUnit.MILLISECONDS);
     }
 
@@ -205,7 +205,7 @@ public class ContextBuilderService {
      */
     private String determineSeason() {
         java.util.Calendar cal = java.util.Calendar.getInstance();
-        cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+        cal.setTime(com.krishihub.common.util.DateUtil.nowUtc());
         int month = cal.get(java.util.Calendar.MONTH) + 1; // Calendar.MONTH is 0-indexed
 
         return switch (month) {
@@ -221,7 +221,7 @@ public class ContextBuilderService {
      */
     private boolean isMonsoonsoon() {
         java.util.Calendar cal = java.util.Calendar.getInstance();
-        cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+        cal.setTime(com.krishihub.common.util.DateUtil.nowUtc());
         int month = cal.get(java.util.Calendar.MONTH) + 1; // Calendar.MONTH is 0-indexed
         return month >= 6 && month <= 8;
     }

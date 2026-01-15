@@ -9,7 +9,7 @@ import com.krishihub.support.entity.ContactMessage;
 import com.krishihub.support.repository.ContactMessageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.beans.factory.annotation.Value; removed
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,8 +28,7 @@ public class PublicContactController {
     private final NotificationOrchestrator notificationOrchestrator;
     private final SystemSettingService systemSettingService;
 
-    @Value("${app.email.support:support@krishibazaar.com.np}")
-    private String defaultSupportEmail;
+    private final com.krishihub.config.properties.EmailProperties emailProperties;
 
     @PostMapping("/contact")
     public ResponseEntity<ApiResponse<String>> submitContactForm(@RequestBody PublicContactRequest request) {
@@ -49,7 +48,7 @@ public class PublicContactController {
         // 2. Send Notification Email to Admin/Support
         try {
             // Get configured company email or fallback to default
-            String recipientEmail = systemSettingService.getSettingValue("COMPANY_EMAIL", defaultSupportEmail);
+            String recipientEmail = systemSettingService.getSettingValue("COMPANY_EMAIL", emailProperties.getSupport());
 
             String emailContent = String.format("""
                     New Contact Message Received:

@@ -84,7 +84,7 @@ public class AgriStoreOrderStrategy implements OrderProcessingStrategy {
         if (request.getPickupDate() != null) {
             order.setPickupDate(java.sql.Date.valueOf(request.getPickupDate()));
         } else {
-            order.setPickupDate(com.krishihub.common.util.DateTimeProvider.today());
+            order.setPickupDate(com.krishihub.common.util.DateUtil.startOfDay(com.krishihub.common.util.DateUtil.nowUtc()));
         }
 
         for (OrderItem item : orderItems) {

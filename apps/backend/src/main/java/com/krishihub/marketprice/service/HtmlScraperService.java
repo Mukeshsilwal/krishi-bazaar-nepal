@@ -75,7 +75,7 @@ public class HtmlScraperService implements MarketPriceDataSource {
                                     .maxPrice(max)
                                     .avgPrice(avg)
                                     .district("Kathmandu") // RamroPatro usually defaults to Kalimati/Kathmandu
-                                    .priceDate(com.krishihub.common.util.DateTimeProvider.today())
+                                    .priceDate(com.krishihub.common.util.DateUtil.startOfDay(com.krishihub.common.util.DateUtil.nowUtc()))
                                     .source(getSourceId())
                                     .build());
                         }

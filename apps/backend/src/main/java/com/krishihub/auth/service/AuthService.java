@@ -1,7 +1,8 @@
 package com.krishihub.auth.service;
 
 import com.krishihub.analytics.event.ActivityEvent;
-import com.krishihub.common.util.DateTimeProvider;
+import com.krishihub.common.util.DateUtil;
+import com.krishihub.config.properties.ApplicationProperties;
 import org.springframework.context.ApplicationEventPublisher;
 
 import com.krishihub.auth.dto.*;
@@ -15,7 +16,7 @@ import com.krishihub.shared.exception.BadRequestException;
 import com.krishihub.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.beans.factory.annotation.Value; removed
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -169,8 +170,9 @@ public class AuthService {
         return "OTP sent to " + mobileNumber;
     }
 
-    @Value("${app.admin.secret-key:test}")
-    private String adminSecretKey;
+    private final ApplicationProperties applicationProperties;
+
+    // @Value("${app.admin.secret-key:test}") removed
 
     /**
      * Registers a new admin user (requires secret key).
@@ -186,7 +188,7 @@ public class AuthService {
      */
     @Transactional
     public String registerAdmin(AdminRegisterRequest request) {
-        if (!request.getAdminSecret().equals(adminSecretKey)) {
+        if (!request.getAdminSecret().equals(applicationProperties.getAdmin().getSecretKey())) {
             throw new BadRequestException("Invalid Admin Secret Key");
         }
 
@@ -203,10 +205,9 @@ public class AuthService {
                 .role(User.UserRole.ADMIN)
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .verified(true)
-                .district("Headquarters")
+                .district(request.getDistrict())
                 .ward("0")
-                .ward("0")
-                .createdAt(DateTimeProvider.now())
+                .createdAt(com.krishihub.common.util.DateUtil.nowUtc())
                 .build();
 
         userRepository.save(user);

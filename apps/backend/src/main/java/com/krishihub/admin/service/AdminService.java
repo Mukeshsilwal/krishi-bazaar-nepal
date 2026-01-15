@@ -36,8 +36,8 @@ public class AdminService {
     private final UserActivityService userActivityService;
 
     public AdminDashboardStats getDashboardStats() {
-        Date todayStart = com.krishihub.common.util.DateTimeProvider.startOfDay();
-        Date todayEnd = com.krishihub.common.util.DateTimeProvider.endOfDay();
+        Date todayStart = com.krishihub.common.util.DateUtil.startOfDay(com.krishihub.common.util.DateUtil.nowUtc());
+        Date todayEnd = com.krishihub.common.util.DateUtil.endOfDay(com.krishihub.common.util.DateUtil.nowUtc());
         Calendar cal = Calendar.getInstance();
         cal.setTime(todayStart);
         cal.add(Calendar.DAY_OF_YEAR, -7);

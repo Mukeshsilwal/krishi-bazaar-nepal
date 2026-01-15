@@ -84,7 +84,7 @@ public class AdvisoryServiceImpl implements AdvisoryService {
                                     .deliveryStatus(DeliveryStatus.DELIVERED)
                                     .channel(DeliveryChannel.IN_APP)
                                     .advisoryContent(response.getTitle() + " - " + response.getSnippet())
-                                    .deliveredAt(com.krishihub.common.util.DateTimeProvider.now())
+                                    .deliveredAt(com.krishihub.common.util.DateUtil.nowUtc())
                                     .build();
                             advisoryDeliveryLogRepository.save(log);
                         }
@@ -112,7 +112,7 @@ public class AdvisoryServiceImpl implements AdvisoryService {
                             .deliveryStatus(DeliveryStatus.DELIVERED)
                             .channel(DeliveryChannel.IN_APP)
                             .advisoryContent(weatherAdvisory.getTitle() + " - " + weatherAdvisory.getSnippet())
-                            .deliveredAt(com.krishihub.common.util.DateTimeProvider.now())
+                            .deliveredAt(com.krishihub.common.util.DateUtil.nowUtc())
                             .build();
                     advisoryDeliveryLogRepository.save(log);
                 }

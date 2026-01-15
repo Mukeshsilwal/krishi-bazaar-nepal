@@ -5,7 +5,7 @@ import com.krishihub.shared.dto.ApiResponse;
 import com.krishihub.shared.exception.ActiveSessionExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.beans.factory.annotation.Value; removed
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -23,11 +23,14 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @Value("${spring.profiles.active:dev}")
-    private String activeProfile;
+    private final org.springframework.core.env.Environment environment;
+
+    public GlobalExceptionHandler(org.springframework.core.env.Environment environment) {
+        this.environment = environment;
+    }
 
     private boolean isProduction() {
-        return "prod".equalsIgnoreCase(activeProfile);
+        return java.util.Arrays.asList(environment.getActiveProfiles()).contains("prod");
     }
 
     private String getDeveloperMessage(Exception ex) {

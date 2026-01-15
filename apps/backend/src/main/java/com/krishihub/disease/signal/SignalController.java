@@ -17,7 +17,7 @@ public class SignalController {
 
     @PostMapping("/report")
     public ResponseEntity<ApiResponse<Void>> reportSymptom(@RequestBody SignalPayload payload) {
-        payload.setTimestamp(com.krishihub.common.util.DateTimeProvider.now());
+        payload.setTimestamp(com.krishihub.common.util.DateUtil.nowUtc());
         signalService.processSignal(payload);
         return ResponseEntity.ok(ApiResponse.success("Signal reported successfully", null));
     }

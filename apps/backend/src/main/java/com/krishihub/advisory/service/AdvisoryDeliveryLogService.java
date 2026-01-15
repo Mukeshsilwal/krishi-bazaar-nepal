@@ -140,7 +140,7 @@ public class AdvisoryDeliveryLogService {
             if (log.getDeliveryStatus().canTransitionTo(newStatus)) {
                 log.setDeliveryStatus(newStatus);
                 if (success) {
-                    log.setDeliveredAt(com.krishihub.common.util.DateTimeProvider.now());
+                    log.setDeliveredAt(com.krishihub.common.util.DateUtil.nowUtc());
                 } else {
                     log.setFailureReason(failureReason);
                 }
@@ -158,7 +158,7 @@ public class AdvisoryDeliveryLogService {
         repository.findById(logId).ifPresent(log -> {
             if (log.getOpenedAt() == null && log.getDeliveryStatus().canTransitionTo(DeliveryStatus.OPENED)) {
                 log.setDeliveryStatus(DeliveryStatus.OPENED);
-                log.setOpenedAt(com.krishihub.common.util.DateTimeProvider.now());
+                log.setOpenedAt(com.krishihub.common.util.DateUtil.nowUtc());
                 repository.save(log);
                 log(logId, "Advisory opened by farmer");
             }
@@ -175,7 +175,7 @@ public class AdvisoryDeliveryLogService {
                 log.setDeliveryStatus(DeliveryStatus.FEEDBACK_RECEIVED);
                 log.setFeedback(feedback);
                 log.setFeedbackComment(comment);
-                log.setFeedbackAt(com.krishihub.common.util.DateTimeProvider.now());
+                log.setFeedbackAt(com.krishihub.common.util.DateUtil.nowUtc());
                 repository.save(log);
                 log(logId, "Feedback received: " + feedback);
             }

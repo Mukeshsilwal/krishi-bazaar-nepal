@@ -15,42 +15,40 @@ import java.util.UUID;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
 
-        Optional<User> findByMobileNumber(String mobileNumber);
+    Optional<User> findByMobileNumber(String mobileNumber);
 
-        boolean existsByMobileNumber(String mobileNumber);
+    boolean existsByMobileNumber(String mobileNumber);
 
-        boolean existsByEmail(String email);
+    boolean existsByEmail(String email);
 
-        Optional<User> findByEmail(String email);
+    Optional<User> findByEmail(String email);
 
-        List<User> findByVerifiedFalse();
+    List<User> findByVerifiedFalse();
 
-        List<User> findByVerifiedFalseAndRoleIn(List<User.UserRole> roles);
+    Page<User> findByVerifiedFalseAndRoleIn(List<User.UserRole> roles, Pageable pageable);
 
-        Page<User> findByVerifiedFalseAndRoleIn(List<User.UserRole> roles, Pageable pageable);
+    /**
+     * Find users by district and role (for weather advisory targeting) - Case Insensitive & Trimmed
+     */
+    @Query("SELECT u FROM User u WHERE LOWER(TRIM(u.district)) = LOWER(TRIM(:district)) AND u.role = :role")
+    List<User> findByDistrictAndRole(@Param("district") String district, @Param("role") User.UserRole role);
 
-        /**
-         * Find users by district and role (for weather advisory targeting) - Case Insensitive & Trimmed
-         */
-        @Query("SELECT u FROM User u WHERE LOWER(TRIM(u.district)) = LOWER(TRIM(:district)) AND u.role = :role")
-        List<User> findByDistrictAndRole(@Param("district") String district, @Param("role") User.UserRole role);
+    /**
+     * Count users by role
+     */
+    long countByRole(User.UserRole role);
 
-        /**
-         * Count users by role
-         */
-        long countByRole(User.UserRole role);
+    @Query("SELECT u FROM User u WHERE " +
+            "(:role IS NULL OR u.role = :role) AND " +
+            "(:status IS NULL OR u.enabled = :status) AND " +
+            "(:search IS NULL OR :search = '' OR " +
+            "LOWER(COALESCE(u.name, '')) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(COALESCE(u.email, '')) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "COALESCE(u.mobileNumber, '') LIKE CONCAT('%', :search, '%'))")
+    Page<User> searchUsers(@Param("role") User.UserRole role,
+                           @Param("status") Boolean status,
+                           @Param("search") String search,
+                           Pageable pageable);
 
-        @Query("SELECT u FROM User u WHERE " +
-                        "(:role IS NULL OR u.role = :role) AND " +
-                        "(:status IS NULL OR u.enabled = :status) AND " +
-                        "(:search IS NULL OR :search = '' OR " +
-                        "LOWER(COALESCE(u.name, '')) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-                        "LOWER(COALESCE(u.email, '')) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-                        "COALESCE(u.mobileNumber, '') LIKE CONCAT('%', :search, '%'))")
-        Page<User> searchUsers(@Param("role") User.UserRole role,
-                        @Param("status") Boolean status,
-                        @Param("search") String search,
-                        Pageable pageable);
-
-        Page<User> findByRole(User.UserRole role, Pageable pageable);
+    Page<User> findByRole(User.UserRole role, Pageable pageable);
 }

@@ -85,7 +85,7 @@ public class AdvisoryLogController {
         java.util.Date startDate = since;
         if (startDate == null) {
             java.util.Calendar cal = java.util.Calendar.getInstance();
-            cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+            cal.setTime(com.krishihub.common.util.DateUtil.nowUtc());
             cal.add(java.util.Calendar.DAY_OF_YEAR, -7);
             startDate = cal.getTime();
         }
@@ -106,7 +106,7 @@ public class AdvisoryLogController {
 
         if (since == null) {
             java.util.Calendar cal = java.util.Calendar.getInstance();
-            cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+            cal.setTime(com.krishihub.common.util.DateUtil.nowUtc());
             cal.add(java.util.Calendar.DAY_OF_YEAR, -30);
             since = cal.getTime();
         }
@@ -126,7 +126,7 @@ public class AdvisoryLogController {
 
         if (since == null) {
             java.util.Calendar cal = java.util.Calendar.getInstance();
-            cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+            cal.setTime(com.krishihub.common.util.DateUtil.nowUtc());
             cal.add(java.util.Calendar.DAY_OF_YEAR, -30);
             since = cal.getTime();
         }
@@ -146,7 +146,7 @@ public class AdvisoryLogController {
 
         if (since == null) {
             java.util.Calendar cal = java.util.Calendar.getInstance();
-            cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+            cal.setTime(com.krishihub.common.util.DateUtil.nowUtc());
             cal.add(java.util.Calendar.DAY_OF_YEAR, -30);
             since = cal.getTime();
         }
@@ -165,7 +165,7 @@ public class AdvisoryLogController {
 
         if (since == null) {
             java.util.Calendar cal = java.util.Calendar.getInstance();
-            cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+            cal.setTime(com.krishihub.common.util.DateUtil.nowUtc());
             cal.add(java.util.Calendar.DAY_OF_YEAR, -30);
             since = cal.getTime();
         }

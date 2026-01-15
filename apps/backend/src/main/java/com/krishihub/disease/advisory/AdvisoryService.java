@@ -59,7 +59,7 @@ public class AdvisoryService {
                 .queryText(feedbackDTO.getQueryText())
                 .isHelpful(feedbackDTO.isHelpful())
                 .comments(feedbackDTO.getComments())
-                .createdAt(com.krishihub.common.util.DateTimeProvider.now())
+                .createdAt(com.krishihub.common.util.DateUtil.nowUtc())
                 .build();
         feedbackRepository.save(feedback);
     }

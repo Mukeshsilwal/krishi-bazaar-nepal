@@ -56,7 +56,7 @@ public class IngestionService {
         log.info("Fetching RSS feed from: {}", source.getUrl());
 
         // Simulation of fetched item
-        String simulatedTitle = "Simulated Article from " + source.getName() + " at " + com.krishihub.common.util.DateTimeProvider.now();
+        String simulatedTitle = "Simulated Article from " + source.getName() + " at " + com.krishihub.common.util.DateUtil.nowUtc();
         String simulatedBody = "This is the raw content of the article relevant to farming.";
         String simulatedUrl = source.getUrl() + "/article/1";
         String contentHash = calculateHash(simulatedTitle + simulatedBody);
@@ -78,7 +78,7 @@ public class IngestionService {
                 .sourceUrl(url)
                 .author(author)
                 .contentHash(hash)
-                .fetchedAt(com.krishihub.common.util.DateTimeProvider.now())
+                .fetchedAt(com.krishihub.common.util.DateUtil.nowUtc())
                 .status(RawKnowledgeContent.IngestionStatus.PENDING_PROCESSING)
                 .build();
 

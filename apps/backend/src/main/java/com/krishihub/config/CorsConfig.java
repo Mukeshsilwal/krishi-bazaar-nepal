@@ -1,6 +1,6 @@
 package com.krishihub.config;
 
-import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.beans.factory.annotation.Value; removed
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -13,26 +13,18 @@ import java.util.List;
 @Configuration
 public class CorsConfig {
 
-    @Value("${app.cors.allowed-origins}")
-    private String allowedOrigins;
+    private final com.krishihub.config.properties.CorsProperties corsProperties;
 
-    @Value("${app.cors.allowed-methods}")
-    private String allowedMethods;
-
-    @Value("${app.cors.allowed-headers}")
-    private String allowedHeaders;
-
-    @Value("${app.cors.allow-credentials}")
-    private boolean allowCredentials;
+    public CorsConfig(com.krishihub.config.properties.CorsProperties corsProperties) {
+        this.corsProperties = corsProperties;
+    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // Parse allowed origins
-        List<String> origins = new java.util.ArrayList<>(Arrays.stream(allowedOrigins.split(","))
-                .map(String::trim)
-                .toList());
+        List<String> origins = new java.util.ArrayList<>(corsProperties.getAllowedOrigins());
 
         if (!origins.contains("http://localhost:8080")) {
             origins.add("http://localhost:8080");
@@ -45,24 +37,24 @@ public class CorsConfig {
         configuration.setAllowedOriginPatterns(origins); // Use patterns instead of origins for better compatibility
 
         // Parse allowed methods
-        List<String> methods = new java.util.ArrayList<>(Arrays.asList(allowedMethods.split(",")));
+        List<String> methods = new java.util.ArrayList<>(corsProperties.getAllowedMethods());
         if (!methods.contains("PATCH")) {
             methods.add("PATCH");
         }
         configuration.setAllowedMethods(methods);
 
         // Set allowed headers
-        if ("*".equals(allowedHeaders)) {
+        List<String> headers = corsProperties.getAllowedHeaders();
+        if (headers.contains("*")) {
             configuration.addAllowedHeader("*");
         } else {
-            List<String> headers = Arrays.asList(allowedHeaders.split(","));
             configuration.setAllowedHeaders(headers);
         }
 
         // Expose headers for frontend access
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
 
-        configuration.setAllowCredentials(allowCredentials);
+        configuration.setAllowCredentials(corsProperties.isAllowCredentials());
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

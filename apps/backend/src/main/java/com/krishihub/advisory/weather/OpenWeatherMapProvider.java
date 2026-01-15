@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.krishihub.advisory.weather.model.WeatherData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.beans.factory.annotation.Value; removed
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
@@ -23,16 +23,12 @@ import java.util.function.Supplier;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class OpenWeatherMapProvider implements WeatherDataProvider {
+public class OpenWeatherMapProvider implements  WeatherDataProvider {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    @Value("${weather.openweathermap.api-key:cc1f6ee6c3d30d4276544a101c0607ad}")
-    private String apiKey;
-
-    @Value("${weather.openweathermap.base-url:https://api.openweathermap.org/data/2.5}")
-    private String baseUrl;
+    private final com.krishihub.config.properties.WeatherProperties weatherProperties;
 
     // Nepal district coordinates mapping (sample - can be expanded)
     private static final Map<String, double[]> DISTRICT_COORDINATES = Map.ofEntries(
@@ -71,9 +67,9 @@ public class OpenWeatherMapProvider implements WeatherDataProvider {
     private Optional<WeatherData> fetchCurrentWeather(Double latitude, Double longitude) {
         try {
             String url = String.format("%s/weather?lat=%s&lon=%s&appid=%s&units=metric",
-                    baseUrl, latitude, longitude, apiKey);
+                    weatherProperties.getOpenweathermap().getBaseUrl(), latitude, longitude, weatherProperties.getOpenweathermap().getApiKey());
 
-            log.debug("Fetching current weather from: {}", url.replace(apiKey, "***"));
+            log.debug("Fetching current weather from: {}", url.replace(weatherProperties.getOpenweathermap().getApiKey(), "***"));
 
             ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
@@ -114,9 +110,9 @@ public class OpenWeatherMapProvider implements WeatherDataProvider {
     private List<WeatherData> fetchForecast(Double latitude, Double longitude, int hours) {
         try {
             String url = String.format("%s/forecast?lat=%s&lon=%s&appid=%s&units=metric",
-                    baseUrl, latitude, longitude, apiKey);
+                    weatherProperties.getOpenweathermap().getBaseUrl(), latitude, longitude, weatherProperties.getOpenweathermap().getApiKey());
 
-            log.debug("Fetching weather forecast from: {}", url.replace(apiKey, "***"));
+            log.debug("Fetching weather forecast from: {}", url.replace(weatherProperties.getOpenweathermap().getApiKey(), "***"));
 
             ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
@@ -180,7 +176,7 @@ public class OpenWeatherMapProvider implements WeatherDataProvider {
         try {
             // Test with Kathmandu coordinates
             String url = String.format("%s/weather?lat=27.7172&lon=85.3240&appid=%s",
-                    baseUrl, apiKey);
+                    weatherProperties.getOpenweathermap().getBaseUrl(), weatherProperties.getOpenweathermap().getApiKey());
             ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
             return response.getStatusCode().is2xxSuccessful();
         } catch (Exception e) {
@@ -223,7 +219,7 @@ public class OpenWeatherMapProvider implements WeatherDataProvider {
                 .cloudCoverage(clouds.get("all").asDouble())
                 .condition(weather.get("main").asText())
                 .description(weather.get("description").asText())
-                .timestamp(com.krishihub.common.util.DateTimeProvider.now())
+                .timestamp(com.krishihub.common.util.DateUtil.nowUtc())
                 .dataSource("OpenWeatherMap")
                 .isForecast(false)
                 .hasAlert(false)
@@ -274,7 +270,7 @@ public class OpenWeatherMapProvider implements WeatherDataProvider {
                     .condition(weather.get("main").asText())
                     .description(weather.get("description").asText())
                     .rainfall(rainfall)
-                    .timestamp(com.krishihub.common.util.DateTimeProvider.now())
+                    .timestamp(com.krishihub.common.util.DateUtil.nowUtc())
                     .forecastTime(forecastTime)
                     .dataSource("OpenWeatherMap")
                     .isForecast(true)

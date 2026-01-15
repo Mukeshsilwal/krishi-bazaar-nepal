@@ -33,7 +33,7 @@ public class AdvisoryLogAnalyticsService {
     public AdvisoryAnalyticsDTO getAnalytics(java.util.Date since) {
         if (since == null) {
             java.util.Calendar cal = java.util.Calendar.getInstance();
-            cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+            cal.setTime(com.krishihub.common.util.DateUtil.nowUtc());
             cal.add(java.util.Calendar.DAY_OF_YEAR, -30);
             since = cal.getTime();
         }
@@ -236,7 +236,7 @@ public class AdvisoryLogAnalyticsService {
      */
     public Map<String, Double> getRulesWithPoorFeedback(double threshold) {
         java.util.Calendar cal = java.util.Calendar.getInstance();
-        cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+        cal.setTime(com.krishihub.common.util.DateUtil.nowUtc());
         cal.add(java.util.Calendar.DAY_OF_YEAR, -30);
         java.util.Date since = cal.getTime();
         

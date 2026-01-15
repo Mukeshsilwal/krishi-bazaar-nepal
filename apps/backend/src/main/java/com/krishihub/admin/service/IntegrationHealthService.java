@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.beans.factory.annotation.Value; removed
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -15,20 +15,10 @@ import java.util.Map;
 @Slf4j
 public class IntegrationHealthService {
 
-    @Value("${app.openai.model:gpt-3.5-turbo}")
-    private String openAiModel;
-
-    @Value("${spring.ai.openai.api-key:}")
-    private String openAiKey;
-
-    @Value("${app.cloudinary.cloud-name:}")
-    private String cloudinaryCloudName;
-
-    @Value("${app.esewa.merchant-code:}")
-    private String esewaMerchantCode;
-
-    @Value("${app.sms.api-key:}")
-    private String smsApiKey;
+    private final com.krishihub.config.properties.OpenAiProperties openAiProperties;
+    private final com.krishihub.config.properties.CloudinaryProperties cloudinaryProperties;
+    private final com.krishihub.config.properties.PaymentProperties paymentProperties;
+    private final com.krishihub.config.properties.SmsProperties smsProperties;
 
     public Map<String, IntegrationStatus> checkIntegrations() {
         Map<String, IntegrationStatus> statusMap = new HashMap<>();
@@ -49,30 +39,30 @@ public class IntegrationHealthService {
     }
 
     private IntegrationStatus checkOpenAi() {
-        if (openAiKey == null || openAiKey.isEmpty()) {
+        if (openAiProperties.getApiKey() == null || openAiProperties.getApiKey().isEmpty()) {
             return IntegrationStatus.builder().status("DOWN").details("API Key missing").build();
         }
         // Basic config check mostly, deep ping might verify key validity but costs
         // money/quota
-        return IntegrationStatus.builder().status("UP").details("Model: " + openAiModel).build();
+        return IntegrationStatus.builder().status("UP").details("Model: " + openAiProperties.getModel()).build();
     }
 
     private IntegrationStatus checkCloudinary() {
-        if (cloudinaryCloudName == null || cloudinaryCloudName.isEmpty()) {
+        if (cloudinaryProperties.getCloudName() == null || cloudinaryProperties.getCloudName().isEmpty()) {
             return IntegrationStatus.builder().status("DOWN").details("Cloud Name missing").build();
         }
-        return IntegrationStatus.builder().status("UP").details("Cloud: " + cloudinaryCloudName).build();
+        return IntegrationStatus.builder().status("UP").details("Cloud: " + cloudinaryProperties.getCloudName()).build();
     }
 
     private IntegrationStatus checkEsewa() {
-        if (esewaMerchantCode == null || esewaMerchantCode.isEmpty()) {
+        if (paymentProperties.getEsewa().getMerchantCode() == null || paymentProperties.getEsewa().getMerchantCode().isEmpty()) {
             return IntegrationStatus.builder().status("DOWN").details("Merchant Code missing").build();
         }
-        return IntegrationStatus.builder().status("UP").details("Merchant: " + esewaMerchantCode).build();
+        return IntegrationStatus.builder().status("UP").details("Merchant: " + paymentProperties.getEsewa().getMerchantCode()).build();
     }
 
     private IntegrationStatus checkSms() {
-        if (smsApiKey == null || smsApiKey.isEmpty()) {
+        if (smsProperties.getApiKey() == null || smsProperties.getApiKey().isEmpty()) {
             return IntegrationStatus.builder().status("UNKNOWN").details("Not Configured (Dev Mode)").build();
         }
         return IntegrationStatus.builder().status("UP").details("Configured").build();

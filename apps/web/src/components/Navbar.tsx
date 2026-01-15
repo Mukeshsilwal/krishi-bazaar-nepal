@@ -134,7 +134,7 @@ const Navbar = ({ variant = 'public' }: NavbarProps) => {
             {/* User Menu or Auth Buttons */}
             {user ? (
               <div className="flex items-center gap-4">
-                <Link to="/cart" className="relative p-2 text-gray-700 hover:bg-gray-100 rounded-full transition">
+                <Link to="/agri-store/cart" className="relative p-2 text-gray-700 hover:bg-gray-100 rounded-full transition">
                   <ShoppingBag size={20} />
                   {totalItems > 0 && (
                     <span className="absolute top-0 right-0 bg-green-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center border-2 border-white">
@@ -223,7 +223,7 @@ const Navbar = ({ variant = 'public' }: NavbarProps) => {
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <Link to="/cart" className="relative p-2 text-gray-700 hover:bg-gray-100 rounded-full transition mr-2">
+                <Link to="/agri-store/cart" className="relative p-2 text-gray-700 hover:bg-gray-100 rounded-full transition mr-2">
                   <ShoppingBag size={20} />
                   {totalItems > 0 && (
                     <span className="absolute top-0 right-0 bg-green-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center border-2 border-white">

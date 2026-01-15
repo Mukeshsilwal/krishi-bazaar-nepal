@@ -92,6 +92,10 @@ const CheckoutPage = lazy(() => import('./features/agriStore/CheckoutPage'));
 const AgriProductManager = lazy(() => import('./pages/admin/AgriProductManager'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
+// Legal Pages
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage'));
+
 // Shipment & Vehicle Booking
 const ShipmentPage = lazy(() => import('./modules/shipment/pages/ShipmentPage'));
 const BookVehiclePage = lazy(() => import('./modules/shipment/pages/BookVehiclePage'));
@@ -115,6 +119,8 @@ function App() {
                     }>
                       <Route index element={<Index />} />
                       <Route path="/about" element={<AboutPage />} />
+                      <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                      <Route path="/terms-of-service" element={<TermsOfServicePage />} />
                       <Route path="/contact" element={<ContactPage />} />
                       <Route path="/marketplace" element={<MarketplacePage />} />
                       <Route path="/listing/:id" element={<ListingDetailPage />} />
@@ -140,7 +146,9 @@ function App() {
                       <Route path="/my-orders" element={<ProtectedRoute><MyOrdersPage /></ProtectedRoute>} />
                       <Route path="/orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
                       <Route path="/payment/success" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />
+                      <Route path="/payment/success/:txnId" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />
                       <Route path="/payment/failure" element={<ProtectedRoute><PaymentFailurePage /></ProtectedRoute>} />
+                      <Route path="/payment/failure/:txnId" element={<ProtectedRoute><PaymentFailurePage /></ProtectedRoute>} />
                       <Route path="/my-listings" element={<ProtectedRoute><MyListingsPage /></ProtectedRoute>} />
                       <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
                       <Route path="/chat/:userId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />

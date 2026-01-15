@@ -17,6 +17,7 @@ import com.krishihub.payment.service.strategy.PaymentVerificationResult;
 import com.krishihub.shared.exception.BadRequestException;
 import com.krishihub.shared.exception.ResourceNotFoundException;
 import com.krishihub.shared.exception.UnauthorizedException;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -38,20 +39,33 @@ public class PaymentService {
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final com.krishihub.order.service.OrderService orderService;
+    private final PaymentStrategy esewaPaymentStrategy;
+    // PaymentStrategy khaltiPaymentStrategy; // If exists
+    
     private final List<PaymentStrategy> paymentStrategies;
     private Map<Transaction.PaymentMethod, PaymentStrategy> strategyMap;
 
-    @jakarta.annotation.PostConstruct
+    @PostConstruct
     public void init() {
         strategyMap = new EnumMap<>(Transaction.PaymentMethod.class);
+        // Explicitly populate to guarantee they are registered
+        if (esewaPaymentStrategy != null) {
+             strategyMap.put(Transaction.PaymentMethod.ESEWA, esewaPaymentStrategy);
+        }
+        
+        // Also iterate list for others
         for (PaymentStrategy strategy : paymentStrategies) {
             strategyMap.put(strategy.getPaymentMethod(), strategy);
         }
+        log.info("Loaded Payment Strategies: {}", strategyMap.keySet());
     }
 
     private PaymentStrategy getStrategy(Transaction.PaymentMethod method) {
+        // Debug
+        // log.info("Requesting strategy for: {}", method);
         PaymentStrategy strategy = strategyMap.get(method);
         if (strategy == null) {
+            log.error("Strategy NOT found for method: {}. Available: {}", method, strategyMap.keySet());
             throw new BadRequestException("Payment method not supported: " + method);
         }
         return strategy;
@@ -196,8 +210,12 @@ public class PaymentService {
 
     private static String getVerificationId(String gatewayTransactionId, Transaction transaction) {
         String verificationId;
-        // For eSewa, verification MUST use the transaction_uuid we generated (which is Order ID)
-        if (transaction.getPaymentMethod() == Transaction.PaymentMethod.ESEWA) {
+        // For eSewa, we use the stored unique transaction ID (which includes suffix)
+        if (transaction.getPaymentMethod() == Transaction.PaymentMethod.ESEWA &&
+            transaction.getTransactionId() != null && !transaction.getTransactionId().isEmpty()) {
+            verificationId = transaction.getTransactionId();
+        } else if (transaction.getPaymentMethod() == Transaction.PaymentMethod.ESEWA) {
+            // Fallback to Order ID if transaction ID not set (legacy behavior)
             verificationId = transaction.getOrder().getId().toString();
         } else {
             // For others (like Khalti), use the gateway provided ID (pidx) if avail, else fallback

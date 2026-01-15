@@ -8,7 +8,7 @@ import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.beans.factory.annotation.Value; removed
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -17,19 +17,19 @@ import java.io.IOException;
 @Slf4j
 public class SendGridClient {
 
-    @Value("${app.email.sendgrid.api-key}")
-    private String sendGridApiKey;
+    private final com.krishihub.config.properties.EmailProperties emailProperties;
 
-    @Value("${app.email.from-email}")
-    private String fromEmail;
+    public SendGridClient(com.krishihub.config.properties.EmailProperties emailProperties) {
+        this.emailProperties = emailProperties;
+    }
 
     public void sendEmail(String to, String subject, String body) {
-        Email from = new Email(fromEmail);
+        Email from = new Email(emailProperties.getFromEmail());
         Email toEmail = new Email(to);
         Content content = new Content("text/plain", body);
         Mail mail = new Mail(from, subject, toEmail, content);
 
-        SendGrid sg = new SendGrid(sendGridApiKey);
+        SendGrid sg = new SendGrid(emailProperties.getSendgrid().getApiKey());
         Request request = new Request();
         try {
             request.setMethod(Method.POST);

@@ -22,7 +22,7 @@ import {
     Globe,
     Loader2
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { formatDateTime } from '@krishihub/common-utils';
 import adminService from '../../services/adminService';
 
 const ActivityLogsPage = () => {
@@ -143,7 +143,7 @@ const ActivityLogsPage = () => {
                                                     ref={isLast ? lastLogRef : null}
                                                 >
                                                     <TableCell className="font-medium">
-                                                        {format(new Date(log.timestamp), 'yyyy-MM-dd HH:mm:ss')}
+                                                        {formatDateTime(log.timestamp)}
                                                     </TableCell>
                                                     <TableCell className="font-mono text-xs text-muted-foreground">
                                                         {log.userId}

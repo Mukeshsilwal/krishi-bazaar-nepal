@@ -96,7 +96,7 @@ public class WeatherAdvisoryController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getAnalytics() {
         java.util.Calendar cal = java.util.Calendar.getInstance();
-        cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+        cal.setTime(com.krishihub.common.util.DateUtil.nowUtc());
         cal.add(java.util.Calendar.DAY_OF_YEAR, -30);
         java.util.Date since = cal.getTime();
 

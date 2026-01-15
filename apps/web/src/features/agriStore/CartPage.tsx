@@ -95,7 +95,7 @@ const CartPage = () => {
                             <span>NPR {totalAmount}</span>
                         </div>
                     </div>
-                    <Button className="w-full" onClick={() => navigate('/checkout')}>
+                    <Button className="w-full" onClick={() => navigate('/agri-store/checkout')}>
                         Proceed to Checkout <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                 </div>

@@ -38,7 +38,7 @@ public class MasterDataService {
         categoryRepository.findByCode(categoryCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found: " + categoryCode));
 
-        java.util.Date today = com.krishihub.common.util.DateTimeProvider.today();
+        java.util.Date today = com.krishihub.common.util.DateUtil.startOfDay(com.krishihub.common.util.DateUtil.nowUtc());
         List<MasterItem> items = itemRepository.findActiveItemsByCategoryCode(categoryCode, today);
 
         List<MasterDataResponse.Item> responseItems = items.stream()

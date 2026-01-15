@@ -6,7 +6,7 @@ import com.krishihub.knowledge.ingestion.RawKnowledgeContent;
 import com.krishihub.knowledge.ingestion.RawKnowledgeContentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.beans.factory.annotation.Value; removed
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -26,14 +26,7 @@ public class AiKnowledgeService {
 
     private final com.krishihub.knowledge.moderation.ModerationService moderationService;
 
-    @Value("${app.openai.api-key}")
-    private String openAiApiKey;
-
-    @Value("${app.openai.api-url}")
-    private String openAiApiUrl;
-
-    @Value("${app.openai.model}")
-    private String openAiModel;
+    private final com.krishihub.config.properties.OpenAiProperties openAiProperties;
 
     @Async
     public void processContentAsync(UUID rawContentId) {
@@ -87,14 +80,14 @@ public class AiKnowledgeService {
                 .formatted(rawContent.getOriginalText());
 
         Map<String, Object> request = Map.of(
-                "model", openAiModel,
+                "model", openAiProperties.getModel(),
                 "messages", java.util.List.of(
                         Map.of("role", "system", "content", systemPrompt)),
                 "response_format", Map.of("type", "json_object"));
 
         String rawResponse = webClientBuilder.build().post()
-                .uri(openAiApiUrl)
-                .header("Authorization", "Bearer " + openAiApiKey)
+                .uri(openAiProperties.getApiUrl())
+                .header("Authorization", "Bearer " + openAiProperties.getApiKey())
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(String.class)
@@ -110,7 +103,7 @@ public class AiKnowledgeService {
                 .processedContent(json.path("content").asText())
                 .language(json.path("language").asText("ne"))
                 .tags(json.path("tags").toString())
-                .aiModelUsed(openAiModel)
+                .aiModelUsed(openAiProperties.getModel())
                 .isObsolete(false)
                 .build();
     }

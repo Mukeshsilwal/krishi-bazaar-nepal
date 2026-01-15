@@ -1,0 +1,19 @@
+{
+    "name": "@krishihub/common-utils",
+    "version": "0.0.1",
+    "type": "module",
+    "main": "./dist/index.js",
+    "exports": {
+        ".": "./dist/index.js"
+    },
+    "ifiles": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc -w"
+    },
+    "devDependencies": {
+        "typescript": "^5.3.3"
+    }
+}

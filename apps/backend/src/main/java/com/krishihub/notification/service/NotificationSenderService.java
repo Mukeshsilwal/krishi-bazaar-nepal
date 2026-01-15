@@ -90,7 +90,7 @@ public class NotificationSenderService {
 
             if (success) {
                 notification.setStatus(NotificationStatus.SENT);
-                notification.setSentAt(com.krishihub.common.util.DateTimeProvider.now());
+                notification.setSentAt(com.krishihub.common.util.DateUtil.nowUtc());
             } else {
                 notification.setStatus(NotificationStatus.FAILED);
                 notification.setFailureReason("No valid contact info for channel");

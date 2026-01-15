@@ -215,7 +215,7 @@ public class WeatherIngestionService {
 
         status.put("cachedDistricts", lastKnownWeatherData.keySet());
         status.put("monitoredDistricts", MONITORED_DISTRICTS);
-        status.put("lastPollTime", com.krishihub.common.util.DateTimeProvider.now());
+        status.put("lastPollTime", com.krishihub.common.util.DateUtil.nowUtc());
 
         return status;
     }

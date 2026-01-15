@@ -31,7 +31,7 @@ public class IngestionIntegrationTest {
     @Autowired
     private MarketPriceRepository priceRepository;
 
-    @MockBean
+    @MockBean(name = "kalimatiScraperService")
     private MarketPriceDataSource mockDataSource;
 
     @Test
@@ -44,7 +44,7 @@ public class IngestionIntegrationTest {
                 .maxPrice(new BigDecimal("60"))
                 .avgPrice(new BigDecimal("55"))
                 .unit("KG")
-                .priceDate(com.krishihub.common.util.DateTimeProvider.today())
+                .priceDate(com.krishihub.common.util.DateUtil.startOfDay(com.krishihub.common.util.DateUtil.nowUtc()))
                 .source("TEST_SOURCE")
                 .build();
 
@@ -56,7 +56,7 @@ public class IngestionIntegrationTest {
                 .maxPrice(new BigDecimal("62"))
                 .avgPrice(new BigDecimal("57"))
                 .unit("KG")
-                .priceDate(com.krishihub.common.util.DateTimeProvider.today())
+                .priceDate(com.krishihub.common.util.DateUtil.startOfDay(com.krishihub.common.util.DateUtil.nowUtc()))
                 .source("TEST_SOURCE")
                 .build();
 

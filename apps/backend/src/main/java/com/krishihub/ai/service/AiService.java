@@ -9,7 +9,7 @@ import com.krishihub.content.enums.ContentStatus;
 import com.krishihub.content.repository.ContentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.beans.factory.annotation.Value; removed
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,8 +31,7 @@ public class AiService {
 
         private final com.krishihub.diagnosis.repository.AIDiagnosisRepository aiDiagnosisRepository;
 
-        @Value("${app.openai.model}")
-        private String openAiModel;
+        private final com.krishihub.config.properties.OpenAiProperties openAiProperties;
 
         public AiRecommendation maximizeCropYield(
                         UUID farmerId,
@@ -87,7 +86,7 @@ public class AiService {
                                 + (imageUrl != null ? "\nImage URL: " + imageUrl : "");
 
                 Map<String, Object> request = Map.of(
-                                "model", openAiModel,
+                                "model", openAiProperties.getModel(),
                                 "messages", java.util.List.of(
                                                 Map.of("role", "system", "content", systemPrompt),
                                                 Map.of("role", "user", "content", userInput)),

@@ -54,7 +54,7 @@ public class WeatherAdvisoryNotificationService {
                 .channel(channel)
                 .priority(priority)
                 .status(NotificationStatus.PENDING)
-                .scheduledAt(com.krishihub.common.util.DateTimeProvider.now())
+                .scheduledAt(com.krishihub.common.util.DateUtil.nowUtc())
                 .isRead(false)
                 .build();
 
@@ -69,7 +69,7 @@ public class WeatherAdvisoryNotificationService {
 
             // Update status to delivered
             saved.setStatus(NotificationStatus.SENT);
-            saved.setSentAt(com.krishihub.common.util.DateTimeProvider.now());
+            saved.setSentAt(com.krishihub.common.util.DateUtil.nowUtc());
             notificationRepository.save(saved);
 
             log.info("Weather advisory notification sent successfully to farmer: {}", context.getFarmerId());
@@ -161,7 +161,7 @@ public class WeatherAdvisoryNotificationService {
         // Add validity
         message.append("\n\n⏰ Valid until: ");
         java.util.Calendar cal = java.util.Calendar.getInstance();
-        cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+        cal.setTime(com.krishihub.common.util.DateUtil.nowUtc());
         cal.add(java.util.Calendar.DAY_OF_YEAR, 1);
         message.append(cal.getTime());
 

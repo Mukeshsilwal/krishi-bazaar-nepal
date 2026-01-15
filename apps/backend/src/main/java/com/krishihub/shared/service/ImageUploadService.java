@@ -6,7 +6,7 @@ import com.krishihub.shared.dto.CloudinarySignatureResponse;
 import com.krishihub.shared.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.beans.factory.annotation.Value; removed
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,14 +25,7 @@ public class ImageUploadService {
 
     private final Cloudinary cloudinary;
 
-    @Value("${app.cloudinary.api-key}")
-    private String apiKey;
-
-    @Value("${app.cloudinary.api-secret}")
-    private String apiSecret;
-
-    @Value("${app.cloudinary.cloud-name}")
-    private String cloudName;
+    private final com.krishihub.config.properties.CloudinaryProperties cloudinaryProperties;
 
     public String uploadImage(MultipartFile file, String folder) {
         validateImage(file);
@@ -96,7 +89,7 @@ public class ImageUploadService {
                     sb.append(entry.getKey()).append("=").append(entry.getValue());
                 }
             }
-            sb.append(apiSecret);
+            sb.append(cloudinaryProperties.getApiSecret());
             String toSign = sb.toString();
 
             MessageDigest md = MessageDigest.getInstance("SHA-1");
@@ -110,8 +103,8 @@ public class ImageUploadService {
             return CloudinarySignatureResponse.builder()
                     .signature(signature)
                     .timestamp(timestamp)
-                    .apiKey(apiKey)
-                    .cloudName(cloudName)
+                    .apiKey(cloudinaryProperties.getApiKey())
+                    .cloudName(cloudinaryProperties.getCloudName())
                     .folder(folder)
                     .build();
         } catch (Exception e) {

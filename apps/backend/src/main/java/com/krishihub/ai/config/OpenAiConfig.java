@@ -1,6 +1,5 @@
 package com.krishihub.ai.config;
-
-import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.beans.factory.annotation.Value; removed
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -11,13 +10,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class OpenAiConfig {
 
     @Bean
-    public WebClient openAiWebClient(
-            @Value("${app.openai.api-key}") String apiKey,
-            @Value("${app.openai.api-url}") String apiUrl
-    ) {
+    public WebClient openAiWebClient(com.krishihub.config.properties.OpenAiProperties openAiProperties) {
         return WebClient.builder()
-                .baseUrl(apiUrl)
-                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
+                .baseUrl(openAiProperties.getApiUrl())
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + openAiProperties.getApiKey())
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }

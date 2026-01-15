@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/public/settings").permitAll()
                         .requestMatchers("/api/public/contact").permitAll()
+                        .requestMatchers("/api/legal/**").permitAll()
                         .requestMatchers("/api/market-prices/**").permitAll()
                         .requestMatchers("/api/weather/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/listings/**").permitAll()

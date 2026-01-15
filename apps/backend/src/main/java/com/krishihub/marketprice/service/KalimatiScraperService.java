@@ -6,7 +6,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.beans.factory.annotation.Value; removed
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -30,12 +30,15 @@ public class KalimatiScraperService implements MarketPriceDataSource {
     private static final String SOURCE_ID = "KALIMATI_GOV";
     private static final int TIMEOUT_MS = 15000;
 
-    @Value("${market.scraper.kalimati.enabled:true}")
-    private boolean enabled;
+    private final com.krishihub.config.properties.MarketProperties marketProperties;
+
+    public KalimatiScraperService(com.krishihub.config.properties.MarketProperties marketProperties) {
+        this.marketProperties = marketProperties;
+    }
 
     @Override
     public List<MarketPriceDto> fetchPrices() {
-        if (!enabled) {
+        if (!marketProperties.getScraper().getKalimati().isEnabled()) {
             log.info("Kalimati scraper is disabled via configuration");
             return new ArrayList<>();
         }
@@ -88,7 +91,7 @@ public class KalimatiScraperService implements MarketPriceDataSource {
                                     .maxPrice(max != null ? max : min)
                                     .avgPrice(avg != null ? avg : min)
                                     .district("Kathmandu")
-                                    .priceDate(com.krishihub.common.util.DateTimeProvider.today())
+                                    .priceDate(com.krishihub.common.util.DateUtil.startOfDay(com.krishihub.common.util.DateUtil.nowUtc()))
                                     .source(SOURCE_ID)
                                     .build());
                         }

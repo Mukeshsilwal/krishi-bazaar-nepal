@@ -2,7 +2,7 @@ package com.krishihub.notification.provider;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.beans.factory.annotation.Value; removed
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -13,18 +13,11 @@ public class SparrowSmsGateway implements SmsGateway {
 
     private final WebClient.Builder webClientBuilder;
 
-    @Value("${app.sms.api-url:#{null}}")
-    private String smsApiUrl;
-
-    @Value("${app.sms.api-key:}")
-    private String smsApiKey;
-
-    @Value("${app.sms.sender-id:KRISHI}")
-    private String senderId;
+    private final com.krishihub.config.properties.SmsProperties smsProperties;
 
     @Override
     public void sendSms(String mobileNumber, String message) {
-        if (smsApiUrl == null || smsApiUrl.isEmpty()) {
+        if (smsProperties.getApiUrl() == null || smsProperties.getApiUrl().isEmpty()) {
             log.info("=== SMS SIMULATION (No API URL configured) ===");
             log.info("To: {}", mobileNumber);
             log.info("Message: {}", message);
@@ -33,13 +26,13 @@ public class SparrowSmsGateway implements SmsGateway {
         }
 
         try {
-            WebClient webClient = webClientBuilder.baseUrl(smsApiUrl).build();
+            WebClient webClient = webClientBuilder.baseUrl(smsProperties.getApiUrl()).build();
 
             // Example for common Nepal SMS gateways (Sparrow/Aakash) usually GET or POST
             webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .queryParam("token", smsApiKey)
-                            .queryParam("from", senderId)
+                            .queryParam("token", smsProperties.getApiKey())
+                            .queryParam("from", smsProperties.getSenderId())
                             .queryParam("to", mobileNumber)
                             .queryParam("text", message)
                             .build())

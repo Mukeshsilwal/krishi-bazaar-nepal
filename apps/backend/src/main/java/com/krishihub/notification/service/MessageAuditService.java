@@ -18,7 +18,7 @@ public class MessageAuditService {
 
     public void logSuccess(MessageRequest request) {
         log.info("AUDIT: SUCCESS - Sent {} to {} at {}",
-                request.getType(), request.getRecipient(), com.krishihub.common.util.DateTimeProvider.now());
+                request.getType(), request.getRecipient(), com.krishihub.common.util.DateUtil.nowUtc());
     }
 
     public void logFailure(MessageRequest request, Throwable error) {

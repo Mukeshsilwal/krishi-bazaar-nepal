@@ -22,12 +22,21 @@ class OpenWeatherMapProviderTest {
     private OpenWeatherMapProvider provider;
     private RestTemplate restTemplate;
     private ObjectMapper objectMapper;
+    private com.krishihub.config.properties.WeatherProperties weatherProperties;
 
     @BeforeEach
     void setUp() {
         restTemplate = mock(RestTemplate.class);
         objectMapper = new ObjectMapper();
-        provider = new OpenWeatherMapProvider(restTemplate, objectMapper);
+        weatherProperties = mock(com.krishihub.config.properties.WeatherProperties.class);
+        
+        // Mock nested properties
+        com.krishihub.config.properties.WeatherProperties.OpenWeatherMap owm = mock(com.krishihub.config.properties.WeatherProperties.OpenWeatherMap.class);
+        when(weatherProperties.getOpenweathermap()).thenReturn(owm);
+        when(owm.getApiKey()).thenReturn("test-api-key");
+        when(owm.getBaseUrl()).thenReturn("http://api.openweathermap.org/data/2.5");
+
+        provider = new OpenWeatherMapProvider(restTemplate, objectMapper, weatherProperties);
     }
 
     @Test

@@ -80,7 +80,7 @@ public class AIDiagnosisService {
         diagnosis.setReviewStatus(request.getStatus());
         diagnosis.setReviewedBy(request.getReviewedBy());
         diagnosis.setReviewNotes(request.getReviewNotes());
-        diagnosis.setReviewedAt(com.krishihub.common.util.DateTimeProvider.now());
+        diagnosis.setReviewedAt(com.krishihub.common.util.DateUtil.nowUtc());
 
         if (request.getStatus() == ReviewStatus.APPROVED) {
             diagnosis.setFinalDiagnosis(

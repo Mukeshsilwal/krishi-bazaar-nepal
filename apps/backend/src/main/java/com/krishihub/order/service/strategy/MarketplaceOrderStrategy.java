@@ -48,7 +48,7 @@ public class MarketplaceOrderStrategy implements OrderProcessingStrategy {
         }
 
         java.util.Date pickupDate = request.getPickupDate() != null ? java.sql.Date.valueOf(request.getPickupDate())
-                : com.krishihub.common.util.DateTimeProvider.today();
+                : com.krishihub.common.util.DateUtil.startOfDay(com.krishihub.common.util.DateUtil.nowUtc());
         if (listing.getHarvestDate() != null) {
             if (pickupDate.before(listing.getHarvestDate())) {
                 throw new BadRequestException("Order date cannot be before harvest date: " + listing.getHarvestDate());
@@ -65,11 +65,11 @@ public class MarketplaceOrderStrategy implements OrderProcessingStrategy {
             }
         }
 
-        boolean isToday = com.krishihub.common.util.DateTimeProvider.isToday(pickupDate);
+        boolean isToday = com.krishihub.common.util.DateUtil.isToday(pickupDate);
         if (listing.getOrderCutoffTime() != null && isToday) {
             // Compare only time components
             java.util.Calendar nowCal = java.util.Calendar.getInstance();
-            nowCal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+            nowCal.setTime(com.krishihub.common.util.DateUtil.nowUtc());
             
             java.util.Calendar cutoffCal = java.util.Calendar.getInstance();
             cutoffCal.setTime(listing.getOrderCutoffTime());

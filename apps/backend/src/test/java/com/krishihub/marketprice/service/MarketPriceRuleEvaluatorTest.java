@@ -45,12 +45,13 @@ public class MarketPriceRuleEvaluatorTest {
                 .cropName("Tomato")
                 .district("Kathmandu")
                 .avgPrice(BigDecimal.valueOf(100))
-                .priceDate(com.krishihub.common.util.DateTimeProvider.today())
+                .avgPrice(BigDecimal.valueOf(100))
+                .priceDate(com.krishihub.common.util.DateUtil.startOfDay(com.krishihub.common.util.DateUtil.nowUtc()))
                 .unit("Kg")
                 .build();
 
         java.util.Calendar cal = java.util.Calendar.getInstance();
-        cal.setTime(com.krishihub.common.util.DateTimeProvider.today());
+        cal.setTime(com.krishihub.common.util.DateUtil.startOfDay(com.krishihub.common.util.DateUtil.nowUtc()));
         cal.add(java.util.Calendar.DAY_OF_YEAR, -1);
         
         MarketPriceDto oldPrice = MarketPriceDto.builder()

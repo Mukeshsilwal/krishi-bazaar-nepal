@@ -32,7 +32,7 @@ public class PaymentController {
     @PostMapping("/verify")
     public ResponseEntity<ApiResponse<TransactionDto>> verifyPayment(
             @RequestParam UUID transactionId,
-            @RequestParam String gatewayTransactionId) {
+            @RequestParam(required = false) String gatewayTransactionId) {
         TransactionDto transaction = paymentService.verifyPayment(transactionId, gatewayTransactionId);
         return ResponseEntity.ok(ApiResponse.success("Payment verified successfully", transaction));
     }

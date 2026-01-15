@@ -30,7 +30,7 @@ public class WeatherAdvisoryService {
     public WeatherAdvisory createAdvisory(WeatherAdvisory advisory) {
         if (advisory.getValidUntil() == null) {
             java.util.Calendar cal = java.util.Calendar.getInstance();
-            cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+            cal.setTime(com.krishihub.common.util.DateUtil.nowUtc());
             cal.add(java.util.Calendar.DAY_OF_YEAR, 3); // Default 3 days validity
             advisory.setValidUntil(cal.getTime());
         }

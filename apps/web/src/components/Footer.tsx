@@ -6,7 +6,7 @@ import { useSettings } from "@/context/SettingsContext";
 
 const footerLinks = {
   platform: [
-    { name: "उब्जनी बेच्नुहोस्", nameEn: "Sell Crops", href: "/create-listing" },
+    { name: "उब्जनी बेच्नुहोस्", nameEn: "Sell Crops", href: "/marketplace/create" },
     { name: "उब्जनी किन्नुहोस्", nameEn: "Buy Produce", href: "/marketplace" },
     { name: "बजार भाउ", nameEn: "Market Prices", href: "/market-prices" },
     { name: "कृषि पसल", nameEn: "Agri Store", href: "/agri-store" },
@@ -14,7 +14,7 @@ const footerLinks = {
   resources: [
     { name: "सिक्ने केन्द्र", nameEn: "Learning Center", href: "/knowledge" },
     { name: "खेती क्यालेन्डर", nameEn: "Farming Calendar", href: "/agriculture-calendar" },
-    { name: "मौसम अपडेट", nameEn: "Weather", href: "/weather" }, // Assuming a weather page exists or anchor
+    { name: "मौसम अपडेट", nameEn: "Weather", href: "/" }, // Weather widget is on home page
     { name: "सोधिने प्रश्नहरू", nameEn: "FAQs", href: "/support" },
   ],
   company: [
@@ -147,12 +147,12 @@ const Footer = () => {
             <Link to="/admin/login" className="hover:text-primary-foreground">
               Admin Login
             </Link>
-            <a href="#" className="hover:text-primary-foreground">
+            <Link to="/privacy-policy" className="hover:text-primary-foreground">
               गोपनीयता नीति
-            </a>
-            <a href="#" className="hover:text-primary-foreground">
+            </Link>
+            <Link to="/terms-of-service" className="hover:text-primary-foreground">
               सेवाका शर्तहरू
-            </a>
+            </Link>
           </div>
         </div>
       </div>

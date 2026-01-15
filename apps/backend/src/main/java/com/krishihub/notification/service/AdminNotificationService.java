@@ -56,7 +56,7 @@ public class AdminNotificationService {
         stats.put("deliveryRate", Math.round(deliveryRate * 10.0) / 10.0);
         stats.put("activeUsers", notificationRepository.countDistinctUsers());
         stats.put("totalTargetableUsers", userRepository.count());
-        stats.put("scheduled", notificationRepository.countByScheduledAtGreaterThan(com.krishihub.common.util.DateTimeProvider.now()));
+        stats.put("scheduled", notificationRepository.countByScheduledAtGreaterThan(com.krishihub.common.util.DateUtil.nowUtc()));
 
         return stats;
     }

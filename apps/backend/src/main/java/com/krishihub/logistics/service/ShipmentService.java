@@ -46,10 +46,10 @@ public class ShipmentService {
                 .orElseThrow(() -> new RuntimeException("Shipment not found"));
         
         shipment.setStatus(status);
-        shipment.setLastUpdated(com.krishihub.common.util.DateTimeProvider.now());
+        shipment.setLastUpdated(com.krishihub.common.util.DateUtil.nowUtc());
 
         if (status == Shipment.ShipmentStatus.DELIVERED) {
-            shipment.setDeliveryTime(com.krishihub.common.util.DateTimeProvider.now());
+            shipment.setDeliveryTime(com.krishihub.common.util.DateUtil.nowUtc());
         }
         
         shipmentRepository.save(shipment);

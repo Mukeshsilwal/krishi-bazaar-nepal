@@ -132,7 +132,7 @@ public class SeleniumScraperService implements MarketPriceDataSource {
                                     .maxPrice(max != null ? max : min)
                                     .avgPrice(avg != null ? avg : min)
                                     .district("Kathmandu")
-                                    .priceDate(com.krishihub.common.util.DateTimeProvider.today())
+                                    .priceDate(com.krishihub.common.util.DateUtil.startOfDay(com.krishihub.common.util.DateUtil.nowUtc()))
                                     .source(SOURCE_ID)
                                     .build());
                         }

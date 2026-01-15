@@ -21,7 +21,7 @@ const CheckoutPage = () => {
     const [notes, setNotes] = useState('');
 
     if (items.length === 0) {
-        return <Navigate to="/cart" replace />;
+        return <Navigate to="/agri-store/cart" replace />;
     }
 
     const handlePlaceOrder = async () => {
@@ -67,7 +67,7 @@ const CheckoutPage = () => {
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-4xl">
-            <Button variant="ghost" className="mb-6" onClick={() => navigate('/cart')}>
+            <Button variant="ghost" className="mb-6" onClick={() => navigate('/agri-store/cart')}>
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back to Cart
             </Button>
 

@@ -1,5 +1,6 @@
 package com.krishihub.auth.service;
 
+import com.krishihub.service.SystemConfigService;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -9,10 +10,10 @@ import java.util.concurrent.atomic.AtomicLong;
 @Service
 public class RateLimitService {
 
-    private final com.krishihub.service.SystemConfigService systemConfigService;
+    private final SystemConfigService systemConfigService;
     private final Map<String, UserRequestCount> requestCounts = new ConcurrentHashMap<>();
     
-    public RateLimitService(com.krishihub.service.SystemConfigService systemConfigService) {
+    public RateLimitService(SystemConfigService systemConfigService) {
         this.systemConfigService = systemConfigService;
     }
 

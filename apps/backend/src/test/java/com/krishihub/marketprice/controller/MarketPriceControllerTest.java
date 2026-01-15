@@ -22,6 +22,9 @@ class MarketPriceControllerTest {
     @Mock
     private MarketPriceService priceService;
 
+    @Mock
+    private org.springframework.context.ApplicationEventPublisher eventPublisher;
+
     @InjectMocks
     private MarketPriceController controller;
 

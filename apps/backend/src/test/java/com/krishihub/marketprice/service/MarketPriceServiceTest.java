@@ -47,7 +47,7 @@ class MarketPriceServiceTest {
                 .maxPrice(new BigDecimal("60"))
                 .avgPrice(new BigDecimal("55"))
                 .unit("Kg")
-                .priceDate(com.krishihub.common.util.DateTimeProvider.today())
+                .priceDate(com.krishihub.common.util.DateUtil.startOfDay(com.krishihub.common.util.DateUtil.nowUtc()))
                 .source("GOV")
                 .build();
 

@@ -230,7 +230,7 @@ public class WeatherAdvisoryOrchestrator {
      */
     private String generateDeduplicationKey(WeatherAdvisoryContext context) {
         java.util.Calendar cal = java.util.Calendar.getInstance();
-        cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+        cal.setTime(com.krishihub.common.util.DateUtil.nowUtc());
         return String.format("%s:%s:%s:%s",
                 context.getFarmerId(),
                 context.getPrimarySignal(),
@@ -327,7 +327,7 @@ public class WeatherAdvisoryOrchestrator {
 
         status.put("weatherIngestionAvailable", weatherIngestionService.isAnyProviderAvailable());
         status.put("recentAlertsCount", recentAlerts.size());
-        status.put("lastProcessingTime", com.krishihub.common.util.DateTimeProvider.now());
+        status.put("lastProcessingTime", com.krishihub.common.util.DateUtil.nowUtc());
 
         return status;
     }

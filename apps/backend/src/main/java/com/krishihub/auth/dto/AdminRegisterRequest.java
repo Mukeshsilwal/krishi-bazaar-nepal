@@ -1,5 +1,6 @@
 package com.krishihub.auth.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -16,7 +17,7 @@ public class AdminRegisterRequest {
     private String mobileNumber;
 
     @NotBlank(message = "Email is required")
-    @jakarta.validation.constraints.Email(message = "Invalid email format")
+    @Email(message = "Invalid email format")
     private String email;
 
     @NotBlank(message = "Name is required")
@@ -27,4 +28,7 @@ public class AdminRegisterRequest {
 
     @NotBlank(message = "Admin secret key is required")
     private String adminSecret;
+
+    @NotBlank(message = "Admin district key is required")
+    private String district;
 }

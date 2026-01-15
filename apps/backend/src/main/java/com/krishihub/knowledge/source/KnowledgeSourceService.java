@@ -74,7 +74,7 @@ public class KnowledgeSourceService {
     @Transactional
     public void updateLastSyncedAt(UUID id) {
         KnowledgeSource source = getSourceById(id);
-        source.setLastSyncedAt(com.krishihub.common.util.DateTimeProvider.now());
+        source.setLastSyncedAt(com.krishihub.common.util.DateUtil.nowUtc());
         sourceRepository.save(source);
     }
 

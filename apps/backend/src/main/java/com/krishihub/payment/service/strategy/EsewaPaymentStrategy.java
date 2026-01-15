@@ -1,6 +1,6 @@
 package com.krishihub.payment.service.strategy;
 
-import com.krishihub.payment.config.EsewaProperties;
+import com.krishihub.config.properties.PaymentProperties;
 import com.krishihub.payment.entity.Transaction;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +45,7 @@ import java.util.UUID;
 @Slf4j
 public class EsewaPaymentStrategy implements PaymentStrategy {
 
-    private final EsewaProperties esewaProperties;
+    private final PaymentProperties paymentProperties;
     private final RestTemplate restTemplate;
 
     private static final String HMAC_SHA256 = "HmacSHA256";
@@ -58,24 +58,49 @@ public class EsewaPaymentStrategy implements PaymentStrategy {
     @Override
     public PaymentInitiationResult initiatePayment(UUID orderId, BigDecimal amount) {
         try {
-            // Business Rule: Tax, service charge, and delivery charge are 0 for now.
-            // These can be configured in future based on business requirements.
-            double amt = amount.doubleValue();
-            double taxAmt = 0.0;
-            double psc = 0.0;
-            double pdc = 0.0;
-            double tAmt = amt + taxAmt + psc + pdc;
+            PaymentProperties.Esewa esewa = paymentProperties.getEsewa();
 
-            String pid = orderId.toString();
-            String scd = esewaProperties.getMerchantCode();
-            String su = buildCallbackUrl(esewaProperties.getSuccessUrl(), pid);
-            String fu = buildCallbackUrl(esewaProperties.getFailureUrl(), pid);
+            // Business Rule: Tax, service charge, and delivery charge are 0 for now.
+            BigDecimal taxAmt = BigDecimal.ZERO;
+            BigDecimal psc = BigDecimal.ZERO;
+            BigDecimal pdc = BigDecimal.ZERO;
+            BigDecimal tAmt = amount.add(taxAmt).add(psc).add(pdc);
+
+            // Generate unique transaction ID for eSewa
+            // Format: KBHexTimestampHexRandom (Purely Alphanumeric, Namespaced, No Hyphens)
+            // Example: KB18d0e729a5f56
+            String uniqueSuffix = Long.toHexString(System.currentTimeMillis());
+            String randomSuffix = Integer.toHexString(new java.util.Random().nextInt(256));
+            String pid = "KB" + uniqueSuffix + randomSuffix;
+            String scd = esewa.getMerchantCode();
+            
+            // Callback URL must allow frontend to identify the ORDER, so we pass raw orderId as txnId param
+            // Frontend will call verify -> Controller -> Service -> Service looks up by Order ID (pid) 
+            // Callback URL: Append Order ID as Path Variable to avoid query param issues?
+            // eSewa will redirect to `success_url` and append its own params (?oid=...&amt=...)
+            // If we use http://localhost:8080/payment/success/{orderId} eSewa makes it:
+            // http://localhost:8080/payment/success/{orderId}?oid=KB...&amt=...
+            // This is clean and valid.
+            String su = esewa.getSuccessUrl() + "/" + orderId;
+            String fu = esewa.getFailureUrl() + "/" + orderId;
 
             // SECURITY: Signature prevents tampering with payment amount or transaction ID.
-            // eSewa verifies this signature before processing payment.
-            String signature = generateEsewaV2Signature(tAmt, pid, scd, esewaProperties.getSecretKey());
+            // DEBUGGING: Log critical details to diagnose signature mismatch
+            String signaturePayload = String.format("product_code=%s,total_amount=%s,transaction_uuid=%s",
+                    scd, trimAmount(tAmt), pid);
+            
+            // Mask secret key for logs but show length and boundaries
+            String sk = esewa.getSecretKey();
+            log.info("DEBUG eSewa - SecretKey Len: {}, Start: '{}', End: '{}'", 
+                    sk != null ? sk.length() : "null", 
+                    sk != null && sk.length() > 2 ? sk.substring(0, 2) : "?",
+                    sk != null && sk.length() > 2 ? sk.substring(sk.length() - 2) : "?");
+            log.info("DEBUG eSewa - Signature Payload: '{}'", signaturePayload);
+            log.info("DEBUG eSewa - PID Len: {}", pid.length());
 
-            log.info("eSewa Payment Initiation - Transaction ID: {}, Amount: {}, Signature generated", pid, tAmt);
+            String signature = generateEsewaV2Signature(tAmt, pid, scd, esewa.getSecretKey());
+
+            log.info("eSewa Payment Initiation - Transaction ID: {}, Amount: {}, Signature generated: {}", pid, tAmt, signature);
 
             String htmlForm = """
                     <html>
@@ -90,15 +115,15 @@ public class EsewaPaymentStrategy implements PaymentStrategy {
                           <input type="hidden" name="product_delivery_charge" value="%s"/>
                           <input type="hidden" name="success_url" value="%s"/>
                           <input type="hidden" name="failure_url" value="%s"/>
-                          <input type="hidden" name="signed_field_names" value="total_amount,transaction_uuid,product_code"/>
+                          <input type="hidden" name="signed_field_names" value="product_code,total_amount,transaction_uuid"/>
                           <input type="hidden" name="signature" value="%s"/>
                         </form>
                       </body>
                     </html>
                     """
                     .formatted(
-                            esewaProperties.getBaseUrl(),
-                            trimAmount(amt),
+                            esewa.getBaseUrl(),
+                            trimAmount(amount),
                             trimAmount(taxAmt),
                             trimAmount(tAmt),
                             htmlEscape(pid),
@@ -109,15 +134,18 @@ public class EsewaPaymentStrategy implements PaymentStrategy {
                             htmlEscape(fu),
                             htmlEscape(signature));
 
-            Map<String, Object> responseData = new HashMap<>();
+            // DEBUG: Log the standard form to check for malformed attributes
+            log.info("DEBUG eSewa - Form: {}", htmlForm.replace("\n", "").replace("  ", " "));
+
+            Map<String, Object> responseData = new HashMap<>(); // Using HashMap for compatibility
             responseData.put("htmlForm", htmlForm);
             responseData.put("transactionId", pid);
-            responseData.put("amount", amt);
+            responseData.put("amount", amount);
             responseData.put("totalAmount", tAmt);
 
             return PaymentInitiationResult.builder()
-                    .transactionId(pid) // For eSewa, Order ID is used as Transaction ID initially
-                    .paymentUrl("esewa-redirect") // Placeholder
+                    .transactionId(pid)
+                    .paymentUrl("esewa-redirect")
                     .paymentData(responseData)
                     .build();
 
@@ -130,11 +158,12 @@ public class EsewaPaymentStrategy implements PaymentStrategy {
     @Override
     public PaymentVerificationResult verifyPayment(String transactionId, BigDecimal amount) {
         try {
+            PaymentProperties.Esewa esewa = paymentProperties.getEsewa();
             String url = UriComponentsBuilder
-                    .fromHttpUrl(esewaProperties.getVerifyUrl())
-                    .queryParam("product_code", esewaProperties.getMerchantCode())
+                    .fromHttpUrl(esewa.getVerifyUrl())
+                    .queryParam("product_code", esewa.getMerchantCode())
                     .queryParam("transaction_uuid", transactionId)
-                    .queryParam("total_amount", trimAmount(amount.doubleValue()))
+                    .queryParam("total_amount", trimAmount(amount))
                     .toUriString();
 
             log.info("Verifying eSewa payment: {}", url);
@@ -170,22 +199,13 @@ public class EsewaPaymentStrategy implements PaymentStrategy {
 
     /**
      * Generates HMAC-SHA256 signature for eSewa payment request.
-     *
-     * Security:
-     * - Signature format: HMAC-SHA256("total_amount=X,transaction_uuid=Y,product_code=Z", secretKey)
-     * - This prevents attackers from modifying payment amount or transaction ID.
-     * - eSewa validates this signature before processing payment.
-     *
-     * Important:
-     * - Amount must be trimmed (no trailing zeros) to match eSewa's format.
-     * - Field order in message MUST match: total_amount, transaction_uuid, product_code.
-     * - Changing field order will cause signature mismatch and payment failure.
      */
-    private String generateEsewaV2Signature(double totalAmount, String transactionUuid, String productCode,
+    private String generateEsewaV2Signature(BigDecimal totalAmount, String transactionUuid, String productCode,
             String secretKey) throws Exception {
         String amtStr = trimAmount(totalAmount);
-        String message = String.format("total_amount=%s,transaction_uuid=%s,product_code=%s",
-                amtStr, transactionUuid, productCode);
+        // Alphabetical Order: product_code, total_amount, transaction_uuid
+        String message = String.format("product_code=%s,total_amount=%s,transaction_uuid=%s",
+                productCode, amtStr, transactionUuid);
 
         Mac mac = Mac.getInstance(HMAC_SHA256);
         SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), HMAC_SHA256);
@@ -194,9 +214,9 @@ public class EsewaPaymentStrategy implements PaymentStrategy {
         return Base64.getEncoder().encodeToString(rawHmac);
     }
 
-    private String trimAmount(double value) {
-        BigDecimal bd = BigDecimal.valueOf(value).stripTrailingZeros();
-        return bd.toPlainString();
+    private String trimAmount(BigDecimal value) {
+        // Strict 2-decimal formatting (e.g. 0.00) for eSewa compliance
+        return String.format(java.util.Locale.US, "%.2f", value);
     }
 
     private String htmlEscape(String s) {

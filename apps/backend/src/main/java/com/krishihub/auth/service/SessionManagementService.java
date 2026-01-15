@@ -4,7 +4,7 @@ import com.krishihub.service.SystemConfigService;
 import com.krishihub.shared.exception.ActiveSessionExistsException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.beans.factory.annotation.Value; removed
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -34,8 +34,7 @@ public class SessionManagementService {
     private final StringRedisTemplate redisTemplate;
     private final SystemConfigService systemConfigService;
 
-    @Value("${app.jwt.expiration}")
-    private long tokenExpTime;
+    private final com.krishihub.config.properties.JwtProperties jwtProperties;
 
     /**
      * Checks if user already has an active session and sets login lock if not.
@@ -54,10 +53,10 @@ public class SessionManagementService {
     public void checkAndSetLoginLock(UUID userId) {
         try {
             String key = "login:lock:" + userId;
-            if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
+            if (redisTemplate.hasKey(key)) {
                  throw new ActiveSessionExistsException("User is already logged in on another device.");
             }
-            long jwtExp = systemConfigService.getLong("auth.jwt.expiration_ms", tokenExpTime);
+            long jwtExp = systemConfigService.getLong("auth.jwt.expiration_ms", jwtProperties.getExpiration());
             redisTemplate.opsForValue().set(key, "true", jwtExp, TimeUnit.MILLISECONDS);
         } catch (ActiveSessionExistsException e) {
             throw e;

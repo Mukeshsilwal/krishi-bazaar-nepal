@@ -35,7 +35,7 @@ public class MarketPriceFallbackIntegrationTest {
 
         // 36: LocalDate yesterday = LocalDate.now().minusDays(1);
         java.util.Calendar cal = java.util.Calendar.getInstance();
-        cal.setTime(com.krishihub.common.util.DateTimeProvider.today());
+        cal.setTime(com.krishihub.common.util.DateUtil.startOfDay(com.krishihub.common.util.DateUtil.nowUtc()));
         cal.add(java.util.Calendar.DAY_OF_YEAR, -1);
         java.util.Date yesterday = cal.getTime();
 
@@ -71,7 +71,7 @@ public class MarketPriceFallbackIntegrationTest {
                 .maxPrice(new BigDecimal("60"))
                 .avgPrice(new BigDecimal("55"))
                 .unit("KG")
-                .priceDate(com.krishihub.common.util.DateTimeProvider.today())
+                .priceDate(com.krishihub.common.util.DateUtil.startOfDay(com.krishihub.common.util.DateUtil.nowUtc()))
                 .source("TEST_SOURCE")
                 .build();
 
@@ -79,7 +79,7 @@ public class MarketPriceFallbackIntegrationTest {
 
         Page<MarketPriceDto> newResult = marketPriceService.getTodaysPrices(testDistrict, 0, 10);
         assertNotNull(newResult);
-        assertEquals(com.krishihub.common.util.DateTimeProvider.today(), newResult.getContent().get(0).getPriceDate(),
+        assertEquals(com.krishihub.common.util.DateUtil.startOfDay(com.krishihub.common.util.DateUtil.nowUtc()), newResult.getContent().get(0).getPriceDate(),
                 "Should return today's price when available");
         assertEquals(new BigDecimal("55"), newResult.getContent().get(0).getAvgPrice());
     }
