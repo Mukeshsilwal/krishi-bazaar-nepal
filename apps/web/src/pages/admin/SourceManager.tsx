@@ -203,55 +203,57 @@ const SourceManager = () => {
 
             <Card>
                 <CardContent className="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Type</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Trust Score</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {sources.length === 0 ? (
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
-                                        No sources defined.
-                                    </TableCell>
+                                    <TableHead className="whitespace-nowrap">Name</TableHead>
+                                    <TableHead className="whitespace-nowrap">Type</TableHead>
+                                    <TableHead className="whitespace-nowrap">Status</TableHead>
+                                    <TableHead className="whitespace-nowrap">Trust Score</TableHead>
+                                    <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
                                 </TableRow>
-                            ) : (
-                                sources.map((source) => (
-                                    <TableRow key={source.id}>
-                                        <TableCell>
-                                            <div className="font-medium">{source.name}</div>
-                                            <div className="text-xs text-muted-foreground">{source.organization}</div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant="outline">{source.type}</Badge>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant={source.status === 'ACTIVE' ? 'default' : 'secondary'}>
-                                                {source.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>{source.trustScore}/100</TableCell>
-                                        <TableCell className="text-right flex justify-end gap-2">
-                                            <Button variant="ghost" size="sm" asChild>
-                                                <a href={source.url} target="_blank" rel="noreferrer"><ExternalLink className="h-4 w-4" /></a>
-                                            </Button>
-                                            <Button variant="ghost" size="sm" onClick={() => openEdit(source)}>
-                                                <Edit className="h-4 w-4" />
-                                            </Button>
-                                            <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600" onClick={() => handleDelete(source.id)}>
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
+                            </TableHeader>
+                            <TableBody>
+                                {sources.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
+                                            No sources defined.
                                         </TableCell>
                                     </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
+                                ) : (
+                                    sources.map((source) => (
+                                        <TableRow key={source.id}>
+                                            <TableCell>
+                                                <div className="font-medium">{source.name}</div>
+                                                <div className="text-xs text-muted-foreground">{source.organization}</div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant="outline">{source.type}</Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant={source.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                                                    {source.status}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell>{source.trustScore}/100</TableCell>
+                                            <TableCell className="text-right flex justify-end gap-2">
+                                                <Button variant="ghost" size="sm" asChild>
+                                                    <a href={source.url} target="_blank" rel="noreferrer"><ExternalLink className="h-4 w-4" /></a>
+                                                </Button>
+                                                <Button variant="ghost" size="sm" onClick={() => openEdit(source)}>
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
+                                                <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600" onClick={() => handleDelete(source.id)}>
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </CardContent>
             </Card>
         </div>

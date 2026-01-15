@@ -259,50 +259,52 @@ const FarmerManager = () => {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Mobile</TableHead>
-                                <TableHead>District</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {farmers.length === 0 ? (
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center h-48 text-muted-foreground">
-                                        <div className="flex flex-col items-center justify-center gap-2">
-                                            <Users className="h-8 w-8 opacity-50" />
-                                            <p>No farmers found matching criteria.</p>
-                                        </div>
-                                    </TableCell>
+                                    <TableHead className="whitespace-nowrap">Name</TableHead>
+                                    <TableHead className="whitespace-nowrap">Mobile</TableHead>
+                                    <TableHead className="whitespace-nowrap">District</TableHead>
+                                    <TableHead className="whitespace-nowrap">Status</TableHead>
+                                    <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
                                 </TableRow>
-                            ) : (
-                                farmers.map((f) => (
-                                    <TableRow key={f.id}>
-                                        <TableCell className="font-medium">{f.name}</TableCell>
-                                        <TableCell>{f.mobileNumber}</TableCell>
-                                        <TableCell>{f.district || 'N/A'}</TableCell>
-                                        <TableCell>
-                                            <Badge
-                                                variant={f.verified ? "default" : "outline"}
-                                                className={f.verified ? "bg-green-600 hover:bg-green-700" : "text-orange-600 border-orange-600 bg-orange-50"}
-                                            >
-                                                {f.verified ? "Verified" : "Pending"}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="ghost" size="sm" onClick={() => handleViewProfile(f.id)}>
-                                                <Eye className="h-4 w-4 mr-1" /> View
-                                            </Button>
+                            </TableHeader>
+                            <TableBody>
+                                {farmers.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="text-center h-48 text-muted-foreground">
+                                            <div className="flex flex-col items-center justify-center gap-2">
+                                                <Users className="h-8 w-8 opacity-50" />
+                                                <p>No farmers found matching criteria.</p>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
+                                ) : (
+                                    farmers.map((f) => (
+                                        <TableRow key={f.id}>
+                                            <TableCell className="font-medium">{f.name}</TableCell>
+                                            <TableCell>{f.mobileNumber}</TableCell>
+                                            <TableCell>{f.district || 'N/A'}</TableCell>
+                                            <TableCell>
+                                                <Badge
+                                                    variant={f.verified ? "default" : "outline"}
+                                                    className={f.verified ? "bg-green-600 hover:bg-green-700" : "text-orange-600 border-orange-600 bg-orange-50"}
+                                                >
+                                                    {f.verified ? "Verified" : "Pending"}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <Button variant="ghost" size="sm" onClick={() => handleViewProfile(f.id)}>
+                                                    <Eye className="h-4 w-4 mr-1" /> View
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </CardContent>
                 {/* Pagination Controls */}
                 <div className="p-4 border-t flex items-center justify-end gap-2">

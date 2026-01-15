@@ -184,72 +184,74 @@ const UserManagement = () => {
 
                     {/* Table */}
                     <div className="rounded-md border">
-                        <InfiniteScroll
-                            isLoading={loading && page > 0}
-                            hasMore={hasMore}
-                            onLoadMore={loadMore}
-                            loader={<div className="p-4 flex justify-center"><Loader2 className="animate-spin h-6 w-6 text-primary" /></div>}
-                            endMessage={users.length > 0 ? <div className="p-4 text-center text-xs text-muted-foreground">End of Users List</div> : null}
-                        >
-                            <Table>
-                                <TableHeader>
-                                    <TableRow className="bg-muted/50">
-                                        <TableHead>User Details</TableHead>
-                                        <TableHead>Role</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Location</TableHead>
-                                        <TableHead>Joined</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {users.length === 0 && !loading ? (
-                                        <TableRow>
-                                            <TableCell colSpan={6} className="text-center h-32 text-muted-foreground">
-                                                No users found matching your filters.
-                                            </TableCell>
+                        <div className="overflow-x-auto">
+                            <InfiniteScroll
+                                isLoading={loading && page > 0}
+                                hasMore={hasMore}
+                                onLoadMore={loadMore}
+                                loader={<div className="p-4 flex justify-center"><Loader2 className="animate-spin h-6 w-6 text-primary" /></div>}
+                                endMessage={users.length > 0 ? <div className="p-4 text-center text-xs text-muted-foreground">End of Users List</div> : null}
+                            >
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow className="bg-muted/50">
+                                            <TableHead className="whitespace-nowrap">User Details</TableHead>
+                                            <TableHead className="whitespace-nowrap">Role</TableHead>
+                                            <TableHead className="whitespace-nowrap">Status</TableHead>
+                                            <TableHead className="whitespace-nowrap">Location</TableHead>
+                                            <TableHead className="whitespace-nowrap">Joined</TableHead>
+                                            <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
                                         </TableRow>
-                                    ) : (
-                                        users.map((user) => (
-                                            <TableRow key={user.id}>
-                                                <TableCell>
-                                                    <div className="flex flex-col">
-                                                        <span className="font-medium">{user.name || 'N/A'}</span>
-                                                        <span className="text-xs text-muted-foreground">{user.email || user.mobileNumber}</span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Badge variant="outline" className="font-normal">
-                                                        {user.role}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Badge variant={user.enabled ? "default" : "destructive"} className="rounded-full px-2 py-0.5 text-[10px]">
-                                                        {user.enabled ? "Active" : "Disabled"}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <span className="text-sm text-muted-foreground">{user.district || '-'}</span>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <span className="text-sm text-muted-foreground">{new Date(user.createdAt).toLocaleDateString()}</span>
-                                                </TableCell>
-                                                <TableCell className="text-right">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() => toggleStatus(user)}
-                                                        className={user.enabled ? "text-destructive hover:text-destructive hover:bg-destructive/10" : "text-green-600 hover:text-green-700 hover:bg-green-50"}
-                                                    >
-                                                        {user.enabled ? <Ban className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
-                                                    </Button>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {users.length === 0 && !loading ? (
+                                            <TableRow>
+                                                <TableCell colSpan={6} className="text-center h-32 text-muted-foreground">
+                                                    No users found matching your filters.
                                                 </TableCell>
                                             </TableRow>
-                                        ))
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </InfiniteScroll>
+                                        ) : (
+                                            users.map((user) => (
+                                                <TableRow key={user.id}>
+                                                    <TableCell>
+                                                        <div className="flex flex-col">
+                                                            <span className="font-medium">{user.name || 'N/A'}</span>
+                                                            <span className="text-xs text-muted-foreground">{user.email || user.mobileNumber}</span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Badge variant="outline" className="font-normal">
+                                                            {user.role}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Badge variant={user.enabled ? "default" : "destructive"} className="rounded-full px-2 py-0.5 text-[10px]">
+                                                            {user.enabled ? "Active" : "Disabled"}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <span className="text-sm text-muted-foreground">{user.district || '-'}</span>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <span className="text-sm text-muted-foreground">{new Date(user.createdAt).toLocaleDateString()}</span>
+                                                    </TableCell>
+                                                    <TableCell className="text-right">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => toggleStatus(user)}
+                                                            className={user.enabled ? "text-destructive hover:text-destructive hover:bg-destructive/10" : "text-green-600 hover:text-green-700 hover:bg-green-50"}
+                                                        >
+                                                            {user.enabled ? <Ban className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
+                                                        </Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </InfiniteScroll>
+                        </div>
                     </div>
                 </CardContent>
             </Card>

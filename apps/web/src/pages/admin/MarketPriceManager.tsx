@@ -102,53 +102,55 @@ const MarketPriceManager = () => {
                 <div className="text-center py-8">Loading...</div>
             ) : (
                 <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Crop</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">District</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Min</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Max</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Avg</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Source</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Updated</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200">
-                            {prices.length === 0 ? (
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
                                 <tr>
-                                    <td colSpan={8} className="px-6 py-4 text-center text-gray-500">No records found</td>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Image</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Crop</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">District</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Min</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Max</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Avg</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Source</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Last Updated</th>
                                 </tr>
-                            ) : (
-                                prices.map((price: any) => {
-                                    // Backend now provides imageUrl
-                                    const imageUrl = price.imageUrl || 'https://images.unsplash.com/photo-1595855709915-f65b907afa0a?w=500&auto=format&fit=crop&q=60';
-                                    return (
-                                        <tr key={price.id}>
-                                            <td className="px-6 py-4">
-                                                <div className="h-10 w-10 rounded-full bg-gray-100 overflow-hidden border border-gray-200">
-                                                    <img
-                                                        src={imageUrl}
-                                                        alt={price.cropName}
-                                                        className="h-full w-full object-cover"
-                                                        loading="lazy"
-                                                    />
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 font-medium text-gray-900">{price.cropName}</td>
-                                            <td className="px-6 py-4">{price.district}</td>
-                                            <td className="px-6 py-4">{price.minPrice}</td>
-                                            <td className="px-6 py-4">{price.maxPrice}</td>
-                                            <td className="px-6 py-4 font-bold text-green-600">{price.avgPrice}</td>
-                                            <td className="px-6 py-4 text-sm text-gray-500">{price.source}</td>
-                                            <td className="px-6 py-4 text-sm text-gray-500">{price.priceDate}</td>
-                                        </tr>
-                                    );
-                                })
-                            )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                                {prices.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={8} className="px-6 py-4 text-center text-gray-500">No records found</td>
+                                    </tr>
+                                ) : (
+                                    prices.map((price: any) => {
+                                        // Backend now provides imageUrl
+                                        const imageUrl = price.imageUrl || 'https://images.unsplash.com/photo-1595855709915-f65b907afa0a?w=500&auto=format&fit=crop&q=60';
+                                        return (
+                                            <tr key={price.id}>
+                                                <td className="px-6 py-4">
+                                                    <div className="h-10 w-10 rounded-full bg-gray-100 overflow-hidden border border-gray-200">
+                                                        <img
+                                                            src={imageUrl}
+                                                            alt={price.cropName}
+                                                            className="h-full w-full object-cover"
+                                                            loading="lazy"
+                                                        />
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 font-medium text-gray-900">{price.cropName}</td>
+                                                <td className="px-6 py-4">{price.district}</td>
+                                                <td className="px-6 py-4">{price.minPrice}</td>
+                                                <td className="px-6 py-4">{price.maxPrice}</td>
+                                                <td className="px-6 py-4 font-bold text-green-600">{price.avgPrice}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-500">{price.source}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-500">{price.priceDate}</td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
 

@@ -222,54 +222,56 @@ const RoleManagement = () => {
                     <CardTitle>Roles</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Description</TableHead>
-                                <TableHead>Permissions</TableHead>
-                                <TableHead>Type</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {roles.map((role) => (
-                                <TableRow key={role.id}>
-                                    <TableCell className="font-medium flex items-center gap-2">
-                                        <Shield className="h-4 w-4 text-muted-foreground" />
-                                        {role.name}
-                                    </TableCell>
-                                    <TableCell>{role.description}</TableCell>
-                                    <TableCell className="max-w-[400px]">
-                                        <div className="flex flex-wrap gap-1">
-                                            {role.permissions.slice(0, 5).map((p) => (
-                                                <Badge key={p} variant="secondary" className="text-[10px] px-1 py-0 h-5">
-                                                    {p}
-                                                </Badge>
-                                            ))}
-                                            {role.permissions.length > 5 && (
-                                                <Badge variant="outline" className="text-[10px] px-1 py-0 h-5">
-                                                    +{role.permissions.length - 5}
-                                                </Badge>
-                                            )}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge variant={role.isSystemDefined ? "default" : "outline"}>
-                                            {role.isSystemDefined ? "System" : "Custom"}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        {!role.isSystemDefined && (
-                                            <Button variant="ghost" size="icon">
-                                                <Trash2 className="h-4 w-4 text-destructive" />
-                                            </Button>
-                                        )}
-                                    </TableCell>
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="whitespace-nowrap">Name</TableHead>
+                                    <TableHead className="whitespace-nowrap">Description</TableHead>
+                                    <TableHead className="whitespace-nowrap">Permissions</TableHead>
+                                    <TableHead className="whitespace-nowrap">Type</TableHead>
+                                    <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {roles.map((role) => (
+                                    <TableRow key={role.id}>
+                                        <TableCell className="font-medium flex items-center gap-2">
+                                            <Shield className="h-4 w-4 text-muted-foreground" />
+                                            {role.name}
+                                        </TableCell>
+                                        <TableCell>{role.description}</TableCell>
+                                        <TableCell className="max-w-[400px]">
+                                            <div className="flex flex-wrap gap-1">
+                                                {role.permissions.slice(0, 5).map((p) => (
+                                                    <Badge key={p} variant="secondary" className="text-[10px] px-1 py-0 h-5">
+                                                        {p}
+                                                    </Badge>
+                                                ))}
+                                                {role.permissions.length > 5 && (
+                                                    <Badge variant="outline" className="text-[10px] px-1 py-0 h-5">
+                                                        +{role.permissions.length - 5}
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant={role.isSystemDefined ? "default" : "outline"}>
+                                                {role.isSystemDefined ? "System" : "Custom"}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            {!role.isSystemDefined && (
+                                                <Button variant="ghost" size="icon">
+                                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                                </Button>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </CardContent>
             </Card>
         </div>

@@ -174,56 +174,58 @@ const SchemeManager = () => {
                     <CardTitle>Active Schemes</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Title</TableHead>
-                                <TableHead>Eligibility</TableHead>
-                                <TableHead>Deadline</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {schemes.map((scheme) => (
-                                <TableRow key={scheme.id}>
-                                    <TableCell className="font-medium">
-                                        <div className="flex items-center gap-2">
-                                            <FileText className="h-4 w-4 text-muted-foreground" />
-                                            {scheme.title}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="max-w-xs truncate" title={scheme.eligibilityCriteria}>
-                                        {scheme.eligibilityCriteria}
-                                    </TableCell>
-                                    <TableCell>
-                                        {scheme.applicationDeadline ? new Date(scheme.applicationDeadline).toLocaleDateString() : 'No Deadline'}
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge
-                                            variant={scheme.active ? "default" : "secondary"}
-                                            className="cursor-pointer"
-                                            onClick={() => handleToggleActive(scheme)}
-                                        >
-                                            {scheme.active ? "Active" : "Inactive"}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Button variant="ghost" size="icon" onClick={() => handleDelete(scheme.id)}>
-                                            <Trash2 className="h-4 w-4 text-destructive" />
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                            {schemes.length === 0 && (
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
-                                        No schemes found.
-                                    </TableCell>
+                                    <TableHead className="whitespace-nowrap">Title</TableHead>
+                                    <TableHead className="whitespace-nowrap">Eligibility</TableHead>
+                                    <TableHead className="whitespace-nowrap">Deadline</TableHead>
+                                    <TableHead className="whitespace-nowrap">Status</TableHead>
+                                    <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
                                 </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {schemes.map((scheme) => (
+                                    <TableRow key={scheme.id}>
+                                        <TableCell className="font-medium">
+                                            <div className="flex items-center gap-2">
+                                                <FileText className="h-4 w-4 text-muted-foreground" />
+                                                {scheme.title}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="max-w-xs truncate" title={scheme.eligibilityCriteria}>
+                                            {scheme.eligibilityCriteria}
+                                        </TableCell>
+                                        <TableCell>
+                                            {scheme.applicationDeadline ? new Date(scheme.applicationDeadline).toLocaleDateString() : 'No Deadline'}
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge
+                                                variant={scheme.active ? "default" : "secondary"}
+                                                className="cursor-pointer"
+                                                onClick={() => handleToggleActive(scheme)}
+                                            >
+                                                {scheme.active ? "Active" : "Inactive"}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="ghost" size="icon" onClick={() => handleDelete(scheme.id)}>
+                                                <Trash2 className="h-4 w-4 text-destructive" />
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                                {schemes.length === 0 && (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
+                                            No schemes found.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </CardContent>
             </Card>
         </div>

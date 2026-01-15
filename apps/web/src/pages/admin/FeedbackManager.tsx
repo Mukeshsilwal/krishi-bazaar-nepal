@@ -71,60 +71,62 @@ const FeedbackManager = () => {
             </div>
 
             <div className="rounded-md border bg-card">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableCell>Date</TableCell>
-                            <TableCell>User</TableCell>
-                            <TableCell>Type</TableCell>
-                            <TableCell className="w-[40%]">Message</TableCell>
-                            <TableCell>Status</TableCell>
-                            <TableCell>Actions</TableCell>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {feedbacks.map((item) => (
-                            <TableRow key={item.id}>
-                                <TableCell>{formatDate(item.createdAt)}</TableCell>
-                                <TableCell>
-                                    <div className="font-medium">{item.user?.name || 'Unknown'}</div>
-                                    <div className="text-xs text-muted-foreground">{item.user?.mobileNumber}</div>
-                                </TableCell>
-                                <TableCell>
-                                    <Badge variant="outline">{item.type}</Badge>
-                                </TableCell>
-                                <TableCell className="whitespace-pre-wrap">{item.message}</TableCell>
-                                <TableCell>
-                                    <Badge variant={item.status === 'OPEN' ? 'destructive' : item.status === 'RESOLVED' ? 'default' : 'secondary'}>
-                                        {item.status}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell>
-                                    <Select
-                                        defaultValue={item.status}
-                                        onValueChange={(val) => handleStatusUpdate(item.id, val)}
-                                    >
-                                        <SelectTrigger className="w-[110px] h-8">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="OPEN">Open</SelectItem>
-                                            <SelectItem value="RESOLVED">Resolved</SelectItem>
-                                            <SelectItem value="REJECTED">Rejected</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                        {feedbacks.length === 0 && (
+                <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader>
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">
-                                    No feedback found.
-                                </TableCell>
+                                <TableHead className="whitespace-nowrap">Date</TableHead>
+                                <TableHead className="whitespace-nowrap">User</TableHead>
+                                <TableHead className="whitespace-nowrap">Type</TableHead>
+                                <TableHead className="w-[40%] whitespace-nowrap">Message</TableHead>
+                                <TableHead className="whitespace-nowrap">Status</TableHead>
+                                <TableHead className="whitespace-nowrap">Actions</TableHead>
                             </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                        </TableHeader>
+                        <TableBody>
+                            {feedbacks.map((item) => (
+                                <TableRow key={item.id}>
+                                    <TableCell>{formatDate(item.createdAt)}</TableCell>
+                                    <TableCell>
+                                        <div className="font-medium">{item.user?.name || 'Unknown'}</div>
+                                        <div className="text-xs text-muted-foreground">{item.user?.mobileNumber}</div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant="outline">{item.type}</Badge>
+                                    </TableCell>
+                                    <TableCell className="whitespace-pre-wrap">{item.message}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={item.status === 'OPEN' ? 'destructive' : item.status === 'RESOLVED' ? 'default' : 'secondary'}>
+                                            {item.status}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Select
+                                            defaultValue={item.status}
+                                            onValueChange={(val) => handleStatusUpdate(item.id, val)}
+                                        >
+                                            <SelectTrigger className="w-[110px] h-8">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="OPEN">Open</SelectItem>
+                                                <SelectItem value="RESOLVED">Resolved</SelectItem>
+                                                <SelectItem value="REJECTED">Rejected</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                            {feedbacks.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">
+                                        No feedback found.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
             </div>
         </div>
     );

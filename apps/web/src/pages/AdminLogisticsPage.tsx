@@ -61,10 +61,13 @@ const AdminLogisticsPage = () => {
         setLoading(true);
         try {
             // Request large page size to keep UI simple for now
-            const content = await logisticsService.getAllBookings({ page: 0, size: 100, sort: 'id,desc' });
-            setBookings(content);
+            const response = await logisticsService.getAllBookings({ page: 0, size: 100, sort: 'id,desc' });
+            console.log('Bookings response:', response); // Debug log
+            setBookings(response || []);
         } catch (error) {
+            console.error('Bookings fetch error:', error);
             toast.error("Failed to load bookings");
+            setBookings([]); // Set empty array on error
         } finally {
             setLoading(false);
         }
@@ -182,93 +185,108 @@ const AdminLogisticsPage = () => {
 
             {activeTab === 'shipments' && (
                 <div className="bg-white rounded-lg shadow overflow-hidden">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tracking Code</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Locations</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {shipments.map((shipment: any) => (
-                                <tr key={shipment.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">{shipment.trackingCode}</div>
-                                        <div className="text-xs text-gray-500">Order: {shipment.orderId}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                            ${shipment.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
-                                                shipment.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
-                                                    'bg-yellow-100 text-yellow-800'}`}>
-                                            {shipment.status}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <div>From: {shipment.sourceLocation}</div>
-                                        <div>To: {shipment.destinationLocation}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <select
-                                            value={shipment.status}
-                                            onChange={(e) => handleUpdateStatus(shipment.id, e.target.value)}
-                                            className="border rounded px-2 py-1 text-xs"
-                                        >
-                                            <option value="CREATED">CREATED</option>
-                                            <option value="ASSIGNED">ASSIGNED</option>
-                                            <option value="IN_TRANSIT">IN_TRANSIT</option>
-                                            <option value="DELIVERED">DELIVERED</option>
-                                            <option value="CANCELLED">CANCELLED</option>
-                                        </select>
-                                    </td>
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Tracking Code</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Status</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Locations</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Actions</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {shipments.map((shipment: any) => (
+                                    <tr key={shipment.id}>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm font-medium text-gray-900">{shipment.trackingCode}</div>
+                                            <div className="text-xs text-gray-500">Order: {shipment.orderId}</div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                ${shipment.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
+                                                    shipment.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
+                                                        'bg-yellow-100 text-yellow-800'}`}>
+                                                {shipment.status}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <div>From: {shipment.sourceLocation}</div>
+                                            <div>To: {shipment.destinationLocation}</div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <select
+                                                value={shipment.status}
+                                                onChange={(e) => handleUpdateStatus(shipment.id, e.target.value)}
+                                                className="border rounded px-2 py-1 text-xs"
+                                            >
+                                                <option value="CREATED">CREATED</option>
+                                                <option value="ASSIGNED">ASSIGNED</option>
+                                                <option value="IN_TRANSIT">IN_TRANSIT</option>
+                                                <option value="DELIVERED">DELIVERED</option>
+                                                <option value="CANCELLED">CANCELLED</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
 
             {activeTab === 'bookings' && (
                 <div className="bg-white rounded-lg shadow overflow-hidden">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking ID</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Storage ID</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Farmer ID</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity (kg)</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Price</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {bookings.map((booking: any) => (
-                                <tr key={booking.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">{booking.id}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{booking.coldStorageId}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{booking.farmerId}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{booking.quantity}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {booking.startDate} to {booking.endDate}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        Rs. {booking.totalPrice}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                            ${booking.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                                                booking.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                                                    'bg-red-100 text-red-800'}`}>
-                                            {booking.status}
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    {loading ? (
+                        <div className="flex justify-center items-center py-12">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                        </div>
+                    ) : bookings.length === 0 ? (
+                        <div className="text-center py-12 text-gray-500">
+                            <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                            <p>No bookings found</p>
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Booking ID</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Storage ID</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Farmer ID</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Quantity (kg)</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Dates</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Total Price</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {bookings.map((booking: any) => (
+                                        <tr key={booking.id}>
+                                            <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">{booking.id}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{booking.coldStorageId}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{booking.farmerId}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{booking.quantity}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {booking.startDate} to {booking.endDate}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                Rs. {booking.totalPrice}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                    ${booking.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
+                                                        booking.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                                                            'bg-red-100 text-red-800'}`}>
+                                                    {booking.status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
