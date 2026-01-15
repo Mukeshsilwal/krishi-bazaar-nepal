@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+
 import java.util.UUID;
 
 @Data
@@ -18,6 +18,6 @@ public class ConversationDto {
     private String userMobile;
     private UUID listingId;
     private String lastMessage;
-    private LocalDateTime lastMessageTime;
+    private java.util.Date lastMessageTime;
     private long unreadCount;
 }

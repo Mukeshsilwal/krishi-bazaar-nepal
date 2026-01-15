@@ -21,7 +21,7 @@ public class AdminSystemConfigController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<SystemConfig>>> getAllConfigs() {
-        return ResponseEntity.ok(new ApiResponse<>(true, "System configurations fetched", systemConfigService.getAllConfigs()));
+        return ResponseEntity.ok(ApiResponse.success("System configurations fetched", systemConfigService.getAllConfigs()));
     }
 
     @PutMapping("/{key}")
@@ -31,6 +31,6 @@ public class AdminSystemConfigController {
             @RequestBody SystemConfigUpdateRequest request) {
         
         SystemConfig updatedConfig = systemConfigService.updateConfig(key, request.getValue());
-        return ResponseEntity.ok(new ApiResponse<>(true, "Configuration updated successfully", updatedConfig));
+        return ResponseEntity.ok(ApiResponse.success("Configuration updated successfully", updatedConfig));
     }
 }

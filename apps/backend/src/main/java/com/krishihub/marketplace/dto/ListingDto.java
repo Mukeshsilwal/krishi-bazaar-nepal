@@ -8,8 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -22,19 +21,20 @@ public class ListingDto {
     private UUID id;
     private FarmerInfo farmer;
     private String cropName;
+    private String category;
     private BigDecimal quantity;
     private String unit;
     private BigDecimal pricePerUnit;
-    private LocalDate harvestDate;
+    private Date harvestDate;
     private Integer harvestWindow;
     private BigDecimal dailyQuantityLimit;
-    private java.time.LocalTime orderCutoffTime;
+    private Date orderCutoffTime;
     private String description;
     private String location;
     private String status;
     private List<ImageDto> images;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private Date createdAt;
+    private Date updatedAt;
 
     @Data
     @Builder
@@ -80,6 +80,7 @@ public class ListingDto {
                 .orderCutoffTime(listing.getOrderCutoffTime())
                 .description(listing.getDescription())
                 .location(listing.getLocation())
+                .category(listing.getCategory() != null ? listing.getCategory().name() : null)
                 .status(listing.getStatus().name())
                 .images(listing.getImages().stream()
                         .map(img -> ImageDto.builder()

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,7 +88,7 @@ public class KalimatiScraperService implements MarketPriceDataSource {
                                     .maxPrice(max != null ? max : min)
                                     .avgPrice(avg != null ? avg : min)
                                     .district("Kathmandu")
-                                    .priceDate(LocalDate.now())
+                                    .priceDate(com.krishihub.common.util.DateTimeProvider.today())
                                     .source(SOURCE_ID)
                                     .build());
                         }

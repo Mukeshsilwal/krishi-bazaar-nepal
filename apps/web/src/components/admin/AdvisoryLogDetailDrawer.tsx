@@ -75,7 +75,7 @@ const AdvisoryLogDetailDrawer: React.FC<AdvisoryLogDetailDrawerProps> = ({ logId
         DEDUPED: XCircle
     };
 
-    if (!log && !loading) return null;
+    // if (!log && !loading) return null; // Removed early return to show empty state in JSX
 
     return (
         <Sheet open={open} onOpenChange={onClose}>
@@ -346,7 +346,21 @@ const AdvisoryLogDetailDrawer: React.FC<AdvisoryLogDetailDrawerProps> = ({ logId
                             )}
                         </div>
                     </>
-                ) : null}
+                ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center p-8">
+                        <div className="bg-gray-100 p-4 rounded-full mb-4">
+                            <AlertTriangle className="h-8 w-8 text-gray-400" />
+                        </div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-1">
+                            {language === 'ne' ? 'विवरण भेटिएन' : 'No Details Found'}
+                        </h3>
+                        <p className="text-gray-500 text-sm">
+                            {language === 'ne'
+                                ? 'यो सल्लाहको लागि कुनै जानकारी उपलब्ध छैन।'
+                                : 'No information available for this advisory log.'}
+                        </p>
+                    </div>
+                )}
             </SheetContent>
         </Sheet>
     );

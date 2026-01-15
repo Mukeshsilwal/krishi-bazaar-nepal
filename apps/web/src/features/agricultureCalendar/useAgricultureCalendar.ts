@@ -7,6 +7,7 @@ export const useAgricultureCalendar = () => {
     const [loading, setLoading] = useState(false);
     const [selectedCrop, setSelectedCrop] = useState<string>('');
     const [selectedMonth, setSelectedMonth] = useState<string>('');
+    const [errorState, setErrorState] = useState<string | null>(null);
 
     const fetchEntries = useCallback(async () => {
         setLoading(true);
@@ -16,9 +17,12 @@ export const useAgricultureCalendar = () => {
                 selectedMonth || undefined
             );
             setEntries(data);
+            setErrorState(null);
         } catch (error) {
             console.error('Failed to fetch calendar entries:', error);
-            toast.error('कुषि क्यालेन्डर लोड गर्न समस्या भयो।');
+            const msg = 'कुषि क्यालेन्डर लोड गर्न समस्या भयो।';
+            setErrorState(msg);
+            toast.error(msg);
         } finally {
             setLoading(false);
         }
@@ -31,6 +35,7 @@ export const useAgricultureCalendar = () => {
     return {
         entries,
         loading,
+        error: errorState,
         selectedCrop,
         setSelectedCrop,
         selectedMonth,

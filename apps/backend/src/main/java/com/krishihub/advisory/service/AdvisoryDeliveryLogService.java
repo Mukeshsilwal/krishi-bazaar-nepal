@@ -12,7 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -140,7 +140,7 @@ public class AdvisoryDeliveryLogService {
             if (log.getDeliveryStatus().canTransitionTo(newStatus)) {
                 log.setDeliveryStatus(newStatus);
                 if (success) {
-                    log.setDeliveredAt(LocalDateTime.now());
+                    log.setDeliveredAt(com.krishihub.common.util.DateTimeProvider.now());
                 } else {
                     log.setFailureReason(failureReason);
                 }
@@ -158,7 +158,7 @@ public class AdvisoryDeliveryLogService {
         repository.findById(logId).ifPresent(log -> {
             if (log.getOpenedAt() == null && log.getDeliveryStatus().canTransitionTo(DeliveryStatus.OPENED)) {
                 log.setDeliveryStatus(DeliveryStatus.OPENED);
-                log.setOpenedAt(LocalDateTime.now());
+                log.setOpenedAt(com.krishihub.common.util.DateTimeProvider.now());
                 repository.save(log);
                 log(logId, "Advisory opened by farmer");
             }
@@ -175,7 +175,7 @@ public class AdvisoryDeliveryLogService {
                 log.setDeliveryStatus(DeliveryStatus.FEEDBACK_RECEIVED);
                 log.setFeedback(feedback);
                 log.setFeedbackComment(comment);
-                log.setFeedbackAt(LocalDateTime.now());
+                log.setFeedbackAt(com.krishihub.common.util.DateTimeProvider.now());
                 repository.save(log);
                 log(logId, "Feedback received: " + feedback);
             }

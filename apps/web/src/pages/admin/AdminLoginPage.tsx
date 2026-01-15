@@ -37,7 +37,7 @@ const AdminLoginPage = () => {
 
     try {
       const result = await adminLogin(formData.identifier, formData.password);
-      if (result.success) {
+      if (result.code === 0) {
         toast.success(language === 'ne' ? 'लगइन सफल!' : 'Login successful!');
         navigate('/admin/dashboard');
       } else {

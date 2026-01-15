@@ -1,9 +1,10 @@
 package com.krishihub.order.entity;
 
 import com.krishihub.auth.entity.User;
+import com.krishihub.shared.entity.AuditableEntity;
 import com.krishihub.marketplace.entity.CropListing;
-import com.krishihub.order.dto.OrderStatus;
-import com.krishihub.order.dto.OrderSource;
+import com.krishihub.order.enums.OrderStatus;
+import com.krishihub.order.enums.OrderSource;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -11,9 +12,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import com.krishihub.shared.entity.AuditableEntity;
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -66,8 +65,9 @@ public class Order extends AuditableEntity {
     @Builder.Default
     private OrderStatus status = OrderStatus.PENDING;
 
+    @Temporal(TemporalType.DATE)
     @Column(name = "pickup_date")
-    private LocalDate pickupDate;
+    private Date pickupDate;
 
     @Column(name = "pickup_location", length = 200)
     private String pickupLocation;

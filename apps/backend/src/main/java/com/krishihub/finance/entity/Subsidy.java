@@ -9,8 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -38,12 +37,14 @@ public class Subsidy {
     @Column(precision = 15, scale = 2)
     private BigDecimal amount;
 
-    private LocalDate deadline;
+    @Temporal(TemporalType.DATE)
+    private Date deadline;
 
     @Column(name = "eligibility_criteria", columnDefinition = "TEXT")
     private String eligibilityCriteria;
 
     @CreatedDate
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Date createdAt;
 }

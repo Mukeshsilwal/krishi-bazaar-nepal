@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -39,8 +38,10 @@ public class NotificationTemplate {
     private Boolean isActive;
 
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date createdAt;
 
     @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date updatedAt;
 }

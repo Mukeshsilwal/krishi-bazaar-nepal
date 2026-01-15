@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+
 import java.util.UUID;
 
 @Data
@@ -21,6 +21,6 @@ public class MasterItemDto {
     private String description;
     private Integer sortOrder;
     private Boolean active;
-    private LocalDate effectiveFrom;
-    private LocalDate effectiveTo;
+    private java.util.Date effectiveFrom;
+    private java.util.Date effectiveTo;
 }

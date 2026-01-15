@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class UpdateListingRequest {
     private String cropName;
+    private String category;
     private BigDecimal quantity;
     private String unit;
     private BigDecimal pricePerUnit;

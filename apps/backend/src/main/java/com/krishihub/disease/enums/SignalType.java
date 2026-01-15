@@ -1,4 +1,4 @@
-package com.krishihub.disease.model;
+package com.krishihub.disease.enums;
 
 public enum SignalType {
     FARMER_SYMPTOM_REPORT,

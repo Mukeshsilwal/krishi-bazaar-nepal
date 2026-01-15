@@ -18,7 +18,7 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     @org.springframework.data.jpa.repository.Query("SELECT COUNT(DISTINCT n.userId) FROM Notification n")
     long countDistinctUsers();
 
-    long countByScheduledAtGreaterThan(java.time.LocalDateTime date);
+    long countByScheduledAtGreaterThan(java.util.Date date);
 
     List<Notification> findByStatus(com.krishihub.notification.enums.NotificationStatus status);
 

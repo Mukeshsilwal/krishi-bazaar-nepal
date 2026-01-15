@@ -4,6 +4,7 @@ import { agriStoreService, AgriProduct } from '@/services/agriStoreService';
 export const useAgriProducts = (filters: any) => {
     const [products, setProducts] = useState<AgriProduct[]>([]);
     const [loading, setLoading] = useState(true);
+    const [errorState, setErrorState] = useState<string | null>(null);
     const [isFetchingNext, setIsFetchingNext] = useState(false);
     const [pagination, setPagination] = useState({
         page: 0,
@@ -45,9 +46,11 @@ export const useAgriProducts = (filters: any) => {
                     totalPages: data.totalPages || 0,
                     totalElements: data.totalElements || 0,
                 });
+                setErrorState(null);
             }
         } catch (error) {
             console.error("Failed to fetch products", error);
+            setErrorState('Failed to load products. Please try again.');
         } finally {
             setLoading(false);
             setIsFetchingNext(false);
@@ -70,6 +73,7 @@ export const useAgriProducts = (filters: any) => {
     return {
         products,
         loading,
+        error: errorState,
         isFetchingNext,
         hasNextPage: pagination.page < pagination.totalPages - 1,
         loadMore

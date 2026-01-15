@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAdminTitle } from '@/context/AdminContext';
-import AdminSettingsPage from './AdminSettingsPage';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -63,7 +63,7 @@ const AdminDashboardPage = () => {
     setTitle('Dashboard', 'ड्यासबोर्ड');
   }, [setTitle]);
 
-  const { data: stats, isLoading } = useQuery<DashboardStats>({
+  const { data: stats, isLoading, isError } = useQuery<DashboardStats>({
     queryKey: ['admin-dashboard-stats'],
     queryFn: adminService.getDashboardStats,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -71,6 +71,28 @@ const AdminDashboardPage = () => {
 
   if (isLoading) {
     return <DashboardSkeleton />;
+  }
+
+  if (isError) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center max-w-2xl mx-auto mt-10">
+          <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-lg font-bold text-gray-900 mb-2">
+            {language === 'ne' ? 'ड्यासबोर्ड डाटा लोड गर्न असफल' : 'Failed to load dashboard data'}
+          </h3>
+          <p className="text-gray-600 mb-6">
+            We encountered an error while fetching the latest statistics.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
   }
 
   const widgets = [

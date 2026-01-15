@@ -1,9 +1,9 @@
 package com.krishihub.disease.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import com.krishihub.disease.enums.RiskLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -62,5 +62,6 @@ public class Pest {
     private String imageUrl;
 
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date createdAt;
 }

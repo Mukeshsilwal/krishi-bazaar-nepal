@@ -134,7 +134,7 @@ export default function NotificationManager() {
 
         try {
             const res = await api.get(`${ADMIN_NOTIFICATION_ENDPOINTS.BASE}?page=${pageNum}&size=${ITEMS_PER_PAGE}`);
-            if (res.data.success) {
+            if (res.data.code === 0) {
                 const newContent = res.data.data.content;
                 const isLast = res.data.data.last;
 
@@ -163,7 +163,7 @@ export default function NotificationManager() {
     const fetchStats = async () => {
         try {
             const res = await api.get(ADMIN_NOTIFICATION_ENDPOINTS.STATS);
-            if (res.data.success) {
+            if (res.data.code === 0) {
                 setStats(res.data.data);
             }
         } catch (err) {
@@ -174,9 +174,11 @@ export default function NotificationManager() {
     const fetchTemplates = async () => {
         try {
             setLoading(true);
-            const res = await api.get(ADMIN_NOTIFICATION_ENDPOINTS.TEMPLATES);
-            if (res.data.success) {
-                setTemplates(res.data.data);
+            // Request large size for now to keep UI simple
+            const res = await api.get(`${ADMIN_NOTIFICATION_ENDPOINTS.TEMPLATES}?page=0&size=100&sort=name,asc`);
+            if (res.data.code === 0) {
+                // PaginatedResponse: content is in data.content
+                setTemplates(res.data.data.content);
             }
         } catch (err) {
             console.error(err);

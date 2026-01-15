@@ -12,7 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -47,7 +47,7 @@ class MarketPriceServiceTest {
                 .maxPrice(new BigDecimal("60"))
                 .avgPrice(new BigDecimal("55"))
                 .unit("Kg")
-                .priceDate(LocalDate.now())
+                .priceDate(com.krishihub.common.util.DateTimeProvider.today())
                 .source("GOV")
                 .build();
 

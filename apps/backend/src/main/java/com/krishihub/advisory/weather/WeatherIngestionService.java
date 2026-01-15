@@ -10,7 +10,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -216,7 +215,7 @@ public class WeatherIngestionService {
 
         status.put("cachedDistricts", lastKnownWeatherData.keySet());
         status.put("monitoredDistricts", MONITORED_DISTRICTS);
-        status.put("lastPollTime", LocalDateTime.now());
+        status.put("lastPollTime", com.krishihub.common.util.DateTimeProvider.now());
 
         return status;
     }

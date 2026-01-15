@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+
 import java.util.UUID;
 
 /**
@@ -21,5 +21,5 @@ public class AdvisoryFeedbackDTO {
     private UUID farmerId;
     private String feedback; // USEFUL, NOT_USEFUL
     private String comment;
-    private LocalDateTime feedbackAt;
+    private java.util.Date feedbackAt;
 }

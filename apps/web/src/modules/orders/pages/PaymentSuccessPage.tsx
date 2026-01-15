@@ -57,12 +57,12 @@ export default function PaymentSuccessPage() {
 
             const response = await paymentService.verifyPayment(transactionId, gatewayTransactionId);
 
-            if (response.success) {
+            if (response.code === 0) {
                 setReceipt(response.data);
             }
         } catch (err: any) {
-            console.error('Payment verification failed:', err);
-            setError(err.response?.data?.message || 'Payment verification failed');
+            const { resolveUserMessage } = await import('@/utils/errorUtils');
+            setError(resolveUserMessage(err));
         } finally {
             setLoading(false);
         }

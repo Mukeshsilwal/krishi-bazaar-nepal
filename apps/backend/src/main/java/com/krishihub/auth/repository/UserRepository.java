@@ -27,6 +27,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
         List<User> findByVerifiedFalseAndRoleIn(List<User.UserRole> roles);
 
+        Page<User> findByVerifiedFalseAndRoleIn(List<User.UserRole> roles, Pageable pageable);
+
         /**
          * Find users by district and role (for weather advisory targeting) - Case Insensitive & Trimmed
          */
@@ -49,4 +51,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
                         @Param("status") Boolean status,
                         @Param("search") String search,
                         Pageable pageable);
+
+        Page<User> findByRole(User.UserRole role, Pageable pageable);
 }

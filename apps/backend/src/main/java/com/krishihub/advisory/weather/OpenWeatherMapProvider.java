@@ -12,9 +12,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -89,7 +87,7 @@ public class OpenWeatherMapProvider implements WeatherDataProvider {
         } catch (Exception e) {
             log.error("Error fetching current weather for coordinates {},{}: {}",
                     latitude, longitude, e.getMessage());
-            throw new RuntimeException(e);
+            throw new com.krishihub.common.exception.SystemException(e.getMessage());
         }
     }
 
@@ -132,7 +130,7 @@ public class OpenWeatherMapProvider implements WeatherDataProvider {
         } catch (Exception e) {
             log.error("Error fetching forecast for coordinates {},{}: {}",
                     latitude, longitude, e.getMessage());
-            throw new RuntimeException(e);
+            throw new com.krishihub.common.exception.SystemException(e.getMessage());
         }
     }
 
@@ -159,14 +157,14 @@ public class OpenWeatherMapProvider implements WeatherDataProvider {
                     Thread.sleep(delay);
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
-                    throw new RuntimeException("Retry interrupted", ie);
+                    throw new com.krishihub.common.exception.SystemException("Retry interrupted: " + ie.getMessage());
                 }
 
                 delay *= 2; // Exponential backoff
             }
         }
 
-        throw new RuntimeException("Should not reach here");
+        throw new com.krishihub.common.exception.SystemException("Should not reach here");
     }
 
     @Override
@@ -225,7 +223,7 @@ public class OpenWeatherMapProvider implements WeatherDataProvider {
                 .cloudCoverage(clouds.get("all").asDouble())
                 .condition(weather.get("main").asText())
                 .description(weather.get("description").asText())
-                .timestamp(LocalDateTime.now())
+                .timestamp(com.krishihub.common.util.DateTimeProvider.now())
                 .dataSource("OpenWeatherMap")
                 .isForecast(false)
                 .hasAlert(false)
@@ -251,8 +249,7 @@ public class OpenWeatherMapProvider implements WeatherDataProvider {
             JsonNode clouds = item.get("clouds");
 
             long timestamp = item.get("dt").asLong();
-            LocalDateTime forecastTime = LocalDateTime.ofInstant(
-                    Instant.ofEpochSecond(timestamp), ZoneId.systemDefault());
+            java.util.Date forecastTime = new java.util.Date(timestamp * 1000);
 
             // Calculate rainfall from rain object if present
             Double rainfall = 0.0;
@@ -277,7 +274,7 @@ public class OpenWeatherMapProvider implements WeatherDataProvider {
                     .condition(weather.get("main").asText())
                     .description(weather.get("description").asText())
                     .rainfall(rainfall)
-                    .timestamp(LocalDateTime.now())
+                    .timestamp(com.krishihub.common.util.DateTimeProvider.now())
                     .forecastTime(forecastTime)
                     .dataSource("OpenWeatherMap")
                     .isForecast(true)

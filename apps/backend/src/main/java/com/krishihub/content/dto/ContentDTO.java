@@ -10,7 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +37,7 @@ public class ContentDTO {
     private List<UUID> linkedRuleIds;
     private UUID createdBy;
     private UUID reviewedBy;
-    private LocalDateTime publishedAt;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private java.util.Date publishedAt;
+    private java.util.Date createdAt;
+    private java.util.Date updatedAt;
 }

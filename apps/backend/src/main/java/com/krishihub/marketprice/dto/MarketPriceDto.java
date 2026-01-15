@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.UUID;
 
 @Data
@@ -23,7 +23,7 @@ public class MarketPriceDto {
     private BigDecimal maxPrice;
     private BigDecimal avgPrice;
     private String unit;
-    private LocalDate priceDate;
+    private Date priceDate;
     private String source;
     private String imageUrl;
 

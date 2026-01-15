@@ -17,7 +17,7 @@ const authService = {
     // Admin Login (Password based)
     adminLogin: async (identifier, password) => {
         const response = await api.post(AUTH_ENDPOINTS.ADMIN_LOGIN, { identifier, password });
-        if (response.data.success && response.data.data) {
+        if (response.data.code === 0 && response.data.data) {
             const { accessToken, refreshToken, user } = response.data.data;
             localStorage.setItem('accessToken', accessToken);
             localStorage.setItem('refreshToken', refreshToken);
@@ -31,7 +31,7 @@ const authService = {
     verifyOtp: async (identifier, otp) => {
         const response = await api.post(AUTH_ENDPOINTS.VERIFY_OTP, { identifier, otp });
 
-        if (response.data.success && response.data.data) {
+        if (response.data.code === 0 && response.data.data) {
             const { accessToken, refreshToken, user } = response.data.data;
 
             // Store tokens and user data

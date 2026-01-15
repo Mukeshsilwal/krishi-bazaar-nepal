@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,5 +15,5 @@ public interface OtpVerificationRepository extends JpaRepository<OtpVerification
     @Query(value = "SELECT * FROM otp_verifications WHERE mobile_number = :mobileNumber AND verified = false ORDER BY created_at DESC LIMIT 1", nativeQuery = true)
     Optional<OtpVerification> findTopByMobileNumberAndVerifiedFalseOrderByCreatedAtDesc(@org.springframework.data.repository.query.Param("mobileNumber") String mobileNumber);
 
-    void deleteByMobileNumberAndExpiresAtBefore(String mobileNumber, LocalDateTime dateTime);
+    void deleteByMobileNumberAndExpiresAtBefore(String mobileNumber, Date dateTime);
 }

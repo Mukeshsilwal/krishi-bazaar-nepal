@@ -2,7 +2,7 @@ package com.krishihub.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -23,7 +23,7 @@ public class RedisConfig implements org.springframework.cache.annotation.Caching
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
         log.info("Initializing RedisCacheManager with DefaultTyping enabled");
         ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
+
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         mapper.activateDefaultTyping(
                 com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator.instance,

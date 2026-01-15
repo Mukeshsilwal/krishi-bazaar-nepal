@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -95,7 +95,10 @@ public class WeatherAdvisoryController {
     @GetMapping("/analytics")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getAnalytics() {
-        LocalDateTime since = LocalDateTime.now().minusDays(30);
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+        cal.add(java.util.Calendar.DAY_OF_YEAR, -30);
+        java.util.Date since = cal.getTime();
 
         Map<String, Object> analytics = Map.of(
                 "deliverySuccessRate", analyticsService.getDeliverySuccessRate(since),

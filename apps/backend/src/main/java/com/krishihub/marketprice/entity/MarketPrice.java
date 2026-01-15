@@ -9,8 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -44,11 +43,12 @@ public class MarketPrice {
     @Column(name = "avg_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal avgPrice;
 
-    @Column(nullable = false, length = 20)
+    @Column(name = "unit", nullable = false, length = 20)
     private String unit;
 
+    @Temporal(TemporalType.DATE)
     @Column(name = "price_date", nullable = false)
-    private LocalDate priceDate;
+    private Date priceDate;
 
     @Column(length = 100)
     private String source; // e.g., "Kalimati Fruits and Vegetable Market"
@@ -58,16 +58,18 @@ public class MarketPrice {
     private Market market;
 
     @CreatedDate
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Date createdAt;
 
     @org.springframework.data.annotation.CreatedBy
     @Column(name = "created_by")
     private UUID createdBy;
 
     @org.springframework.data.annotation.LastModifiedDate
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Date updatedAt;
 
     @org.springframework.data.annotation.LastModifiedBy
     @Column(name = "updated_by")

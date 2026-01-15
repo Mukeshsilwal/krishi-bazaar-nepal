@@ -32,6 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2, Plus, CloudRain } from "lucide-react";
 import { toast } from 'sonner';
+import { resolveUserMessage } from '@/utils/errorUtils';
 
 interface WeatherAdvisory {
     id: string;
@@ -60,7 +61,7 @@ const WeatherAdvisoryManager = () => {
     const fetchAdvisories = async () => {
         try {
             const res = await api.get(WEATHER_ADVISORY_ENDPOINTS.BASE);
-            if (res.data.success) {
+            if (res.data.code === 0) {
                 setAdvisories(res.data.data);
             }
         } catch (error) {
@@ -78,7 +79,7 @@ const WeatherAdvisoryManager = () => {
             toast.success("Advisory published successfully");
         } catch (error: any) {
             console.error('Failed to create advisory', error);
-            toast.error(error.response?.data?.message || "Failed to create advisory");
+            toast.error(resolveUserMessage(error));
         }
     };
 

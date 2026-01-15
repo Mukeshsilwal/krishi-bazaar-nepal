@@ -2,7 +2,7 @@ package com.krishihub.order.service.strategy;
 
 import com.krishihub.auth.entity.User;
 import com.krishihub.order.dto.CreateOrderRequest;
-import com.krishihub.order.dto.OrderSource;
+import com.krishihub.order.enums.OrderSource;
 import com.krishihub.order.entity.Order;
 
 public interface OrderProcessingStrategy {

@@ -4,12 +4,27 @@ import weatherService, { WeatherData } from '@/modules/advisory/services/weather
 import { Cloud, Droplets, Wind, MapPin, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 
-
+/**
+ * Displays current weather information for farmer's district.
+ *
+ * Design Notes:
+ * - Uses skeleton loader during data fetch for better perceived performance.
+ * - District is currently hardcoded to 'Kathmandu' but can be made dynamic
+ *   based on user profile in future.
+ * - Gracefully degrades to "Weather Unavailable" if API fails.
+ *
+ * Important:
+ * - Weather data is fetched on component mount only (not cached).
+ * - This ensures fresh data but may cause unnecessary API calls.
+ * - Consider adding React Query for caching if performance becomes an issue.
+ */
 const WeatherCard = () => {
     const { language } = useLanguage();
     const [weather, setWeather] = useState<WeatherData | null>(null);
     const [loading, setLoading] = useState(true);
     const [district] = useState('Kathmandu'); // Could be dynamic based on user profile in future
+
+    const [error, setError] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchWeather = async () => {
@@ -18,6 +33,7 @@ const WeatherCard = () => {
                 setWeather(data);
             } catch (error) {
                 console.error("Failed to fetch weather", error);
+                setError(true);
             } finally {
                 setLoading(false);
             }
@@ -53,7 +69,12 @@ const WeatherCard = () => {
         </div>
     );
 
-    if (!weather) return null;
+    if (error || !weather) return (
+        <div className="bg-gray-100 rounded-3xl p-6 text-gray-500 shadow-lg h-full flex flex-col items-center justify-center text-center border border-gray-200">
+            <Cloud className="h-10 w-10 mb-2 opacity-50" />
+            <span className="text-sm">Weather Unavailable</span>
+        </div>
+    );
 
     const today = new Date();
     const dateFormatted = language === 'ne'

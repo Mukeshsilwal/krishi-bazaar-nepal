@@ -25,7 +25,8 @@ interface SystemSetting {
     value: string;
     description: string;
     type: 'STRING' | 'NUMBER' | 'BOOLEAN' | 'JSON';
-    public: boolean;
+    public?: boolean;
+    isPublic?: boolean;
 }
 
 const SettingsManager = () => {
@@ -41,9 +42,17 @@ const SettingsManager = () => {
     const fetchSettings = async () => {
         setLoading(true);
         try {
-            const res = await api.get('/admin/settings');
-            if (res.data.success) {
-                setSettings(res.data.data);
+            // Request large size to get all settings for grouping, complying with backend pagination
+            const res = await api.get('/admin/settings?page=0&size=200&sort=key,asc');
+            if (res.data.code === 0) {
+                // Backend now returns PaginatedResponse, so we need res.data.data.content
+                const content = res.data.data?.content || [];
+                // Map backend fields to frontend interface if needed
+                const mappedSettings = content.map((s: any) => ({
+                    ...s,
+                    public: s.isPublic !== undefined ? s.isPublic : s.public // Handle field mismatch
+                }));
+                setSettings(mappedSettings);
             }
         } catch (err) {
             console.error(err);
@@ -57,7 +66,7 @@ const SettingsManager = () => {
         setSaving(true);
         try {
             const res = await api.post('/admin/settings', settings);
-            if (res.data.success) {
+            if (res.data.code === 0) {
                 toast.success("Settings updated successfully");
                 setSettings(res.data.data);
                 setEditing({});

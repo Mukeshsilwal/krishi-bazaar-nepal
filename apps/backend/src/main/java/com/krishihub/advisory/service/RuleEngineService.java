@@ -7,6 +7,7 @@ import com.krishihub.advisory.repository.AdvisoryRuleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -108,7 +109,7 @@ public class RuleEngineService {
                         .triggered(true)
                         .actions(rule.getDefinition().getActions())
                         .matchReason("Conditions met")
-                        .executedAt(java.time.LocalDateTime.now())
+                        .executedAt(new Date())
                         .build());
             }
         }

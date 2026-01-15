@@ -9,8 +9,9 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -49,12 +50,14 @@ public class Loan {
     private LoanStatus status;
 
     @CreatedDate
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "applied_at", nullable = false, updatable = false)
-    private LocalDateTime appliedAt;
+    private java.util.Date appliedAt;
 
     @LastModifiedDate
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private java.util.Date updatedAt;
 
     public enum LoanStatus {
         PENDING, APPROVED, REJECTED, DISBURSED

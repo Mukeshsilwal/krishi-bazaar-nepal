@@ -11,7 +11,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import java.util.UUID;
 
 /**
@@ -98,10 +99,12 @@ public class AdvisoryDeliveryLog {
     private String advisoryContent;
 
     @Column(name = "delivered_at")
-    private LocalDateTime deliveredAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date deliveredAt;
 
     @Column(name = "opened_at")
-    private LocalDateTime openedAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date openedAt;
 
     @Column(name = "feedback")
     private String feedback; // USEFUL, NOT_USEFUL, NO_FEEDBACK
@@ -110,7 +113,8 @@ public class AdvisoryDeliveryLog {
     private String feedbackComment;
 
     @Column(name = "feedback_at")
-    private LocalDateTime feedbackAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date feedbackAt;
 
     // Additional contextual data for analytics
     @Column(name = "farmer_name")
@@ -139,5 +143,6 @@ public class AdvisoryDeliveryLog {
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date createdAt;
 }

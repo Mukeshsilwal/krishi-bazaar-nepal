@@ -8,8 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -33,13 +32,16 @@ public class GovernmentScheme {
     @Column(nullable = false)
     private String eligibilityCriteria;
 
-    private LocalDate applicationDeadline;
+    @Temporal(TemporalType.DATE)
+    private Date applicationDeadline;
 
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt;
 
     @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt;
 
     @Builder.Default
     private Boolean active = true;

@@ -3,6 +3,7 @@ package com.krishihub.payment.service;
 import com.krishihub.payment.entity.Transaction;
 import com.krishihub.payment.repository.TransactionRepository;
 import com.krishihub.payment.service.strategy.PaymentStrategy;
+import com.krishihub.payment.service.strategy.PaymentVerificationResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -59,7 +60,8 @@ public class PaymentVerificationService {
                  
                  // If ID is still null (e.g. Khalti init failed and no PIDX saved), we can't verify
                  if (verifyId != null) {
-                    verified = strategy.verifyPayment(verifyId, transaction.getAmount());
+                    PaymentVerificationResult result = strategy.verifyPayment(verifyId, transaction.getAmount());
+                    verified = result.isSuccess();
                  }
             }
 

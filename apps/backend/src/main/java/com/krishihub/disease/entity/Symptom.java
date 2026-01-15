@@ -1,7 +1,6 @@
 package com.krishihub.disease.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -36,5 +35,6 @@ public class Symptom {
     private String imageUrl;
 
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date createdAt;
 }

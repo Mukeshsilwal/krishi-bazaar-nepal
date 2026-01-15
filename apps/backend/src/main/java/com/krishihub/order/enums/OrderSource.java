@@ -1,4 +1,4 @@
-package com.krishihub.order.dto;
+package com.krishihub.order.enums;
 
 public enum OrderSource {
     MARKETPLACE,

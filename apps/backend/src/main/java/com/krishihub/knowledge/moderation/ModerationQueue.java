@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
+
 import java.util.UUID;
 
 @Entity
@@ -47,10 +47,12 @@ public class ModerationQueue {
     private String reviewerComments;
 
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    @jakarta.persistence.Temporal(jakarta.persistence.TemporalType.TIMESTAMP)
+    private java.util.Date createdAt;
 
     @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    @jakarta.persistence.Temporal(jakarta.persistence.TemporalType.TIMESTAMP)
+    private java.util.Date updatedAt;
 
     public enum ModerationStatus {
         PENDING,

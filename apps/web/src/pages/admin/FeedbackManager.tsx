@@ -44,7 +44,7 @@ const FeedbackManager = () => {
     const fetchFeedback = async () => {
         try {
             const res = await api.get(FEEDBACK_ENDPOINTS.ADMIN);
-            if (res.data.success) {
+            if (res.data.code === 0) {
                 setFeedbacks(res.data.data);
             }
         } catch (err) {

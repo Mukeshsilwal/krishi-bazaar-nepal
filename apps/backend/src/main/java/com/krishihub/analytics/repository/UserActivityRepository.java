@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -14,7 +13,7 @@ public interface UserActivityRepository extends JpaRepository<UserActivity, Long
 
     List<UserActivity> findByUserId(java.util.UUID userId);
 
-    Page<UserActivity> findByTimestampBetween(LocalDateTime start, LocalDateTime end, Pageable pageable);
+    Page<UserActivity> findByTimestampBetween(java.util.Date start, java.util.Date end, Pageable pageable);
     
     Page<UserActivity> findByAction(String action, Pageable pageable);
 }

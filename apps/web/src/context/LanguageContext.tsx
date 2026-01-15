@@ -1,5 +1,18 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 
+/**
+ * Provides bilingual support (Nepali/English) across the application.
+ *
+ * Design Notes:
+ * - Default language is Nepali ('ne') to serve primary user base of Nepali farmers.
+ * - All UI text is stored in a centralized translations object for maintainability.
+ * - Translation keys use dot notation (e.g., 'nav.home', 'hero.title.prefix').
+ *
+ * Important:
+ * - If a translation key is missing, the key itself is returned as fallback.
+ * - This prevents blank UI elements when translations are incomplete.
+ * - Always add both 'ne' and 'en' translations when adding new UI text.
+ */
 type Language = 'ne' | 'en';
 
 interface LanguageContextType {

@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -19,5 +19,5 @@ public class RuleResult {
     private boolean triggered;
     private List<RuleAction> actions;
     private String matchReason;
-    private LocalDateTime executedAt;
+    private java.util.Date executedAt;
 }

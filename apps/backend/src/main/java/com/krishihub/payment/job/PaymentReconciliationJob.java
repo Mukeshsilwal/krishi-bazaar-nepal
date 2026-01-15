@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -24,7 +23,7 @@ public class PaymentReconciliationJob {
         log.info("Starting payment reconciliation job...");
 
         // Fetch pending transactions created > 5 mins ago (to allow immediate user redirected verification to happen first)
-        LocalDateTime cutOffTime = LocalDateTime.now().minusMinutes(5);
+        java.util.Date cutOffTime = new java.util.Date(System.currentTimeMillis() - 5 * 60 * 1000);
         List<Transaction> pendingTransactions = transactionRepository.findByPaymentStatusAndCreatedAtBefore(
                 Transaction.PaymentStatus.PENDING, cutOffTime);
 

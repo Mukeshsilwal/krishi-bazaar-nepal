@@ -2,7 +2,7 @@ package com.krishihub.notification.enums;
 
 public enum NotificationStatus {
     PENDING,
-    QUEUED,
+    QUEUED, // Added
     SENT,
     FAILED,
     DELIVERED,

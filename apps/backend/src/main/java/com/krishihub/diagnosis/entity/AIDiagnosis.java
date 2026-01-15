@@ -13,7 +13,6 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp; // Correct import for UpdateTimestamp
 import org.hibernate.type.SqlTypes;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.hibernate.annotations.SQLDelete;
@@ -91,12 +90,15 @@ public class AIDiagnosis {
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date createdAt;
 
     @Column(name = "reviewed_at")
-    private LocalDateTime reviewedAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date reviewedAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date updatedAt;
 }

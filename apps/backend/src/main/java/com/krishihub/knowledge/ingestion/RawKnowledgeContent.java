@@ -17,7 +17,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Immutable;
 
-import java.time.LocalDateTime;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import java.util.UUID;
 
 @Entity
@@ -47,13 +48,15 @@ public class RawKnowledgeContent {
     private String author;
 
     @Column(name = "published_at_source")
-    private LocalDateTime publishedAtSource;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date publishedAtSource;
 
     @Column(nullable = false, unique = true)
     private String contentHash; // Checksum to prevent duplicates
 
     @Column(nullable = false)
-    private LocalDateTime fetchedAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date fetchedAt;
 
     @Enumerated(EnumType.STRING)
     private IngestionStatus status;

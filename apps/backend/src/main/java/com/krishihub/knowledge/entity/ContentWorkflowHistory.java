@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -39,7 +38,8 @@ public class ContentWorkflowHistory {
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date createdAt;
 
     public static ContentWorkflowHistoryBuilder builder() {
         return new ContentWorkflowHistoryBuilder();
@@ -52,7 +52,7 @@ public class ContentWorkflowHistory {
         private UUID actorId;
         private String action;
         private String comment;
-        private LocalDateTime createdAt;
+        private java.util.Date createdAt;
 
         ContentWorkflowHistoryBuilder() {
         }
@@ -87,7 +87,7 @@ public class ContentWorkflowHistory {
             return this;
         }
 
-        public ContentWorkflowHistoryBuilder createdAt(LocalDateTime createdAt) {
+        public ContentWorkflowHistoryBuilder createdAt(java.util.Date createdAt) {
             this.createdAt = createdAt;
             return this;
         }

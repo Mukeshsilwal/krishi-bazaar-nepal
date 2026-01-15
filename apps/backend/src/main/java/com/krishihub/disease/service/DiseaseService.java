@@ -15,6 +15,8 @@ public interface DiseaseService {
 
     List<Pesticide> getAllPesticides();
 
+    List<Disease> getAllDiseases();
+
     void linkPesticideToDisease(UUID diseaseId, UUID pesticideId, String dosage, Integer interval, Boolean isPrimary);
 
     // Farmer

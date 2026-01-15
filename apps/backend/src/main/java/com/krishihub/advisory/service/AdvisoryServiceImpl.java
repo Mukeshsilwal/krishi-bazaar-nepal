@@ -15,7 +15,7 @@ import com.krishihub.advisory.enums.Severity;
 import com.krishihub.advisory.enums.DeliveryStatus;
 import com.krishihub.advisory.enums.DeliveryChannel;
 import com.krishihub.common.context.UserContextHolder;
-import java.time.LocalDateTime;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -59,8 +59,8 @@ public class AdvisoryServiceImpl implements AdvisoryService {
                 // 2. Fetch Disease Alerts
                 java.util.UUID finalUserId = userId;
                 diseaseService.getDiseasesByCrop(parameter).forEach(disease -> {
-                    if (disease.getRiskLevel() == com.krishihub.disease.entity.RiskLevel.HIGH
-                            || disease.getRiskLevel() == com.krishihub.disease.entity.RiskLevel.CRITICAL) {
+                    if (disease.getRiskLevel() == com.krishihub.disease.enums.RiskLevel.HIGH
+                            || disease.getRiskLevel() == com.krishihub.disease.enums.RiskLevel.CRITICAL) {
 
                         AdvisoryResponse response = AdvisoryResponse.builder()
                                 .title("⚠️ High Risk: " + disease.getDiseaseName())
@@ -76,7 +76,7 @@ public class AdvisoryServiceImpl implements AdvisoryService {
                             AdvisoryDeliveryLog log = AdvisoryDeliveryLog.builder()
                                     .farmerId(finalUserId)
                                     .advisoryType(com.krishihub.advisory.enums.AdvisoryType.DISEASE)
-                                    .severity(disease.getRiskLevel() == com.krishihub.disease.entity.RiskLevel.CRITICAL
+                                    .severity(disease.getRiskLevel() == com.krishihub.disease.enums.RiskLevel.CRITICAL
                                             ? Severity.EMERGENCY
                                             : Severity.WARNING)
                                     .diseaseCode(disease.getDiseaseName().toString()) // Using ID as code for now
@@ -84,7 +84,7 @@ public class AdvisoryServiceImpl implements AdvisoryService {
                                     .deliveryStatus(DeliveryStatus.DELIVERED)
                                     .channel(DeliveryChannel.IN_APP)
                                     .advisoryContent(response.getTitle() + " - " + response.getSnippet())
-                                    .deliveredAt(LocalDateTime.now())
+                                    .deliveredAt(com.krishihub.common.util.DateTimeProvider.now())
                                     .build();
                             advisoryDeliveryLogRepository.save(log);
                         }
@@ -112,7 +112,7 @@ public class AdvisoryServiceImpl implements AdvisoryService {
                             .deliveryStatus(DeliveryStatus.DELIVERED)
                             .channel(DeliveryChannel.IN_APP)
                             .advisoryContent(weatherAdvisory.getTitle() + " - " + weatherAdvisory.getSnippet())
-                            .deliveredAt(LocalDateTime.now())
+                            .deliveredAt(com.krishihub.common.util.DateTimeProvider.now())
                             .build();
                     advisoryDeliveryLogRepository.save(log);
                 }
@@ -128,7 +128,7 @@ public class AdvisoryServiceImpl implements AdvisoryService {
     @Override
     public void generateAdvisoryRules(java.util.UUID userId) {
         com.krishihub.auth.entity.User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new com.krishihub.shared.exception.ResourceNotFoundException("User not found"));
 
         java.util.Map<String, Object> context = new java.util.HashMap<>();
         context.put("user_id", user.getId().toString());

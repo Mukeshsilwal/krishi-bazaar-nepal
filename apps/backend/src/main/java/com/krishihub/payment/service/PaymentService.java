@@ -2,8 +2,8 @@ package com.krishihub.payment.service;
 
 import com.krishihub.auth.entity.User;
 import com.krishihub.auth.repository.UserRepository;
-import com.krishihub.order.dto.OrderStatus;
 import com.krishihub.order.entity.Order;
+import com.krishihub.order.enums.OrderStatus;
 import com.krishihub.order.repository.OrderRepository;
 import com.krishihub.payment.dto.InitiatePaymentRequest;
 import com.krishihub.payment.dto.PaymentResponse;
@@ -13,6 +13,7 @@ import com.krishihub.payment.event.PaymentCompletedEvent;
 import com.krishihub.payment.repository.TransactionRepository;
 import com.krishihub.payment.service.strategy.PaymentInitiationResult;
 import com.krishihub.payment.service.strategy.PaymentStrategy;
+import com.krishihub.payment.service.strategy.PaymentVerificationResult;
 import com.krishihub.shared.exception.BadRequestException;
 import com.krishihub.shared.exception.ResourceNotFoundException;
 import com.krishihub.shared.exception.UnauthorizedException;
@@ -100,7 +101,6 @@ public class PaymentService {
         // Delegate to Strategy
         PaymentInitiationResult result = getStrategy(paymentMethod).initiatePayment(order.getId(), order.getTotalAmount());
 
-        // Update transaction with gateway specific ID (pidx etc)
         if (result.getTransactionId() != null) {
             savedTransaction.setTransactionId(result.getTransactionId());
             transactionRepository.save(savedTransaction);
@@ -128,9 +128,7 @@ public class PaymentService {
             if (transactions.isEmpty()) {
                 throw new ResourceNotFoundException("Transaction not found for ID or Order ID: " + transactionId);
             }
-            transaction = transactions.stream()
-                    .sorted((t1, t2) -> t2.getCreatedAt().compareTo(t1.getCreatedAt()))
-                    .findFirst()
+            transaction = transactions.stream().min((t1, t2) -> t2.getCreatedAt().compareTo(t1.getCreatedAt()))
                     .orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
         }
 
@@ -141,38 +139,73 @@ public class PaymentService {
         boolean verified;
         try {
             // Use Strategy for verification
-            // For eSewa, if gatewayTransactionId is missing/null, it might use orderId or amount logic internally.
-            // But here we pass exactly what we have.
-            verified = getStrategy(transaction.getPaymentMethod()).verifyPayment(
-                    gatewayTransactionId != null ? gatewayTransactionId : transaction.getOrder().getId().toString(),
+            String verificationId = getVerificationId(gatewayTransactionId, transaction);
+
+            PaymentVerificationResult result = getStrategy(transaction.getPaymentMethod()).verifyPayment(
+                    verificationId,
                     transaction.getAmount()
             );
+
+            verified = result.isSuccess();
+            transaction.setGatewayResponse(result.getRawResponse());
+            
+            if (verified) {
+                transaction.setPaymentStatus(Transaction.PaymentStatus.COMPLETED);
+                // Use the transaction ID from the gateway if available (e.g. eSewa refId)
+                if (result.getTransactionId() != null && !result.getTransactionId().isEmpty() && !"N/A".equals(result.getTransactionId())) {
+                    transaction.setTransactionId(result.getTransactionId());
+                } else if (gatewayTransactionId != null) {
+                    transaction.setTransactionId(gatewayTransactionId);
+                }
+                
+                transactionRepository.save(transaction);
+
+                orderService.updatePaymentStatus(transaction.getOrder().getId(), OrderStatus.PAID);
+                eventPublisher.publishEvent(new PaymentCompletedEvent(this, transaction));
+
+                log.info("Payment verified and completed: {}", transactionId);
+            } else {
+                transaction.setPaymentStatus(Transaction.PaymentStatus.FAILED);
+                // We already set gatewayResponse above
+                if (result.getFailureReason() != null) {
+                    // Append failure reason to response if needed, or rely on raw response
+                    // Let's just log it
+                    log.warn("Payment verification failed reason: {}", result.getFailureReason());
+                }
+                transactionRepository.save(transaction);
+                throw new BadRequestException("Payment verification failed: " + (result.getFailureReason() != null ? result.getFailureReason() : "Unknown error"));
+            }
+
+            return TransactionDto.fromEntity(transaction);
+
         } catch (Exception e) {
             log.error("Payment verification failed: {}", e.getMessage());
             transaction.setPaymentStatus(Transaction.PaymentStatus.FAILED);
-            transaction.setGatewayResponse(e.getMessage());
+            // transaction.setGatewayResponse(e.getMessage()); // Don't overwrite if we have partial response, but here e is exception
+            // If rawResponse was set before exception, fine. If not, maybe set exception message?
+            // Safer to leave what was set or append.
+            if (transaction.getGatewayResponse() == null) {
+                transaction.setGatewayResponse("Exception: " + e.getMessage());
+            }
             transactionRepository.save(transaction);
             throw new BadRequestException("Payment verification failed: " + e.getMessage());
         }
 
-        if (verified) {
-            transaction.setPaymentStatus(Transaction.PaymentStatus.COMPLETED);
-            if (gatewayTransactionId != null) {
-                transaction.setTransactionId(gatewayTransactionId);
-            }
-            transactionRepository.save(transaction);
 
-            orderService.updatePaymentStatus(transaction.getOrder().getId(), OrderStatus.PAID);
-            eventPublisher.publishEvent(new PaymentCompletedEvent(this, transaction));
+    }
 
-            log.info("Payment verified and completed: {}", transactionId);
+    private static String getVerificationId(String gatewayTransactionId, Transaction transaction) {
+        String verificationId;
+        // For eSewa, verification MUST use the transaction_uuid we generated (which is Order ID)
+        if (transaction.getPaymentMethod() == Transaction.PaymentMethod.ESEWA) {
+            verificationId = transaction.getOrder().getId().toString();
         } else {
-            transaction.setPaymentStatus(Transaction.PaymentStatus.FAILED);
-            transactionRepository.save(transaction);
-            throw new BadRequestException("Payment verification failed");
+            // For others (like Khalti), use the gateway provided ID (pidx) if avail, else fallback
+            verificationId = (gatewayTransactionId != null && !gatewayTransactionId.trim().isEmpty())
+                    ? gatewayTransactionId
+                    : transaction.getOrder().getId().toString();
         }
-
-        return TransactionDto.fromEntity(transaction);
+        return verificationId;
     }
 
     public TransactionDto getTransaction(UUID id, UUID userId) {

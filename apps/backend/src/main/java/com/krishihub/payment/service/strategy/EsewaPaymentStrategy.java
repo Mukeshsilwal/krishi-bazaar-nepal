@@ -18,6 +18,28 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Implements eSewa payment gateway integration for Nepal.
+ *
+ * Design Notes:
+ * - Uses HTML form auto-submit pattern to redirect users to eSewa payment page.
+ * - Signature is generated using HMAC-SHA256 to prevent tampering.
+ * - Verification is done via eSewa's REST API after payment completion.
+ *
+ * Business Rules:
+ * - Tax, service charge, and delivery charge are currently set to 0.
+ * - Total amount must match exactly during verification.
+ * - Transaction UUID (order ID) is used as the primary identifier.
+ *
+ * Security:
+ * - NEVER log the secret key or raw signature in production.
+ * - All callback URLs must be HTTPS in production.
+ * - Signature verification prevents payment amount manipulation.
+ *
+ * Important:
+ * - eSewa API responses are not always JSON; parsing is defensive.
+ * - Payment verification may fail due to network issues; implement retry logic at caller level.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -36,7 +58,8 @@ public class EsewaPaymentStrategy implements PaymentStrategy {
     @Override
     public PaymentInitiationResult initiatePayment(UUID orderId, BigDecimal amount) {
         try {
-            // Calculate amounts
+            // Business Rule: Tax, service charge, and delivery charge are 0 for now.
+            // These can be configured in future based on business requirements.
             double amt = amount.doubleValue();
             double taxAmt = 0.0;
             double psc = 0.0;
@@ -48,6 +71,8 @@ public class EsewaPaymentStrategy implements PaymentStrategy {
             String su = buildCallbackUrl(esewaProperties.getSuccessUrl(), pid);
             String fu = buildCallbackUrl(esewaProperties.getFailureUrl(), pid);
 
+            // SECURITY: Signature prevents tampering with payment amount or transaction ID.
+            // eSewa verifies this signature before processing payment.
             String signature = generateEsewaV2Signature(tAmt, pid, scd, esewaProperties.getSecretKey());
 
             log.info("eSewa Payment Initiation - Transaction ID: {}, Amount: {}, Signature generated", pid, tAmt);
@@ -98,12 +123,12 @@ public class EsewaPaymentStrategy implements PaymentStrategy {
 
         } catch (Exception e) {
             log.error("Error initiating eSewa payment", e);
-            throw new RuntimeException("Payment Initiation Failed: " + e.getMessage());
+            throw new com.krishihub.common.exception.SystemException("Payment Initiation Failed: " + e.getMessage());
         }
     }
 
     @Override
-    public boolean verifyPayment(String transactionId, BigDecimal amount) {
+    public PaymentVerificationResult verifyPayment(String transactionId, BigDecimal amount) {
         try {
             String url = UriComponentsBuilder
                     .fromHttpUrl(esewaProperties.getVerifyUrl())
@@ -120,18 +145,42 @@ public class EsewaPaymentStrategy implements PaymentStrategy {
 
             if (!result.isSuccess()) {
                 log.error("Payment verification failed: {}", result.getFailureReason());
-                return false;
+                return PaymentVerificationResult.builder()
+                        .success(false)
+                        .failureReason(result.getFailureReason())
+                        .rawResponse(result.getRawResponse())
+                        .build();
             }
 
             log.info("Payment verified successfully. Ref ID: {}", result.getRefId());
-            return true;
+            return PaymentVerificationResult.builder()
+                    .success(true)
+                    .transactionId(result.getRefId())
+                    .rawResponse(result.getRawResponse())
+                    .build();
 
         } catch (Exception e) {
             log.error("eSewa verification error", e);
-            return false;
+            return PaymentVerificationResult.builder()
+                    .success(false)
+                    .failureReason(e.getMessage())
+                    .build();
         }
     }
 
+    /**
+     * Generates HMAC-SHA256 signature for eSewa payment request.
+     *
+     * Security:
+     * - Signature format: HMAC-SHA256("total_amount=X,transaction_uuid=Y,product_code=Z", secretKey)
+     * - This prevents attackers from modifying payment amount or transaction ID.
+     * - eSewa validates this signature before processing payment.
+     *
+     * Important:
+     * - Amount must be trimmed (no trailing zeros) to match eSewa's format.
+     * - Field order in message MUST match: total_amount, transaction_uuid, product_code.
+     * - Changing field order will cause signature mismatch and payment failure.
+     */
     private String generateEsewaV2Signature(double totalAmount, String transactionUuid, String productCode,
             String secretKey) throws Exception {
         String amtStr = trimAmount(totalAmount);
@@ -164,6 +213,18 @@ public class EsewaPaymentStrategy implements PaymentStrategy {
                 : baseUrl + "?txnId=" + transactionId;
     }
 
+    /**
+     * Parses eSewa verification response (defensive parsing).
+     *
+     * Important:
+     * - eSewa API responses are not always consistent (JSON vs XML vs plain text).
+     * - This method uses defensive string matching to detect success.
+     * - Multiple success indicators are checked to handle API variations.
+     *
+     * Workaround:
+     * - We cannot rely on structured JSON parsing due to eSewa API inconsistency.
+     * - String matching is intentionally case-insensitive for robustness.
+     */
     private VerificationResult parseVerificationResponse(String response) {
         VerificationResult result = new VerificationResult();
         result.setRawResponse(response);
@@ -174,6 +235,7 @@ public class EsewaPaymentStrategy implements PaymentStrategy {
             return result;
         }
 
+        // Check multiple success indicators due to eSewa API inconsistency
         boolean success = response.toLowerCase().contains("success") ||
                 response.toLowerCase().contains("complete") ||
                 response.contains("<status>Success</status>") ||
@@ -192,10 +254,20 @@ public class EsewaPaymentStrategy implements PaymentStrategy {
         try {
             int idx = response.indexOf("ref_id");
             if (idx == -1) return "N/A";
-            int start = idx + 8;
-            int end = response.indexOf("\"", start);
-            if (end == -1) end = response.length();
-            return response.substring(start, end).trim();
+            
+            // Find colon after ref_id
+            int colIdx = response.indexOf(":", idx);
+            if (colIdx == -1) return "N/A";
+
+            // Find opening quote of value
+            int valStartQuote = response.indexOf("\"", colIdx);
+            if (valStartQuote == -1) return "N/A";
+
+            // Find closing quote
+            int valEndQuote = response.indexOf("\"", valStartQuote + 1);
+            if (valEndQuote == -1) return "N/A";
+
+            return response.substring(valStartQuote + 1, valEndQuote).trim();
         } catch (Exception e) {
             return "N/A";
         }

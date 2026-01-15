@@ -1,6 +1,6 @@
 package com.krishihub.order.repository;
 
-import com.krishihub.order.dto.OrderStatus;
+import com.krishihub.order.enums.OrderStatus;
 import com.krishihub.order.entity.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,5 +46,5 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     @Query("SELECT SUM(o.quantity) FROM Order o WHERE o.listing.id = :listingId AND o.pickupDate = :pickupDate AND o.status NOT IN ('CANCELLED')")
     BigDecimal sumQuantityByListingIdAndPickupDate(@Param("listingId") UUID listingId,
-                                                   @Param("pickupDate") LocalDate pickupDate);
+                                                   @Param("pickupDate") Date pickupDate);
 }

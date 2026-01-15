@@ -1,6 +1,6 @@
 package com.krishihub.order.dto;
 
-import com.krishihub.order.dto.OrderSource;
+import com.krishihub.order.enums.OrderSource;
 import com.krishihub.order.entity.Order;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,8 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Data
@@ -24,11 +23,11 @@ public class OrderDto {
     private BigDecimal quantity;
     private BigDecimal totalAmount;
     private String status;
-    private LocalDate pickupDate;
+    private Date pickupDate;
     private String pickupLocation;
     private String notes;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private Date createdAt;
+    private Date updatedAt;
 
     @Data
     @Builder
@@ -90,6 +89,14 @@ public class OrderDto {
                 .items(order.getItems().stream().map(item -> OrderItemDto.builder()
                         .id(item.getId())
                         .agriProductId(item.getAgriProduct() != null ? item.getAgriProduct().getId() : null)
+                        .agriProduct(item.getAgriProduct() != null ? com.krishihub.agristore.dto.AgriProductDTO.builder()
+                                .id(item.getAgriProduct().getId())
+                                .name(item.getAgriProduct().getName())
+                                .description(item.getAgriProduct().getDescription())
+                                .category(item.getAgriProduct().getCategory())
+                                .price(item.getAgriProduct().getPrice())
+                                .imageUrl(item.getAgriProduct().getImageUrl())
+                                .build() : null)
                         .quantity(item.getQuantity())
                         .pricePerUnit(item.getPricePerUnit())
                         .totalPrice(item.getTotalPrice())

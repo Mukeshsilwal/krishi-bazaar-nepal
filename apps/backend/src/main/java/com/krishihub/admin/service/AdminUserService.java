@@ -4,6 +4,8 @@ import com.krishihub.auth.entity.User;
 import com.krishihub.auth.repository.UserRepository;
 import com.krishihub.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,8 +19,8 @@ public class AdminUserService {
     private final UserRepository userRepository;
     private final AuditService auditService;
 
-    public org.springframework.data.domain.Page<User> getAllUsers(String search, String role, Boolean status,
-            org.springframework.data.domain.Pageable pageable) {
+    public Page<User> getAllUsers(String search, String role, Boolean status,
+                                  Pageable pageable) {
         User.UserRole userRole = null;
         if (role != null && !role.isEmpty() && !role.equalsIgnoreCase("all")) {
             try {

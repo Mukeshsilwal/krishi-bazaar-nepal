@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -37,7 +36,7 @@ public class UserActivityService {
         return userActivityRepository.findAll(pageable);
     }
     
-    public Page<UserActivity> getActivitiesByTimeRange(LocalDateTime start, LocalDateTime end, Pageable pageable) {
+    public Page<UserActivity> getActivitiesByTimeRange(java.util.Date start, java.util.Date end, Pageable pageable) {
         return userActivityRepository.findByTimestampBetween(start, end, pageable);
     }
 }

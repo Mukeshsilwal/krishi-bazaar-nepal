@@ -1,8 +1,8 @@
 package com.krishihub.disease.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import java.util.UUID;
+import com.krishihub.disease.enums.TreatmentType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -37,5 +37,6 @@ public class Treatment {
     private String productId;
 
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date createdAt;
 }

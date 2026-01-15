@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+
 
 /**
  * Normalized weather data model
@@ -60,8 +60,8 @@ public class WeatherData {
     private String alertSeverity; // MINOR, MODERATE, SEVERE, EXTREME
 
     // Metadata
-    private LocalDateTime timestamp;
-    private LocalDateTime forecastTime;
+    private java.util.Date timestamp;
+    private java.util.Date forecastTime;
     private String dataSource; // Provider name
     private Boolean isForecast;
 

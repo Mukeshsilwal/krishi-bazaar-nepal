@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -33,7 +32,8 @@ public class UserActivity {
 
     @CreationTimestamp
     @Column(name = "timestamp", updatable = false)
-    private LocalDateTime timestamp;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date timestamp;
 
     @Column(name = "ip_address")
     private String ipAddress;

@@ -57,7 +57,7 @@ const SourceManager = () => {
     const fetchSources = async () => {
         try {
             const res = await api.get(KNOWLEDGE_ENDPOINTS.SOURCES);
-            if (res.data.success) {
+            if (res.data.code === 0) {
                 setSources(res.data.data);
             } else {
                 toast.error(res.data.message || "Failed to fetch sources");

@@ -44,41 +44,54 @@ export interface DiseaseFeedback {
 
 const advisoryService = {
     diagnoseBySymptoms: async (symptom: string) => {
-        const response = await api.get<DiseaseDiagnosis[]>('/diseases/diagnose', {
+        const response = await api.get<any>('/diseases/diagnose', {
             params: { symptom }
         });
-        return response.data;
+        return response.data.code === 0 ? response.data.data : [];
     },
 
     getDiseasesByCrop: async (cropName: string) => {
-        const response = await api.get<DiseaseDiagnosis[]>(DISEASE_ENDPOINTS.BY_CROP(cropName));
-        return response.data;
+        const response = await api.get<any>(DISEASE_ENDPOINTS.BY_CROP(cropName));
+        return response.data.code === 0 ? response.data.data : [];
     },
 
     // Pesticide Management
     createPesticide: async (pesticide: Partial<Pesticide>) => {
         const response = await api.post(DISEASE_ENDPOINTS.PESTICIDES, pesticide);
-        return response.data;
+        return response.data.code === 0 ? response.data.data : null;
     },
 
     getAllPesticides: async () => {
         const response = await api.get(DISEASE_ENDPOINTS.PESTICIDES);
-        return response.data;
+        // Normalize response
+        if (response.data.code === 0) {
+            return response.data.data;
+        }
+        return [];
     },
 
     getAllDiseases: async () => {
         const response = await api.get(DISEASE_ENDPOINTS.BASE);
-        return response.data;
+        if (response.data.code === 0) {
+            return response.data.data;
+        }
+        return [];
     },
 
     createDisease: async (disease: any) => {
         const response = await api.post(DISEASE_ENDPOINTS.BASE, disease);
-        return response.data;
+        if (response.data.code === 0) {
+            return response.data.data;
+        }
+        throw new Error(response.data.message || 'Failed to create disease');
     },
 
     getPesticides: async () => {
         const response = await api.get(DISEASE_ENDPOINTS.PESTICIDES);
-        return response.data;
+        if (response.data.code === 0) {
+            return response.data.data;
+        }
+        return [];
     },
 
     linkPesticide: async (diseaseId: string, data: { pesticideId: string; dosage: string; interval: number; isPrimary: boolean }) => {
@@ -92,7 +105,7 @@ const advisoryService = {
 
     sendSignal: async (payload: any) => {
         const response = await api.post(DISEASE_ENDPOINTS.REPORT_SIGNAL, payload);
-        return response.data;
+        return response.data.data;
     },
 
     // Disease Feedback
@@ -104,7 +117,32 @@ const advisoryService = {
         const response = await api.get(DIAGNOSIS_ENDPOINTS.HISTORY, {
             params: { page, size }
         });
-        return response.data;
+        return response.data.code === 0 ? response.data.data : [];
+    },
+
+    // Rule Management
+    getAllRules: async () => {
+        const response = await api.get(RULE_ENDPOINTS.BASE);
+        if (response.data.code === 0) {
+            return response.data.data;
+        }
+        return [];
+    },
+
+    createRule: async (rule: any) => {
+        const response = await api.post(RULE_ENDPOINTS.BASE, rule);
+        if (response.data.code === 0) {
+            return response.data.data;
+        }
+        throw new Error(response.data.message || 'Failed to create rule');
+    },
+
+    updateRule: async (id: string, rule: any) => {
+        const response = await api.put(RULE_ENDPOINTS.BY_ID(id), rule);
+        if (response.data.code === 0) {
+            return response.data.data;
+        }
+        throw new Error(response.data.message || 'Failed to update rule');
     }
 };
 

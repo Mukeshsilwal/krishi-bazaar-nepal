@@ -15,7 +15,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import java.util.UUID;
 
 @Entity
@@ -65,13 +66,16 @@ public class KnowledgeSource {
 
     @CreationTimestamp
     @Column(updatable = false)
-    private LocalDateTime createdAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date createdAt;
 
     @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date updatedAt;
 
     @Column(name = "last_synced_at")
-    private LocalDateTime lastSyncedAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date lastSyncedAt;
 
     public enum SourceType {
         RSS_FEED,

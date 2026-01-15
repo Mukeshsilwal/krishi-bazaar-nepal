@@ -8,8 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -33,11 +32,13 @@ public class StorageBooking {
     @Column(nullable = false)
     private Double quantity; // in kg
 
+    @Temporal(TemporalType.DATE)
     @Column(name = "start_date", nullable = false)
-    private LocalDate startDate; // Using LocalDate for simpler booking dates
+    private Date startDate; // Using Date (at 00:00) for booking dates
 
+    @Temporal(TemporalType.DATE)
     @Column(name = "end_date", nullable = false)
-    private LocalDate endDate;
+    private Date endDate;
 
     @Column(name = "total_price")
     private Double totalPrice;
@@ -47,12 +48,14 @@ public class StorageBooking {
     private BookingStatus status;
 
     @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    private Date createdAt;
 
     @UpdateTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Date updatedAt;
 
     public enum BookingStatus {
         PENDING,

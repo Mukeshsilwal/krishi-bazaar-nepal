@@ -13,8 +13,8 @@ export const useOrders = (role = null) => {
             setLoading(true);
             const response = await orderService.getMyOrders(role);
 
-            if (response.success && response.data) {
-                // Response structure: { success, message, data: { content: [...] } }
+            if (response.code === 0 && response.data) {
+                // Response structure: { code, message, data: { content: [...] } }
                 const pageData = response.data;
                 setOrders(Array.isArray(pageData) ? pageData : (pageData.content || []));
             }
@@ -34,46 +34,64 @@ export const useOrders = (role = null) => {
     const createOrder = async (orderData) => {
         try {
             const response = await orderService.createOrder(orderData);
-            if (response.success) {
+            if (response.code === 0) {
                 await fetchOrders();
-                return { success: true, data: response.data };
+                return { code: 0, data: response.data };
             }
-            return { success: false, message: response.message };
+            return { code: 'ERROR', message: response.message };
         } catch (err) {
             return {
-                success: false,
+                code: 'ERROR',
                 message: err.response?.data?.message || 'Failed to create order',
             };
         }
     };
 
-    const updateStatus = async (orderId, statusData) => {
+    const updateOrderStatus = async (orderId, status) => {
         try {
-            const response = await orderService.updateOrderStatus(orderId, statusData);
-            if (response.success) {
+            setLoading(true);
+            const response = await orderService.updateOrderStatus(orderId, status);
+            if (response.code === 0) {
                 await fetchOrders();
-                return { success: true, data: response.data };
+                return response;
             }
-            return { success: false, message: response.message };
+            return response;
         } catch (err) {
-            return {
-                success: false,
-                message: err.response?.data?.message || 'Failed to update order',
-            };
+            setError(err.message || 'Failed to update order');
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const placeOrder = async (orderData) => {
+        try {
+            setLoading(true);
+            const response = await orderService.placeOrder(orderData);
+            if (response.code === 0) {
+                await fetchOrders();
+                return response;
+            }
+            return response;
+        } catch (err) {
+            setError(err.message || 'Failed to place order');
+            throw err;
+        } finally {
+            setLoading(false);
         }
     };
 
     const cancelOrder = async (orderId) => {
         try {
             const response = await orderService.cancelOrder(orderId);
-            if (response.success) {
+            if (response.code === 0) {
                 await fetchOrders();
-                return { success: true };
+                return { code: 0 };
             }
-            return { success: false, message: response.message };
+            return { code: 'ERROR', message: response.message };
         } catch (err) {
             return {
-                success: false,
+                code: 'ERROR',
                 message: err.response?.data?.message || 'Failed to cancel order',
             };
         }
@@ -84,7 +102,8 @@ export const useOrders = (role = null) => {
         loading,
         error,
         createOrder,
-        updateStatus,
+        updateOrderStatus,
+        placeOrder,
         cancelOrder,
         refresh: fetchOrders,
     };

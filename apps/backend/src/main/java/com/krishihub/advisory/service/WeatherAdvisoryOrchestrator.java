@@ -15,7 +15,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+
 import java.util.*;
 
 /**
@@ -229,11 +229,13 @@ public class WeatherAdvisoryOrchestrator {
      * Generate deduplication key
      */
     private String generateDeduplicationKey(WeatherAdvisoryContext context) {
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
         return String.format("%s:%s:%s:%s",
                 context.getFarmerId(),
                 context.getPrimarySignal(),
                 context.getCropType(),
-                LocalDateTime.now().getHour());
+                cal.get(java.util.Calendar.HOUR_OF_DAY));
     }
 
     /**
@@ -325,7 +327,7 @@ public class WeatherAdvisoryOrchestrator {
 
         status.put("weatherIngestionAvailable", weatherIngestionService.isAnyProviderAvailable());
         status.put("recentAlertsCount", recentAlerts.size());
-        status.put("lastProcessingTime", LocalDateTime.now());
+        status.put("lastProcessingTime", com.krishihub.common.util.DateTimeProvider.now());
 
         return status;
     }

@@ -33,7 +33,7 @@ export const useListings = (filters = {}) => {
 
             const response = await listingService.searchListings(searchParams);
 
-            if (response.success && response.data) {
+            if (response.code === 0 && response.data) {
                 const newData = response.data.content || [];
 
                 setListings(prev => {
@@ -51,7 +51,8 @@ export const useListings = (filters = {}) => {
                 });
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to fetch listings');
+            const { resolveUserMessage } = await import('@/utils/errorUtils');
+            setError(resolveUserMessage(err));
         } finally {
             setLoading(false);
             setIsFetchingNext(false);

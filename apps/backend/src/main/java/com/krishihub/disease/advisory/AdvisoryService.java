@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.Map;
 import com.krishihub.disease.repository.AdvisoryFeedbackRepository;
-import java.time.LocalDateTime;
+
 
 @Service
 @RequiredArgsConstructor
@@ -59,7 +59,7 @@ public class AdvisoryService {
                 .queryText(feedbackDTO.getQueryText())
                 .isHelpful(feedbackDTO.isHelpful())
                 .comments(feedbackDTO.getComments())
-                .createdAt(LocalDateTime.now())
+                .createdAt(com.krishihub.common.util.DateTimeProvider.now())
                 .build();
         feedbackRepository.save(feedback);
     }

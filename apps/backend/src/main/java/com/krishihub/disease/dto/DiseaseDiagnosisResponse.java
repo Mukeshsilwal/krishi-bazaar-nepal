@@ -1,6 +1,6 @@
 package com.krishihub.disease.dto;
 
-import com.krishihub.disease.entity.RiskLevel;
+import com.krishihub.disease.enums.RiskLevel;
 import java.util.List;
 import lombok.Builder;
 import lombok.Data;

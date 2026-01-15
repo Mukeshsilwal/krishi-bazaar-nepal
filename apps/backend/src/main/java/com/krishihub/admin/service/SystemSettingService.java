@@ -65,19 +65,20 @@ public class SystemSettingService {
                 .collect(Collectors.toMap(SystemSetting::getKey, SystemSetting::getValue));
     }
 
-    public List<SystemSetting> getAllSettings() {
-        return repository.findAll();
+    public org.springframework.data.domain.Page<SystemSetting> getSettings(org.springframework.data.domain.Pageable pageable) {
+        return repository.findAll(pageable);
     }
 
     @Transactional
     public List<SystemSetting> updateSettings(List<SystemSetting> settings) {
+        List<SystemSetting> updatedSettings = new java.util.ArrayList<>();
         for (SystemSetting setting : settings) {
             repository.findByKey(setting.getKey()).ifPresent(existing -> {
                 existing.setValue(setting.getValue());
-                repository.save(existing);
+                updatedSettings.add(repository.save(existing));
             });
         }
-        return repository.findAll();
+        return updatedSettings;
     }
 
     public String getSettingValue(String key, String defaultValue) {

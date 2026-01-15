@@ -12,8 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -93,7 +92,7 @@ public class ContextBuilderService {
                 .isMonsoonsoon(isMonsoonsoon())
                 .riskLevel(assessRiskLevel(signals, primarySignal))
                 .identifiedRisks(identifyRisks(signals, primaryCrop))
-                .contextCreatedAt(LocalDateTime.now())
+                .contextCreatedAt(com.krishihub.common.util.DateTimeProvider.now())
                 .contextSource("ContextBuilderService")
                 .build();
 
@@ -193,18 +192,21 @@ public class ContextBuilderService {
     /**
      * Calculate days after planting
      */
-    private int calculateDaysAfterPlanting(LocalDateTime plantingDate) {
+    private int calculateDaysAfterPlanting(java.util.Date plantingDate) {
         if (plantingDate == null) {
             return 0;
         }
-        return (int) ChronoUnit.DAYS.between(plantingDate, LocalDateTime.now());
+        long diffInMillies = Math.abs(com.krishihub.common.util.DateTimeProvider.now().getTime() - plantingDate.getTime());
+        return (int) java.util.concurrent.TimeUnit.DAYS.convert(diffInMillies, java.util.concurrent.TimeUnit.MILLISECONDS);
     }
 
     /**
      * Determine current season
      */
     private String determineSeason() {
-        int month = LocalDateTime.now().getMonthValue();
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+        int month = cal.get(java.util.Calendar.MONTH) + 1; // Calendar.MONTH is 0-indexed
 
         return switch (month) {
             case 3, 4, 5 -> "SPRING";
@@ -218,7 +220,9 @@ public class ContextBuilderService {
      * Check if currently in monsoon season
      */
     private boolean isMonsoonsoon() {
-        int month = LocalDateTime.now().getMonthValue();
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+        int month = cal.get(java.util.Calendar.MONTH) + 1; // Calendar.MONTH is 0-indexed
         return month >= 6 && month <= 8;
     }
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import logisticsService from '../services/logisticsService';
 import { COLD_STORAGE_ENDPOINTS, LOGISTICS_ENDPOINTS } from '../config/endpoints';
 import { Truck, Warehouse, Package, MapPin, Check, X, Search } from 'lucide-react';
 import { toast } from 'sonner';
@@ -59,8 +60,9 @@ const AdminLogisticsPage = () => {
     const fetchBookings = async () => {
         setLoading(true);
         try {
-            const data = await api.get(`${COLD_STORAGE_ENDPOINTS.BASE}/bookings`);
-            setBookings(data.data.data);
+            // Request large page size to keep UI simple for now
+            const content = await logisticsService.getAllBookings({ page: 0, size: 100, sort: 'id,desc' });
+            setBookings(content);
         } catch (error) {
             toast.error("Failed to load bookings");
         } finally {
@@ -68,7 +70,7 @@ const AdminLogisticsPage = () => {
         }
     };
 
-    const handleCreateStorage = async (e) => {
+    const handleCreateStorage = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             await api.post(COLD_STORAGE_ENDPOINTS.BASE, newStorage);
@@ -84,7 +86,7 @@ const AdminLogisticsPage = () => {
         }
     };
 
-    const handleUpdateStatus = async (id, status) => {
+    const handleUpdateStatus = async (id: string, status: string) => {
         try {
             await api.put(LOGISTICS_ENDPOINTS.UPDATE_STATUS(id), status, {
                 headers: { 'Content-Type': 'application/json' }

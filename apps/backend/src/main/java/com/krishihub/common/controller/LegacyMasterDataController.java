@@ -38,7 +38,7 @@ public class LegacyMasterDataController {
         if (type != null) {
             return ResponseEntity.ok(ApiResponse.success("Units fetched", masterDataService.getUnitsByType(type)));
         }
-        return ResponseEntity.badRequest().body(ApiResponse.error("Must provide type or parentId"));
+        return ResponseEntity.badRequest().body(ApiResponse.error("Must provide type or parentId", null));
     }
 
     @PostMapping("/units")

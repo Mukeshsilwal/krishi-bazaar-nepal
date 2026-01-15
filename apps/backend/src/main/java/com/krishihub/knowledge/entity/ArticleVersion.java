@@ -9,7 +9,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
@@ -38,7 +37,8 @@ public class ArticleVersion {
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date createdAt;
 
     @Column(name = "created_by")
     private UUID createdBy;
@@ -52,7 +52,7 @@ public class ArticleVersion {
         private Article article;
         private Integer versionNumber;
         private Map<String, Object> contentSnapshot;
-        private LocalDateTime createdAt;
+        private java.util.Date createdAt;
         private UUID createdBy;
 
         ArticleVersionBuilder() {
@@ -78,7 +78,7 @@ public class ArticleVersion {
             return this;
         }
 
-        public ArticleVersionBuilder createdAt(LocalDateTime createdAt) {
+        public ArticleVersionBuilder createdAt(java.util.Date createdAt) {
             this.createdAt = createdAt;
             return this;
         }

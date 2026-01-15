@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -29,7 +29,10 @@ public class WeatherAdvisoryService {
     @Transactional
     public WeatherAdvisory createAdvisory(WeatherAdvisory advisory) {
         if (advisory.getValidUntil() == null) {
-            advisory.setValidUntil(LocalDateTime.now().plusDays(3)); // Default 3 days validity
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+            cal.add(java.util.Calendar.DAY_OF_YEAR, 3); // Default 3 days validity
+            advisory.setValidUntil(cal.getTime());
         }
         WeatherAdvisory saved = repository.save(advisory);
         broadcastAdvisory(saved);

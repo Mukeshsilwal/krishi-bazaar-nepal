@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { toast } from 'sonner';
+import { resolveUserMessage } from '../utils/errorUtils';
 
 import { API_URL } from '../config/app';
 
@@ -13,9 +14,10 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to add auth token
+// Request interceptor
 api.interceptors.request.use(
   (config) => {
+    console.log(`[API Request] ${config.method.toUpperCase()} ${config.url}`, config);
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -33,44 +35,21 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Show safe user message from backend if available
-    // Show safe user message from backend if available
-    if (error.response?.data?.userMessage) {
-      toast.error(error.response.data.userMessage);
-    } else if (error.message === 'Network Error') {
-      toast.error("इन्टरनेट जडानमा समस्या छ। कृपया जाँच गर्नुहोस्।");
-    } else if (error.response) {
-      // Handle standard HTTP errors
-      const status = error.response.status;
-      switch (status) {
-        case 400:
-          // Bad request - often validation errors, usually handled by form
-          // Only show if no specific userMessage was sent
-          if (!error.response.data?.userMessage) {
-            toast.error("आवेदनमा त्रुटि। कृपया विवरण जाँच गर्नुहोस्।");
-          }
-          break;
-        case 401:
-          // Handled by refresh logic, but show message if it fails eventually
-          if (originalRequest._retry) {
-            toast.error("सत्र समाप्त भयो। कृपया पुन: लगइन गर्नुहोस्।");
-          }
-          break;
-        case 403:
-          toast.error("तपाईंलाई यो कार्य गर्न अनुमति छैन।");
-          break;
-        case 404:
-          toast.error("अनुरोध गरिएको स्रोत फेला परेन।");
-          break;
-        case 500:
-          toast.error("सर्भरमा समस्या आयो। कृपया केहि समय पछि पुन: प्रयास गर्नुहोस्।");
-          break;
-        default:
-          toast.error("केही गलत भयो। कृपया पुन: प्रयास गर्नुहोस्।");
-      }
-    } else {
-      toast.error("केही गलत भयो। कृपया पुन: प्रयास गर्नुहोस्।");
+    // Unified Error Handling using Resolver
+
+    const userMessage = resolveUserMessage(error);
+
+    // Avoid duplicate toasts if handled elsewhere? 
+    // Actually, we want a global toast for most errors, except maybe 401 which triggers refresh loop.
+    // But even 401 might need a message if refresh fails.
+
+    // We only show toast if it's NOT a 401 that is about to be retried
+    const isRetryable401 = error.response?.status === 401 && !originalRequest._retry;
+
+    if (!isRetryable401) {
+      toast.error(userMessage);
     }
+
 
     // If 401 and we haven't retried yet
     if (error.response?.status === 401 && !originalRequest._retry) {

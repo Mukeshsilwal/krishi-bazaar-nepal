@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -34,7 +34,7 @@ public interface AdvisoryDeliveryLogRepository extends JpaRepository<AdvisoryDel
         /**
          * Find logs within date range
          */
-        List<AdvisoryDeliveryLog> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+        List<AdvisoryDeliveryLog> findByCreatedAtBetween(java.util.Date start, java.util.Date end);
 
         /**
          * Count deliveries by status
@@ -48,7 +48,7 @@ public interface AdvisoryDeliveryLogRepository extends JpaRepository<AdvisoryDel
         @Query("SELECT CAST(COUNT(CASE WHEN l.deliveryStatus IN ('DELIVERED', 'OPENED', 'FEEDBACK_RECEIVED') THEN 1 END) AS double) / NULLIF(COUNT(l), 0) * 100 "
                         +
                         "FROM AdvisoryDeliveryLog l WHERE l.createdAt >= :since")
-        Double getDeliverySuccessRate(@Param("since") LocalDateTime since);
+        Double getDeliverySuccessRate(@Param("since") java.util.Date since);
 
         /**
          * Get feedback statistics
@@ -62,7 +62,7 @@ public interface AdvisoryDeliveryLogRepository extends JpaRepository<AdvisoryDel
          */
         @Query("SELECT l.ruleName, COUNT(l) as count FROM AdvisoryDeliveryLog l " +
                         "WHERE l.createdAt >= :since GROUP BY l.ruleName ORDER BY count DESC")
-        List<Object[]> getMostTriggeredRules(@Param("since") LocalDateTime since);
+        List<Object[]> getMostTriggeredRules(@Param("since") java.util.Date since);
 
         /**
          * Check if deduplication key exists
@@ -79,7 +79,7 @@ public interface AdvisoryDeliveryLogRepository extends JpaRepository<AdvisoryDel
                         +
                         "FROM AdvisoryDeliveryLog l WHERE l.createdAt >= :since AND l.channel IS NOT NULL " +
                         "GROUP BY l.channel")
-        List<Object[]> getChannelStatistics(@Param("since") LocalDateTime since);
+        List<Object[]> getChannelStatistics(@Param("since") java.util.Date since);
 
         /**
          * Get rule effectiveness metrics
@@ -91,7 +91,7 @@ public interface AdvisoryDeliveryLogRepository extends JpaRepository<AdvisoryDel
                         "SUM(CASE WHEN l.feedback = 'NOT_USEFUL' THEN 1 ELSE 0 END) " +
                         "FROM AdvisoryDeliveryLog l WHERE l.createdAt >= :since AND l.ruleName IS NOT NULL " +
                         "GROUP BY l.ruleName ORDER BY COUNT(l) DESC")
-        List<Object[]> getRuleEffectivenessMetrics(@Param("since") LocalDateTime since);
+        List<Object[]> getRuleEffectivenessMetrics(@Param("since") java.util.Date since);
 
         /**
          * Get district-wise statistics
@@ -101,14 +101,14 @@ public interface AdvisoryDeliveryLogRepository extends JpaRepository<AdvisoryDel
                         "SUM(CASE WHEN l.deliveryStatus = 'DELIVERY_FAILED' THEN 1 ELSE 0 END) " +
                         "FROM AdvisoryDeliveryLog l WHERE l.createdAt >= :since AND l.district IS NOT NULL " +
                         "GROUP BY l.district")
-        List<Object[]> getDistrictStatistics(@Param("since") LocalDateTime since);
+        List<Object[]> getDistrictStatistics(@Param("since") java.util.Date since);
 
         /**
          * Find farmers with excessive advisories (alert fatigue)
          */
         @Query("SELECT l.farmerId, COUNT(l) FROM AdvisoryDeliveryLog l " +
                         "WHERE l.createdAt >= :since GROUP BY l.farmerId HAVING COUNT(l) > :threshold")
-        List<Object[]> findFarmersWithExcessiveAdvisories(@Param("since") LocalDateTime since,
+        List<Object[]> findFarmersWithExcessiveAdvisories(@Param("since") java.util.Date since,
                         @Param("threshold") long threshold);
 
         /**
@@ -117,7 +117,7 @@ public interface AdvisoryDeliveryLogRepository extends JpaRepository<AdvisoryDel
         @Query("SELECT l.id FROM AdvisoryDeliveryLog l " +
                         "WHERE l.severity = 'EMERGENCY' AND l.createdAt >= :since " +
                         "AND l.deliveryStatus NOT IN ('OPENED', 'FEEDBACK_RECEIVED')")
-        List<UUID> findIgnoredEmergencyAlerts(@Param("since") LocalDateTime since);
+        List<UUID> findIgnoredEmergencyAlerts(@Param("since") java.util.Date since);
 
         /**
          * Get rules with poor feedback ratio
@@ -129,20 +129,20 @@ public interface AdvisoryDeliveryLogRepository extends JpaRepository<AdvisoryDel
                         "WHERE l.createdAt >= :since AND l.ruleName IS NOT NULL " +
                         "GROUP BY l.ruleName " +
                         "HAVING SUM(CASE WHEN l.feedback IS NOT NULL THEN 1 ELSE 0 END) >= :minFeedbackCount")
-        List<Object[]> getRulesWithPoorFeedback(@Param("since") LocalDateTime since,
+        List<Object[]> getRulesWithPoorFeedback(@Param("since") java.util.Date since,
                         @Param("minFeedbackCount") long minFeedbackCount);
 
         /**
          * Count total advisories since date
          */
         @Query("SELECT COUNT(l) FROM AdvisoryDeliveryLog l WHERE l.createdAt >= :since")
-        long countSince(@Param("since") LocalDateTime since);
+        long countSince(@Param("since") java.util.Date since);
 
         /**
          * Count high-risk alerts (EMERGENCY or WARNING severity) since date
          */
         @Query("SELECT COUNT(l) FROM AdvisoryDeliveryLog l WHERE l.createdAt >= :since AND l.severity IN ('EMERGENCY', 'WARNING')")
-        long countHighRiskSince(@Param("since") LocalDateTime since);
+        long countHighRiskSince(@Param("since") java.util.Date since);
 
         /**
          * Get open rate (opened/delivered)
@@ -152,7 +152,7 @@ public interface AdvisoryDeliveryLogRepository extends JpaRepository<AdvisoryDel
                         "NULLIF(SUM(CASE WHEN l.deliveryStatus IN ('DELIVERED', 'OPENED', 'FEEDBACK_RECEIVED') THEN 1 ELSE 0 END), 0) * 100 "
                         +
                         "FROM AdvisoryDeliveryLog l WHERE l.createdAt >= :since")
-        Double getOpenRate(@Param("since") LocalDateTime since);
+        Double getOpenRate(@Param("since") java.util.Date since);
 
         /**
          * Get feedback rate (feedback/opened)
@@ -161,5 +161,5 @@ public interface AdvisoryDeliveryLogRepository extends JpaRepository<AdvisoryDel
                         "NULLIF(SUM(CASE WHEN l.deliveryStatus IN ('OPENED', 'FEEDBACK_RECEIVED') THEN 1 ELSE 0 END), 0) * 100 "
                         +
                         "FROM AdvisoryDeliveryLog l WHERE l.createdAt >= :since")
-        Double getFeedbackRate(@Param("since") LocalDateTime since);
+        Double getFeedbackRate(@Param("since") java.util.Date since);
 }

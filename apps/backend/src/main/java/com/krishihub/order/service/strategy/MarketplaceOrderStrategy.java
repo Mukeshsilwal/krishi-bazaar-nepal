@@ -4,8 +4,8 @@ import com.krishihub.auth.entity.User;
 import com.krishihub.marketplace.entity.CropListing;
 import com.krishihub.marketplace.repository.CropListingRepository;
 import com.krishihub.order.dto.CreateOrderRequest;
-import com.krishihub.order.dto.OrderSource;
-import com.krishihub.order.dto.OrderStatus;
+import com.krishihub.order.enums.OrderSource;
+import com.krishihub.order.enums.OrderStatus;
 import com.krishihub.order.entity.Order;
 import com.krishihub.order.repository.OrderRepository;
 import com.krishihub.shared.exception.BadRequestException;
@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+
 
 @Component
 @RequiredArgsConstructor
@@ -47,22 +47,39 @@ public class MarketplaceOrderStrategy implements OrderProcessingStrategy {
             throw new BadRequestException("Requested quantity exceeds available quantity");
         }
 
-        LocalDate pickupDate = request.getPickupDate() != null ? LocalDate.parse(request.getPickupDate())
-                : LocalDate.now();
+        java.util.Date pickupDate = request.getPickupDate() != null ? java.sql.Date.valueOf(request.getPickupDate())
+                : com.krishihub.common.util.DateTimeProvider.today();
         if (listing.getHarvestDate() != null) {
-            if (pickupDate.isBefore(listing.getHarvestDate())) {
+            if (pickupDate.before(listing.getHarvestDate())) {
                 throw new BadRequestException("Order date cannot be before harvest date: " + listing.getHarvestDate());
             }
             if (listing.getHarvestWindow() != null) {
-                LocalDate maxDate = listing.getHarvestDate().plusDays(listing.getHarvestWindow());
-                if (pickupDate.isAfter(maxDate)) {
+                java.util.Calendar cal = java.util.Calendar.getInstance();
+                cal.setTime(listing.getHarvestDate());
+                cal.add(java.util.Calendar.DAY_OF_MONTH, listing.getHarvestWindow());
+                java.util.Date maxDate = cal.getTime();
+                
+                if (pickupDate.after(maxDate)) {
                     throw new BadRequestException("Order date is outside harvest window. Available until: " + maxDate);
                 }
             }
         }
 
-        if (listing.getOrderCutoffTime() != null && pickupDate.equals(LocalDate.now())) {
-            if (java.time.LocalTime.now().isAfter(listing.getOrderCutoffTime())) {
+        boolean isToday = com.krishihub.common.util.DateTimeProvider.isToday(pickupDate);
+        if (listing.getOrderCutoffTime() != null && isToday) {
+            // Compare only time components
+            java.util.Calendar nowCal = java.util.Calendar.getInstance();
+            nowCal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+            
+            java.util.Calendar cutoffCal = java.util.Calendar.getInstance();
+            cutoffCal.setTime(listing.getOrderCutoffTime());
+            
+            // Normalize dates to same day for time comparison
+            cutoffCal.set(java.util.Calendar.YEAR, nowCal.get(java.util.Calendar.YEAR));
+            cutoffCal.set(java.util.Calendar.MONTH, nowCal.get(java.util.Calendar.MONTH));
+            cutoffCal.set(java.util.Calendar.DAY_OF_MONTH, nowCal.get(java.util.Calendar.DAY_OF_MONTH));
+            
+            if (nowCal.after(cutoffCal)) {
                 throw new BadRequestException(
                         "Orders for today are closed. Cutoff time was: " + listing.getOrderCutoffTime());
             }
@@ -100,7 +117,7 @@ public class MarketplaceOrderStrategy implements OrderProcessingStrategy {
                 .build();
 
         if (request.getPickupDate() != null) {
-            order.setPickupDate(LocalDate.parse(request.getPickupDate()));
+            order.setPickupDate(java.sql.Date.valueOf(request.getPickupDate()));
         }
         return order;
     }

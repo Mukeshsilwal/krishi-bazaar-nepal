@@ -8,6 +8,7 @@ const AgricultureCalendarPage: React.FC = () => {
     const {
         entries,
         loading,
+        error,
         selectedCrop,
         setSelectedCrop,
         selectedMonth,
@@ -36,6 +37,18 @@ const AgricultureCalendarPage: React.FC = () => {
             {loading ? (
                 <div className="flex justify-center items-center py-20">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+                </div>
+            ) : error ? (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
+                    <div className="text-red-500 text-4xl mb-4">⚠️</div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">लोड गर्न असफल</h3>
+                    <p className="text-gray-600 mb-6">{error}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-4 py-2 bg-white text-red-600 border border-red-200 rounded-lg hover:bg-red-50 font-medium"
+                    >
+                        पुन: प्रयास गर्नुहोस्
+                    </button>
                 </div>
             ) : entries.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

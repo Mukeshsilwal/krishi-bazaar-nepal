@@ -69,8 +69,20 @@ const PesticideCMSPage = () => {
 
   const loadData = async () => {
     try {
-      const data = await advisoryService.getAllPesticides();
-      setPesticides(data || []);
+      const response: any = await advisoryService.getAllPesticides();
+
+      let list = [];
+      if (Array.isArray(response)) {
+        list = response;
+      } else if (response.data && Array.isArray(response.data)) {
+        list = response.data;
+      } else if (response.data && response.data.content && Array.isArray(response.data.content)) {
+        list = response.data.content;
+      } else if (response.content && Array.isArray(response.content)) {
+        list = response.content;
+      }
+
+      setPesticides(list);
     } catch (error) {
       console.error("Failed to fetch pesticides", error);
       toast.error("Failed to load pesticides");

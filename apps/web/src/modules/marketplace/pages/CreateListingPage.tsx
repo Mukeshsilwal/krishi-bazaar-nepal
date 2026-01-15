@@ -20,6 +20,7 @@ export default function CreateListingPage() {
     const [error, setError] = useState('');
     const [formData, setFormData] = useState({
         cropName: '',
+        category: '',
         variety: '',
         quantity: '',
         unit: 'kg',
@@ -40,6 +41,7 @@ export default function CreateListingPage() {
                     const data = await getListingById(id);
                     setFormData({
                         cropName: data.cropName || '',
+                        category: data.category || '',
                         variety: data.variety || '',
                         quantity: data.quantity || '',
                         unit: data.unit || 'kg',
@@ -158,6 +160,28 @@ export default function CreateListingPage() {
                             </select>
                         )}
                         <p className="text-xs text-gray-500 mt-1">{t('listings.form.selectCrop')}</p>
+                    </div>
+
+                    {/* Category */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Category *
+                        </label>
+                        <select
+                            name="category"
+                            value={formData.category}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            required
+                        >
+                            <option value="">Select Category</option>
+                            <option value="VEGETABLES">Vegetables</option>
+                            <option value="FRUITS">Fruits</option>
+                            <option value="GRAINS">Grains</option>
+                            <option value="LIVESTOCK">Livestock</option>
+                            <option value="DAIRY">Dairy</option>
+                            <option value="OTHERS">Others</option>
+                        </select>
                     </div>
 
                     {/* Variety */}

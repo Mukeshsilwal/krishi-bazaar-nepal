@@ -3,7 +3,6 @@ package com.krishihub.marketprice.service;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,9 +14,6 @@ public class VegetableImageProvider {
 
     @PostConstruct
     public void init() {
-        // In a real scenario, this could load from a DB or external config
-        // Populating with the same Unsplash URLs used in the frontend
-        
         // Common Vegetables
         imageMap.put("tomato", "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=500&auto=format&fit=crop&q=60");
         imageMap.put("potato", "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=500&auto=format&fit=crop&q=60");
@@ -34,7 +30,7 @@ public class VegetableImageProvider {
         imageMap.put("banana", "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=500&auto=format&fit=crop&q=60");
         imageMap.put("orange", "https://images.unsplash.com/photo-1611080626919-7cf5a9dbab5b?w=500&auto=format&fit=crop&q=60");
 
-        // Nepali aliases (simple normalization map could be separate, but keys here work too if normalized)
+        // Nepali aliases
         imageMap.put("golbheda", imageMap.get("tomato"));
         imageMap.put("alu", imageMap.get("potato"));
         imageMap.put("pyaj", imageMap.get("onion"));
@@ -51,17 +47,10 @@ public class VegetableImageProvider {
 
     public String getImageUrl(String cropName) {
         if (cropName == null) return FALLBACK_IMAGE;
-        
-        // Normalize: lowercase, trim, replace spaces with underscores, handled simply here
         String normalized = cropName.trim().toLowerCase().replaceAll("\\s+", "_");
-        
-        // Check exact match
         if (imageMap.containsKey(normalized)) {
             return imageMap.get(normalized);
         }
-
-        // Try to match partial keys if needed, or just standard fallback
-        // For now, simple direct lookup
         return imageMap.getOrDefault(normalized, FALLBACK_IMAGE);
     }
 }

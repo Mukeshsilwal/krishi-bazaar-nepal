@@ -9,7 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+
 import java.util.UUID;
 
 /**
@@ -31,8 +31,8 @@ public class AdvisoryLogResponseDTO {
     private String cropType;
     private DeliveryStatus deliveryStatus;
     private DeliveryChannel channel;
-    private LocalDateTime createdAt;
-    private LocalDateTime deliveredAt;
-    private LocalDateTime openedAt;
+    private java.util.Date createdAt;
+    private java.util.Date deliveredAt;
+    private java.util.Date openedAt;
     private String feedback;
 }

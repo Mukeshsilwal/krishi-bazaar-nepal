@@ -21,7 +21,7 @@ export default function ListingDetailPage() {
     const fetchListing = async () => {
         try {
             const response = await listingService.getListing(id!);
-            if (response.success) {
+            if (response.code === 0) {
                 setListing(response.data);
             }
         } catch (error) {
@@ -46,7 +46,7 @@ export default function ListingDetailPage() {
                 pickupLocation: listing.location,
             });
 
-            if (response.success) {
+            if (response.code === 0) {
                 alert('Order placed successfully!');
                 navigate(`/orders/${response.data.id}`);
             } else {

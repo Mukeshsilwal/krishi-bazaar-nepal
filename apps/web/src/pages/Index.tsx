@@ -64,20 +64,46 @@ const Index = () => {
   return (
     <div className="space-y-8">
       {/* Header Greeting */}
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
-          {getGreeting()}, <span className="text-green-700">{user?.name || (language === 'ne' ? 'किसान मित्र' : 'Farmer Friend')}!</span>
-        </h1>
-        <div className="flex items-center gap-1.5 text-gray-500 mt-2">
-          <MapPin size={16} className="text-green-600" />
-          <span>{user?.district || (language === 'ne' ? 'नेपाल' : 'Nepal')}</span>
+      {/* Hero Greeting Card */}
+      <div className="relative bg-gradient-to-br from-emerald-600 via-emerald-700 to-green-900 rounded-[2rem] p-6 md:p-10 text-white shadow-xl overflow-hidden mb-8 isolate">
+        {/* Background Decorative Blobs */}
+        <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-green-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-60 h-60 bg-emerald-400 rounded-full blur-3xl opacity-20"></div>
+
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+          <div className="space-y-4">
+            {/* Location Badge */}
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full text-emerald-50 text-sm font-medium border border-white/10">
+              <MapPin size={14} className="text-emerald-300" />
+              <span>{user?.district || (language === 'ne' ? 'नेपाल' : 'Nepal')}</span>
+            </div>
+
+            {/* Main Greeting */}
+            <div>
+              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight">
+                {getGreeting()}, <br className="hidden md:block" />
+                <span className="text-emerald-200 bg-gradient-to-r from-emerald-200 to-green-100 bg-clip-text text-transparent">
+                  {user?.name || (language === 'ne' ? 'किसान मित्र' : 'Farmer Friend')}!
+                </span>
+              </h1>
+            </div>
+
+            {/* Subtitle */}
+            <p className="text-lg md:text-xl text-emerald-100/90 font-medium max-w-xl leading-relaxed">
+              {language === 'ne'
+                ? 'आजको बजार मूल्य र कृषि जानकारी यहाँ पाउनुहोस्'
+                : 'Find today\'s market prices and agri-updates here.'}
+            </p>
+          </div>
+
+          {/* Decorative Icon for visuals */}
+          <div className="hidden md:block opacity-90 transition-transform hover:scale-105 duration-500">
+            <div className="w-24 h-24 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20 shadow-inner">
+              <Sprout size={48} className="text-emerald-100" />
+            </div>
+          </div>
         </div>
-        <p className="text-gray-500 mt-1">
-          {language === 'ne'
-            ? 'आजको बजार मूल्य र कृषि जानकारी यहाँ पाउनुहोस्'
-            : 'Find today\'s market prices and agri-updates here.'}
-        </p>
-      </header>
+      </div>
 
       {/* Top Row: Weather + Stats */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">

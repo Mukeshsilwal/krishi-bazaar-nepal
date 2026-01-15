@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2, Plus, Shield, Check } from "lucide-react";
 import { toast } from 'sonner';
+import { resolveUserMessage } from '@/utils/errorUtils';
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -103,7 +104,7 @@ const RoleManagement = () => {
             toast.success("Role created successfully");
         } catch (error: any) {
             console.error('Failed to create role', error);
-            toast.error(error.response?.data?.message || "Failed to create role");
+            toast.error(resolveUserMessage(error));
         }
     };
 

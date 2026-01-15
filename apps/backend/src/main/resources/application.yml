@@ -7,3 +7,8 @@ spring:
     redis:
       timeout: 2000
       connect-timeout: 2000
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    date-format: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+    time-zone: UTC

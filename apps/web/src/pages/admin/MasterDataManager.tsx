@@ -23,6 +23,7 @@ import { Plus, Edit, Database, List } from 'lucide-react';
 import api from '@/services/api';
 import { ADMIN_MASTER_DATA_ENDPOINTS } from '@/config/endpoints';
 import { toast } from 'sonner';
+import { resolveUserMessage } from '@/utils/errorUtils';
 
 interface MasterCategory {
     id: string;
@@ -69,7 +70,7 @@ const MasterDataManager = () => {
     const fetchCategories = async () => {
         try {
             const res = await api.get(ADMIN_MASTER_DATA_ENDPOINTS.CATEGORIES);
-            if (res.data.success) {
+            if (res.data.code === 0) {
                 setCategories(res.data.data);
                 if (res.data.data.length > 0 && !selectedCategory) {
                     setSelectedCategory(res.data.data[0]);
@@ -84,7 +85,7 @@ const MasterDataManager = () => {
     const fetchItems = async (categoryId: string) => {
         try {
             const res = await api.get(ADMIN_MASTER_DATA_ENDPOINTS.ITEMS_BY_CATEGORY(categoryId));
-            if (res.data.success) {
+            if (res.data.code === 0) {
                 setItems(res.data.data);
             }
         } catch (err) {
@@ -106,7 +107,7 @@ const MasterDataManager = () => {
             fetchCategories();
         } catch (err: any) {
             console.error(err);
-            toast.error(err.response?.data?.message || "Failed to create category");
+            toast.error(resolveUserMessage(err));
         }
     };
 
@@ -128,7 +129,7 @@ const MasterDataManager = () => {
             fetchItems(selectedCategory.id);
         } catch (err: any) {
             console.error(err);
-            toast.error(err.response?.data?.message || "Failed to save item");
+            toast.error(resolveUserMessage(err));
         }
     };
 

@@ -14,9 +14,10 @@ const logisticsService = {
         return response.data.data;
     },
 
-    getAllBookings: async () => {
-        const response = await api.get(`${COLD_STORAGE_ENDPOINTS.BASE}/bookings`);
-        return response.data.data;
+    getAllBookings: async (params) => {
+        const response = await api.get(`${COLD_STORAGE_ENDPOINTS.BASE}/bookings`, { params });
+        // Return content from PaginatedResponse
+        return response.data.data.content;
     },
 
     bookStorage: async (coldStorageId, bookingData) => {

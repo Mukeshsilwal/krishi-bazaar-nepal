@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -47,10 +46,10 @@ public class ShipmentService {
                 .orElseThrow(() -> new RuntimeException("Shipment not found"));
         
         shipment.setStatus(status);
-        shipment.setLastUpdated(LocalDateTime.now());
+        shipment.setLastUpdated(com.krishihub.common.util.DateTimeProvider.now());
 
         if (status == Shipment.ShipmentStatus.DELIVERED) {
-            shipment.setDeliveryTime(LocalDateTime.now());
+            shipment.setDeliveryTime(com.krishihub.common.util.DateTimeProvider.now());
         }
         
         shipmentRepository.save(shipment);

@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -60,8 +59,13 @@ public class MarketplaceService {
                 .status(CropListing.ListingStatus.ACTIVE)
                 .build();
 
-        if (request.getHarvestDate() != null) {
-            listing.setHarvestDate(LocalDate.parse(request.getHarvestDate()));
+        if (request.getCategory() != null) {
+            try {
+                listing.setCategory(CropListing.CropCategory.valueOf(request.getCategory().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // log error or set default
+                 listing.setCategory(CropListing.CropCategory.OTHERS);
+            }
         }
 
         CropListing savedListing = listingRepository.save(listing);
@@ -102,7 +106,7 @@ public class MarketplaceService {
         return imageUrl;
     }
 
-    public Page<ListingDto> getAllListings(int page, int size, String cropName, String district,
+    public Page<ListingDto> getAllListings(int page, int size, String cropName, String category, String district,
             BigDecimal minPrice, BigDecimal maxPrice, String sortBy) {
         Pageable pageable = createPageable(page, size, sortBy);
 
@@ -115,6 +119,16 @@ public class MarketplaceService {
         if (cropName != null && !cropName.isEmpty()) {
             spec = spec.and(
                     (root, query, cb) -> cb.like(cb.lower(root.get("cropName")), "%" + cropName.toLowerCase() + "%"));
+        }
+
+        // Filter by category
+        if (category != null && !category.isEmpty()) {
+             try {
+                CropListing.CropCategory catEnum = CropListing.CropCategory.valueOf(category.toUpperCase());
+                spec = spec.and((root, query, cb) -> cb.equal(root.get("category"), catEnum));
+             } catch (IllegalArgumentException e) {
+                 // ignore invalid category filter
+             }
         }
 
         // Filter by district
@@ -164,6 +178,13 @@ public class MarketplaceService {
         if (request.getCropName() != null) {
             listing.setCropName(request.getCropName());
         }
+        if (request.getCategory() != null) {
+            try {
+                listing.setCategory(CropListing.CropCategory.valueOf(request.getCategory().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                 // ignore or error
+            }
+        }
         if (request.getQuantity() != null) {
             listing.setQuantity(request.getQuantity());
         }
@@ -174,7 +195,7 @@ public class MarketplaceService {
             listing.setPricePerUnit(request.getPricePerUnit());
         }
         if (request.getHarvestDate() != null) {
-            listing.setHarvestDate(LocalDate.parse(request.getHarvestDate()));
+            listing.setHarvestDate(java.sql.Date.valueOf(request.getHarvestDate()));
         }
         if (request.getDescription() != null) {
             listing.setDescription(request.getDescription());

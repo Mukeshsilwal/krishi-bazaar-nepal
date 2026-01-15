@@ -1,4 +1,4 @@
-package com.krishihub.disease.entity;
+package com.krishihub.disease.enums;
 
 public enum TreatmentType {
     CHEMICAL,

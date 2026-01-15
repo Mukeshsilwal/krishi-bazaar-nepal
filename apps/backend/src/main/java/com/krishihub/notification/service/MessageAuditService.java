@@ -5,7 +5,7 @@ import com.krishihub.notification.enums.MessageType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+
 
 @Service
 @Slf4j
@@ -18,7 +18,7 @@ public class MessageAuditService {
 
     public void logSuccess(MessageRequest request) {
         log.info("AUDIT: SUCCESS - Sent {} to {} at {}",
-                request.getType(), request.getRecipient(), LocalDateTime.now());
+                request.getType(), request.getRecipient(), com.krishihub.common.util.DateTimeProvider.now());
     }
 
     public void logFailure(MessageRequest request, Throwable error) {

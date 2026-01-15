@@ -46,7 +46,7 @@ const RulePlayground = () => {
 
             const res = await api.post(RULE_ENDPOINTS.SIMULATE, payload);
 
-            if (res.data.success) {
+            if (res.data.code === 0) {
                 setResult(res.data.data);
             }
         } catch (err) {

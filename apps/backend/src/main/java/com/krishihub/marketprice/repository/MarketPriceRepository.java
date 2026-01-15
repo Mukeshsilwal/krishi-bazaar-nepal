@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,14 +24,14 @@ public interface MarketPriceRepository extends JpaRepository<MarketPrice, UUID> 
         @Query("SELECT mp FROM MarketPrice mp WHERE mp.district = :district AND mp.priceDate = :date ORDER BY mp.cropName")
         org.springframework.data.domain.Page<MarketPrice> findByDistrictAndPriceDate(
                         @Param("district") String district,
-                        @Param("date") LocalDate date,
+                        @Param("date") Date date,
                         org.springframework.data.domain.Pageable pageable);
 
         @Query("SELECT mp FROM MarketPrice mp WHERE mp.district = :district AND LOWER(mp.cropName) LIKE LOWER(CONCAT('%', :cropName, '%')) AND mp.priceDate = :date ORDER BY mp.cropName")
         org.springframework.data.domain.Page<MarketPrice> findByDistrictAndCropNameContainingIgnoreCaseAndPriceDate(
                         @Param("district") String district,
                         @Param("cropName") String cropName,
-                        @Param("date") LocalDate date,
+                        @Param("date") Date date,
                         org.springframework.data.domain.Pageable pageable);
 
         @Query("SELECT mp FROM MarketPrice mp WHERE " +
@@ -39,10 +39,10 @@ public interface MarketPriceRepository extends JpaRepository<MarketPrice, UUID> 
         List<MarketPrice> findByCropDistrictAndDate(
                         @Param("cropName") String cropName,
                         @Param("district") String district,
-                        @Param("date") LocalDate date);
+                        @Param("date") Date date);
 
         @Query("SELECT mp FROM MarketPrice mp WHERE mp.priceDate = :date ORDER BY mp.cropName")
-        org.springframework.data.domain.Page<MarketPrice> findByDate(@Param("date") LocalDate date,
+        org.springframework.data.domain.Page<MarketPrice> findByDate(@Param("date") Date date,
                         org.springframework.data.domain.Pageable pageable);
 
         @Query("SELECT DISTINCT mp.cropName FROM MarketPrice mp ORDER BY mp.cropName")
@@ -52,10 +52,10 @@ public interface MarketPriceRepository extends JpaRepository<MarketPrice, UUID> 
         List<String> findDistinctDistricts();
 
         @Query("SELECT MAX(mp.priceDate) FROM MarketPrice mp WHERE mp.district = :district")
-        LocalDate findMaxDateByDistrict(@Param("district") String district);
+        Date findMaxDateByDistrict(@Param("district") String district);
 
         MarketPrice findFirstByCropNameAndDistrictAndPriceDateBeforeOrderByPriceDateDesc(
-                        String cropName, String district, LocalDate date);
+                        String cropName, String district, Date date);
 
     @org.springframework.transaction.annotation.Transactional
     long deleteBySource(String source);
@@ -67,6 +67,6 @@ public interface MarketPriceRepository extends JpaRepository<MarketPrice, UUID> 
     List<com.krishihub.marketprice.dto.PriceStats> findPriceHistory(
             @Param("cropName") String cropName,
             @Param("district") String district,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate);
+            @Param("startDate") Date startDate,
+            @Param("endDate") Date endDate);
 }

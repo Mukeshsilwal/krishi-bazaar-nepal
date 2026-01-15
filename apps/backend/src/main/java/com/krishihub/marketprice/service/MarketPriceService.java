@@ -1,23 +1,21 @@
 package com.krishihub.marketprice.service;
 
 import com.krishihub.marketprice.dto.MarketPriceDto;
+import com.krishihub.marketprice.dto.PriceStats;
 import com.krishihub.marketprice.entity.MarketPrice;
 import com.krishihub.marketprice.entity.MarketPriceAudit;
-import com.krishihub.marketprice.repository.MarketPriceAuditRepository;
 import com.krishihub.marketprice.repository.MarketPriceRepository;
 import com.krishihub.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import com.krishihub.marketprice.dto.PriceStats;
 
 
 @Service
@@ -26,7 +24,7 @@ import com.krishihub.marketprice.dto.PriceStats;
 public class MarketPriceService {
 
     private final MarketPriceRepository priceRepository;
-    private final MarketPriceAuditRepository auditRepository;
+    private final com.krishihub.marketprice.repository.MarketPriceAuditRepository auditRepository;
     private final VegetableImageProvider imageProvider;
 
     private MarketPriceDto mapToDto(MarketPrice price) {
@@ -53,19 +51,14 @@ public class MarketPriceService {
         return mapToDto(prices.get(0)); // Already sorted by date DESC
     }
 
-    public org.springframework.data.domain.Page<MarketPriceDto> getPricesByDate(LocalDate date,
+    public org.springframework.data.domain.Page<MarketPriceDto> getPricesByDate(java.util.Date date,
             org.springframework.data.domain.Pageable pageable) {
         org.springframework.data.domain.Page<MarketPrice> pricesPage = priceRepository.findByDate(date, pageable);
         return pricesPage.map(this::mapToDto);
     }
 
-    public List<MarketPriceDto> getPricesByDate(LocalDate date) {
-        // Fallback for non-paginated legacy calls - get all (using unpaged if necessary
-        // or large default)
-        // For backwards compatibility, we might just call the repository with unpaged
-        // However, the repository signature changed. We need to overloading in
-        // repository or adapt here.
-        // Easiest is to call repo with Pageable.unpaged()
+    public List<MarketPriceDto> getPricesByDate(java.util.Date date) {
+        // Fallback for non-paginated legacy calls
         return priceRepository.findByDate(date, org.springframework.data.domain.Pageable.unpaged())
                 .stream()
                 .map(this::mapToDto)
@@ -75,6 +68,7 @@ public class MarketPriceService {
     @Cacheable(value = "todaysPrices", key = "{#district, #cropName, #page, #size}")
     public org.springframework.data.domain.Page<MarketPriceDto> getTodaysPrices(String district, String cropName, int page, int size) {
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        java.util.Date today = com.krishihub.common.util.DateTimeProvider.today();
 
         // 1. Try to get today's prices
         if (district != null && !district.isEmpty()) {
@@ -82,9 +76,9 @@ public class MarketPriceService {
             
             if (cropName != null && !cropName.trim().isEmpty()) {
                  todaysPrices = priceRepository.findByDistrictAndCropNameContainingIgnoreCaseAndPriceDate(
-                        district, cropName.trim(), LocalDate.now(), pageable);
+                        district, cropName.trim(), today, pageable);
             } else {
-                 todaysPrices = priceRepository.findByDistrictAndPriceDate(district, LocalDate.now(), pageable);
+                 todaysPrices = priceRepository.findByDistrictAndPriceDate(district, today, pageable);
             }
 
             if (todaysPrices.hasContent()) {
@@ -92,10 +86,8 @@ public class MarketPriceService {
             }
 
             // 2. If no prices for today, try fallback to latest available date
-            // (Only do this complex fallback if NOT searching, or keep it simple? 
-            // User said "don't overcomplicate". Let's skip complex fallback for search for now unless critical.)
             if (page == 0 && (cropName == null || cropName.trim().isEmpty())) {
-                LocalDate latestDate = priceRepository.findMaxDateByDistrict(district);
+                java.util.Date latestDate = priceRepository.findMaxDateByDistrict(district);
                 if (latestDate != null) {
                     log.info("No prices found for today in {}. Falling back to latest date: {}", district, latestDate);
                     return priceRepository.findByDistrictAndPriceDate(district, latestDate, pageable)
@@ -107,7 +99,7 @@ public class MarketPriceService {
         }
 
         // Fallback for all districts
-        return getPricesByDate(LocalDate.now(), pageable);
+        return getPricesByDate(today, pageable);
     }
 
     public org.springframework.data.domain.Page<MarketPriceDto> getTodaysPrices(String district, int page, int size) {
@@ -119,15 +111,14 @@ public class MarketPriceService {
     }
 
     public List<MarketPriceDto> getTodaysPrices() {
-        return getPricesByDate(LocalDate.now());
+        return getPricesByDate(com.krishihub.common.util.DateTimeProvider.today());
     }
 
     public List<MarketPriceDto> getTodaysPricesList(String district) {
         if (district == null || district.isEmpty()) {
-            return getTodaysPrices();
+             return getTodaysPrices();
         }
-        // Use unpaged pageable to get list behavior from the Page-returning repository method
-        return priceRepository.findByDistrictAndPriceDate(district, LocalDate.now(), org.springframework.data.domain.Pageable.unpaged())
+        return priceRepository.findByDistrictAndPriceDate(district, com.krishihub.common.util.DateTimeProvider.today(), org.springframework.data.domain.Pageable.unpaged())
                 .stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
@@ -184,7 +175,7 @@ public class MarketPriceService {
                 .maxPrice(priceDto.getMaxPrice())
                 .avgPrice(priceDto.getAvgPrice())
                 .unit(priceDto.getUnit())
-                .priceDate(priceDto.getPriceDate() != null ? priceDto.getPriceDate() : LocalDate.now())
+                .priceDate(priceDto.getPriceDate() != null ? priceDto.getPriceDate() : com.krishihub.common.util.DateTimeProvider.today())
                 .source(priceDto.getSource())
                 .build();
 
@@ -205,7 +196,7 @@ public class MarketPriceService {
                 .action("OVERRIDE")
                 .newValue(saved.getAvgPrice())
                 .userId(executedBy)
-                .createdAt(java.time.LocalDateTime.now())
+                .createdAt(com.krishihub.common.util.DateTimeProvider.now())
                 .build();
 
         auditRepository.save(audit);
@@ -214,27 +205,25 @@ public class MarketPriceService {
         return saved;
     }
 
-    public MarketPriceDto getPreviousPrice(String cropName, String district, LocalDate date) {
+    public MarketPriceDto getPreviousPrice(String cropName, String district, java.util.Date date) {
         MarketPrice previous = priceRepository.findFirstByCropNameAndDistrictAndPriceDateBeforeOrderByPriceDateDesc(
                 cropName, district, date);
         return previous != null ? mapToDto(previous) : null;
     }
 
-    public List<PriceStats> getPriceHistory(String cropName, String district, LocalDate startDate, LocalDate endDate) {
+    public List<PriceStats> getPriceHistory(String cropName, String district, java.util.Date startDate, java.util.Date endDate) {
         return priceRepository.findPriceHistory(cropName, district, startDate, endDate);
     }
 
     @Cacheable(value = "marketPriceAnalytics")
     public List<com.krishihub.marketprice.dto.MarketPriceAnalyticsDto> getAnalytics() {
         List<String> crops = priceRepository.findDistinctCropNames();
-        List<String> districts = priceRepository.findDistinctDistricts(); // Ideally we might aggregate per district or global. Let's do Global Crop Average for now.
+        List<String> districts = priceRepository.findDistinctDistricts(); 
         
-        // Use a "National" or most common district? Or just average across the main district "Kathmandu" for better consistency if multi-district is complex.
-        // For simplicity and user value, let's pick "Kathmandu" as the benchmark if it exists, otherwise the first available.
         String benchmarkDistrict = districts.contains("Kathmandu") ? "Kathmandu" : (districts.isEmpty() ? "Unknown" : districts.get(0));
 
-        LocalDate endDate = LocalDate.now();
-        LocalDate startDate = endDate.minusDays(30);
+        java.util.Date endDate = com.krishihub.common.util.DateTimeProvider.today();
+        java.util.Date startDate = com.krishihub.common.util.DateTimeProvider.addDays(endDate, -30);
 
         return crops.stream().map(crop -> {
             List<PriceStats> history = priceRepository.findPriceHistory(crop, benchmarkDistrict, startDate, endDate);
@@ -248,12 +237,14 @@ public class MarketPriceService {
             // Trend Calculation (Last 7 days vs Previous 7 days)
             String trend = "STABLE";
             if (history.size() >= 2) {
+                java.util.Date sevenDaysAgo = com.krishihub.common.util.DateTimeProvider.addDays(endDate, -7);
+                
                 double recentAvg = history.stream()
-                        .filter(s -> s.getDate().isAfter(endDate.minusDays(7)))
+                        .filter(s -> s.getDate().after(sevenDaysAgo))
                         .mapToDouble(PriceStats::getAvg).average().orElse(0.0);
                 
                 double oldAvg = history.stream()
-                        .filter(s -> s.getDate().isBefore(endDate.minusDays(7)))
+                        .filter(s -> s.getDate().before(sevenDaysAgo))
                         .mapToDouble(PriceStats::getAvg).average().orElse(0.0);
 
                 if (oldAvg > 0) {

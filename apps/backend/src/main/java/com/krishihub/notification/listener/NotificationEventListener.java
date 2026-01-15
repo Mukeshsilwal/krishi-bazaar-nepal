@@ -3,7 +3,7 @@ package com.krishihub.notification.listener;
 import com.krishihub.notification.dto.MessageRequest;
 import com.krishihub.notification.enums.MessageType;
 import com.krishihub.notification.service.NotificationOrchestrator;
-import com.krishihub.order.dto.OrderStatus;
+import com.krishihub.order.enums.OrderStatus;
 import com.krishihub.order.event.OrderCancelledEvent;
 import com.krishihub.order.event.OrderPlacedEvent;
 import com.krishihub.order.event.OrderStatusChangedEvent;
@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -26,15 +27,18 @@ public class NotificationEventListener {
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public void handleOrderPlaced(OrderPlacedEvent event) {
         orderRepository.findById(event.getOrder().getId()).ifPresent(order -> {
-            String farmerMobile = order.getFarmer().getMobileNumber();
-            String message = String.format(
-                    "New order received for %s (%.2f %s). Order ID: %s. Login to confirm.",
-                    order.getListing().getCropName(),
-                    order.getQuantity(),
-                    order.getListing().getUnit(),
-                    order.getId());
-            
-            sendSms(farmerMobile, message);
+            // Only send SMS to farmer if farmer exists (Marketplace order)
+            if (order.getFarmer() != null && order.getListing() != null) {
+                String farmerMobile = order.getFarmer().getMobileNumber();
+                String message = String.format(
+                        "New order received for %s (%.2f %s). Order ID: %s. Login to confirm.",
+                        order.getListing().getCropName(),
+                        order.getQuantity(),
+                        order.getListing().getUnit(),
+                        order.getId());
+                
+                sendSms(farmerMobile, message);
+            }
         });
     }
 
@@ -50,7 +54,7 @@ public class NotificationEventListener {
             switch (newStatus) {
                 case CONFIRMED:
                     recipient = order.getBuyer().getMobileNumber();
-                    message = String.format("Your order %s has been confirmed by the farmer.", order.getId());
+                    message = String.format("Your order %s has been confirmed.", order.getId());
                     break;
                 case READY_FOR_HARVEST:
                     recipient = order.getBuyer().getMobileNumber();
@@ -65,8 +69,10 @@ public class NotificationEventListener {
                     message = String.format("Your order %s is ready for pickup.", order.getId());
                     break;
                 case COMPLETED:
-                    recipient = order.getFarmer().getMobileNumber();
-                    message = String.format("Order %s has been completed.", order.getId());
+                    if (order.getFarmer() != null) {
+                        recipient = order.getFarmer().getMobileNumber();
+                        message = String.format("Order %s has been completed.", order.getId());
+                    }
                     break;
                 case CANCELLED:
                     break;
@@ -82,11 +88,13 @@ public class NotificationEventListener {
 
     @Async
     @EventListener
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public void handleOrderCancelled(OrderCancelledEvent event) {
         orderRepository.findById(event.getOrder().getId()).ifPresent(order -> {
             String message = String.format("Order %s has been cancelled. Reason: %s", order.getId(), event.getReason());
-            sendSms(order.getFarmer().getMobileNumber(), message);
+            if (order.getFarmer() != null) {
+                sendSms(order.getFarmer().getMobileNumber(), message);
+            }
             sendSms(order.getBuyer().getMobileNumber(), message);
         });
     }
@@ -99,8 +107,10 @@ public class NotificationEventListener {
             String buyerMsg = "Payment successful for order " + order.getId();
             sendSms(order.getBuyer().getMobileNumber(), buyerMsg);
 
-            String farmerMsg = "Payment received for order " + order.getId() + ". Please prepare the order.";
-            sendSms(order.getFarmer().getMobileNumber(), farmerMsg);
+            if (order.getFarmer() != null) {
+                String farmerMsg = "Payment received for order " + order.getId() + ". Please prepare the order.";
+                sendSms(order.getFarmer().getMobileNumber(), farmerMsg);
+            }
         });
     }
 

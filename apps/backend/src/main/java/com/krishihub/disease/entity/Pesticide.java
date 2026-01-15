@@ -1,8 +1,8 @@
 package com.krishihub.disease.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import java.util.UUID;
+import com.krishihub.disease.enums.PesticideType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -41,5 +41,6 @@ public class Pesticide {
     private String govtApprovalLicense;
 
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date createdAt;
 }

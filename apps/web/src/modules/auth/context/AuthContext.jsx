@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
             // Refresh user data from server to get latest fields (like createdAt)
             authService.getCurrentUser()
                 .then(response => {
-                    if (response.success && response.data) {
+                    if (response.code === 0 && response.data) {
                         setUser(response.data);
                         localStorage.setItem('user', JSON.stringify(response.data));
                     }
@@ -31,31 +31,37 @@ export const AuthProvider = ({ children }) => {
     const login = async (mobileNumber, otp) => {
         try {
             const response = await authService.verifyOtp(mobileNumber, otp);
-            if (response.success && response.data) {
+            if (response.code === 0 && response.data) {
                 setUser(response.data.user);
-                return { success: true, data: response.data };
+                return { code: 0, data: response.data };
             }
-            return { success: false, message: response.message };
+            return { code: 'ERROR', message: response.message };
         } catch (error) {
+            const { resolveUserMessage } = await import('@/utils/errorUtils');
             return {
-                success: false,
-                message: error.response?.data?.message || 'Login failed'
+                code: 'ERROR',
+                message: resolveUserMessage(error)
             };
         }
     };
 
     const adminLogin = async (identifier, password) => {
         try {
+            console.log('Attempting admin login for:', identifier);
             const response = await authService.adminLogin(identifier, password);
-            if (response.success && response.data) {
+            console.log('Admin login response:', response);
+
+            if (response.code === 0 && response.data) {
+                console.log('Setting user state:', response.data.user);
                 setUser(response.data.user);
-                return { success: true, data: response.data };
+                return { code: 0, data: response.data };
             }
-            return { success: false, message: response.message };
+            return { code: 'ERROR', message: response.message };
         } catch (error) {
+            const { resolveUserMessage } = await import('@/utils/errorUtils');
             return {
-                success: false,
-                message: error.response?.data?.message || 'Login failed'
+                code: 'ERROR',
+                message: resolveUserMessage(error)
             };
         }
     };

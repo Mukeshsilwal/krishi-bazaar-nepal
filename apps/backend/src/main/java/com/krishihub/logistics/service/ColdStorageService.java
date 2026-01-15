@@ -1,8 +1,12 @@
 package com.krishihub.logistics.service;
 
+import com.krishihub.common.context.UserContextHolder;
 import com.krishihub.logistics.entity.ColdStorage;
+import com.krishihub.logistics.entity.StorageBooking;
 import com.krishihub.logistics.repository.ColdStorageRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,11 +31,11 @@ public class ColdStorageService {
         return coldStorageRepository.save(coldStorage);
     }
 
-    public java.util.List<com.krishihub.logistics.entity.StorageBooking> getAllBookings() {
-        return storageBookingRepository.findAll();
+    public Page<com.krishihub.logistics.entity.StorageBooking> getAllBookings(Pageable pageable) {
+        return storageBookingRepository.findAll(pageable);
     }
 
-    public com.krishihub.logistics.entity.StorageBooking bookStorage(com.krishihub.logistics.entity.StorageBooking booking) {
+    public StorageBooking bookStorage(StorageBooking booking) {
         // Basic validation
         ColdStorage storage = coldStorageRepository.findById(booking.getColdStorageId())
                 .orElseThrow(() -> new RuntimeException("Cold Storage not found"));
@@ -41,7 +45,7 @@ public class ColdStorageService {
         }
         
         // Retrieve current user as farmer if not set (or validate)
-        UUID currentUserId = com.krishihub.common.context.UserContextHolder.getUserId();
+        UUID currentUserId = UserContextHolder.getUserId();
         if (booking.getFarmerId() == null && currentUserId != null) {
             booking.setFarmerId(currentUserId);
         } else if (booking.getFarmerId() == null) {
@@ -52,7 +56,8 @@ public class ColdStorageService {
         
         // Calculate price if not set (simple logic)
         if (booking.getTotalPrice() == null && storage.getPricePerKgPerDay() != null) {
-            long days = java.time.temporal.ChronoUnit.DAYS.between(booking.getStartDate(), booking.getEndDate());
+            long diffInMillies = Math.abs(booking.getEndDate().getTime() - booking.getStartDate().getTime());
+            long days = java.util.concurrent.TimeUnit.DAYS.convert(diffInMillies, java.util.concurrent.TimeUnit.MILLISECONDS);
             if (days < 1) days = 1;
             
             java.math.BigDecimal quantity = java.math.BigDecimal.valueOf(booking.getQuantity());

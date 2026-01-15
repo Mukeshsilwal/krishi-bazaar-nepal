@@ -20,13 +20,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -41,8 +36,12 @@ public class AdminService {
     private final UserActivityService userActivityService;
 
     public AdminDashboardStats getDashboardStats() {
-        LocalDateTime todayStart = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
-        LocalDateTime todayEnd = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
+        Date todayStart = com.krishihub.common.util.DateTimeProvider.startOfDay();
+        Date todayEnd = com.krishihub.common.util.DateTimeProvider.endOfDay();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(todayStart);
+        cal.add(Calendar.DAY_OF_YEAR, -7);
+        Date sevenDaysAgo = cal.getTime();
 
         // Recent Activity
         List<UserActivity> activities = userActivityService.getAllActivities(
@@ -83,7 +82,7 @@ public class AdminService {
                 .pendingReviews(articleRepository.countByStatus(ArticleStatus.PENDING))
 
                 // Advisory Metrics
-                .activeAdvisories(advisoryLogRepository.countSince(todayStart.minusDays(7)))
+                .activeAdvisories(advisoryLogRepository.countSince(sevenDaysAgo))
                 .highRiskAlerts(advisoryLogRepository.countHighRiskSince(todayStart))
                 .advisoriesDeliveredToday(advisoryLogRepository.countSince(todayStart))
 
@@ -101,8 +100,8 @@ public class AdminService {
         return userActivityService.getAllActivities(pageable);
     }
 
-    public List<User> getPendingVendors() {
-        return userRepository.findByVerifiedFalseAndRoleIn(List.of(User.UserRole.VENDOR, User.UserRole.EXPERT));
+    public Page<User> getPendingVendors(Pageable pageable) {
+        return userRepository.findByVerifiedFalseAndRoleIn(List.of(User.UserRole.VENDOR, User.UserRole.EXPERT), pageable);
     }
 
     private final AuditService auditService;

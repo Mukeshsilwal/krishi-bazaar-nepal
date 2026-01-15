@@ -9,8 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -48,15 +47,18 @@ public class InsurancePolicy {
     @Enumerated(EnumType.STRING)
     private PolicyStatus status;
 
+    @Temporal(TemporalType.DATE)
     @Column(name = "start_date")
-    private LocalDate startDate;
+    private Date startDate;
 
+    @Temporal(TemporalType.DATE)
     @Column(name = "end_date")
-    private LocalDate endDate;
+    private Date endDate;
 
     @CreatedDate
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Date createdAt;
 
     public enum PolicyStatus {
         ACTIVE, EXPIRED, CLAIMED, PENDING

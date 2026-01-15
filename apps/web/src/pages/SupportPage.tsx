@@ -30,7 +30,7 @@ const SupportPage = () => {
     const onSubmit = async (data: any) => {
         try {
             const res = await api.post(FEEDBACK_ENDPOINTS.BASE, data);
-            if (res.data.success) {
+            if (res.data.code === 0) {
                 toast.success("Feedback submitted successfully!");
                 reset();
             }

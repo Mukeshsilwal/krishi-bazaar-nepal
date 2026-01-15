@@ -12,11 +12,12 @@ import com.krishihub.notification.repository.NotificationTemplateRepository;
 import com.krishihub.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -32,8 +33,8 @@ public class AdminNotificationService {
 
     private final UserRepository userRepository;
 
-    public List<NotificationTemplate> getAllTemplates() {
-        return templateRepository.findAll();
+    public Page<NotificationTemplate> getTemplates(Pageable pageable) {
+        return templateRepository.findAll(pageable);
     }
 
     public Map<String, Object> getDashboardStats() {
@@ -55,43 +56,59 @@ public class AdminNotificationService {
         stats.put("deliveryRate", Math.round(deliveryRate * 10.0) / 10.0);
         stats.put("activeUsers", notificationRepository.countDistinctUsers());
         stats.put("totalTargetableUsers", userRepository.count());
-        stats.put("scheduled", notificationRepository.countByScheduledAtGreaterThan(LocalDateTime.now()));
+        stats.put("scheduled", notificationRepository.countByScheduledAtGreaterThan(com.krishihub.common.util.DateTimeProvider.now()));
 
         return stats;
     }
 
     public void sendBroadcast(String title, String message, String channel, String role, String targetValue,
             String priority) {
-        List<User> users;
-
+        
         if ("SINGLE".equalsIgnoreCase(role)) {
             User user = userRepository.findByMobileNumber(targetValue)
                     .orElseThrow(() -> new ResourceNotFoundException("User not found with mobile: " + targetValue));
-            users = Collections.singletonList(user);
-        } else if ("ALL".equalsIgnoreCase(role)) {
-            users = userRepository.findAll();
-        } else {
-            // Correctly filter users based on the role Enum field logic
-            users = userRepository.findAll().stream()
-                    .filter(u -> u.getRole().name().equalsIgnoreCase(role))
-                    .toList();
+            sendNotificationToUser(user, title, message, channel, priority);
+            return;
         }
 
-        users.forEach(user -> {
-            Notification notification = Notification.builder()
-                    .userId(user.getId())
-                    .title(title)
-                    .message(message)
-                    .type("BROADCAST")
-                    .channel(NotificationChannel.valueOf(channel))
-                    .status(NotificationStatus.PENDING)
-                    .priority(NotificationPriority.valueOf(priority))
-                    .isRead(false)
-                    .build();
+        int page = 0;
+        int size = 100;
+        Page<User> userPage;
 
-            notification = notificationRepository.save(notification);
-            producerService.sendToQueue(notification);
-        });
+        do {
+            Pageable pageable = PageRequest.of(page, size);
+            if ("ALL".equalsIgnoreCase(role)) {
+                userPage = userRepository.findAll(pageable);
+            } else {
+                try {
+                     // Try to parse role, ignore if invalid (though validation should happen upstream)
+                     User.UserRole userRole = User.UserRole.valueOf(role.toUpperCase());
+                     userPage = userRepository.findByRole(userRole, pageable);
+                } catch (IllegalArgumentException e) {
+                     // Fallback or error if role is invalid. For now treating as empty.
+                     userPage = Page.empty();
+                }
+            }
+
+            userPage.forEach(user -> sendNotificationToUser(user, title, message, channel, priority));
+            page++;
+        } while (userPage.hasNext());
+    }
+
+    private void sendNotificationToUser(User user, String title, String message, String channel, String priority) {
+        Notification notification = Notification.builder()
+                .userId(user.getId())
+                .title(title)
+                .message(message)
+                .type("BROADCAST")
+                .channel(NotificationChannel.valueOf(channel))
+                .status(NotificationStatus.PENDING)
+                .priority(NotificationPriority.valueOf(priority))
+                .isRead(false)
+                .build();
+
+        notification = notificationRepository.save(notification);
+        producerService.sendToQueue(notification);
     }
 
     @Transactional

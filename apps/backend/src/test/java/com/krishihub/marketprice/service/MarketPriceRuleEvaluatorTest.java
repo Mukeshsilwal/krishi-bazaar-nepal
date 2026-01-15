@@ -11,7 +11,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -45,15 +45,19 @@ public class MarketPriceRuleEvaluatorTest {
                 .cropName("Tomato")
                 .district("Kathmandu")
                 .avgPrice(BigDecimal.valueOf(100))
-                .priceDate(LocalDate.now())
+                .priceDate(com.krishihub.common.util.DateTimeProvider.today())
                 .unit("Kg")
                 .build();
 
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(com.krishihub.common.util.DateTimeProvider.today());
+        cal.add(java.util.Calendar.DAY_OF_YEAR, -1);
+        
         MarketPriceDto oldPrice = MarketPriceDto.builder()
                 .cropName("Tomato")
                 .district("Kathmandu")
                 .avgPrice(BigDecimal.valueOf(50)) // 50 -> 100 is 100% surge
-                .priceDate(LocalDate.now().minusDays(1))
+                .priceDate(cal.getTime())
                 .build();
 
         when(marketPriceService.getPreviousPrice(anyString(), anyString(), any()))

@@ -1,7 +1,8 @@
 package com.krishihub.disease.model;
 
-import java.time.LocalDateTime;
+
 import java.util.List;
+import com.krishihub.disease.enums.SignalType;
 import java.util.Map;
 import java.util.UUID;
 import lombok.Data;
@@ -32,5 +33,5 @@ public class SignalPayload {
     // Extra context
     private Map<String, Object> metadata;
 
-    private LocalDateTime timestamp;
+    private java.util.Date timestamp;
 }

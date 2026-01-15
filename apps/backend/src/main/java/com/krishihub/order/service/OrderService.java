@@ -6,6 +6,8 @@ import com.krishihub.auth.repository.UserRepository;
 
 import com.krishihub.marketplace.repository.CropListingRepository;
 import com.krishihub.order.dto.*;
+import com.krishihub.order.enums.OrderSource;
+import com.krishihub.order.enums.OrderStatus;
 import com.krishihub.order.entity.Order;
 import com.krishihub.order.event.OrderCancelledEvent;
 import com.krishihub.order.event.OrderPlacedEvent;
@@ -27,7 +29,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -170,7 +171,8 @@ public class OrderService {
 
         // Update other fields
         if (request.getPickupDate() != null) {
-            order.setPickupDate(LocalDate.parse(request.getPickupDate()));
+            // Assuming strict YYYY-MM-DD format from frontend
+            order.setPickupDate(java.sql.Date.valueOf(request.getPickupDate()));
         }
         if (request.getPickupLocation() != null) {
             order.setPickupLocation(request.getPickupLocation());

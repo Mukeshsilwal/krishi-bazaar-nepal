@@ -10,13 +10,17 @@ const WeatherWidget = () => {
     const [loading, setLoading] = useState(true);
     const [district, setDistrict] = useState('Kathmandu'); // Default
 
+    const [error, setError] = useState<string | null>(null);
+
     useEffect(() => {
         const fetchWeather = async () => {
             try {
                 const data = await weatherService.getCurrentWeather(district);
                 setWeather(data);
+                setError(null);
             } catch (error) {
                 console.error("Failed to fetch weather", error);
+                setError("Failed to load weather data");
             } finally {
                 setLoading(false);
             }
@@ -26,7 +30,26 @@ const WeatherWidget = () => {
     }, [district]);
 
     if (loading) return <div className="p-4 flex justify-center"><LoadingSpinner /></div>;
-    if (!weather) return null;
+
+    if (error || !weather) {
+        return (
+            <section className="py-12 bg-white">
+                <div className="container mx-auto px-4">
+                    <div className="bg-gray-100 rounded-3xl p-8 text-center max-w-4xl mx-auto border border-gray-200">
+                        <p className="text-gray-500 mb-2">
+                            {language === 'ne' ? 'मौसम जानकारी लोड गर्न सकिएन' : 'Could not load weather data'}
+                        </p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="text-blue-600 hover:underline text-sm"
+                        >
+                            Retry
+                        </button>
+                    </div>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section className="py-12 bg-white">

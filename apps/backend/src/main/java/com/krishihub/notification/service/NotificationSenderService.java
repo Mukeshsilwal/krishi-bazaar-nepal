@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -91,7 +90,7 @@ public class NotificationSenderService {
 
             if (success) {
                 notification.setStatus(NotificationStatus.SENT);
-                notification.setSentAt(LocalDateTime.now());
+                notification.setSentAt(com.krishihub.common.util.DateTimeProvider.now());
             } else {
                 notification.setStatus(NotificationStatus.FAILED);
                 notification.setFailureReason("No valid contact info for channel");

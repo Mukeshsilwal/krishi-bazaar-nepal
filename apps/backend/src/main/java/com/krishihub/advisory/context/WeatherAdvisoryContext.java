@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -33,7 +33,7 @@ public class WeatherAdvisoryContext {
     // Crop information
     private String cropType;
     private GrowthStage growthStage;
-    private LocalDateTime plantingDate;
+    private java.util.Date plantingDate;
     private Integer daysAfterPlanting;
 
     // Weather information
@@ -55,7 +55,7 @@ public class WeatherAdvisoryContext {
     private List<String> identifiedRisks;
 
     // Advisory metadata
-    private LocalDateTime contextCreatedAt;
+    private java.util.Date contextCreatedAt;
     private String contextSource;
 
     /**

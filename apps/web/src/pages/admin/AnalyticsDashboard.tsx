@@ -23,7 +23,7 @@ const AnalyticsDashboard = () => {
             try {
 
                 const statsRes = await api.get(ADMIN_ENDPOINTS.ANALYTICS_DASHBOARD);
-                if (statsRes.data.success) {
+                if (statsRes.data.code === 0) {
                     setStats(statsRes.data.data);
                 }
             } catch (error) {

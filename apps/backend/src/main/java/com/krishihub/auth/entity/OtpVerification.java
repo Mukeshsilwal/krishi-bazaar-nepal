@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -31,7 +30,8 @@ public class OtpVerification {
     private String otp;
 
     @Column(name = "expires_at", nullable = false)
-    private LocalDateTime expiresAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date expiresAt;
 
     @Column(nullable = false)
     @Builder.Default
@@ -39,9 +39,10 @@ public class OtpVerification {
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date createdAt;
 
     public boolean isExpired() {
-        return LocalDateTime.now().isAfter(expiresAt);
+        return new java.util.Date().after(expiresAt);
     }
 }

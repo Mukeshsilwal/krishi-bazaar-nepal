@@ -79,7 +79,7 @@ public class KhaltiPaymentStrategy implements PaymentStrategy {
     }
 
     @Override
-    public boolean verifyPayment(String transactionId, BigDecimal amount) {
+    public PaymentVerificationResult verifyPayment(String transactionId, BigDecimal amount) {
         try {
             String lookupUrl = khaltiProperties.getBaseUrl() + "epayment/lookup/";
 
@@ -100,16 +100,29 @@ public class KhaltiPaymentStrategy implements PaymentStrategy {
 
             if (response == null) {
                 log.error("Empty response during verification");
-                return false;
+                return PaymentVerificationResult.builder()
+                        .success(false)
+                        .failureReason("Empty response from Khalti")
+                        .build();
             }
 
             log.info("Khalti Verification Response: Status={}, PIDX={}", response.getStatus(), response.getPidx());
 
-            return "Completed".equalsIgnoreCase(response.getStatus());
+            boolean success = "Completed".equalsIgnoreCase(response.getStatus());
+
+            return PaymentVerificationResult.builder()
+                    .success(success)
+                    .transactionId(response.getTransaction_id())
+                    .failureReason(success ? null : "Status: " + response.getStatus())
+                    .rawResponse(response.toString())
+                    .build();
 
         } catch (Exception e) {
             log.error("Failed to verify Khalti payment: {}", e.getMessage());
-            return false;
+            return PaymentVerificationResult.builder()
+                    .success(false)
+                    .failureReason(e.getMessage())
+                    .build();
         }
     }
 

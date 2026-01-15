@@ -16,7 +16,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -39,7 +38,8 @@ public class MasterDataService {
         categoryRepository.findByCode(categoryCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found: " + categoryCode));
 
-        List<MasterItem> items = itemRepository.findActiveItemsByCategoryCode(categoryCode, LocalDate.now());
+        java.util.Date today = com.krishihub.common.util.DateTimeProvider.today();
+        List<MasterItem> items = itemRepository.findActiveItemsByCategoryCode(categoryCode, today);
 
         List<MasterDataResponse.Item> responseItems = items.stream()
                 .map(item -> MasterDataResponse.Item.builder()

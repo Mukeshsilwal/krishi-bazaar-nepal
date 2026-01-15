@@ -1,6 +1,7 @@
 package com.krishihub.auth.service;
 
 import com.krishihub.analytics.event.ActivityEvent;
+import com.krishihub.common.util.DateTimeProvider;
 import org.springframework.context.ApplicationEventPublisher;
 
 import com.krishihub.auth.dto.*;
@@ -21,9 +22,28 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Handles user authentication and registration for all user types.
+ *
+ * Design Notes:
+ * - Supports passwordless OTP-based authentication for farmers, buyers, and vendors.
+ * - Supports password-based authentication for admin users only.
+ * - Uses email as primary OTP delivery channel with SMS fallback.
+ * - Enforces single active session per user via SessionManagementService.
+ *
+ * Business Rules:
+ * - Admin role cannot be registered via public API (requires secret key).
+ * - Only admins can use password-based login and forgot password flow.
+ * - Mobile numbers are normalized to +977 format for Nepal.
+ * - Email and mobile number must be unique across all users.
+ *
+ * Security:
+ * - OTP values are NEVER logged in production.
+ * - Session locks prevent concurrent logins across devices.
+ * - All authentication failures throw user-safe exception messages.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -83,6 +103,8 @@ public class AuthService {
 
         userRepository.save(user);
 
+        // Email is preferred delivery channel for OTP (cheaper than SMS)
+        // SMS is used as fallback if email delivery fails
         String otp = otpService.generateOtp();
         otpService.saveOtp(mobileNumber, otp);
 
@@ -150,6 +172,18 @@ public class AuthService {
     @Value("${app.admin.secret-key:test}")
     private String adminSecretKey;
 
+    /**
+     * Registers a new admin user (requires secret key).
+     * <p>
+     * Business Rule:
+     * - Admin registration is protected by a secret key to prevent unauthorized access.
+     * - Admins use password-based authentication instead of OTP.
+     * - Admins are marked as verified immediately upon registration.
+     * <p>
+     * Security:
+     * - Secret key must be configured in application properties.
+     * - This endpoint should be restricted to internal networks in production.
+     */
     @Transactional
     public String registerAdmin(AdminRegisterRequest request) {
         if (!request.getAdminSecret().equals(adminSecretKey)) {
@@ -171,7 +205,8 @@ public class AuthService {
                 .verified(true)
                 .district("Headquarters")
                 .ward("0")
-                .createdAt(LocalDateTime.now())
+                .ward("0")
+                .createdAt(DateTimeProvider.now())
                 .build();
 
         userRepository.save(user);
@@ -252,6 +287,10 @@ public class AuthService {
             log.error("Failed to publish activity event", e);
         }
 
+        // CRITICAL: Session lock must be set AFTER successful OTP verification
+        // to prevent concurrent logins from multiple devices/browsers.
+        // If this check throws ActiveSessionExistsException, the user must logout
+        // from other devices first.
         sessionManagementService.checkAndSetLoginLock(user.getId());
 
         log.info("User verified and logged in: {}", mobileNumber);
@@ -297,6 +336,14 @@ public class AuthService {
         return UserDto.fromEntity(user);
     }
 
+    /**
+     * Initiates password reset flow (admin users only).
+     *
+     * Business Rule:
+     * - Only admins have passwords, so forgot password is restricted to admins.
+     * - Regular users (farmers, buyers, vendors) use passwordless OTP login.
+     * - This prevents non-admin users from attempting password recovery.
+     */
     @Transactional
     public String initiateForgotPassword(ForgotPasswordRequest request) {
         String mobileNumber = normalizeMobileNumber(request.getMobileNumber());
@@ -381,6 +428,14 @@ public class AuthService {
         }
     }
 
+    /**
+     * Normalizes mobile numbers to +977 format for Nepal.
+     *
+     * Business Rule:
+     * - All mobile numbers are stored in international format (+977XXXXXXXXXX).
+     * - This ensures consistency across SMS delivery, OTP verification, and user lookup.
+     * - Supports input formats: +977XXXXXXXXXX, 977XXXXXXXXXX, or XXXXXXXXXX.
+     */
     private String normalizeMobileNumber(String mobileNumber) {
         String normalized = mobileNumber.replaceAll("[^0-9+]", "");
         if (normalized.startsWith("+977")) {

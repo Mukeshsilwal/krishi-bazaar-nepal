@@ -14,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -100,7 +99,7 @@ public class ContentService {
         changeStatus(id, ContentStatus.ACTIVE, userId, "Published");
         // Update publishedAt
         repository.findById(id).ifPresent(c -> {
-            c.setPublishedAt(LocalDateTime.now());
+            c.setPublishedAt(com.krishihub.common.util.DateTimeProvider.now());
             c.setReviewedBy(userId);
             repository.save(c);
         });

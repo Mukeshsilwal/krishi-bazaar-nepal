@@ -11,7 +11,7 @@ const AgriStorePage = () => {
     const [search, setSearch] = useState('');
     const [category, setCategory] = useState<string>('ALL');
 
-    const { products, loading, isFetchingNext, hasNextPage, loadMore } = useAgriProducts({ search, category });
+    const { products, loading, error, isFetchingNext, hasNextPage, loadMore } = useAgriProducts({ search, category });
 
     // Infinite Scroll Observer
     const observer = useRef<IntersectionObserver | null>(null);
@@ -61,7 +61,19 @@ const AgriStorePage = () => {
             </div>
 
             {loading ? (
-                <LoadingSpinner />
+                <div className="flex justify-center py-20">
+                    <LoadingSpinner />
+                </div>
+            ) : error ? (
+                <div className="text-center py-20 bg-red-50 rounded-xl border border-red-100">
+                    <p className="text-red-600 mb-4">{error}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="text-blue-600 hover:underline font-medium"
+                    >
+                        Retry
+                    </button>
+                </div>
             ) : (
                 <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

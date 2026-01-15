@@ -1,5 +1,6 @@
 import { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import ErrorBoundary from './components/common/ErrorBoundary';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './modules/auth/context/AuthContext';
 import AdminLayout from './components/admin/AdminLayout';
@@ -8,6 +9,7 @@ import { CartProvider } from './context/CartContext';
 import { SettingsProvider } from './context/SettingsContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingSpinner from './components/common/LoadingSpinner';
+import RouteErrorBoundary from './components/common/RouteErrorBoundary';
 
 const PublicLayout = lazy(() => import('./components/layout/PublicLayout'));
 const AppLayout = lazy(() => import('./components/layout/AppLayout'));
@@ -35,6 +37,8 @@ const NotificationList = lazy(() => import('./pages/NotificationList'));
 const KnowledgePage = lazy(() => import('./modules/knowledge/pages/KnowledgePage'));
 const ArticleDetailPage = lazy(() => import('./modules/knowledge/pages/ArticleDetailPage'));
 const DiagnosticTool = lazy(() => import('./modules/advisory/pages/DiagnosticTool'));
+const AdvisoryHistoryPage = lazy(() => import('./pages/farmer/AdvisoryHistoryPage'));
+const AdvisoryDetailPage = lazy(() => import('./pages/farmer/AdvisoryDetailPage'));
 
 const ForgotPasswordPage = lazy(() => import('./modules/auth/pages/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('./modules/auth/pages/ResetPasswordPage'));
@@ -86,6 +90,11 @@ const ProductDetailPage = lazy(() => import('./features/agriStore/ProductDetailP
 const CartPage = lazy(() => import('./features/agriStore/CartPage'));
 const CheckoutPage = lazy(() => import('./features/agriStore/CheckoutPage'));
 const AgriProductManager = lazy(() => import('./pages/admin/AgriProductManager'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+
+// Shipment & Vehicle Booking
+const ShipmentPage = lazy(() => import('./modules/shipment/pages/ShipmentPage'));
+const BookVehiclePage = lazy(() => import('./modules/shipment/pages/BookVehiclePage'));
 
 function App() {
   return (
@@ -94,83 +103,111 @@ function App() {
         <AuthProvider>
           <SettingsProvider>
             <CartProvider>
-              <Suspense fallback={<LoadingSpinner />}>
-                {/* SPA Layout Structure */}
-                <Routes>
-                  {/* Public / Auth Layout */}
-                  <Route element={<PublicLayout />}>
-                    <Route index element={<Index />} />
-                    <Route path="/about" element={<AboutPage />} />
-                    <Route path="/contact" element={<ContactPage />} />
-                    <Route path="/marketplace" element={<MarketplacePage />} />
-                    <Route path="/listing/:id" element={<ListingDetailPage />} />
-                    <Route path="/prices" element={<MarketPriceDashboard />} />
-                    <Route path="/market-prices" element={<MarketPriceDashboard />} />
-                    <Route path="/knowledge" element={<KnowledgePage />} />
-                    <Route path="/knowledge/:slug" element={<ArticleDetailPage />} />
-                    <Route path="/diagnosis" element={<DiagnosticTool />} />
-                    <Route path="/agriculture-calendar" element={<AgricultureCalendarPage />} />
-                    <Route path="/agri-store" element={<AgriStorePage />} />
-                    <Route path="/agri-store/product/:id" element={<ProductDetailPage />} />
-                    <Route path="/agri-store/cart" element={<CartPage />} />
-                    <Route path="/agri-store/checkout" element={<CheckoutPage />} />
-                    <Route path="/logistics" element={<LogisticsDashboard />} />
+              <ErrorBoundary>
+                <Suspense fallback={<LoadingSpinner />}>
+                  {/* SPA Layout Structure */}
+                  <Routes>
+                    {/* Public / Auth Layout */}
+                    <Route element={
+                      <RouteErrorBoundary>
+                        <PublicLayout />
+                      </RouteErrorBoundary>
+                    }>
+                      <Route index element={<Index />} />
+                      <Route path="/about" element={<AboutPage />} />
+                      <Route path="/contact" element={<ContactPage />} />
+                      <Route path="/marketplace" element={<MarketplacePage />} />
+                      <Route path="/listing/:id" element={<ListingDetailPage />} />
+                      <Route path="/prices" element={<MarketPriceDashboard />} />
+                      <Route path="/market-prices" element={<MarketPriceDashboard />} />
+                      <Route path="/knowledge" element={<KnowledgePage />} />
+                      <Route path="/knowledge/:slug" element={<ArticleDetailPage />} />
+                      <Route path="/diagnosis" element={<DiagnosticTool />} />
+                      <Route path="/agriculture-calendar" element={<AgricultureCalendarPage />} />
+                      <Route path="/agri-store" element={<AgriStorePage />} />
+                      <Route path="/agri-store/product/:id" element={<ProductDetailPage />} />
+                      <Route path="/agri-store/cart" element={<CartPage />} />
+                      <Route path="/agri-store/checkout" element={<CheckoutPage />} />
+                      <Route path="/logistics" element={<LogisticsDashboard />} />
 
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/register" element={<RegisterPage />} />
-                    <Route path="/admin/login" element={<AdminLoginPage />} />
-                    <Route path="/marketplace/create" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
-                    <Route path="/edit-listing/:id" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
-                    <Route path="/orders" element={<ProtectedRoute><MyOrdersPage /></ProtectedRoute>} />
-                    <Route path="/my-orders" element={<ProtectedRoute><MyOrdersPage /></ProtectedRoute>} />
-                    <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
-                    <Route path="/chat/:userId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
-                    <Route path="/profile" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-                    <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-                    <Route path="/finance" element={<ProtectedRoute><FinanceDashboard /></ProtectedRoute>} />
-                    <Route path="/ai-assistant" element={<ProtectedRoute><AiAssistant /></ProtectedRoute>} />
-                    <Route path="/notifications" element={<ProtectedRoute><NotificationList /></ProtectedRoute>} />
-                    <Route path="/support" element={<ProtectedRoute><SupportPage /></ProtectedRoute>} />
-                  </Route>
+                      <Route path="/login" element={<LoginPage />} />
+                      <Route path="/register" element={<RegisterPage />} />
+                      <Route path="/admin/login" element={<AdminLoginPage />} />
+                      <Route path="/admin/register" element={<AdminRegisterPage />} />
+                      <Route path="/marketplace/create" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
+                      <Route path="/edit-listing/:id" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
+                      <Route path="/orders" element={<ProtectedRoute><MyOrdersPage /></ProtectedRoute>} />
+                      <Route path="/my-orders" element={<ProtectedRoute><MyOrdersPage /></ProtectedRoute>} />
+                      <Route path="/orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
+                      <Route path="/payment/success" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />
+                      <Route path="/payment/failure" element={<ProtectedRoute><PaymentFailurePage /></ProtectedRoute>} />
+                      <Route path="/my-listings" element={<ProtectedRoute><MyListingsPage /></ProtectedRoute>} />
+                      <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+                      <Route path="/chat/:userId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+                      <Route path="/profile" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+                      <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+                      <Route path="/finance" element={<ProtectedRoute><FinanceDashboard /></ProtectedRoute>} />
+                      <Route path="/ai-assistant" element={<ProtectedRoute><AiAssistant /></ProtectedRoute>} />
+                      <Route path="/notifications" element={<ProtectedRoute><NotificationList /></ProtectedRoute>} />
+                      <Route path="/support" element={<ProtectedRoute><SupportPage /></ProtectedRoute>} />
 
-                  {/* Admin Routes */}
-                  {/* Admin Routes */}
-                  <Route path="/admin" element={<ProtectedRoute requiredRole="ADMIN"><AdminLayout /></ProtectedRoute>}>
-                    <Route path="dashboard" element={<AdminDashboardPage />} />
-                    <Route path="knowledge" element={<KnowledgeCMSPage />} />
-                    <Route path="diseases" element={<DiseaseCMSPage />} />
-                    <Route path="pesticides" element={<PesticideCMSPage />} />
-                    <Route path="ai-review" element={<AIReviewPage />} />
-                    <Route path="logs" element={<AdvisoryLogsPage />} />
+                      {/* Shipment & Vehicle Booking Routes */}
+                      <Route path="/orders/:orderId/shipment" element={<ProtectedRoute><ShipmentPage /></ProtectedRoute>} />
+                      <Route path="/orders/:orderId/shipment/book-vehicle" element={<ProtectedRoute><BookVehiclePage /></ProtectedRoute>} />
 
-                    <Route path="cms" element={<CmsDashboard />} />
-                    <Route path="rules" element={<RulePlayground />} />
-                    <Route path="rules-manager" element={<RuleCMSPage />} />
-                    <Route path="farmers" element={<FarmerManager />} />
-                    <Route path="notifications" element={<NotificationManager />} />
-                    <Route path="master-data" element={<MasterDataManager />} />
-                    <Route path="system-health" element={<SystemHealth />} />
-                    <Route path="feedback" element={<FeedbackManager />} />
-                    <Route path="weather" element={<WeatherAdvisoryManager />} />
-                    <Route path="schemes" element={<SchemeManager />} />
-                    <Route path="users" element={<UserManagement />} />
-                    <Route path="settings" element={<SettingsManager />} />
-                    <Route path="analytics" element={<AnalyticsDashboard />} />
-                    <Route path="sources" element={<SourceManager />} />
-                    <Route path="moderation" element={<ModerationQueue />} />
-                    <Route path="verification" element={<VerificationQueue />} />
-                    <Route path="content" element={<ContentDashboard />} />
-                    <Route path="content/:id" element={<ContentEditor />} />
-                    <Route path="market-prices" element={<MarketPriceManager />} />
-                    <Route path="agriculture-calendar" element={<AdminAgricultureCalendarPage />} />
-                    <Route path="activities" element={<ActivityLogsPage />} />
-                    <Route path="activities" element={<ActivityLogsPage />} />
-                    <Route path="agri-products" element={<AgriProductManager />} />
-                    <Route path="logistics" element={<AdminLogisticsPage />} />
+                      {/* Advisory Routes */}
+                      <Route path="/advisory-history" element={<ProtectedRoute><AdvisoryHistoryPage /></ProtectedRoute>} />
+                      <Route path="/advisory/:id" element={<ProtectedRoute><AdvisoryDetailPage /></ProtectedRoute>} />
+                    </Route>
 
-                  </Route>
-                </Routes>
-              </Suspense>
+                    {/* Admin Routes */}
+                    {/* Admin Routes */}
+                    <Route path="/admin" element={
+                      <ProtectedRoute requiredRole="ADMIN">
+                        <RouteErrorBoundary>
+                          <AdminLayout />
+                        </RouteErrorBoundary>
+                      </ProtectedRoute>
+                    }>
+                      <Route index element={<Navigate to="dashboard" replace />} />
+                      <Route path="dashboard" element={<AdminDashboardPage />} />
+                      <Route path="knowledge" element={<KnowledgeCMSPage />} />
+                      <Route path="diseases" element={<DiseaseCMSPage />} />
+                      <Route path="pesticides" element={<PesticideCMSPage />} />
+                      <Route path="ai-review" element={<AIReviewPage />} />
+                      <Route path="logs" element={<AdvisoryLogsPage />} />
+
+                      <Route path="cms" element={<CmsDashboard />} />
+                      <Route path="rules" element={<RulePlayground />} />
+                      <Route path="rules-manager" element={<RuleCMSPage />} />
+                      <Route path="farmers" element={<FarmerManager />} />
+                      <Route path="notifications" element={<NotificationManager />} />
+                      <Route path="master-data" element={<MasterDataManager />} />
+                      <Route path="system-health" element={<SystemHealth />} />
+                      <Route path="feedback" element={<FeedbackManager />} />
+                      <Route path="weather" element={<WeatherAdvisoryManager />} />
+                      <Route path="schemes" element={<SchemeManager />} />
+                      <Route path="users" element={<UserManagement />} />
+                      <Route path="settings" element={<SettingsManager />} />
+                      <Route path="analytics" element={<AnalyticsDashboard />} />
+                      <Route path="sources" element={<SourceManager />} />
+                      <Route path="moderation" element={<ModerationQueue />} />
+                      <Route path="verification" element={<VerificationQueue />} />
+                      <Route path="content" element={<ContentDashboard />} />
+                      <Route path="content/:id" element={<ContentEditor />} />
+                      <Route path="market-prices" element={<MarketPriceManager />} />
+                      <Route path="agriculture-calendar" element={<AdminAgricultureCalendarPage />} />
+                      <Route path="activities" element={<ActivityLogsPage />} />
+                      <Route path="agri-products" element={<AgriProductManager />} />
+                      <Route path="logistics" element={<AdminLogisticsPage />} />
+
+                    </Route>
+
+                    {/* 404 Fallback */}
+                    <Route path="*" element={<NotFoundPage />} />
+                  </Routes>
+                </Suspense>
+              </ErrorBoundary>
             </CartProvider>
           </SettingsProvider>
         </AuthProvider>

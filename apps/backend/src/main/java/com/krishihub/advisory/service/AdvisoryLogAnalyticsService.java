@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,9 +30,12 @@ public class AdvisoryLogAnalyticsService {
     /**
      * Get comprehensive analytics
      */
-    public AdvisoryAnalyticsDTO getAnalytics(LocalDateTime since) {
+    public AdvisoryAnalyticsDTO getAnalytics(java.util.Date since) {
         if (since == null) {
-            since = LocalDateTime.now().minusDays(30);
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+            cal.add(java.util.Calendar.DAY_OF_YEAR, -30);
+            since = cal.getTime();
         }
 
         log.info("Generating analytics since {}", since);
@@ -52,14 +55,14 @@ public class AdvisoryLogAnalyticsService {
     /**
      * Get total advisories count
      */
-    public Long getTotalAdvisories(LocalDateTime since) {
+    public Long getTotalAdvisories(java.util.Date since) {
         return repository.countSince(since);
     }
 
     /**
      * Get delivery success rate
      */
-    public Double getDeliverySuccessRate(LocalDateTime since) {
+    public Double getDeliverySuccessRate(java.util.Date since) {
         Double rate = repository.getDeliverySuccessRate(since);
         return rate != null ? rate : 0.0;
     }
@@ -67,7 +70,7 @@ public class AdvisoryLogAnalyticsService {
     /**
      * Get open rate (opened / delivered)
      */
-    public Double getOpenRate(LocalDateTime since) {
+    public Double getOpenRate(java.util.Date since) {
         Double rate = repository.getOpenRate(since);
         return rate != null ? rate : 0.0;
     }
@@ -75,7 +78,7 @@ public class AdvisoryLogAnalyticsService {
     /**
      * Get feedback rate (feedback / opened)
      */
-    public Double getFeedbackRate(LocalDateTime since) {
+    public Double getFeedbackRate(java.util.Date since) {
         Double rate = repository.getFeedbackRate(since);
         return rate != null ? rate : 0.0;
     }
@@ -83,7 +86,7 @@ public class AdvisoryLogAnalyticsService {
     /**
      * Get channel performance metrics
      */
-    public Map<String, ChannelMetrics> getChannelPerformance(LocalDateTime since) {
+    public Map<String, ChannelMetrics> getChannelPerformance(java.util.Date since) {
         Map<String, ChannelMetrics> metrics = new HashMap<>();
 
         List<Object[]> channelStats = repository.getChannelStatistics(since);
@@ -121,7 +124,7 @@ public class AdvisoryLogAnalyticsService {
     /**
      * Get rule effectiveness metrics
      */
-    public Map<String, RuleMetrics> getRuleEffectiveness(LocalDateTime since) {
+    public Map<String, RuleMetrics> getRuleEffectiveness(java.util.Date since) {
         Map<String, RuleMetrics> metrics = new HashMap<>();
 
         List<Object[]> ruleStats = repository.getRuleEffectivenessMetrics(since);
@@ -177,7 +180,7 @@ public class AdvisoryLogAnalyticsService {
     /**
      * Get district-wise insights
      */
-    public Map<String, DistrictMetrics> getDistrictInsights(LocalDateTime since) {
+    public Map<String, DistrictMetrics> getDistrictInsights(java.util.Date since) {
         Map<String, DistrictMetrics> insights = new HashMap<>();
 
         List<Object[]> districtStats = repository.getDistrictStatistics(since);
@@ -205,7 +208,7 @@ public class AdvisoryLogAnalyticsService {
     /**
      * Detect alert fatigue (repeated advisories per farmer)
      */
-    public Map<UUID, Long> detectAlertFatigue(LocalDateTime since, int threshold) {
+    public Map<UUID, Long> detectAlertFatigue(java.util.Date since, int threshold) {
         log.info("Detecting alert fatigue with threshold {} since {}", threshold, since);
 
         List<Object[]> results = repository.findFarmersWithExcessiveAdvisories(since, threshold);
@@ -219,7 +222,7 @@ public class AdvisoryLogAnalyticsService {
     /**
      * Get ignored emergency alerts
      */
-    public List<UUID> getIgnoredEmergencyAlerts(LocalDateTime since) {
+    public List<UUID> getIgnoredEmergencyAlerts(java.util.Date since) {
         log.info("Finding ignored emergency alerts since {}", since);
         return repository.findIgnoredEmergencyAlerts(since);
     }
@@ -232,7 +235,11 @@ public class AdvisoryLogAnalyticsService {
      * @return Map of rule name to NOT_USEFUL percentage
      */
     public Map<String, Double> getRulesWithPoorFeedback(double threshold) {
-        LocalDateTime since = LocalDateTime.now().minusDays(30);
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+        cal.add(java.util.Calendar.DAY_OF_YEAR, -30);
+        java.util.Date since = cal.getTime();
+        
         long minFeedbackCount = 5; // Minimum feedback count to be statistically relevant
 
         log.info("Finding rules with poor feedback (threshold: {}%, min feedback: {})", threshold, minFeedbackCount);
@@ -256,7 +263,7 @@ public class AdvisoryLogAnalyticsService {
     /**
      * Get advisory trends over time
      */
-    public Map<String, Long> getAdvisoryTrends(LocalDateTime since, String groupBy) {
+    public Map<String, Long> getAdvisoryTrends(java.util.Date since, String groupBy) {
         // This would require more complex date grouping queries
         // For now, return basic counts
         Map<String, Long> trends = new HashMap<>();
@@ -268,7 +275,7 @@ public class AdvisoryLogAnalyticsService {
      * Get farmer engagement score
      * Combines open rate and feedback rate
      */
-    public Double getFarmerEngagementScore(LocalDateTime since) {
+    public Double getFarmerEngagementScore(java.util.Date since) {
         Double openRate = getOpenRate(since);
         Double feedbackRate = getFeedbackRate(since);
 
@@ -279,7 +286,7 @@ public class AdvisoryLogAnalyticsService {
     /**
      * Get high-risk districts (high emergency count + high failure rate)
      */
-    public List<String> getHighRiskDistricts(LocalDateTime since) {
+    public List<String> getHighRiskDistricts(java.util.Date since) {
         Map<String, DistrictMetrics> insights = getDistrictInsights(since);
 
         return insights.entrySet().stream()
@@ -295,7 +302,7 @@ public class AdvisoryLogAnalyticsService {
     /**
      * Get top performing rules (high open rate + positive feedback)
      */
-    public List<String> getTopPerformingRules(LocalDateTime since, int limit) {
+    public List<String> getTopPerformingRules(java.util.Date since, int limit) {
         Map<String, RuleMetrics> effectiveness = getRuleEffectiveness(since);
 
         return effectiveness.entrySet().stream()
@@ -319,7 +326,7 @@ public class AdvisoryLogAnalyticsService {
     /**
      * Get underperforming rules (low open rate or negative feedback)
      */
-    public List<String> getUnderperformingRules(LocalDateTime since, int limit) {
+    public List<String> getUnderperformingRules(java.util.Date since, int limit) {
         Map<String, RuleMetrics> effectiveness = getRuleEffectiveness(since);
 
         return effectiveness.entrySet().stream()

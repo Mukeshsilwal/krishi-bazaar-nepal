@@ -15,7 +15,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import java.util.UUID;
 
 @Entity
@@ -45,7 +46,8 @@ public class ProcessedKnowledge {
     private String tags; // JSON array of tags
 
     @CreationTimestamp
-    private LocalDateTime processedAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date processedAt;
 
     private String aiModelUsed;
 

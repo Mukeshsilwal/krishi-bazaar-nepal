@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -52,11 +52,13 @@ public class Notification {
     @Column(nullable = false)
     private NotificationPriority priority;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "scheduled_at")
-    private LocalDateTime scheduledAt;
+    private Date scheduledAt;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "sent_at")
-    private LocalDateTime sentAt;
+    private Date sentAt;
 
     @Column(name = "failure_reason")
     private String failureReason;
@@ -73,6 +75,7 @@ public class Notification {
     private boolean isRead = false;
 
     @CreatedDate
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Date createdAt;
 }

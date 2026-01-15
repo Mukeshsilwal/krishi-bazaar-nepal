@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -33,7 +33,11 @@ public class MarketPriceFallbackIntegrationTest {
         // boundaries if transaction propagation mattered (though here it's read only).
         // Let's just create unique data.
 
-        LocalDate yesterday = LocalDate.now().minusDays(1);
+        // 36: LocalDate yesterday = LocalDate.now().minusDays(1);
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(com.krishihub.common.util.DateTimeProvider.today());
+        cal.add(java.util.Calendar.DAY_OF_YEAR, -1);
+        java.util.Date yesterday = cal.getTime();
 
         MarketPriceDto oldPrice = MarketPriceDto.builder()
                 .cropName("Fallback Potato")
@@ -67,7 +71,7 @@ public class MarketPriceFallbackIntegrationTest {
                 .maxPrice(new BigDecimal("60"))
                 .avgPrice(new BigDecimal("55"))
                 .unit("KG")
-                .priceDate(LocalDate.now())
+                .priceDate(com.krishihub.common.util.DateTimeProvider.today())
                 .source("TEST_SOURCE")
                 .build();
 
@@ -75,7 +79,7 @@ public class MarketPriceFallbackIntegrationTest {
 
         Page<MarketPriceDto> newResult = marketPriceService.getTodaysPrices(testDistrict, 0, 10);
         assertNotNull(newResult);
-        assertEquals(LocalDate.now(), newResult.getContent().get(0).getPriceDate(),
+        assertEquals(com.krishihub.common.util.DateTimeProvider.today(), newResult.getContent().get(0).getPriceDate(),
                 "Should return today's price when available");
         assertEquals(new BigDecimal("55"), newResult.getContent().get(0).getAvgPrice());
     }

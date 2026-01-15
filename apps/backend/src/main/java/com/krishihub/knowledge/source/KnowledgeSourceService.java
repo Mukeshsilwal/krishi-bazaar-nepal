@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -75,7 +74,7 @@ public class KnowledgeSourceService {
     @Transactional
     public void updateLastSyncedAt(UUID id) {
         KnowledgeSource source = getSourceById(id);
-        source.setLastSyncedAt(LocalDateTime.now());
+        source.setLastSyncedAt(com.krishihub.common.util.DateTimeProvider.now());
         sourceRepository.save(source);
     }
 

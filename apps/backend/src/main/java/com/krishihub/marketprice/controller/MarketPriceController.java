@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -74,7 +73,7 @@ public class MarketPriceController {
 
     @GetMapping("/date/{date}")
     public ResponseEntity<ApiResponse<List<MarketPriceDto>>> getPricesByDate(
-            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") java.util.Date date) {
         List<MarketPriceDto> prices = priceService.getPricesByDate(date);
         return ResponseEntity.ok(ApiResponse.success(prices));
     }

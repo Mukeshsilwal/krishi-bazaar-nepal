@@ -9,7 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+
 import java.util.UUID;
 
 /**
@@ -56,10 +56,10 @@ public class AdvisoryLogDetailDTO {
     private String failureReason;
 
     // Timeline
-    private LocalDateTime createdAt;
-    private LocalDateTime deliveredAt;
-    private LocalDateTime openedAt;
-    private LocalDateTime feedbackAt;
+    private java.util.Date createdAt;
+    private java.util.Date deliveredAt;
+    private java.util.Date openedAt;
+    private java.util.Date feedbackAt;
 
     // Feedback
     private String feedback;

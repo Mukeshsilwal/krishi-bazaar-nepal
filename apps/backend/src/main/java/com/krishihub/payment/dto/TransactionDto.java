@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Data
@@ -21,7 +21,7 @@ public class TransactionDto {
     private String paymentMethod;
     private String paymentStatus;
     private String transactionId;
-    private LocalDateTime createdAt;
+    private Date createdAt;
 
     public static TransactionDto fromEntity(Transaction transaction) {
         return TransactionDto.builder()

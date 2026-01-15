@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2, Plus, FileText, CheckCircle, XCircle } from "lucide-react";
 import { toast } from 'sonner';
+import { resolveUserMessage } from '@/utils/errorUtils';
 
 interface Scheme {
     id: string;
@@ -53,7 +54,7 @@ const SchemeManager = () => {
     const fetchSchemes = async () => {
         try {
             const res = await api.get(SCHEME_ENDPOINTS.BASE);
-            if (res.data.success) {
+            if (res.data.code === 0) {
                 setSchemes(res.data.data);
             }
         } catch (error) {
@@ -77,7 +78,7 @@ const SchemeManager = () => {
             toast.success("Scheme created successfully");
         } catch (error: any) {
             console.error('Failed to create scheme', error);
-            toast.error(error.response?.data?.message || "Failed to create scheme");
+            toast.error(resolveUserMessage(error));
         }
     };
 

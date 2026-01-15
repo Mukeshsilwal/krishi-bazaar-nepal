@@ -35,7 +35,7 @@ public class WeatherController {
 
         return weather
                 .map(data -> ResponseEntity.ok(ApiResponse.success("Weather data retrieved", data)))
-                .orElse(ResponseEntity.ok(ApiResponse.error("No weather data available for district: " + district)));
+                .orElse(ResponseEntity.ok(ApiResponse.error("No weather data available for district: " + district, null)));
     }
 
     /**

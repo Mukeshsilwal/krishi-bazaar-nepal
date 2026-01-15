@@ -59,7 +59,7 @@ const ActivityLogsPage = () => {
                     return newLogs;
                 });
 
-                setPage(data.number);
+                setPage(data.page);
                 setHasMore(!data.last); // 'last' property from Spring Page interface
             }
         } catch (error) {

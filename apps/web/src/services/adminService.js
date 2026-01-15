@@ -4,12 +4,17 @@ import { ADMIN_ENDPOINTS } from '../config/endpoints';
 const adminService = {
     getDashboardStats: async () => {
         const response = await api.get(ADMIN_ENDPOINTS.DASHBOARD);
-        return response.data.data; // Extract from ApiResponse wrapper
+        if (response.data.code === 0) {
+            return response.data.data;
+        }
+        throw new Error(response.data.message || 'Failed to fetch dashboard stats');
     },
 
     getPendingVendors: async () => {
-        const response = await api.get(ADMIN_ENDPOINTS.VENDORS_PENDING);
-        return response.data.data;
+        // Request large size for now as UI might be list-based
+        const response = await api.get(ADMIN_ENDPOINTS.VENDORS_PENDING + '?page=0&size=100');
+        // Return content from PaginatedResponse
+        return response.data.data.content;
     },
 
     getUserActivities: async (params) => {

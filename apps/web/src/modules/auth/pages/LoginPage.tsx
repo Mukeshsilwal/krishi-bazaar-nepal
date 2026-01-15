@@ -19,13 +19,20 @@ export default function LoginPage() {
 
         try {
             const result = await authService.login(identifier);
-            if (result.success) {
+            console.log('Login response:', result);
+            // New API structure uses 'code' instead of 'success'
+            if (result.code === 0) {
+                console.log('Transitioning to OTP step');
                 setStep('otp');
             } else {
+                console.log('Login failed:', result.message);
                 setError(result.message || 'Failed to send OTP');
             }
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Failed to send OTP');
+            console.error('Login error:', err);
+            // Use centralized error resolver
+            const { resolveUserMessage } = await import('@/utils/errorUtils');
+            setError(resolveUserMessage(err));
         } finally {
             setLoading(false);
         }
@@ -38,13 +45,15 @@ export default function LoginPage() {
 
         try {
             const result = await login(identifier, otp);
-            if (result.success) {
+            // New API structure uses 'code' instead of 'success'
+            if (result.code === 0) {
                 window.location.href = '/';
             } else {
                 setError(result.message || 'Invalid OTP');
             }
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Invalid OTP');
+            const { resolveUserMessage } = await import('@/utils/errorUtils');
+            setError(resolveUserMessage(err));
         } finally {
             setLoading(false);
         }

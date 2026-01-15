@@ -1,6 +1,19 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import api from '@/services/api';
 
+/**
+ * Provides global access to system settings (company info, hero text, etc.).
+ *
+ * Design Notes:
+ * - Settings are fetched once at app startup and cached in React state.
+ * - Only public settings are exposed via `/public/settings` endpoint.
+ * - This prevents multiple API calls for static configuration data.
+ *
+ * Important:
+ * - Settings are loaded asynchronously; components should handle loading state.
+ * - If settings fail to load, empty object is used as fallback.
+ * - refreshSettings() can be called to manually reload settings if needed.
+ */
 interface SettingsContextType {
     settings: Record<string, string>;
     loading: boolean;
@@ -17,8 +30,40 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     const fetchSettings = async () => {
         try {
             const response = await api.get('/public/settings');
-            if (response.data.success) {
-                setSettings(response.data.data);
+            console.log('Settings API Response:', response.data);
+
+            // Check for success code (standardized API response)
+            if (response.data.code === 0 || response.data.success) {
+                const responseData = response.data.data;
+                console.log('Settings Response Data:', responseData);
+
+                let settingsMap: Record<string, string> = {};
+
+                // Case 1: Paginated Response (has content array)
+                if (responseData && responseData.content && Array.isArray(responseData.content)) {
+                    responseData.content.forEach((setting: any) => {
+                        if (setting.key && setting.value) {
+                            settingsMap[setting.key] = setting.value;
+                        }
+                    });
+                }
+                // Case 2: Array Response
+                else if (Array.isArray(responseData)) {
+                    responseData.forEach((setting: any) => {
+                        if (setting.key && setting.value) {
+                            settingsMap[setting.key] = setting.value;
+                        }
+                    });
+                }
+                // Case 3: Direct Map/Object Response (e.g., { "KEY": "Value" })
+                else if (typeof responseData === 'object' && responseData !== null) {
+                    settingsMap = responseData;
+                }
+
+                console.log('Final Settings Map:', settingsMap);
+                setSettings(settingsMap);
+            } else {
+                console.warn('Settings fetch failed with code:', response.data.code);
             }
         } catch (error) {
             console.error('Failed to fetch settings:', error);

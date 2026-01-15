@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -41,14 +40,14 @@ public class RefreshTokenService {
             refreshToken.setUser(user);
         }
         
-        refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
+        refreshToken.setExpiryDate(new java.util.Date(System.currentTimeMillis() + refreshTokenDurationMs));
         refreshToken.setToken(UUID.randomUUID().toString());
         
         return refreshTokenRepository.save(refreshToken);
     }
 
     public RefreshToken verifyExpiration(RefreshToken token) {
-        if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
+        if (token.getExpiryDate().before(new java.util.Date())) {
             refreshTokenRepository.delete(token);
             throw new UnauthorizedException("Refresh token was expired. Please make a new signin request");
         }

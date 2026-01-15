@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Data
@@ -20,7 +20,7 @@ public class MessageDto {
     private UUID listingId;
     private String message;
     private Boolean isRead;
-    private LocalDateTime createdAt;
+    private Date createdAt;
 
     @Data
     @Builder

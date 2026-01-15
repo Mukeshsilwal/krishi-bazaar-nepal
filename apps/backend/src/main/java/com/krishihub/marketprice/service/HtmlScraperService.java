@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,7 +75,7 @@ public class HtmlScraperService implements MarketPriceDataSource {
                                     .maxPrice(max)
                                     .avgPrice(avg)
                                     .district("Kathmandu") // RamroPatro usually defaults to Kalimati/Kathmandu
-                                    .priceDate(LocalDate.now())
+                                    .priceDate(com.krishihub.common.util.DateTimeProvider.today())
                                     .source(getSourceId())
                                     .build());
                         }

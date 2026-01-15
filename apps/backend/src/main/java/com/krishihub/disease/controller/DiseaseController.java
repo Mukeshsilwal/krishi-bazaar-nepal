@@ -36,6 +36,12 @@ public class DiseaseController {
     }
 
     // Admin Endpoints
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<Disease>>> getAllDiseases() {
+        return ResponseEntity.ok(ApiResponse.success(diseaseService.getAllDiseases()));
+    }
+
     @PostMapping
     public ResponseEntity<ApiResponse<Disease>> createDisease(@RequestBody Disease disease) {
         return ResponseEntity.ok(ApiResponse.success("Disease created successfully", diseaseService.createDisease(disease)));

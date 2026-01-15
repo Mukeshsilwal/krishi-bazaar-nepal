@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+
 import java.util.UUID;
 
 @Data
@@ -21,7 +21,7 @@ public class RuleDTO {
     private boolean isActive;
     private Integer version;
     private Integer priority;
-    private LocalDateTime effectiveFrom;
-    private LocalDateTime effectiveTo;
+    private java.util.Date effectiveFrom;
+    private java.util.Date effectiveTo;
     private UUID createdBy; // In real app, get from Security Context
 }

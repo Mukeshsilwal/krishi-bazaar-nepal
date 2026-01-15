@@ -63,6 +63,7 @@ const listingService = {
                 page: searchParams.page || 0,
                 size: searchParams.size || 20,
                 cropName: searchParams.cropName,
+                category: searchParams.category,
                 district: searchParams.district,
                 minPrice: searchParams.minPrice,
                 maxPrice: searchParams.maxPrice,

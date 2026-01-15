@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
-import java.time.LocalDateTime;
+
 
 @RestController
 @RequestMapping("/api/disease/signals")
@@ -17,7 +17,7 @@ public class SignalController {
 
     @PostMapping("/report")
     public ResponseEntity<ApiResponse<Void>> reportSymptom(@RequestBody SignalPayload payload) {
-        payload.setTimestamp(LocalDateTime.now());
+        payload.setTimestamp(com.krishihub.common.util.DateTimeProvider.now());
         signalService.processSignal(payload);
         return ResponseEntity.ok(ApiResponse.success("Signal reported successfully", null));
     }

@@ -2,7 +2,9 @@ package com.krishihub.notification.enums;
 
 public enum NotificationPriority {
     LOW,
-    NORMAL,
+    NORMAL, // Added
+    MEDIUM,
     HIGH,
-    EMERGENCY
+    URGENT,
+    EMERGENCY // Added
 }

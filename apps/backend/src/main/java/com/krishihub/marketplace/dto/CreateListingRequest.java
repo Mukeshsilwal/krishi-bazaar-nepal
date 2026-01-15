@@ -16,6 +16,8 @@ public class CreateListingRequest {
     @Size(max = 100, message = "Crop name must not exceed 100 characters")
     private String cropName;
 
+    private String category;
+
     @NotNull(message = "Quantity is required")
     @DecimalMin(value = "0.01", message = "Quantity must be greater than 0")
     private BigDecimal quantity;

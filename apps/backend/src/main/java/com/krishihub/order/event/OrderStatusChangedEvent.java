@@ -1,7 +1,7 @@
 package com.krishihub.order.event;
 
 import com.krishihub.order.entity.Order;
-import com.krishihub.order.dto.OrderStatus;
+import com.krishihub.order.enums.OrderStatus;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/modules/auth/context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,8 +21,7 @@ const CheckoutPage = () => {
     const [notes, setNotes] = useState('');
 
     if (items.length === 0) {
-        navigate('/cart');
-        return null;
+        return <Navigate to="/cart" replace />;
     }
 
     const handlePlaceOrder = async () => {

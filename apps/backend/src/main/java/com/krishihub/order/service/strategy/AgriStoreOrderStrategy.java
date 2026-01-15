@@ -5,8 +5,8 @@ import com.krishihub.agristore.repository.AgriProductRepository;
 import com.krishihub.auth.entity.User;
 import com.krishihub.order.dto.CreateOrderRequest;
 import com.krishihub.order.dto.OrderItemDto;
-import com.krishihub.order.dto.OrderSource;
-import com.krishihub.order.dto.OrderStatus;
+import com.krishihub.order.enums.OrderSource;
+import com.krishihub.order.enums.OrderStatus;
 import com.krishihub.order.entity.Order;
 import com.krishihub.order.entity.OrderItem;
 import com.krishihub.shared.exception.BadRequestException;
@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,9 +82,9 @@ public class AgriStoreOrderStrategy implements OrderProcessingStrategy {
         order.setQuantity(totalQty);
         
         if (request.getPickupDate() != null) {
-            order.setPickupDate(LocalDate.parse(request.getPickupDate()));
+            order.setPickupDate(java.sql.Date.valueOf(request.getPickupDate()));
         } else {
-            order.setPickupDate(LocalDate.now());
+            order.setPickupDate(com.krishihub.common.util.DateTimeProvider.today());
         }
 
         for (OrderItem item : orderItems) {

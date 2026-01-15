@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
 import java.util.HexFormat;
 import java.util.List;
 
@@ -57,7 +56,7 @@ public class IngestionService {
         log.info("Fetching RSS feed from: {}", source.getUrl());
 
         // Simulation of fetched item
-        String simulatedTitle = "Simulated Article from " + source.getName() + " at " + LocalDateTime.now();
+        String simulatedTitle = "Simulated Article from " + source.getName() + " at " + com.krishihub.common.util.DateTimeProvider.now();
         String simulatedBody = "This is the raw content of the article relevant to farming.";
         String simulatedUrl = source.getUrl() + "/article/1";
         String contentHash = calculateHash(simulatedTitle + simulatedBody);
@@ -79,7 +78,7 @@ public class IngestionService {
                 .sourceUrl(url)
                 .author(author)
                 .contentHash(hash)
-                .fetchedAt(LocalDateTime.now())
+                .fetchedAt(com.krishihub.common.util.DateTimeProvider.now())
                 .status(RawKnowledgeContent.IngestionStatus.PENDING_PROCESSING)
                 .build();
 

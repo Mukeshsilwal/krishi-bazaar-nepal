@@ -29,7 +29,7 @@ public class AdvisoryController {
                     .valueOf(context.toUpperCase());
             return ResponseEntity.ok(ApiResponse.success(advisoryService.getContextualAdvisory(contextType, param)));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(ApiResponse.error("Invalid context type: " + context));
+            return ResponseEntity.badRequest().body(ApiResponse.error("Invalid context type: " + context, null));
         }
     }
 

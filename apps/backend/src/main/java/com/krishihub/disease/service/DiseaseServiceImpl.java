@@ -35,6 +35,11 @@ public class DiseaseServiceImpl implements DiseaseService {
     }
 
     @Override
+    public List<Disease> getAllDiseases() {
+        return diseaseRepository.findAll();
+    }
+
+    @Override
     public void linkPesticideToDisease(UUID diseaseId, UUID pesticideId, String dosage, Integer interval,
             Boolean isPrimary) {
         Disease disease = diseaseRepository.findById(diseaseId).orElseThrow();

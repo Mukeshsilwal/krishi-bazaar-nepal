@@ -13,7 +13,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+
 import java.util.Map;
 
 /**
@@ -54,7 +54,7 @@ public class WeatherAdvisoryNotificationService {
                 .channel(channel)
                 .priority(priority)
                 .status(NotificationStatus.PENDING)
-                .scheduledAt(LocalDateTime.now())
+                .scheduledAt(com.krishihub.common.util.DateTimeProvider.now())
                 .isRead(false)
                 .build();
 
@@ -69,7 +69,7 @@ public class WeatherAdvisoryNotificationService {
 
             // Update status to delivered
             saved.setStatus(NotificationStatus.SENT);
-            saved.setSentAt(LocalDateTime.now());
+            saved.setSentAt(com.krishihub.common.util.DateTimeProvider.now());
             notificationRepository.save(saved);
 
             log.info("Weather advisory notification sent successfully to farmer: {}", context.getFarmerId());
@@ -160,7 +160,10 @@ public class WeatherAdvisoryNotificationService {
 
         // Add validity
         message.append("\n\n⏰ Valid until: ");
-        message.append(LocalDateTime.now().plusDays(1).toLocalDate());
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(com.krishihub.common.util.DateTimeProvider.now());
+        cal.add(java.util.Calendar.DAY_OF_YEAR, 1);
+        message.append(cal.getTime());
 
         return message.toString();
     }

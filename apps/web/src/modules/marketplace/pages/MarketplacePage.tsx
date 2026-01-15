@@ -11,6 +11,7 @@ export default function MarketplacePage() {
     const navigate = useNavigate();
     const [filters, setFilters] = useState({
         cropName: '',
+        category: '',
         district: '',
         minPrice: '',
         maxPrice: '',
@@ -24,7 +25,7 @@ export default function MarketplacePage() {
         const fetchCrops = async () => {
             try {
                 const response = await listingService.getAvailableCrops();
-                if (response.success) {
+                if (response.code === 0) {
                     setAvailableCrops(response.data);
                 }
             } catch (err) {
@@ -54,7 +55,7 @@ export default function MarketplacePage() {
                     <div className="max-w-2xl mx-auto">
                         <SearchBar
                             value={filters.cropName}
-                            onChange={(val) => setFilters({ ...filters, cropName: val })}
+                            onChange={(val) => setFilters({ ...filters, cropName: val, category: '' })}
                             onSearch={handleSearch}
                             suggestions={availableCrops}
                             placeholder={t('marketplace.search.placeholder')}
@@ -65,13 +66,9 @@ export default function MarketplacePage() {
                             <p className="text-green-100 text-sm mb-4 font-medium uppercase tracking-wider opacity-90">Browse by Category</p>
                             <VisualFilter
                                 onSelect={(cat) => {
-                                    // For now, setting cropName to category label 
-                                    // ideally backend supports category filter
-                                    // converting 'vegetables' -> 'vegetable' for singular match potential
-                                    const term = cat === 'vegetables' ? 'vegetable' : (cat === 'fruits' ? 'fruit' : cat);
-                                    setFilters({ ...filters, cropName: term });
+                                    setFilters({ ...filters, category: cat, cropName: '' });
                                 }}
-                                selectedCategory={filters.cropName.toLowerCase().includes('veg') ? 'vegetables' : (filters.cropName.toLowerCase().includes('fruit') ? 'fruits' : undefined)}
+                                selectedCategory={filters.category}
                             />
                         </div>
                     </div>

@@ -19,7 +19,7 @@ export default function OrderDetailPage() {
     const fetchOrder = async () => {
         try {
             const response = await orderService.getOrder(id!);
-            if (response.success) {
+            if (response.code === 0) {
                 setOrder(response.data);
             }
         } catch (error) {
@@ -33,7 +33,7 @@ export default function OrderDetailPage() {
         setActionLoading(true);
         try {
             const response = await orderService.updateOrderStatus(id!, { status: 'CONFIRMED' });
-            if (response.success) {
+            if (response.code === 0) {
                 setOrder(response.data);
                 alert('Order confirmed successfully!');
             }
@@ -52,7 +52,7 @@ export default function OrderDetailPage() {
                 paymentMethod: method,
             });
 
-            if (response.success) {
+            if (response.code === 0) {
                 if (response.data.data && response.data.data.htmlForm) {
                     // eSewa returns a full HTML form
                     // Create a container, inject the form, and submit it
@@ -82,7 +82,7 @@ export default function OrderDetailPage() {
         setActionLoading(true);
         try {
             const response = await orderService.updateOrderStatus(id!, { status: 'READY' });
-            if (response.success) {
+            if (response.code === 0) {
                 setOrder(response.data);
                 alert('Order marked as ready!');
             }
@@ -97,7 +97,7 @@ export default function OrderDetailPage() {
         setActionLoading(true);
         try {
             const response = await orderService.updateOrderStatus(id!, { status });
-            if (response.success) {
+            if (response.code === 0) {
                 setOrder(response.data);
                 alert(`Order marked as ${status.replace(/_/g, ' ').toLowerCase()}!`);
             }
@@ -147,8 +147,8 @@ export default function OrderDetailPage() {
         );
     }
 
-    const isBuyer = user?.id === order.buyer.id;
-    const isFarmer = user?.id === order.farmer.id;
+    const isBuyer = user?.id === order.buyer?.id;
+    const isFarmer = user?.id === order.farmer?.id;
 
 
 
@@ -189,22 +189,54 @@ export default function OrderDetailPage() {
                         </span>
                     </div>
 
-                    {/* Listing Info */}
+                    {/* Listing Info or Agri Order Info */}
                     <div className="border-t pt-6 mb-6">
-                        <h2 className="font-semibold text-gray-900 mb-4">Crop Details</h2>
+                        <h2 className="font-semibold text-gray-900 mb-4">
+                            {order.listing ? 'Crop Details' : 'Product Details'}
+                        </h2>
                         <div className="bg-gray-50 rounded-lg p-4">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">{order.listing.cropName}</h3>
-                            <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                                <div>
-                                    <p>Quantity: {order.quantity} {order.listing.unit}</p>
-                                    <p>Price per {order.listing.unit}: NPR {order.listing.pricePerUnit}</p>
-                                </div>
-                                <div>
-                                    <p className="text-xl font-bold text-green-600">
-                                        Total: NPR {order.totalAmount}
-                                    </p>
-                                </div>
-                            </div>
+                            {order.listing ? (
+                                <>
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{order.listing.cropName}</h3>
+                                    <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                                        <div>
+                                            <p>Quantity: {order.quantity} {order.listing.unit}</p>
+                                            <p>Price per {order.listing.unit}: NPR {order.listing.pricePerUnit}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xl font-bold text-green-600">
+                                                Total: NPR {order.totalAmount}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    {order.items && order.items.map((item: any, index: number) => (
+                                        <div key={item.id || index} className="mb-4 last:mb-0 border-b last:border-0 border-gray-200 pb-4 last:pb-0">
+                                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                                                {item.agriProduct?.name || 'Unknown Product'}
+                                            </h3>
+                                            <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                                                <div>
+                                                    <p>Quantity: {item.quantity}</p>
+                                                    <p>Price: NPR {item.pricePerUnit}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="font-semibold text-gray-900">
+                                                        Subtotal: NPR {item.totalPrice}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <div className="mt-4 pt-4 border-t border-gray-200 text-right">
+                                        <p className="text-xl font-bold text-green-600">
+                                            Grand Total: NPR {order.totalAmount}
+                                        </p>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
 
@@ -214,17 +246,28 @@ export default function OrderDetailPage() {
                             <div>
                                 <h3 className="font-semibold text-gray-900 mb-2">Buyer</h3>
                                 <div className="text-sm text-gray-600">
-                                    <p>{order.buyer.name}</p>
-                                    <p>{order.buyer.mobileNumber}</p>
-                                    <p>{order.buyer.district}</p>
+                                    <p>{order.buyer?.name || 'Unknown Buyer'}</p>
+                                    <p>{order.buyer?.mobileNumber || 'N/A'}</p>
+                                    <p>{order.buyer?.district || 'N/A'}</p>
                                 </div>
                             </div>
                             <div>
-                                <h3 className="font-semibold text-gray-900 mb-2">Farmer</h3>
+                                <h3 className="font-semibold text-gray-900 mb-2">
+                                    {order.farmer ? 'Farmer' : 'Seller (Platform)'}
+                                </h3>
                                 <div className="text-sm text-gray-600">
-                                    <p>{order.farmer.name}</p>
-                                    <p>{order.farmer.mobileNumber}</p>
-                                    <p>{order.farmer.district}</p>
+                                    {order.farmer ? (
+                                        <>
+                                            <p>{order.farmer.name}</p>
+                                            <p>{order.farmer.mobileNumber}</p>
+                                            <p>{order.farmer.district}</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p>Krishi Bazaar Store</p>
+                                            <p>Official Retailer</p>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>

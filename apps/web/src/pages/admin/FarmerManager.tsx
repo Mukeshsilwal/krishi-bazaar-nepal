@@ -24,6 +24,7 @@ import { Eye, CheckCircle, XCircle, Download, Upload, Search, Users, UserCheck, 
 import api from '@/services/api';
 import { ADMIN_ENDPOINTS } from '@/config/endpoints';
 import { toast } from 'sonner';
+import { resolveUserMessage } from '@/utils/errorUtils';
 
 interface Farmer {
     id: string;
@@ -78,7 +79,7 @@ const FarmerManager = () => {
             if (debouncedSearchTerm) params.append('search', debouncedSearchTerm);
 
             const res = await api.get(`${ADMIN_ENDPOINTS.FARMERS}?${params.toString()}`);
-            if (res.data.success) {
+            if (res.data.code === 0) {
                 setFarmers(res.data.data.content);
                 setTotalPages(res.data.data.totalPages);
                 setTotalElements(res.data.data.totalElements);
@@ -92,7 +93,7 @@ const FarmerManager = () => {
     const handleViewProfile = async (id: string) => {
         try {
             const res = await api.get(ADMIN_ENDPOINTS.FARMER_BY_ID(id));
-            if (res.data.success) {
+            if (res.data.code === 0) {
                 setSelectedFarmer(res.data.data);
                 setVerifyMode(null); // Reset mode
                 setOpen(true);
@@ -156,7 +157,7 @@ const FarmerManager = () => {
             fetchFarmers(); // Refresh list
         } catch (err: any) {
             console.error(err);
-            toast.error(err.response?.data?.message || "Failed to import farmers");
+            toast.error(resolveUserMessage(err));
         } finally {
             e.target.value = ''; // Reset input
         }

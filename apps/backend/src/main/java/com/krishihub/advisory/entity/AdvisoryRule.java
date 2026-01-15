@@ -9,7 +9,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
@@ -50,15 +49,18 @@ public class AdvisoryRule {
     private Integer priority;
 
     @Column(name = "effective_from")
-    private LocalDateTime effectiveFrom;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date effectiveFrom;
 
     @Column(name = "effective_to")
-    private LocalDateTime effectiveTo;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date effectiveTo;
 
     @Column(name = "created_by")
     private UUID createdBy;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date createdAt;
 }

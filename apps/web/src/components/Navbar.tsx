@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, User, LogOut, Package, ShoppingBag, MessageCircle, UserCircle } from 'lucide-react';
+import { Menu, X, User, LogOut, Package, ShoppingBag, MessageCircle, UserCircle, ShieldAlert } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../modules/auth/context/AuthContext';
@@ -56,7 +56,7 @@ const Navbar = ({ variant = 'public' }: NavbarProps) => {
               {t('nav.home') || 'Home'}
             </Link>
             <Link
-              to="/#marketplace"
+              to="/marketplace"
               className="text-gray-700 hover:text-green-600 font-medium transition px-1.5 py-2"
             >
               {t('nav.marketplace') || 'Marketplace'}
@@ -77,7 +77,7 @@ const Navbar = ({ variant = 'public' }: NavbarProps) => {
             {/* More Menu - Secondary Navigation */}
             <MoreMenu label={t('nav.more') || 'More'}>
               <Link
-                to="/#prices"
+                to="/prices"
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 transition block"
               >
                 {t('nav.prices') || 'Prices'}
@@ -161,14 +161,24 @@ const Navbar = ({ variant = 'public' }: NavbarProps) => {
                   {showUserMenu && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
                       {user.role === 'FARMER' && (
-                        <Link
-                          to="/my-listings"
-                          onClick={() => setShowUserMenu(false)}
-                          className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100"
-                        >
-                          <Package size={18} />
-                          {t('dashboard.myListings') || 'My Listings'}
-                        </Link>
+                        <>
+                          <Link
+                            to="/my-listings"
+                            onClick={() => setShowUserMenu(false)}
+                            className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100"
+                          >
+                            <Package size={18} />
+                            {t('dashboard.myListings') || 'My Listings'}
+                          </Link>
+                          <Link
+                            to="/advisory-history"
+                            onClick={() => setShowUserMenu(false)}
+                            className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100"
+                          >
+                            <ShieldAlert size={18} />
+                            {language === 'ne' ? 'मेरो सल्लाह' : 'My Advisories'}
+                          </Link>
+                        </>
                       )}
                       <Link
                         to="/my-orders"
@@ -258,14 +268,14 @@ const Navbar = ({ variant = 'public' }: NavbarProps) => {
                 {t('nav.home') || 'Home'}
               </Link>
               <Link
-                to="/#marketplace"
+                to="/marketplace"
                 onClick={() => setIsOpen(false)}
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
               >
                 {t('nav.marketplace') || 'Marketplace'}
               </Link>
               <Link
-                to="/#prices"
+                to="/prices"
                 onClick={() => setIsOpen(false)}
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
               >
@@ -330,13 +340,22 @@ const Navbar = ({ variant = 'public' }: NavbarProps) => {
               {user ? (
                 <>
                   {user.role === 'FARMER' && (
-                    <Link
-                      to="/my-listings"
-                      onClick={() => setIsOpen(false)}
-                      className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-                    >
-                      {t('dashboard.myListings') || 'My Listings'}
-                    </Link>
+                    <>
+                      <Link
+                        to="/my-listings"
+                        onClick={() => setIsOpen(false)}
+                        className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+                      >
+                        {t('dashboard.myListings') || 'My Listings'}
+                      </Link>
+                      <Link
+                        to="/advisory-history"
+                        onClick={() => setIsOpen(false)}
+                        className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+                      >
+                        {language === 'ne' ? 'मेरो सल्लाह' : 'My Advisories'}
+                      </Link>
+                    </>
                   )}
                   <Link
                     to="/my-orders"

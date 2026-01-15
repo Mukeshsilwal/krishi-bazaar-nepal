@@ -3,7 +3,10 @@ package com.krishihub.notification.controller;
 import com.krishihub.notification.entity.NotificationTemplate;
 import com.krishihub.notification.service.AdminNotificationService;
 import com.krishihub.shared.dto.ApiResponse;
+import com.krishihub.shared.dto.PaginatedResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,8 +23,10 @@ public class AdminNotificationController {
     private final com.krishihub.notification.service.NotificationProducerService producerService;
 
     @GetMapping("/templates")
-    public ResponseEntity<ApiResponse<List<NotificationTemplate>>> getTemplates() {
-        return ResponseEntity.ok(ApiResponse.success("Templates fetched", notificationService.getAllTemplates()));
+    public ResponseEntity<ApiResponse<PaginatedResponse<NotificationTemplate>>> getTemplates(
+            @PageableDefault(size = 10, sort = "name") Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success("Templates fetched", 
+                PaginatedResponse.from(notificationService.getTemplates(pageable))));
     }
 
     @PostMapping("/templates")
@@ -33,13 +38,6 @@ public class AdminNotificationController {
     @PostMapping("/send")
     public ResponseEntity<ApiResponse<Void>> sendNotification(@RequestParam String templateName,
             @RequestParam UUID userId, @RequestBody Map<String, String> params) {
-        // Updated to use producer service (this requires refactoring
-        // AdminNotificationService to return Notification object or call producer
-        // directly)
-        // For now, let's keep it simple: AdminNotificationService creates entity,
-        // returns it, controller sends to queue.
-        // OR AdminNotificationService calls producer. Let's assume
-        // AdminNotificationService will be updated to use producer.
         notificationService.sendTemplatedNotification(templateName, userId, params);
         return ResponseEntity.ok(ApiResponse.success("Notification queued", null));
     }

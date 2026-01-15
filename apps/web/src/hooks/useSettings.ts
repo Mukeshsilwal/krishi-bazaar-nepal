@@ -20,7 +20,7 @@ export const useSettings = () => {
         const fetchSettings = async () => {
             try {
                 const res = await api.get('/public/settings');
-                if (res.data.success) {
+                if (res.data.code === 0) {
                     setSettings(res.data.data);
                 }
             } catch (error) {

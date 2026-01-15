@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+
 import java.util.UUID;
 
 /**
@@ -24,8 +24,8 @@ public class AdvisoryLogFilterDTO {
     private UUID ruleId;
     private String district;
     private DeliveryStatus deliveryStatus;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    private java.util.Date startDate;
+    private java.util.Date endDate;
     private String cursor; // For cursor-based pagination
     private Integer limit;
 }

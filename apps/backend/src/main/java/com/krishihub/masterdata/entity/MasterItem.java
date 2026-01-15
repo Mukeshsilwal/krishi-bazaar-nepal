@@ -8,8 +8,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -47,13 +45,17 @@ public class MasterItem {
     @Builder.Default
     private Boolean active = true;
 
-    private LocalDate effectiveFrom;
+    @Temporal(TemporalType.DATE)
+    private java.util.Date effectiveFrom;
 
-    private LocalDate effectiveTo;
+    @Temporal(TemporalType.DATE)
+    private java.util.Date effectiveTo;
 
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date createdAt;
 
     @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date updatedAt;
 }

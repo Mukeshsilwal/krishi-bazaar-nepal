@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -35,10 +34,12 @@ public class WeatherAdvisory {
     @Column(nullable = false)
     private AlertLevel alertLevel;
 
-    private LocalDateTime validUntil;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date validUntil;
 
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date createdAt;
 
     @Builder.Default
     private Boolean active = true;

@@ -2,24 +2,37 @@ package com.krishihub.admin.service;
 
 import com.krishihub.admin.dto.FarmerProfileDto;
 import com.krishihub.auth.entity.User;
+import com.krishihub.auth.model.CustomUserDetails;
 import com.krishihub.auth.repository.UserRepository;
 import com.krishihub.marketplace.entity.CropListing;
+import com.krishihub.notification.entity.Notification;
+import com.krishihub.notification.enums.NotificationChannel;
+import com.krishihub.notification.enums.NotificationStatus;
+import com.krishihub.notification.repository.NotificationRepository;
+import com.krishihub.notification.service.NotificationSenderService;
 import com.krishihub.order.entity.Order;
 import com.krishihub.marketplace.repository.CropListingRepository;
 import com.krishihub.order.repository.OrderRepository;
 import com.krishihub.shared.exception.ResourceNotFoundException;
+import com.opencsv.CSVReader;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.krishihub.admin.dto.FarmerVerificationRequest;
 import jakarta.transaction.Transactional;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,11 +42,11 @@ public class AdminFarmerService {
         private final UserRepository userRepository;
         private final CropListingRepository cropListingRepository;
         private final OrderRepository orderRepository;
-        private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
-        private final com.krishihub.notification.repository.NotificationRepository notificationRepository;
-        private final com.krishihub.notification.service.NotificationSenderService notificationSenderService;
+        private final PasswordEncoder passwordEncoder;
+        private final NotificationRepository notificationRepository;
+        private final NotificationSenderService notificationSenderService;
 
-        public org.springframework.data.domain.Page<User> getAllFarmers(String search, Pageable pageable) {
+        public Page<User> getAllFarmers(String search, Pageable pageable) {
                 return userRepository.searchUsers(User.UserRole.FARMER, null, search, pageable);
         }
 
@@ -63,7 +76,7 @@ public class AdminFarmerService {
                                 .build();
         }
 
-        private final com.krishihub.admin.service.AuditService auditService;
+        private final AuditService auditService;
 
         @Transactional
         public User verifyFarmer(UUID farmerId, FarmerVerificationRequest request) {
@@ -91,7 +104,7 @@ public class AdminFarmerService {
                 return saved;
         }
 
-        public void exportFarmers(java.io.PrintWriter writer) {
+        public void exportFarmers(PrintWriter writer) {
                 try {
                         List<User> farmers = getAllFarmers(null, PageRequest.of(0, 10000)).getContent(); // Export all (limit 10k)
                         com.opencsv.CSVWriter csvWriter = new com.opencsv.CSVWriter(writer);
@@ -119,9 +132,9 @@ public class AdminFarmerService {
         }
 
         @Transactional
-        public void importFarmers(org.springframework.web.multipart.MultipartFile file) {
-                try (java.io.Reader reader = new java.io.InputStreamReader(file.getInputStream())) {
-                        com.opencsv.CSVReader csvReader = new com.opencsv.CSVReader(reader);
+        public void importFarmers(MultipartFile file) {
+                try (Reader reader = new InputStreamReader(file.getInputStream())) {
+                        CSVReader csvReader = new CSVReader(reader);
                         List<String[]> records = csvReader.readAll();
 
                         // Skip header if present (assuming first row is header)
@@ -147,7 +160,7 @@ public class AdminFarmerService {
                                         continue; // Skip existing
                                 }
                                 
-                                String rawPassword = java.util.UUID.randomUUID().toString().substring(0, 8);
+                                String rawPassword = UUID.randomUUID().toString().substring(0, 8);
                                 String encodedPassword = passwordEncoder.encode(rawPassword);
 
                                 User newFarmer = User.builder()
@@ -158,7 +171,7 @@ public class AdminFarmerService {
                                                 .ward(ward)
                                                 .role(User.UserRole.FARMER)
                                                 .verified(false) // Default unverified for imported
-                                                .createdAt(java.time.LocalDateTime.now())
+                                                .createdAt(new Date())
                                                 .passwordHash(encodedPassword)
                                                 .build();
 
@@ -183,18 +196,18 @@ public class AdminFarmerService {
         private void createAndSendWelcomeNotification(User user, String password) {
              try {
                 String message = "Welcome to Krishi Bazaar! Your account has been created. Password: " + password;
-                com.krishihub.notification.entity.Notification notification = com.krishihub.notification.entity.Notification.builder()
+                Notification notification = Notification.builder()
                     .userId(user.getId())
                     .title("Welcome to Krishi Bazaar")
                     .message(message)
                     .type("ACCOUNT_CREATED")
-                    .channel(user.getEmail() != null ? com.krishihub.notification.enums.NotificationChannel.EMAIL : com.krishihub.notification.enums.NotificationChannel.SMS)
-                    .status(com.krishihub.notification.enums.NotificationStatus.PENDING)
+                    .channel(user.getEmail() != null ? NotificationChannel.EMAIL : NotificationChannel.SMS)
+                    .status(NotificationStatus.PENDING)
                     .isRead(false)
-                    .createdAt(java.time.LocalDateTime.now())
+                    .createdAt(new Date())
                     .build();
                 
-                com.krishihub.notification.entity.Notification saved = notificationRepository.save(notification);
+                Notification saved = notificationRepository.save(notification);
                 notificationSenderService.sendNotification(saved.getId());
              } catch (Exception e) {
                  // Log but don't fail import
@@ -204,9 +217,9 @@ public class AdminFarmerService {
         
         private UUID getCurrentUserId() {
             try {
-                org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-                if (auth != null && auth.getPrincipal() instanceof com.krishihub.auth.model.CustomUserDetails) {
-                    return ((com.krishihub.auth.model.CustomUserDetails) auth.getPrincipal()).getId();
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                if (auth != null && auth.getPrincipal() instanceof CustomUserDetails) {
+                    return ((CustomUserDetails) auth.getPrincipal()).getId();
                 }
             } catch (Exception e) {
                 // ignore

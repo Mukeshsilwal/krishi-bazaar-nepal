@@ -3,6 +3,19 @@ import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { Link } from 'react-router-dom';
 
+/**
+ * Reusable dashboard stat card component with loading and empty states.
+ *
+ * Design Notes:
+ * - Supports skeleton loading for better perceived performance on slow networks.
+ * - Empty state (when value is "0") shows a call-to-action link to encourage engagement.
+ * - Trend indicator shows percentage change with color-coded arrows.
+ *
+ * Important:
+ * - Empty state only shows when value is exactly "0" AND emptyStateLink is provided.
+ * - This prevents showing empty state for legitimate zero values (e.g., "0 pending orders").
+ * - Skeleton loader uses same layout as actual content to prevent layout shift.
+ */
 interface StatCardProps {
     titleEn: string;
     titleNe: string;

@@ -15,7 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -81,7 +80,7 @@ public class AIDiagnosisService {
         diagnosis.setReviewStatus(request.getStatus());
         diagnosis.setReviewedBy(request.getReviewedBy());
         diagnosis.setReviewNotes(request.getReviewNotes());
-        diagnosis.setReviewedAt(LocalDateTime.now());
+        diagnosis.setReviewedAt(com.krishihub.common.util.DateTimeProvider.now());
 
         if (request.getStatus() == ReviewStatus.APPROVED) {
             diagnosis.setFinalDiagnosis(

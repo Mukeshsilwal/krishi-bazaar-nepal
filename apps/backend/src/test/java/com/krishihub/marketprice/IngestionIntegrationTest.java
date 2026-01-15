@@ -12,7 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class IngestionIntegrationTest {
                 .maxPrice(new BigDecimal("60"))
                 .avgPrice(new BigDecimal("55"))
                 .unit("KG")
-                .priceDate(LocalDate.now())
+                .priceDate(com.krishihub.common.util.DateTimeProvider.today())
                 .source("TEST_SOURCE")
                 .build();
 
@@ -56,7 +56,7 @@ public class IngestionIntegrationTest {
                 .maxPrice(new BigDecimal("62"))
                 .avgPrice(new BigDecimal("57"))
                 .unit("KG")
-                .priceDate(LocalDate.now())
+                .priceDate(com.krishihub.common.util.DateTimeProvider.today())
                 .source("TEST_SOURCE")
                 .build();
 

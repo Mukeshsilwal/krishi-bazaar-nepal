@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
+import { resolveUserMessage } from '../../utils/errorUtils';
 import api from '../../services/api';
 import { AUTH_ENDPOINTS } from '../../config/endpoints';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 const AdminRegisterPage = () => {
     const [formData, setFormData] = useState({
         name: '',
+        email: '',
         mobileNumber: '',
         password: '',
         adminSecret: ''
@@ -25,13 +27,13 @@ const AdminRegisterPage = () => {
 
         try {
             const res = await api.post(AUTH_ENDPOINTS.ADMIN_REGISTER, formData);
-            if (res.data.success) {
+            if (res.data.code === 0) {
                 toast.success("Admin registered successfully! Please login.");
                 navigate('/admin/login');
             }
         } catch (err: any) {
             console.error(err);
-            toast.error(err.response?.data?.message || "Registration failed");
+            toast.error(resolveUserMessage(err));
         } finally {
             setLoading(false);
         }
@@ -53,6 +55,17 @@ const AdminRegisterPage = () => {
                                 placeholder="Admin Name"
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="email">Email Address</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="admin@example.com"
+                                value={formData.email}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                 required
                             />
                         </div>

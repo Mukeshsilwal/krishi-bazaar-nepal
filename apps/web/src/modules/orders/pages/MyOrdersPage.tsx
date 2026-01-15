@@ -182,7 +182,10 @@ export default function MyOrdersPage() {
                                                 {getStatusIcon(order.status)}
                                                 <div>
                                                     <h3 className="text-lg font-semibold text-gray-900">
-                                                        {order.listing?.cropName || 'Unknown Crop'}
+                                                        {order.listing?.cropName ||
+                                                            (order.items && order.items.length > 0
+                                                                ? `${order.items[0].agriProduct?.name || 'Unknown Product'}${order.items.length > 1 ? ` + ${order.items.length - 1} more` : ''}`
+                                                                : 'Unknown Order')}
                                                     </h3>
                                                     <p className="text-sm text-gray-600">
                                                         Order #{order.id.substring(0, 8)}

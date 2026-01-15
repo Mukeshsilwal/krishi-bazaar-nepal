@@ -1,17 +1,17 @@
 package com.krishihub.admin.controller;
 
-import org.springframework.security.access.prepost.PreAuthorize;
-
 import com.krishihub.admin.dto.AdminDashboardStats;
 import com.krishihub.admin.service.AdminService;
 import com.krishihub.auth.entity.User;
 import com.krishihub.shared.dto.ApiResponse;
+import com.krishihub.shared.dto.PaginatedResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -28,16 +28,17 @@ public class AdminController {
     }
 
     @GetMapping("/activities")
-    public ResponseEntity<ApiResponse<org.springframework.data.domain.Page<com.krishihub.analytics.entity.UserActivity>>> getActivities(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+    public ResponseEntity<ApiResponse<PaginatedResponse<com.krishihub.analytics.entity.UserActivity>>> getActivities(
+            @PageableDefault(size = 20) Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success("Activities fetched",
-                adminService.getAllActivities(org.springframework.data.domain.PageRequest.of(page, size))));
+                PaginatedResponse.from(adminService.getAllActivities(pageable))));
     }
 
     @GetMapping("/vendors/pending")
-    public ResponseEntity<ApiResponse<List<User>>> getPendingVendors() {
-        return ResponseEntity.ok(ApiResponse.success(adminService.getPendingVendors()));
+    public ResponseEntity<ApiResponse<PaginatedResponse<User>>> getPendingVendors(
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(
+                PaginatedResponse.from(adminService.getPendingVendors(pageable))));
     }
 
     @PostMapping("/users/{userId}/approve")

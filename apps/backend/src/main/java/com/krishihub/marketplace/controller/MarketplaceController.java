@@ -47,12 +47,13 @@ public class MarketplaceController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String cropName,
+            @RequestParam(required = false) String category,
             @RequestParam(required = false) String district,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) String sortBy) {
         Page<ListingDto> listings = marketplaceService.getAllListings(
-                page, size, cropName, district, minPrice, maxPrice, sortBy);
+                page, size, cropName, category, district, minPrice, maxPrice, sortBy);
         return ResponseEntity.ok(ApiResponse.success(listings));
     }
 

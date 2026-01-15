@@ -54,7 +54,7 @@ const CmsDashboard = () => {
     const fetchArticles = async () => {
         try {
             const res = await api.get(CMS_ENDPOINTS.ARTICLES);
-            if (res.data.success) {
+            if (res.data.code === 0) {
                 setArticles(res.data.data); // Assuming data is nested under 'data' property
             }
         } catch (error) {

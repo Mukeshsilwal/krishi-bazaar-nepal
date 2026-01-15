@@ -1,6 +1,6 @@
 package com.krishihub.order.validator;
 
-import com.krishihub.order.dto.OrderStatus;
+import com.krishihub.order.enums.OrderStatus;
 import com.krishihub.shared.exception.BadRequestException;
 import org.springframework.stereotype.Component;
 

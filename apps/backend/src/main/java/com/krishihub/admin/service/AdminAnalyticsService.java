@@ -1,5 +1,6 @@
 package com.krishihub.admin.service;
 
+import com.krishihub.admin.dto.AdminDashboardStats;
 import com.krishihub.auth.repository.UserRepository;
 import com.krishihub.knowledge.entity.ArticleStatus;
 import com.krishihub.knowledge.repository.ArticleRepository;
@@ -24,7 +25,7 @@ public class AdminAnalyticsService {
         long totalArticles = articleRepository.count();
         long publishedArticles = articleRepository.countByStatus(ArticleStatus.PUBLISHED);
 
-        return com.krishihub.admin.dto.AdminDashboardStats.builder()
+        return AdminDashboardStats.builder()
                 .totalUsers(totalUsers)
                 .totalOrders(totalOrders)
                 .totalArticles(totalArticles)

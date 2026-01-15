@@ -39,6 +39,8 @@ const Sidebar = () => {
     if (user) {
         navItems.push({ icon: Wallet, label: 'Finance', labelNe: 'वित्त', path: '/finance' });
         navItems.push({ icon: BrainCircuit, label: 'AI Assistant', labelNe: 'AI सहायक', path: '/ai-assistant' });
+        // Added for easier access to feedback
+        navItems.push({ icon: ShieldAlert, label: 'My Advisories', labelNe: 'मेरो सल्लाह', path: '/advisory-history' });
     }
 
     if (user?.role === 'ADMIN') {

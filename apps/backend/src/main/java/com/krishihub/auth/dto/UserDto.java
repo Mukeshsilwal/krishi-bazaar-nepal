@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+
 import java.util.UUID;
 
 @Data
@@ -24,7 +24,7 @@ public class UserDto {
     private String ward;
     private BigDecimal landSize;
     private Boolean verified;
-    private LocalDateTime createdAt;
+    private java.util.Date createdAt;
 
     public static UserDto fromEntity(User user) {
         return UserDto.builder()
