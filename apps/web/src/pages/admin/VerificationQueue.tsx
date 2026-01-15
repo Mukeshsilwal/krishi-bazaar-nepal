@@ -42,7 +42,7 @@ const VerificationQueue = () => {
         try {
             // Request large size for now
             const response = await api.get('/admin/vendors/pending?page=0&size=100');
-            if (response.data.success) {
+            if (response.data.code === 0) {
                 // Backend now returns PaginatedResponse
                 setUsers(response.data.data.content);
             }

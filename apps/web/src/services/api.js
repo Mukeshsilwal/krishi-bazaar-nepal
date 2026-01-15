@@ -64,7 +64,7 @@ api.interceptors.response.use(
             refreshToken: refreshToken
           });
 
-          if (response.data?.success) {
+          if (response.data?.code === 0) {
             const { accessToken, refreshToken: newRefreshToken, user } = response.data.data;
 
             // Update local storage

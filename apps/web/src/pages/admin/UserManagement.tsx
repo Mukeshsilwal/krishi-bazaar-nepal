@@ -75,7 +75,8 @@ const UserManagement = () => {
 
             const response = await api.get(`${ADMIN_ENDPOINTS.USERS}?${params.toString()}`);
 
-            if (response.data.success) {
+            // Updated to check code === 0 instead of deprecated success boolean
+            if (response.data.code === 0) {
                 const newUsers = response.data.data.content;
                 setUsers(prev => isReset ? newUsers : [...prev, ...newUsers]);
                 setHasMore(!response.data.data.last);
@@ -105,8 +106,13 @@ const UserManagement = () => {
         setUsers(users.map(u => u.id === user.id ? { ...u, enabled: !u.enabled } : u));
 
         try {
-            await api.patch(ADMIN_ENDPOINTS.USER_STATUS(user.id), { enabled: !user.enabled });
-            toast.success(`User ${!user.enabled ? 'activated' : 'deactivated'} successfully`);
+            const response = await api.patch(ADMIN_ENDPOINTS.USER_STATUS(user.id), { enabled: !user.enabled });
+
+            if (response.data.code === 0) {
+                toast.success(`User ${!user.enabled ? 'activated' : 'deactivated'} successfully`);
+            } else {
+                throw new Error(response.data.message || 'Operation failed');
+            }
         } catch (error) {
             // Revert on failure
             setUsers(originalUsers);

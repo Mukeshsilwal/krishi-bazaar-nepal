@@ -65,7 +65,7 @@ const RoleManagement = () => {
     const fetchRoles = async () => {
         try {
             const response = await api.get(ADMIN_RBAC_ENDPOINTS.ROLES);
-            if (response.data.success) {
+            if (response.data.code === 0) {
                 setRoles(response.data.data);
             }
         } catch (error) {
@@ -77,7 +77,7 @@ const RoleManagement = () => {
     const fetchPermissions = async () => {
         try {
             const response = await api.get(ADMIN_RBAC_ENDPOINTS.PERMISSIONS);
-            if (response.data.success) {
+            if (response.data.code === 0) {
                 setPermissions(response.data.data);
             }
         } catch (error) {
