@@ -26,6 +26,8 @@ public class UserDto {
     private Boolean verified;
     private java.util.Date createdAt;
 
+    private java.util.List<com.krishihub.admin.dto.RoleDto> assignedRoles;
+
     public static UserDto fromEntity(User user) {
         return UserDto.builder()
                 .id(user.getId())
@@ -38,6 +40,17 @@ public class UserDto {
                 .landSize(user.getLandSize())
                 .verified(user.getVerified())
                 .createdAt(user.getCreatedAt())
+                .assignedRoles(user.getRoles().stream()
+                        .map(role -> com.krishihub.admin.dto.RoleDto.builder()
+                                .id(role.getId())
+                                .name(role.getName())
+                                .description(role.getDescription())
+                                .isSystemDefined(role.getIsSystemDefined())
+                                .permissions(role.getPermissions().stream()
+                                        .map(com.krishihub.auth.entity.Permission::getName)
+                                        .collect(java.util.stream.Collectors.toSet()))
+                                .build())
+                        .collect(java.util.stream.Collectors.toList()))
                 .build();
     }
 }

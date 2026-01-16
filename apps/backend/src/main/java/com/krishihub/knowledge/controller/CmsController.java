@@ -13,6 +13,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/admin/cms")
 @RequiredArgsConstructor
+@org.springframework.security.access.prepost.PreAuthorize("hasAuthority(T(com.krishihub.auth.constant.PermissionConstants).CMS_MANAGE)")
 public class CmsController {
 
     private final CmsService cmsService;

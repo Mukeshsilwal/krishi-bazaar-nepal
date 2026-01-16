@@ -42,10 +42,12 @@ import {
 const AdminLayoutContent: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { language, setLanguage } = useLanguage();
-  const { user, logout } = useAuth();
+  const { user, logout, hasPermission } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { title, titleNe } = useAdminTitle();
+
+
 
   const menuItems = [
     {
@@ -154,7 +156,8 @@ const AdminLayoutContent: React.FC = () => {
       path: '/admin/notifications',
       icon: MessageSquare,
       labelEn: 'Notifications',
-      labelNe: 'सूचनाहरू'
+      labelNe: 'सूचनाहरू',
+      requiredPermission: 'NOTIFICATION:MANAGE'
     },
     {
       path: '/admin/farmers',
@@ -233,7 +236,8 @@ const AdminLayoutContent: React.FC = () => {
 
         {/* Navigation */}
         <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-4rem)]">
-          {menuItems.map((item) => {
+          {menuItems.map((item: any) => {
+            if (item.requiredPermission && !hasPermission(item.requiredPermission)) return null;
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
             return (

@@ -18,7 +18,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/admin/diagnosis")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('ADMIN:PANEL')")
 public class AdminDiagnosisController {
 
     private final AIDiagnosisService diagnosisService;

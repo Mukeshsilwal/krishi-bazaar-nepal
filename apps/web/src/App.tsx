@@ -75,6 +75,7 @@ const UserManagement = lazy(() => import('./pages/admin/UserManagement'));
 const SourceManager = lazy(() => import('./pages/admin/SourceManager'));
 const ModerationQueue = lazy(() => import('./pages/admin/ModerationQueue'));
 const VerificationQueue = lazy(() => import('./pages/admin/VerificationQueue'));
+const UserVerificationPage = lazy(() => import('./pages/admin/UserVerificationPage'));
 const ContentDashboard = lazy(() => import('./pages/admin/content/ContentDashboard'));
 const ContentEditor = lazy(() => import('./pages/admin/content/ContentEditor'));
 const MarketPriceManager = lazy(() => import('./pages/admin/MarketPriceManager'));
@@ -91,6 +92,7 @@ const CartPage = lazy(() => import('./features/agriStore/CartPage'));
 const CheckoutPage = lazy(() => import('./features/agriStore/CheckoutPage'));
 const AgriProductManager = lazy(() => import('./pages/admin/AgriProductManager'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const UnauthorizedPage = lazy(() => import('./pages/UnauthorizedPage'));
 
 // Legal Pages
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
@@ -140,6 +142,8 @@ function App() {
                       <Route path="/register" element={<RegisterPage />} />
                       <Route path="/admin/login" element={<AdminLoginPage />} />
                       <Route path="/admin/register" element={<AdminRegisterPage />} />
+                      <Route path="/admin/forgot-password" element={<ForgotPasswordPage />} />
+                      <Route path="/admin/reset-password" element={<ResetPasswordPage />} />
                       <Route path="/marketplace/create" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
                       <Route path="/edit-listing/:id" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
                       <Route path="/orders" element={<ProtectedRoute><MyOrdersPage /></ProtectedRoute>} />
@@ -169,9 +173,8 @@ function App() {
                     </Route>
 
                     {/* Admin Routes */}
-                    {/* Admin Routes */}
                     <Route path="/admin" element={
-                      <ProtectedRoute requiredRole="ADMIN">
+                      <ProtectedRoute requiredAnyPermission={["ADMIN:PANEL"]}>
                         <RouteErrorBoundary>
                           <AdminLayout />
                         </RouteErrorBoundary>
@@ -201,6 +204,7 @@ function App() {
                       <Route path="sources" element={<SourceManager />} />
                       <Route path="moderation" element={<ModerationQueue />} />
                       <Route path="verification" element={<VerificationQueue />} />
+                      <Route path="user-verification" element={<UserVerificationPage />} />
                       <Route path="content" element={<ContentDashboard />} />
                       <Route path="content/:id" element={<ContentEditor />} />
                       <Route path="market-prices" element={<MarketPriceManager />} />
@@ -210,6 +214,9 @@ function App() {
                       <Route path="logistics" element={<AdminLogisticsPage />} />
 
                     </Route>
+
+                    {/* Unauthorized Page */}
+                    <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
                     {/* 404 Fallback */}
                     <Route path="*" element={<NotFoundPage />} />

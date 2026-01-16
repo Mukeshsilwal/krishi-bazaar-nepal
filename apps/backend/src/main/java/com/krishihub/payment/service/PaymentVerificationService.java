@@ -73,7 +73,7 @@ public class PaymentVerificationService {
                      confirmId = transaction.getOrder().getId().toString();
                  }
                  
-                 paymentService.verifyPayment(transaction.getId(), confirmId);
+                 paymentService.verifyPayment(transaction.getId().toString(), confirmId);
                  return true;
             } else {
                  log.debug("Verification failed for txn {}", transaction.getId());

@@ -12,7 +12,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/admin/agri-store/products")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('AGRISTORE:MANAGE')")
 public class AdminAgriProductController {
 
     private final AgriProductService agriProductService;

@@ -19,7 +19,7 @@ public class AdminAnalyticsController {
     private final AdminAnalyticsService analyticsService;
 
     @GetMapping("/dashboard")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:ANALYTICS')")
     public ResponseEntity<ApiResponse<AdminDashboardStats>> getDashboardStats() {
         AdminDashboardStats stats = analyticsService.getDashboardStats();
         return ResponseEntity.ok(ApiResponse.success("Dashboard stats fetched", stats));

@@ -49,10 +49,18 @@ public class JwtUtil {
             Map<String, Object> extraClaims,
             UserDetails userDetails,
             long expiration) {
+        
+        // Extract userId if CustomUserDetails
+        Object userId = null;
+        if (userDetails instanceof com.krishihub.auth.model.CustomUserDetails) {
+            userId = ((com.krishihub.auth.model.CustomUserDetails) userDetails).getId().toString();
+        }
+
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
+                .claim("userId", userId) // Add userId for identification
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)

@@ -1,20 +1,29 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { useMyListings } from '../hooks/useMyListings';
 import { useLanguage } from '../../../context/LanguageContext';
 import { Plus, Edit, Trash2, Eye, RefreshCw } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export default function MyListingsPage() {
     const { listings, loading, error, deleteListing, refetch } = useMyListings();
     const { t } = useLanguage();
+    const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string | null }>({ open: false, id: null });
 
-    const handleDelete = async (id: string) => {
-        if (window.confirm(t('listings.confirmDelete') || 'Are you sure you want to delete this listing?')) {
-            try {
-                await deleteListing(id);
-            } catch (err) {
-                alert('Failed to delete listing');
-            }
+    const handleDelete = (id: string) => {
+        setDeleteDialog({ open: true, id });
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteDialog.id) return;
+
+        try {
+            await deleteListing(deleteDialog.id);
+        } catch (err) {
+            toast.error('Failed to delete listing');
+        } finally {
+            setDeleteDialog({ open: false, id: null });
         }
     };
 
@@ -200,6 +209,18 @@ export default function MyListingsPage() {
                     </>
                 )}
             </div>
+
+            <ConfirmDialog
+                open={deleteDialog.open}
+                onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}
+                onConfirm={confirmDelete}
+                title={t('listings.actions.delete') || "Delete Listing"}
+                description={t('listings.confirmDelete') || "Are you sure you want to delete this listing? This action cannot be undone."}
+                confirmText={t('listings.actions.delete') || "Delete"}
+                cancelText={t('common.cancel') || "Cancel"}
+                variant="destructive"
+                icon={<Trash2 className="h-6 w-6 text-red-600" />}
+            />
         </div>
     );
 }

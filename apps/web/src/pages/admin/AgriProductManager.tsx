@@ -28,6 +28,7 @@ import { Plus, Search, Edit, Trash2, Loader2, Package } from 'lucide-react';
 import { toast } from 'sonner';
 import { agriStoreService, AgriProduct } from '@/services/agriStoreService';
 import { Badge } from '@/components/ui/badge';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -41,6 +42,7 @@ const AgriProductManager = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<AgriProduct | null>(null);
     const [saving, setSaving] = useState(false);
+    const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string | null }>({ open: false, id: null });
 
     // Form State
     const [formData, setFormData] = useState<Partial<AgriProduct>>({
@@ -124,15 +126,21 @@ const AgriProductManager = () => {
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (window.confirm("Are you sure you want to delete this product?")) {
-            try {
-                await agriStoreService.deleteProduct(id);
-                toast.success("Product deleted successfully");
-                fetchProducts();
-            } catch (error) {
-                toast.error("Failed to delete product");
-            }
+    const handleDelete = (id: string) => {
+        setDeleteDialog({ open: true, id });
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteDialog.id) return;
+
+        try {
+            await agriStoreService.deleteProduct(deleteDialog.id);
+            toast.success("Product deleted successfully");
+            fetchProducts();
+        } catch (error) {
+            toast.error("Failed to delete product");
+        } finally {
+            setDeleteDialog({ open: false, id: null });
         }
     };
 
@@ -374,7 +382,20 @@ const AgriProductManager = () => {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </div>
+
+
+            <ConfirmDialog
+                open={deleteDialog.open}
+                onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}
+                onConfirm={confirmDelete}
+                title="Delete Product"
+                description="Are you sure you want to delete this product? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+                variant="destructive"
+                icon={<Trash2 className="h-6 w-6 text-red-600" />}
+            />
+        </div >
     );
 };
 

@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import marketPriceService from '../modules/marketplace/services/marketPriceService';
 import { useAuth } from '../modules/auth/context/AuthContext';
 import { Bell, Trash2, Plus } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 const PriceAlerts = () => {
     const { user } = useAuth();
-    const [alerts, setAlerts] = useState([]);
+    const [alerts, setAlerts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ const PriceAlerts = () => {
         targetPrice: '',
         condition: 'BELOW'
     });
+    const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string | null }>({ open: false, id: null });
 
     useEffect(() => {
         if (user) {
@@ -47,14 +49,20 @@ const PriceAlerts = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure?')) {
-            try {
-                await marketPriceService.deleteAlert(id);
-                loadAlerts();
-            } catch (error) {
-                console.error('Failed to delete alert', error);
-            }
+    const handleDelete = (id: string) => {
+        setDeleteDialog({ open: true, id });
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteDialog.id) return;
+
+        try {
+            await marketPriceService.deleteAlert(deleteDialog.id);
+            loadAlerts();
+        } catch (error) {
+            console.error('Failed to delete alert', error);
+        } finally {
+            setDeleteDialog({ open: false, id: null });
         }
     };
 
@@ -145,6 +153,19 @@ const PriceAlerts = () => {
                     ))}
                 </div>
             )}
+
+
+            <ConfirmDialog
+                open={deleteDialog.open}
+                onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}
+                onConfirm={confirmDelete}
+                title="Delete Alert"
+                description="Are you sure you want to delete this price alert? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+                variant="destructive"
+                icon={<Trash2 className="h-6 w-6 text-red-600" />}
+            />
         </div>
     );
 };

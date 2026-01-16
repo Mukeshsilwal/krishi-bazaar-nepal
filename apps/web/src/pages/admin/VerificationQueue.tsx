@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface User {
     id: string;
@@ -31,6 +32,7 @@ const VerificationQueue = () => {
     const { setTitle } = useAdminTitle();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
+    const [approveDialog, setApproveDialog] = useState<{ open: boolean; user: User | null }>({ open: false, user: null });
 
     useEffect(() => {
         setTitle('Verification Queue', 'प्रमाणीकरण लाम');
@@ -54,15 +56,23 @@ const VerificationQueue = () => {
         }
     };
 
-    const handleApprove = async (user: User) => {
-        if (!window.confirm(`Approve ${user.name} as ${user.role}?`)) return;
+    const handleApprove = (user: User) => {
+        setApproveDialog({ open: true, user });
+    };
+
+    const confirmApprove = async () => {
+        if (!approveDialog.user) return;
+        const user = approveDialog.user;
 
         try {
             await api.post(`/admin/users/${user.id}/approve`);
             toast.success(`${user.name} approved successfully`);
             setUsers(users.filter(u => u.id !== user.id));
         } catch (error) {
+            console.error('Failed to verify user', error);
             toast.error("Failed to approve user");
+        } finally {
+            setApproveDialog({ open: false, user: null });
         }
     };
 
@@ -134,7 +144,19 @@ const VerificationQueue = () => {
                     </div>
                 </CardContent>
             </Card>
-        </div>
+
+
+            <ConfirmDialog
+                open={approveDialog.open}
+                onOpenChange={(open) => setApproveDialog({ ...approveDialog, open })}
+                onConfirm={confirmApprove}
+                title="Approve Verification"
+                description={approveDialog.user ? `Approve ${approveDialog.user.name} as ${approveDialog.user.role}?` : ""}
+                confirmText="Approve"
+                variant="success"
+                icon={<CheckCircle className="h-6 w-6 text-green-600" />}
+            />
+        </div >
     );
 };
 

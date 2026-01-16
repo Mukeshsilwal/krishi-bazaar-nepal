@@ -31,26 +31,26 @@ public class MasterDataController {
     // --- Admin Endpoints ---
 
     @GetMapping("/admin/master-data/categories")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('MASTERDATA:MANAGE')")
     public ResponseEntity<ApiResponse<List<MasterCategoryDto>>> getAllCategories() {
         return ResponseEntity.ok(ApiResponse.success("Categories fetched", masterDataService.getAllCategories()));
     }
 
     @PostMapping("/admin/master-data/categories")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('MASTERDATA:MANAGE')")
     public ResponseEntity<ApiResponse<MasterCategoryDto>> createCategory(@RequestBody MasterCategoryDto request) {
         return ResponseEntity.ok(ApiResponse.success("Category created", masterDataService.createCategory(request)));
     }
 
     @GetMapping("/admin/master-data/categories/{categoryId}/items")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('MASTERDATA:MANAGE')")
     public ResponseEntity<ApiResponse<List<MasterItemDto>>> getItemsByCategory(@PathVariable UUID categoryId) {
         return ResponseEntity
                 .ok(ApiResponse.success("Items fetched", masterDataService.getItemsByCategory(categoryId)));
     }
 
     @PostMapping("/admin/master-data/categories/{categoryId}/items")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('MASTERDATA:MANAGE')")
     public ResponseEntity<ApiResponse<MasterItemDto>> createItem(@PathVariable UUID categoryId,
             @RequestBody MasterItemDto request) {
         return ResponseEntity
@@ -58,7 +58,7 @@ public class MasterDataController {
     }
 
     @PutMapping("/admin/master-data/items/{itemId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('MASTERDATA:MANAGE')")
     public ResponseEntity<ApiResponse<MasterItemDto>> updateItem(@PathVariable UUID itemId,
             @RequestBody MasterItemDto request) {
         return ResponseEntity.ok(ApiResponse.success("Item updated", masterDataService.updateItem(itemId, request)));

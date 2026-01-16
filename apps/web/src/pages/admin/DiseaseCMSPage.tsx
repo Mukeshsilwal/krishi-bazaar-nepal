@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import advisoryService from '@/modules/advisory/services/advisoryService';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface Disease {
   id?: string;
@@ -80,6 +81,7 @@ const DiseaseCMSPage = () => {
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRisk, setFilterRisk] = useState('all');
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string | null }>({ open: false, id: null });
 
   const [pesticides, setPesticides] = useState<any[]>([]);
   const [selectedPesticides, setSelectedPesticides] = useState<string[]>([]);
@@ -133,10 +135,14 @@ const DiseaseCMSPage = () => {
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm(language === 'ne' ? 'के तपाईं निश्चित हुनुहुन्छ?' : 'Are you sure?')) {
-      setDiseases(prev => prev.filter(d => d.id !== id));
-      toast.success(language === 'ne' ? 'मेटाइयो' : 'Deleted');
-    }
+    setDeleteDialog({ open: true, id });
+  };
+
+  const confirmDelete = () => {
+    if (!deleteDialog.id) return;
+    setDiseases(prev => prev.filter(d => d.id !== deleteDialog.id));
+    toast.success(language === 'ne' ? 'मेटाइयो' : 'Deleted');
+    setDeleteDialog({ open: false, id: null });
   };
 
   const filteredDiseases = diseases.filter(d => {
@@ -459,6 +465,18 @@ const DiseaseCMSPage = () => {
           </div>
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}
+        onConfirm={confirmDelete}
+        title={language === 'ne' ? 'रोग मेटाउनुहोस्' : 'Delete Disease'}
+        description={language === 'ne' ? 'के तपाईं यो रोग मेटाउन चाहनुहुन्छ? यो कार्य पूर्ववत गर्न सकिँदैन।' : 'Are you sure you want to delete this disease? This action cannot be undone.'}
+        confirmText={language === 'ne' ? 'मेटाउनुहोस्' : 'Delete'}
+        cancelText={language === 'ne' ? 'रद्द गर्नुहोस्' : 'Cancel'}
+        variant="destructive"
+        icon={<Trash2 className="h-6 w-6 text-red-600" />}
+      />
     </>
   );
 };

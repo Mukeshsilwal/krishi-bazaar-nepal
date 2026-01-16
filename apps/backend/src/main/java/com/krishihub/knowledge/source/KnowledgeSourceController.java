@@ -3,6 +3,7 @@ package com.krishihub.knowledge.source;
 import com.krishihub.shared.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/knowledge/sources")
 @RequiredArgsConstructor
-// @PreAuthorize("hasRole('ADMIN')") // TODO: Enable security later
+@PreAuthorize("hasAuthority('ADMIN:PANEL')")
 public class KnowledgeSourceController {
 
     private final KnowledgeSourceService sourceService;

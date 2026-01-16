@@ -63,6 +63,12 @@ const authService = {
         return response.data;
     },
 
+    // Get user permissions
+    getPermissions: async () => {
+        const response = await api.get(`${AUTH_ENDPOINTS.ME}/permissions`);
+        return response.data;
+    },
+
     // Update user profile
     updateProfile: async (profileData) => {
         const response = await api.put(AUTH_ENDPOINTS.ME, profileData);
@@ -91,6 +97,11 @@ const authService = {
     getUser: () => {
         const userStr = localStorage.getItem('user');
         return userStr ? JSON.parse(userStr) : null;
+    },
+
+    // Get stored access token
+    getToken: () => {
+        return localStorage.getItem('accessToken');
     },
 };
 

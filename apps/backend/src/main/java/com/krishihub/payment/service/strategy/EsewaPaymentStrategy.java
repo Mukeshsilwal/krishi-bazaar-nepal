@@ -1,7 +1,9 @@
 package com.krishihub.payment.service.strategy;
 
+import com.krishihub.common.exception.SystemException;
 import com.krishihub.config.properties.PaymentProperties;
 import com.krishihub.payment.entity.Transaction;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
@@ -19,30 +22,25 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Implements eSewa payment gateway integration for Nepal.
+ * ===========================
+ * eSewa Payment Strategy
+ * ===========================
+ * <p>
+ * Responsibilities:
+ * - Generate signed redirect form
+ * - Redirect user to eSewa
+ * - Verify transaction after callback
+ * <p>
+ * Design Rules:
+ * - Amount precision MUST be consistent
+ * - Signature order MUST match signed_field_names
+ * - Never expose gateway errors to frontend
+ * - SPA compatible redirect handling
  *
- * Design Notes:
- * - Uses HTML form auto-submit pattern to redirect users to eSewa payment page.
- * - Signature is generated using HMAC-SHA256 to prevent tampering.
- * - Verification is done via eSewa's REST API after payment completion.
- *
- * Business Rules:
- * - Tax, service charge, and delivery charge are currently set to 0.
- * - Total amount must match exactly during verification.
- * - Transaction UUID (order ID) is used as the primary identifier.
- *
- * Security:
- * - NEVER log the secret key or raw signature in production.
- * - All callback URLs must be HTTPS in production.
- * - Signature verification prevents payment amount manipulation.
- *
- * Important:
- * - eSewa API responses are not always JSON; parsing is defensive.
- * - Payment verification may fail due to network issues; implement retry logic at caller level.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class EsewaPaymentStrategy implements PaymentStrategy {
 
     private final PaymentProperties paymentProperties;
@@ -55,254 +53,330 @@ public class EsewaPaymentStrategy implements PaymentStrategy {
         return Transaction.PaymentMethod.ESEWA;
     }
 
+    /**
+     * --------------------------------
+     * PAYMENT INITIATION
+     * --------------------------------
+     */
     @Override
     public PaymentInitiationResult initiatePayment(UUID orderId, BigDecimal amount) {
+
+        PaymentProperties.Esewa esewa = paymentProperties.getEsewa();
+
         try {
-            PaymentProperties.Esewa esewa = paymentProperties.getEsewa();
+            BigDecimal normalizedAmount = normalizeAmount(amount);
+            String transactionUuid = String.valueOf(java.util.concurrent.ThreadLocalRandom.current().nextInt(100000, 1000000));
+            String productCode = esewa.getMerchantCode();
 
-            // Business Rule: Tax, service charge, and delivery charge are 0 for now.
-            BigDecimal taxAmt = BigDecimal.ZERO;
-            BigDecimal psc = BigDecimal.ZERO;
-            BigDecimal pdc = BigDecimal.ZERO;
-            BigDecimal tAmt = amount.add(taxAmt).add(psc).add(pdc);
+            String successUrl = esewa.getSuccessUrl() + "?txnId=" + transactionUuid;
+            String failureUrl = esewa.getFailureUrl() + "?txnId=" + transactionUuid;
 
-            // Generate unique transaction ID for eSewa
-            // Format: KBHexTimestampHexRandom (Purely Alphanumeric, Namespaced, No Hyphens)
-            // Example: KB18d0e729a5f56
-            String uniqueSuffix = Long.toHexString(System.currentTimeMillis());
-            String randomSuffix = Integer.toHexString(new java.util.Random().nextInt(256));
-            String pid = "KB" + uniqueSuffix + randomSuffix;
-            String scd = esewa.getMerchantCode();
-            
-            // Callback URL must allow frontend to identify the ORDER, so we pass raw orderId as txnId param
-            // Frontend will call verify -> Controller -> Service -> Service looks up by Order ID (pid) 
-            // Callback URL: Append Order ID as Path Variable to avoid query param issues?
-            // eSewa will redirect to `success_url` and append its own params (?oid=...&amt=...)
-            // If we use http://localhost:8080/payment/success/{orderId} eSewa makes it:
-            // http://localhost:8080/payment/success/{orderId}?oid=KB...&amt=...
-            // This is clean and valid.
-            String su = esewa.getSuccessUrl() + "/" + orderId;
-            String fu = esewa.getFailureUrl() + "/" + orderId;
+            String secretKey = esewa.getSecretKey().trim();
 
-            // SECURITY: Signature prevents tampering with payment amount or transaction ID.
-            // DEBUGGING: Log critical details to diagnose signature mismatch
-            String signaturePayload = String.format("product_code=%s,total_amount=%s,transaction_uuid=%s",
-                    scd, trimAmount(tAmt), pid);
-            
-            // Mask secret key for logs but show length and boundaries
-            String sk = esewa.getSecretKey();
-            log.info("DEBUG eSewa - SecretKey Len: {}, Start: '{}', End: '{}'", 
-                    sk != null ? sk.length() : "null", 
-                    sk != null && sk.length() > 2 ? sk.substring(0, 2) : "?",
-                    sk != null && sk.length() > 2 ? sk.substring(sk.length() - 2) : "?");
-            log.info("DEBUG eSewa - Signature Payload: '{}'", signaturePayload);
-            log.info("DEBUG eSewa - PID Len: {}", pid.length());
+            String signature = generateSignature(
+                    productCode,
+                    normalizedAmount,
+                    transactionUuid,
+                    secretKey
+            );
 
-            String signature = generateEsewaV2Signature(tAmt, pid, scd, esewa.getSecretKey());
+            log.info("eSewa Payment Initiation:");
+            log.info("  Transaction UUID: {}", transactionUuid);
+            log.info("  Amount: {}", formatAmount(normalizedAmount));
+            log.info("  Product Code: {}", productCode);
+            log.info("  Signature: {}", signature);
+            log.info("  Success URL: {}", successUrl);
+            log.info("  Failure URL: {}", failureUrl);
 
-            log.info("eSewa Payment Initiation - Transaction ID: {}, Amount: {}, Signature generated: {}", pid, tAmt, signature);
+            String htmlForm = buildEsewaRedirectForm(
+                    esewa,
+                    normalizedAmount,
+                    transactionUuid,
+                    signature,
+                    successUrl,
+                    failureUrl
+            );
 
-            String htmlForm = """
-                    <html>
-                      <body onload="document.forms[0].submit()">
-                        <form action="%s" method="POST">
-                          <input type="hidden" name="amount" value="%s"/>
-                          <input type="hidden" name="tax_amount" value="%s"/>
-                          <input type="hidden" name="total_amount" value="%s"/>
-                          <input type="hidden" name="transaction_uuid" value="%s"/>
-                          <input type="hidden" name="product_code" value="%s"/>
-                          <input type="hidden" name="product_service_charge" value="%s"/>
-                          <input type="hidden" name="product_delivery_charge" value="%s"/>
-                          <input type="hidden" name="success_url" value="%s"/>
-                          <input type="hidden" name="failure_url" value="%s"/>
-                          <input type="hidden" name="signed_field_names" value="product_code,total_amount,transaction_uuid"/>
-                          <input type="hidden" name="signature" value="%s"/>
-                        </form>
-                      </body>
-                    </html>
-                    """
-                    .formatted(
-                            esewa.getBaseUrl(),
-                            trimAmount(amount),
-                            trimAmount(taxAmt),
-                            trimAmount(tAmt),
-                            htmlEscape(pid),
-                            htmlEscape(scd),
-                            trimAmount(psc),
-                            trimAmount(pdc),
-                            htmlEscape(su),
-                            htmlEscape(fu),
-                            htmlEscape(signature));
-
-            // DEBUG: Log the standard form to check for malformed attributes
-            log.info("DEBUG eSewa - Form: {}", htmlForm.replace("\n", "").replace("  ", " "));
-
-            Map<String, Object> responseData = new HashMap<>(); // Using HashMap for compatibility
-            responseData.put("htmlForm", htmlForm);
-            responseData.put("transactionId", pid);
-            responseData.put("amount", amount);
-            responseData.put("totalAmount", tAmt);
+            Map<String, Object> paymentData = new HashMap<>();
+            paymentData.put("htmlForm", htmlForm);
 
             return PaymentInitiationResult.builder()
-                    .transactionId(pid)
+                    .transactionId(transactionUuid)
                     .paymentUrl("esewa-redirect")
-                    .paymentData(responseData)
+                    .paymentData(paymentData)
                     .build();
 
-        } catch (Exception e) {
-            log.error("Error initiating eSewa payment", e);
-            throw new com.krishihub.common.exception.SystemException("Payment Initiation Failed: " + e.getMessage());
+        } catch (Exception ex) {
+            log.error("eSewa payment initiation failed | orderId={}", orderId, ex);
+            throw new SystemException("Unable to initiate payment. Please try again.");
         }
     }
 
+    /**
+     * --------------------------------
+     * PAYMENT VERIFICATION
+     * --------------------------------
+     */
     @Override
-    public PaymentVerificationResult verifyPayment(String transactionId, BigDecimal amount) {
+    public PaymentVerificationResult verifyPayment(String transactionUuid, BigDecimal amount) {
+
+        PaymentProperties.Esewa esewa = paymentProperties.getEsewa();
+
         try {
-            PaymentProperties.Esewa esewa = paymentProperties.getEsewa();
-            String url = UriComponentsBuilder
+            BigDecimal normalizedAmount = normalizeAmount(amount);
+
+            String verifyUrl = UriComponentsBuilder
                     .fromHttpUrl(esewa.getVerifyUrl())
                     .queryParam("product_code", esewa.getMerchantCode())
-                    .queryParam("transaction_uuid", transactionId)
-                    .queryParam("total_amount", trimAmount(amount))
+                    .queryParam("total_amount", formatAmount(normalizedAmount))
+                    .queryParam("transaction_uuid", transactionUuid)
                     .toUriString();
 
-            log.info("Verifying eSewa payment: {}", url);
+            log.info("eSewa verify URL => {}", verifyUrl);
 
-            ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
+            ResponseEntity<String> response = restTemplate.getForEntity(verifyUrl, String.class);
 
-            VerificationResult result = parseVerificationResponse(responseEntity.getBody());
+            log.info("eSewa verification response status: {}", response.getStatusCode());
+            log.info("eSewa verification response body: {}", response.getBody());
 
-            if (!result.isSuccess()) {
-                log.error("Payment verification failed: {}", result.getFailureReason());
+            VerificationResult parsed = parseVerificationResponse(response.getBody());
+
+            if (!parsed.isSuccess()) {
+                log.warn("eSewa verification failed => {}", parsed.getRawResponse());
+
                 return PaymentVerificationResult.builder()
                         .success(false)
-                        .failureReason(result.getFailureReason())
-                        .rawResponse(result.getRawResponse())
+                        .failureReason(parsed.getFailureReason() != null ?
+                                parsed.getFailureReason() : "Payment verification failed")
+                        .rawResponse(parsed.getRawResponse())
                         .build();
             }
 
-            log.info("Payment verified successfully. Ref ID: {}", result.getRefId());
+            log.info("eSewa payment verified successfully => Transaction: {}, RefID: {}",
+                    transactionUuid, parsed.getRefId());
+
             return PaymentVerificationResult.builder()
                     .success(true)
-                    .transactionId(result.getRefId())
-                    .rawResponse(result.getRawResponse())
+                    .transactionId(parsed.getRefId())
+                    .rawResponse(parsed.getRawResponse())
                     .build();
 
-        } catch (Exception e) {
-            log.error("eSewa verification error", e);
+        } catch (Exception ex) {
+            log.error("eSewa verification exception for transaction: {}", transactionUuid, ex);
+
             return PaymentVerificationResult.builder()
                     .success(false)
-                    .failureReason(e.getMessage())
+                    .failureReason("Unable to verify payment: " + ex.getMessage())
                     .build();
         }
     }
 
     /**
-     * Generates HMAC-SHA256 signature for eSewa payment request.
+     * --------------------------------
+     * FORM BUILDER
+     * --------------------------------
+     * CRITICAL: Signature must match eSewa's expected format
      */
-    private String generateEsewaV2Signature(BigDecimal totalAmount, String transactionUuid, String productCode,
-            String secretKey) throws Exception {
-        String amtStr = trimAmount(totalAmount);
-        // Alphabetical Order: product_code, total_amount, transaction_uuid
-        String message = String.format("product_code=%s,total_amount=%s,transaction_uuid=%s",
-                productCode, amtStr, transactionUuid);
+    private String buildEsewaRedirectForm(
+            PaymentProperties.Esewa esewa,
+            BigDecimal amount,
+            String transactionUuid,
+            String signature,
+            String successUrl,
+            String failureUrl
+    ) {
 
-        Mac mac = Mac.getInstance(HMAC_SHA256);
-        SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), HMAC_SHA256);
-        mac.init(secretKeySpec);
-        byte[] rawHmac = mac.doFinal(message.getBytes(StandardCharsets.UTF_8));
-        return Base64.getEncoder().encodeToString(rawHmac);
-    }
+        String formattedAmount = formatAmount(amount);
 
-    private String trimAmount(BigDecimal value) {
-        // Strict 2-decimal formatting (e.g. 0.00) for eSewa compliance
-        return String.format(java.util.Locale.US, "%.2f", value);
-    }
-
-    private String htmlEscape(String s) {
-        if (s == null) return "";
-        return s.replace("&", "&amp;")
-                .replace("\"", "&quot;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;");
-    }
-
-    private String buildCallbackUrl(String baseUrl, String transactionId) {
-        return baseUrl.contains("?")
-                ? baseUrl + "&txnId=" + transactionId
-                : baseUrl + "?txnId=" + transactionId;
+        return """
+                <!DOCTYPE html>
+                <html>
+                  <head>
+                    <title>Redirecting to eSewa...</title>
+                  </head>
+                  <body onload="document.forms[0].submit()">
+                    <form action="%s" method="POST">
+                
+                      <input type="hidden" name="amount" value="%s"/>
+                      <input type="hidden" name="tax_amount" value="0"/>
+                      <input type="hidden" name="total_amount" value="%s"/>
+                      <input type="hidden" name="transaction_uuid" value="%s"/>
+                      <input type="hidden" name="product_code" value="%s"/>
+                      <input type="hidden" name="product_service_charge" value="0"/>
+                      <input type="hidden" name="product_delivery_charge" value="0"/>
+                      <input type="hidden" name="success_url" value="%s"/>
+                      <input type="hidden" name="failure_url" value="%s"/>
+                      <input type="hidden" name="signed_field_names" value="total_amount,transaction_uuid,product_code"/>
+                      <input type="hidden" name="signature" value="%s"/>
+                
+                      <noscript>
+                        <p>Please click the button below to proceed with payment.</p>
+                        <input type="submit" value="Continue to eSewa"/>
+                      </noscript>
+                    </form>
+                    <div style="text-align: center; margin-top: 50px;">
+                      <p>Redirecting to eSewa payment gateway...</p>
+                    </div>
+                  </body>
+                </html>
+                """.formatted(
+                esewa.getBaseUrl(),
+                formattedAmount,
+                formattedAmount,
+                transactionUuid,
+                esewa.getMerchantCode(),
+                successUrl,
+                failureUrl,
+                signature
+        );
     }
 
     /**
-     * Parses eSewa verification response (defensive parsing).
-     *
-     * Important:
-     * - eSewa API responses are not always consistent (JSON vs XML vs plain text).
-     * - This method uses defensive string matching to detect success.
-     * - Multiple success indicators are checked to handle API variations.
-     *
-     * Workaround:
-     * - We cannot rely on structured JSON parsing due to eSewa API inconsistency.
-     * - String matching is intentionally case-insensitive for robustness.
+     * --------------------------------
+     * SIGNATURE GENERATOR
+     * --------------------------------
+     * CRITICAL: eSewa Official Order (from docs)
+     * Order: total_amount, transaction_uuid, product_code
+     */
+    private String generateSignature(
+            String productCode,
+            BigDecimal amount,
+            String transactionUuid,
+            String secretKey
+    ) throws Exception {
+
+        String payload = String.format(
+                "total_amount=%s,transaction_uuid=%s,product_code=%s",
+                formatAmount(amount),
+                transactionUuid,
+                productCode
+        );
+
+        log.info("eSewa signature payload: [{}]", payload);
+        log.info("eSewa secret key length: {}", secretKey.length());
+
+        Mac mac = Mac.getInstance(HMAC_SHA256);
+        SecretKeySpec key = new SecretKeySpec(
+                secretKey.getBytes(StandardCharsets.UTF_8),
+                HMAC_SHA256
+        );
+
+        mac.init(key);
+        byte[] rawHmac = mac.doFinal(payload.getBytes(StandardCharsets.UTF_8));
+
+        String signature = Base64.getEncoder().encodeToString(rawHmac);
+
+        log.info("eSewa generated signature: {}", signature);
+
+        return signature;
+    }
+
+    /**
+     * --------------------------------
+     * RESPONSE PARSER
+     * --------------------------------
      */
     private VerificationResult parseVerificationResponse(String response) {
+
         VerificationResult result = new VerificationResult();
         result.setRawResponse(response);
 
-        if (response == null || response.isEmpty()) {
+        if (response == null || response.isBlank()) {
             result.setSuccess(false);
-            result.setFailureReason("Empty response from gateway");
+            result.setFailureReason("Empty gateway response");
             return result;
         }
 
-        // Check multiple success indicators due to eSewa API inconsistency
-        boolean success = response.toLowerCase().contains("success") ||
-                response.toLowerCase().contains("complete") ||
-                response.contains("<status>Success</status>") ||
-                response.contains("\"status\":\"Success\"");
+        String normalized = response.toLowerCase();
+
+        boolean success = normalized.contains("<status>success</status>") ||
+                normalized.contains("\"status\":\"success\"") ||
+                normalized.contains("\"status\": \"success\"");
 
         result.setSuccess(success);
+
         if (success) {
             result.setRefId(extractRefId(response));
         } else {
+            // Try to extract failure reason
             result.setFailureReason(extractFailureReason(response));
         }
+
         return result;
     }
 
     private String extractRefId(String response) {
         try {
-            int idx = response.indexOf("ref_id");
-            if (idx == -1) return "N/A";
-            
-            // Find colon after ref_id
-            int colIdx = response.indexOf(":", idx);
-            if (colIdx == -1) return "N/A";
+            // Try JSON format first
+            int refIdIndex = response.indexOf("\"ref_id\"");
+            if (refIdIndex == -1) {
+                refIdIndex = response.indexOf("\"reference_id\"");
+            }
 
-            // Find opening quote of value
-            int valStartQuote = response.indexOf("\"", colIdx);
-            if (valStartQuote == -1) return "N/A";
+            if (refIdIndex != -1) {
+                int start = response.indexOf("\"", refIdIndex + 10);
+                int end = response.indexOf("\"", start + 1);
+                if (start != -1 && end != -1) {
+                    return response.substring(start + 1, end);
+                }
+            }
 
-            // Find closing quote
-            int valEndQuote = response.indexOf("\"", valStartQuote + 1);
-            if (valEndQuote == -1) return "N/A";
+            // Try XML format
+            int xmlStart = response.indexOf("<ref_id>");
+            if (xmlStart != -1) {
+                int xmlEnd = response.indexOf("</ref_id>");
+                if (xmlEnd != -1) {
+                    return response.substring(xmlStart + 8, xmlEnd);
+                }
+            }
 
-            return response.substring(valStartQuote + 1, valEndQuote).trim();
-        } catch (Exception e) {
+            return "N/A";
+
+        } catch (Exception ex) {
+            log.warn("Unable to extract ref_id from eSewa response", ex);
             return "N/A";
         }
     }
 
     private String extractFailureReason(String response) {
-        response = response.toLowerCase();
-        if (response.contains("insufficient")) return "Insufficient balance";
-        if (response.contains("invalid")) return "Invalid transaction or credentials";
-        if (response.contains("expired")) return "Transaction expired";
-        if (response.contains("cancelled")) return "Cancelled by user";
-        return "Payment verification failed";
+        try {
+            String normalized = response.toLowerCase();
+
+            // Look for common error patterns
+            if (normalized.contains("invalid signature")) {
+                return "Invalid signature";
+            }
+            if (normalized.contains("transaction not found")) {
+                return "Transaction not found";
+            }
+            if (normalized.contains("amount mismatch")) {
+                return "Amount mismatch";
+            }
+
+            return "Payment verification failed";
+
+        } catch (Exception ex) {
+            return "Unknown error";
+        }
     }
 
-    @lombok.Data
+    /**
+     * AMOUNT UTILS
+     */
+    private BigDecimal normalizeAmount(BigDecimal value) {
+        return value.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private String formatAmount(BigDecimal value) {
+        return String.format(java.util.Locale.US, "%.2f", value);
+    }
+
+    /**
+     * --------------------------------
+     * INTERNAL DTO
+     * --------------------------------
+     */
+    @Data
     private static class VerificationResult {
         private boolean success;
         private String refId;

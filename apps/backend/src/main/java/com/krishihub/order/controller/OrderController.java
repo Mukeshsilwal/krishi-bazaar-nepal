@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +24,7 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ORDER:CREATE')")
     public ResponseEntity<ApiResponse<OrderDto>> createOrder(
             @Valid @RequestBody CreateOrderRequest request) {
         UUID userId = UserContextHolder.getUserId();
@@ -31,6 +33,7 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('ORDER:READ')")
     public ResponseEntity<ApiResponse<OrderDto>> getOrderById(
             @PathVariable UUID id) {
         UUID userId = UserContextHolder.getUserId();
@@ -39,6 +42,7 @@ public class OrderController {
     }
 
     @GetMapping("/my")
+    @PreAuthorize("hasAuthority('ORDER:READ')")
     public ResponseEntity<ApiResponse<Page<OrderDto>>> getMyOrders(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -50,6 +54,7 @@ public class OrderController {
     }
 
     @PutMapping("/{id}/status")
+    @PreAuthorize("hasAuthority('ORDER:UPDATE')")
     public ResponseEntity<ApiResponse<OrderDto>> updateOrderStatus(
             @PathVariable UUID id,
             @RequestBody UpdateOrderRequest request) {
@@ -59,6 +64,7 @@ public class OrderController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ORDER:DELETE')")
     public ResponseEntity<ApiResponse<Void>> cancelOrder(
             @PathVariable UUID id) {
         UUID userId = UserContextHolder.getUserId();

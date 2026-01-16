@@ -9,6 +9,7 @@ import com.krishihub.shared.dto.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,7 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping("/initiate")
+    @PreAuthorize("hasAuthority('PAYMENT:INITIATE')")
     public ResponseEntity<ApiResponse<PaymentResponse>> initiatePayment(
             @Valid @RequestBody InitiatePaymentRequest request) {
         UUID userId = UserContextHolder.getUserId();
@@ -30,14 +32,16 @@ public class PaymentController {
     }
 
     @PostMapping("/verify")
+    @PreAuthorize("hasAuthority('PAYMENT:VERIFY')")
     public ResponseEntity<ApiResponse<TransactionDto>> verifyPayment(
-            @RequestParam UUID transactionId,
+            @RequestParam String transactionId,
             @RequestParam(required = false) String gatewayTransactionId) {
         TransactionDto transaction = paymentService.verifyPayment(transactionId, gatewayTransactionId);
         return ResponseEntity.ok(ApiResponse.success("Payment verified successfully", transaction));
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('PAYMENT:READ')")
     public ResponseEntity<ApiResponse<TransactionDto>> getTransaction(
             @PathVariable UUID id) {
         UUID userId = com.krishihub.common.context.UserContextHolder.getUserId();

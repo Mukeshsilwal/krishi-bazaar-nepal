@@ -30,7 +30,7 @@ public class ColdStorageController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('LOGISTICS:MANAGE')")
     public ResponseEntity<ApiResponse<ColdStorage>> createColdStorage(@RequestBody ColdStorage coldStorage) {
         return ResponseEntity.ok(ApiResponse.success("Cold storage created successfully", coldStorageService.createColdStorage(coldStorage)));
     }
@@ -44,7 +44,7 @@ public class ColdStorageController {
     }
 
     @GetMapping("/bookings")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('LOGISTICS:MANAGE')")
     public ResponseEntity<ApiResponse<PaginatedResponse<StorageBooking>>> getAllBookings(
             @PageableDefault(size = 20) Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(

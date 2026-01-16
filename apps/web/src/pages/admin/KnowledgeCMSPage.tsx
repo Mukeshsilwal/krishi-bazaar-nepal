@@ -43,6 +43,7 @@ import {
 import knowledgeService, { Article, KnowledgeCategory } from '@/modules/knowledge/services/knowledgeService';
 import imageUploadService from '@/services/imageUploadService';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 const KnowledgeCMSPage = () => {
   const { language } = useLanguage();
@@ -57,6 +58,7 @@ const KnowledgeCMSPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string | null }>({ open: false, id: null });
 
   useEffect(() => {
     if (isEditing) {
@@ -103,15 +105,21 @@ const KnowledgeCMSPage = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm(language === 'ne' ? 'के तपाईं यो मेटाउन निश्चित हुनुहुन्छ?' : 'Are you sure you want to delete this?')) {
-      try {
-        await knowledgeService.deleteArticle(id);
-        toast.success(language === 'ne' ? 'मेटाइयो' : 'Deleted successfully');
-        loadData();
-      } catch (error) {
-        toast.error(language === 'ne' ? 'मेटाउन असफल' : 'Failed to delete');
-      }
+  const handleDelete = (id: string) => {
+    setDeleteDialog({ open: true, id });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteDialog.id) return;
+
+    try {
+      await knowledgeService.deleteArticle(deleteDialog.id);
+      toast.success(language === 'ne' ? 'मेटाइयो' : 'Deleted successfully');
+      loadData();
+    } catch (error) {
+      toast.error(language === 'ne' ? 'मेटाउन असफल' : 'Failed to delete');
+    } finally {
+      setDeleteDialog({ open: false, id: null });
     }
   };
 
@@ -470,6 +478,19 @@ const KnowledgeCMSPage = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}
+        onConfirm={confirmDelete}
+        title={language === 'ne' ? 'लेख मेटाउनुहोस्' : 'Delete Article'}
+        description={language === 'ne' ? 'के तपाईं यो लेख मेटाउन चाहनुहुन्छ? यो कार्य पूर्ववत गर्न सकिँदैन।' : 'Are you sure you want to delete this article? This action cannot be undone.'}
+        confirmText={language === 'ne' ? 'मेटाउनुहोस्' : 'Delete'}
+        cancelText={language === 'ne' ? 'रद्द गर्नुहोस्' : 'Cancel'}
+        variant="destructive"
+        icon={<Trash2 className="h-6 w-6 text-red-600" />}
+      />
     </>
   );
 };

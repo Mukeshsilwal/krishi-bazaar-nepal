@@ -56,8 +56,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/agriculture-calendar/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
-                        .requestMatchers("/actuator/**").hasRole("ADMIN")
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/actuator/**").hasAuthority("ADMIN:PANEL")
+                        .requestMatchers("/api/admin/**").hasAuthority("ADMIN:PANEL")
 
                         // Protected endpoints
                         .anyRequest().authenticated())

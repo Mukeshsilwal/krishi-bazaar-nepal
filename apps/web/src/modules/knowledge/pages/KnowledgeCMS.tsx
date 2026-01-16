@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import knowledgeService, { Article, KnowledgeCategory } from '../services/knowledgeService';
 import { Plus, Edit, Trash, BookOpen } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 const KnowledgeCMS = () => {
     const [articles, setArticles] = useState<Article[]>([]);
     const [categories, setCategories] = useState<KnowledgeCategory[]>([]);
     const [isEditing, setIsEditing] = useState(false);
     const [editingArticle, setEditingArticle] = useState<Partial<Article>>({});
+    const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string | null }>({ open: false, id: null });
 
     useEffect(() => {
         loadData();
@@ -37,11 +39,15 @@ const KnowledgeCMS = () => {
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (window.confirm('Are you sure you want to delete this article?')) {
-            await knowledgeService.deleteArticle(id);
-            loadData();
-        }
+    const handleDelete = (id: string) => {
+        setDeleteDialog({ open: true, id });
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteDialog.id) return;
+        await knowledgeService.deleteArticle(deleteDialog.id);
+        loadData();
+        setDeleteDialog({ open: false, id: null });
     };
 
     return (
@@ -201,6 +207,19 @@ const KnowledgeCMS = () => {
                     </table>
                 </div>
             )}
+
+
+            <ConfirmDialog
+                open={deleteDialog.open}
+                onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}
+                onConfirm={confirmDelete}
+                title="Delete Article"
+                description="Are you sure you want to delete this article? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+                variant="destructive"
+                icon={<Trash className="h-6 w-6 text-red-600" />}
+            />
         </div>
     );
 };

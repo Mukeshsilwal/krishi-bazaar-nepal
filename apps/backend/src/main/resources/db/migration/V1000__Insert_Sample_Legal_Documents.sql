@@ -92,7 +92,8 @@ If you have questions about this Privacy Policy, please contact us through the a
     true,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
-);
+)
+ON CONFLICT (id) DO NOTHING;
 
 -- Insert sample Terms of Service
 INSERT INTO legal_documents (id, type, version, title_en, title_ne, content_en, content_ne, effective_date, is_active, created_at, updated_at)
@@ -198,4 +199,5 @@ For questions about these Terms, contact us at info@kisansarathi.com.np',
     true,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
-);
+)
+ON CONFLICT (id) DO NOTHING;

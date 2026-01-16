@@ -8,7 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -33,17 +36,18 @@ public class ShipmentController {
      *
      * Security: Validates buyer/farmer ownership at service layer.
      */
-    @GetMapping("/{orderId}")
-    @PreAuthorize("hasAnyRole('BUYER', 'FARMER', 'VENDOR', 'ADMIN')")
+    @GetMapping("/order/{orderId}")
+    @PreAuthorize("hasAuthority('LOGISTICS:READ')")
     public ResponseEntity<ApiResponse<ShipmentDto>> getShipmentByOrderId(@PathVariable UUID orderId) {
         Shipment shipment = shipmentService.getShipmentByOrderId(orderId);
         return ResponseEntity.ok(ApiResponse.success(ShipmentDto.fromEntity(shipment)));
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<org.springframework.data.domain.Page<Shipment>>> getAllShipments(org.springframework.data.domain.Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.success(shipmentService.getAllShipments(pageable)));
+    @PreAuthorize("hasAuthority('LOGISTICS:MANAGE')")
+    public ResponseEntity<ApiResponse<Page<ShipmentDto>>> getAllShipments(Pageable pageable) {
+        Page<Shipment> shipments = shipmentService.getAllShipments(pageable);
+        return ResponseEntity.ok(ApiResponse.success(shipments.map(ShipmentDto::fromEntity)));
     }
 
     /**
@@ -60,8 +64,8 @@ public class ShipmentController {
     }
 
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> updateStatus(@PathVariable UUID id, @RequestBody Shipment.ShipmentStatus status) {
+    @PreAuthorize("hasAuthority('LOGISTICS:MANAGE')")
+    public ResponseEntity<ApiResponse<ShipmentDto>> updateShipmentStatus(@PathVariable UUID id, @RequestBody Shipment.ShipmentStatus status) {
         shipmentService.updateStatus(id, status);
         return ResponseEntity.ok(ApiResponse.success("Shipment status updated successfully", null));
     }

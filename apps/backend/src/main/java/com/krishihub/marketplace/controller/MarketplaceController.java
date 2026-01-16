@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +26,7 @@ public class MarketplaceController {
     private final MarketplaceService marketplaceService;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('MARKETPLACE:CREATE')")
     public ResponseEntity<ApiResponse<ListingDto>> createListing(
             @Valid @RequestBody CreateListingRequest request) {
         UUID userId = com.krishihub.common.context.UserContextHolder.getUserId();
@@ -33,6 +35,7 @@ public class MarketplaceController {
     }
 
     @PostMapping("/{id}/images")
+    @PreAuthorize("hasAuthority('MARKETPLACE:UPDATE')")
     public ResponseEntity<ApiResponse<String>> uploadImage(
             @PathVariable UUID id,
             @RequestParam("file") MultipartFile file,
@@ -64,6 +67,7 @@ public class MarketplaceController {
     }
 
     @GetMapping("/my")
+    @PreAuthorize("hasAuthority('MARKETPLACE:READ')")
     public ResponseEntity<ApiResponse<Page<ListingDto>>> getMyListings(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
@@ -73,6 +77,7 @@ public class MarketplaceController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('MARKETPLACE:UPDATE')")
     public ResponseEntity<ApiResponse<ListingDto>> updateListing(
             @PathVariable UUID id,
             @RequestBody UpdateListingRequest request) {
@@ -82,6 +87,7 @@ public class MarketplaceController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('MARKETPLACE:DELETE')")
     public ResponseEntity<ApiResponse<Void>> deleteListing(
             @PathVariable UUID id) {
         UUID userId = com.krishihub.common.context.UserContextHolder.getUserId();

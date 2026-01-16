@@ -18,6 +18,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.security.Principal;
 import java.util.List;
@@ -35,6 +36,7 @@ public class MessagingController {
     // REST endpoints
     @PostMapping("/api/messages")
     @ResponseBody
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<MessageDto>> sendMessage(
             @Valid @RequestBody SendMessageRequest request) {
         UUID userId = UserContextHolder.getUserId();
@@ -44,6 +46,7 @@ public class MessagingController {
 
     @GetMapping("/api/messages/conversations")
     @ResponseBody
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<ConversationDto>>> getConversations() {
         UUID userId = UserContextHolder.getUserId();
         List<ConversationDto> conversations = messagingService.getConversations(userId);
@@ -52,6 +55,7 @@ public class MessagingController {
 
     @GetMapping("/api/messages/{userId}")
     @ResponseBody
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<MessageDto>>> getConversation(
             @PathVariable UUID userId) {
         UUID currentUserId = UserContextHolder.getUserId();
@@ -61,6 +65,7 @@ public class MessagingController {
 
     @GetMapping("/api/messages/unread/count")
     @ResponseBody
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Long>> getUnreadCount() {
         UUID userId = UserContextHolder.getUserId();
         long count = messagingService.getUnreadCount(userId);
@@ -69,12 +74,14 @@ public class MessagingController {
 
     @GetMapping("/api/messages/presence")
     @ResponseBody
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Map<String, Boolean>>> getOnlineUsers() {
         return ResponseEntity.ok(ApiResponse.success(presenceService.getOnlineUsers()));
     }
 
     @PutMapping("/api/messages/{userId}/read")
     @ResponseBody
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> markAsRead(
             @PathVariable UUID userId) {
         UUID currentUserId = UserContextHolder.getUserId();

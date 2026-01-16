@@ -18,6 +18,7 @@ export const AUTH_ENDPOINTS = {
     FORGOT_PASSWORD: '/auth/forgot-password',
     RESET_PASSWORD: '/auth/reset-password',
     LOGOUT: '/auth/logout',
+    ROLES: '/auth/roles',
 };
 
 // ==================== Marketplace & Listings ====================
@@ -311,9 +312,24 @@ export const ADMIN_ENDPOINTS = {
 };
 
 export const ADMIN_RBAC_ENDPOINTS = {
+    // Roles
     ROLES: '/admin/rbac/roles',
+    ROLE_BY_ID: (id) => `/admin/rbac/roles/${id}`,
+    UPDATE_ROLE_PERMISSIONS: (id) => `/admin/rbac/roles/${id}/permissions`,
+
+    // Permissions
     PERMISSIONS: '/admin/rbac/permissions',
-    ASSIGN: '/admin/rbac/assign',
+
+    // User-Role Assignment
+    ASSIGN_ROLE: (userId, roleId) => `/admin/rbac/users/${userId}/roles/${roleId}`,
+    REMOVE_ROLE: (userId, roleId) => `/admin/rbac/users/${userId}/roles/${roleId}`,
+
+    // User Verification
+    PENDING_USERS: '/admin/users/pending',
+    VERIFIED_USERS: '/admin/users/verified',
+    VERIFY_USER: (userId) => `/admin/users/${userId}/verify`,
+    UNVERIFY_USER: (userId) => `/admin/users/${userId}/unverify`,
+    DELETE_USER: (userId) => `/admin/users/${userId}`,
 };
 
 // ==================== Master Data ====================

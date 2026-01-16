@@ -30,7 +30,7 @@ public class AdvisoryLogController {
      * Get advisory logs with filters and pagination (Admin)
      */
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:ANALYTICS')")
     public ResponseEntity<ApiResponse<CursorPageResponse<AdvisoryLogResponseDTO>>> getAdvisoryLogs(
             @ModelAttribute AdvisoryLogFilterDTO filter) {
 
@@ -42,7 +42,7 @@ public class AdvisoryLogController {
      * Get advisory log detail (Admin)
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:ANALYTICS')")
     public ResponseEntity<ApiResponse<AdvisoryLogDetailDTO>> getAdvisoryLogDetail(@PathVariable UUID id) {
         return logService.getAdvisoryLogDetail(id)
                 .map(detail -> ResponseEntity.ok(ApiResponse.success("Advisory log detail retrieved", detail)))
@@ -53,7 +53,7 @@ public class AdvisoryLogController {
      * Get analytics (Admin)
      */
     @GetMapping("/analytics")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:ANALYTICS')")
     public ResponseEntity<ApiResponse<AdvisoryAnalyticsDTO>> getAnalytics(
             @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(pattern="yyyy-MM-dd") java.util.Date since) {
 
@@ -65,7 +65,7 @@ public class AdvisoryLogController {
      * Get district risk insights (Admin)
      */
     @GetMapping("/analytics/district-risk")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:ANALYTICS')")
     public ResponseEntity<ApiResponse<Object>> getDistrictRiskInsights(
             @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(pattern="yyyy-MM-dd") java.util.Date since) {
 
@@ -77,7 +77,7 @@ public class AdvisoryLogController {
      * Get alert fatigue detection (Admin)
      */
     @GetMapping("/analytics/alert-fatigue")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:ANALYTICS')")
     public ResponseEntity<ApiResponse<Object>> getAlertFatigue(
             @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(pattern="yyyy-MM-dd") java.util.Date since,
             @RequestParam(defaultValue = "10") int threshold) {
@@ -100,7 +100,7 @@ public class AdvisoryLogController {
      * Get high-risk districts (Admin)
      */
     @GetMapping("/analytics/high-risk-districts")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:ANALYTICS')")
     public ResponseEntity<ApiResponse<List<String>>> getHighRiskDistricts(
             @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(pattern="yyyy-MM-dd") java.util.Date since) {
 
@@ -119,7 +119,7 @@ public class AdvisoryLogController {
      * Get top performing rules (Admin)
      */
     @GetMapping("/analytics/top-rules")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:ANALYTICS')")
     public ResponseEntity<ApiResponse<List<String>>> getTopPerformingRules(
             @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(pattern="yyyy-MM-dd") java.util.Date since,
             @RequestParam(defaultValue = "10") int limit) {

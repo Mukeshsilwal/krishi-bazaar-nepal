@@ -68,6 +68,8 @@ public class OrderService {
         User buyer = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
+        // Authorization check - controller-level @PreAuthorize('ORDER:CREATE') handles this
+        // This check is redundant but kept for additional validation
         if (buyer.getRole() != User.UserRole.BUYER && buyer.getRole() != User.UserRole.FARMER) {
             throw new BadRequestException("Only buyers and farmers can place orders");
         }
@@ -98,6 +100,8 @@ public class OrderService {
 
         if (!order.getBuyer().getId().equals(user.getId()) &&
                 (order.getFarmer() == null || !order.getFarmer().getId().equals(user.getId()))) {
+             // Authorization check - controller-level @PreAuthorize handles this
+             // Admin override for viewing any order
              if (user.getRole() != User.UserRole.ADMIN) { 
                 throw new UnauthorizedException("You don't have access to this order");
              }

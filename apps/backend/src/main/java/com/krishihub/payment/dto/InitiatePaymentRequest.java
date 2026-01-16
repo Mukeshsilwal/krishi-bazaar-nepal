@@ -16,7 +16,7 @@ public class InitiatePaymentRequest {
     private UUID orderId;
 
     @NotNull(message = "Payment method is required")
-    private String paymentMethod; // ESEWA or KHALTI
+    private String paymentMethod;
 
     private String returnUrl;
 }

@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.UUID;
 
@@ -49,6 +50,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<UserDto>> getCurrentUser() {
         UUID userId = com.krishihub.common.context.UserContextHolder.getUserId();
         UserDto user = authService.getCurrentUser(userId);
@@ -56,11 +58,19 @@ public class AuthController {
     }
 
     @PutMapping("/me")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<UserDto>> updateProfile(
             @RequestBody UpdateProfileRequest request) {
         UUID userId = com.krishihub.common.context.UserContextHolder.getUserId();
         UserDto user = authService.updateProfile(userId, request);
         return ResponseEntity.ok(ApiResponse.success("Profile updated successfully", user));
+    }
+
+    @GetMapping("/me/permissions")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<java.util.Set<String>>> getUserPermissions() {
+        UUID userId = com.krishihub.common.context.UserContextHolder.getUserId();
+        return ResponseEntity.ok(ApiResponse.success(authService.getUserPermissions(userId)));
     }
 
     @PostMapping("/forgot-password")
@@ -80,6 +90,7 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Token refreshed successfully", response));
     }
     @PostMapping("/logout")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<String>> logout() {
         UUID userId = com.krishihub.common.context.UserContextHolder.getUserId();
         authService.logout(userId);

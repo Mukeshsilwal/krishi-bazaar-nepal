@@ -28,7 +28,7 @@ public class SystemSettingController {
     }
 
     @GetMapping("/admin/settings")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:SETTINGS')")
     public ResponseEntity<ApiResponse<PaginatedResponse<SystemSetting>>> getAllSettings(
             @PageableDefault(size = 10, sort = "key") Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(
@@ -37,7 +37,7 @@ public class SystemSettingController {
     }
 
     @PostMapping("/admin/settings")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:SETTINGS')")
     public ResponseEntity<ApiResponse<List<SystemSetting>>> updateSettings(@RequestBody List<SystemSetting> settings) {
         return ResponseEntity.ok(ApiResponse.success(service.updateSettings(settings)));
     }

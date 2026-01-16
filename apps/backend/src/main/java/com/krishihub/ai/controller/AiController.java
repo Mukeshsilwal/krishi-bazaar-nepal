@@ -6,6 +6,7 @@ import com.krishihub.shared.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.UUID;
 import com.krishihub.common.context.UserContextHolder;
@@ -18,6 +19,7 @@ public class AiController {
     private final AiService aiService;
 
     @PostMapping("/recommendation")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<AiRecommendation>> getRecommendation(@RequestBody RecommendationRequest request) {
         UUID farmerId = UserContextHolder.getUserId();
         return ResponseEntity.ok(ApiResponse.success(

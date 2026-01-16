@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import authService from '../services/authService';
 import { useSettings } from '@/hooks/useSettings';
+import api from '@/services/api';
+import { AUTH_ENDPOINTS } from '@/config/endpoints';
 
 export default function RegisterPage() {
-    const [step, setStep] = useState<'form' | 'otp'>('form');
+    const [step, setStep] = useState<'form' | 'otp' | 'pending'>('form');
     const [formData, setFormData] = useState({
         mobileNumber: '',
         email: '',
@@ -16,7 +18,25 @@ export default function RegisterPage() {
     const [otp, setOtp] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [availableRoles, setAvailableRoles] = useState<string[]>([]);
     const { settings } = useSettings();
+
+    // Fetch available roles on component mount
+    useEffect(() => {
+        const fetchRoles = async () => {
+            try {
+                const response = await api.get(AUTH_ENDPOINTS.ROLES);
+                if (response.data.code === 0) {
+                    setAvailableRoles(response.data.data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch roles:', error);
+                // Fallback to default roles if API fails
+                setAvailableRoles(['FARMER', 'BUYER', 'VENDOR', 'EXPERT']);
+            }
+        };
+        fetchRoles();
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -25,12 +45,15 @@ export default function RegisterPage() {
 
         try {
             const result = await authService.register(formData);
-            if (result.success) {
+            console.log('Registration result:', result);
+
+            if (result.code === 0) {
                 setStep('otp');
             } else {
                 setError(result.message || 'Registration failed');
             }
         } catch (err: any) {
+            console.error('Registration error:', err);
             setError(err.response?.data?.message || 'Registration failed');
         } finally {
             setLoading(false);
@@ -44,12 +67,23 @@ export default function RegisterPage() {
 
         try {
             const result = await authService.verifyOtp(formData.mobileNumber, otp);
-            if (result.success) {
-                window.location.href = '/';
+            console.log('OTP verification result:', result);
+
+            if (result.code === 0) {
+                // Check if user is VENDOR or EXPERT (needs approval)
+                const userRole = formData.role;
+                if (userRole === 'VENDOR' || userRole === 'EXPERT') {
+                    // Show approval pending message
+                    setStep('pending');
+                } else {
+                    // FARMER and BUYER can login immediately
+                    window.location.href = '/';
+                }
             } else {
                 setError(result.message || 'Invalid OTP');
             }
         } catch (err: any) {
+            console.error('OTP verification error:', err);
             setError(err.response?.data?.message || 'Invalid OTP');
         } finally {
             setLoading(false);
@@ -123,9 +157,15 @@ export default function RegisterPage() {
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                     required
                                 >
-                                    <option value="BUYER">Buyer</option>
-                                    <option value="FARMER">Farmer</option>
-                                    <option value="VENDOR">Vendor</option>
+                                    {availableRoles.length === 0 ? (
+                                        <option value="">Loading roles...</option>
+                                    ) : (
+                                        availableRoles.map((role) => (
+                                            <option key={role} value={role}>
+                                                {role.charAt(0) + role.slice(1).toLowerCase()}
+                                            </option>
+                                        ))
+                                    )}
                                 </select>
                             </div>
 
@@ -174,7 +214,7 @@ export default function RegisterPage() {
                                 {loading ? 'Creating Account...' : 'Create Account'}
                             </button>
                         </form>
-                    ) : (
+                    ) : step === 'otp' ? (
                         <form onSubmit={handleVerifyOtp}>
                             <div className="mb-6">
                                 <label className="block text-gray-700 font-medium mb-2">Enter OTP</label>
@@ -200,6 +240,57 @@ export default function RegisterPage() {
                                 {loading ? 'Verifying...' : 'Verify & Register'}
                             </button>
                         </form>
+                    ) : (
+                        // Pending Approval Screen for VENDOR/EXPERT
+                        <div className="text-center py-8">
+                            <div className="mb-6">
+                                <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <svg className="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <h2 className="text-2xl font-bold text-gray-800 mb-3">Registration Successful!</h2>
+                                <p className="text-lg text-gray-600 mb-4">
+                                    Your account has been created as a <span className="font-semibold text-green-600">{formData.role}</span>
+                                </p>
+                            </div>
+
+                            <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-6 mb-6">
+                                <h3 className="font-semibold text-yellow-800 mb-2">⏳ Approval Pending</h3>
+                                <p className="text-yellow-700 text-sm leading-relaxed">
+                                    Your account is currently pending approval from our admin team.
+                                    You will receive a notification once your account has been verified and approved.
+                                    This usually takes 24-48 hours.
+                                </p>
+                            </div>
+
+                            <div className="space-y-3">
+                                <p className="text-sm text-gray-600">
+                                    <strong>What happens next?</strong>
+                                </p>
+                                <ul className="text-sm text-gray-600 text-left space-y-2">
+                                    <li className="flex items-start">
+                                        <span className="text-green-600 mr-2">✓</span>
+                                        <span>Admin will review your registration</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <span className="text-green-600 mr-2">✓</span>
+                                        <span>You'll receive an email notification upon approval</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <span className="text-green-600 mr-2">✓</span>
+                                        <span>Once approved, you can login and access all features</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <button
+                                onClick={() => window.location.href = '/login'}
+                                className="mt-6 w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition"
+                            >
+                                Go to Login Page
+                            </button>
+                        </div>
                     )}
 
                     <div className="mt-6 text-center">

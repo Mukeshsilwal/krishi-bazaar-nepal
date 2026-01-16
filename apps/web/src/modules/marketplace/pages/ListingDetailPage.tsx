@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/context/AuthContext';
+import { ShoppingCart } from 'lucide-react';
+import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import listingService from '../services/listingService';
 import orderService from '../../orders/services/orderService';
 
@@ -13,6 +16,7 @@ export default function ListingDetailPage() {
     const [quantity, setQuantity] = useState(1);
     const [pickupDate, setPickupDate] = useState('');
     const [orderLoading, setOrderLoading] = useState(false);
+    const [confirmOrderDialog, setConfirmOrderDialog] = useState(false);
 
     useEffect(() => {
         fetchListing();
@@ -31,12 +35,19 @@ export default function ListingDetailPage() {
         }
     };
 
-    const handlePlaceOrder = async () => {
+    const handlePlaceOrderClick = () => {
         if (!isAuthenticated) {
             navigate('/login');
             return;
         }
+        if (!pickupDate) {
+            toast.error('Please select a pickup date');
+            return;
+        }
+        setConfirmOrderDialog(true);
+    };
 
+    const handleConfirmOrder = async () => {
         setOrderLoading(true);
         try {
             const response = await orderService.createOrder({
@@ -47,15 +58,16 @@ export default function ListingDetailPage() {
             });
 
             if (response.code === 0) {
-                alert('Order placed successfully!');
+                toast.success('Order placed successfully!');
                 navigate(`/orders/${response.data.id}`);
             } else {
-                alert(response.message || 'Failed to place order');
+                toast.error(response.message || 'Failed to place order');
             }
         } catch (error: any) {
-            alert(error.response?.data?.message || 'Failed to place order');
+            toast.error(error.response?.data?.message || 'Failed to place order');
         } finally {
             setOrderLoading(false);
+            setConfirmOrderDialog(false);
         }
     };
 
@@ -226,11 +238,11 @@ export default function ListingDetailPage() {
                                     </div>
 
                                     <button
-                                        onClick={handlePlaceOrder}
+                                        onClick={handlePlaceOrderClick}
                                         disabled={orderLoading}
                                         className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50"
                                     >
-                                        {orderLoading ? 'Placing Order...' : 'Place Order'}
+                                        Place Order
                                     </button>
                                 </div>
                             )}
@@ -238,6 +250,19 @@ export default function ListingDetailPage() {
                     </div>
                 </div>
             </div>
-        </div>
+
+
+            <ConfirmDialog
+                open={confirmOrderDialog}
+                onOpenChange={setConfirmOrderDialog}
+                onConfirm={handleConfirmOrder}
+                title="Confirm Order"
+                description={`Are you sure you want to place this order for ${quantity} ${listing.unit} of ${listing.cropName}? Total cost: NPR ${totalPrice.toFixed(2)}`}
+                confirmText="Place Order"
+                cancelText="Cancel"
+                variant="default"
+                icon={<ShoppingCart className="h-6 w-6 text-green-600" />}
+            />
+        </div >
     );
 }

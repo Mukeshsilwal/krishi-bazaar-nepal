@@ -20,7 +20,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/admin/legal")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('ADMIN:PANEL')")
 @CrossOrigin(origins = "*")
 public class AdminLegalDocumentController {
 

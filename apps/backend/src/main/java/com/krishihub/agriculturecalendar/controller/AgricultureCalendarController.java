@@ -27,13 +27,13 @@ public class AgricultureCalendarController {
     }
 
     // Admin APIs
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CALENDAR:MANAGE')")
     @PostMapping("/api/admin/agriculture-calendar")
     public ResponseEntity<AgricultureCalendarDto> createEntry(@RequestBody AgricultureCalendarDto dto) {
         return ResponseEntity.ok(service.createEntry(dto));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CALENDAR:MANAGE')")
     @PutMapping("/api/admin/agriculture-calendar/{id}")
     public ResponseEntity<AgricultureCalendarDto> updateEntry(
             @PathVariable UUID id,
@@ -41,7 +41,7 @@ public class AgricultureCalendarController {
         return ResponseEntity.ok(service.updateEntry(id, dto));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CALENDAR:MANAGE')")
     @DeleteMapping("/api/admin/agriculture-calendar/{id}")
     public ResponseEntity<Void> deleteEntry(@PathVariable UUID id) {
         service.deleteEntry(id);

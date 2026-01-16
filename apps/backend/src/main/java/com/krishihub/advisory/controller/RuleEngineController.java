@@ -7,10 +7,12 @@ import com.krishihub.shared.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/admin/rules")
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('ADMIN:PANEL')")
 public class RuleEngineController {
 
     private final RuleEngineService ruleService;

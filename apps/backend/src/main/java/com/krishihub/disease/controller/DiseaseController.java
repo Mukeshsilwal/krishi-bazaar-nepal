@@ -10,6 +10,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/diseases")
@@ -43,11 +44,13 @@ public class DiseaseController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN:PANEL')")
     public ResponseEntity<ApiResponse<Disease>> createDisease(@RequestBody Disease disease) {
         return ResponseEntity.ok(ApiResponse.success("Disease created successfully", diseaseService.createDisease(disease)));
     }
 
     @PostMapping("/pesticides")
+    @PreAuthorize("hasAuthority('ADMIN:PANEL')")
     public ResponseEntity<ApiResponse<Pesticide>> createPesticide(@RequestBody Pesticide pesticide) {
         return ResponseEntity.ok(ApiResponse.success("Pesticide created successfully", diseaseService.createPesticide(pesticide)));
     }
@@ -58,6 +61,7 @@ public class DiseaseController {
     }
 
     @PostMapping("/{diseaseId}/link-pesticide")
+    @PreAuthorize("hasAuthority('ADMIN:PANEL')")
     public ResponseEntity<ApiResponse<Void>> linkPesticide(
             @PathVariable UUID diseaseId,
             @RequestParam UUID pesticideId,

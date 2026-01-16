@@ -134,6 +134,18 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    // Access Denied Exception
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<?>> handleAccessDenied(org.springframework.security.access.AccessDeniedException ex) {
+        log.warn("Access Denied: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(
+                        "You do not have permission to perform this action.",
+                        getDeveloperMessage(ex)
+                ));
+    }
+
     // Catch-all for unexpected errors
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> handleUnknown(Exception ex) {

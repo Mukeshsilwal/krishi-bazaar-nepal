@@ -39,8 +39,8 @@ public class VehicleBookingController {
      * - Automatically updates shipment status to ASSIGNED.
      */
     @PostMapping("/shipment/{shipmentId}")
-    @PreAuthorize("hasAnyRole('BUYER', 'FARMER', 'VENDOR')")
-    public ResponseEntity<ApiResponse<VehicleBookingDto>> bookVehicle(
+    @PreAuthorize("hasAuthority('VEHICLE:CREATE')")
+    public ResponseEntity<ApiResponse<VehicleBookingDto>> createBooking(
             @PathVariable UUID shipmentId,
             @RequestBody BookVehicleRequest request) {
         
@@ -66,7 +66,7 @@ public class VehicleBookingController {
      * GET /api/vehicle-bookings/shipment/{shipmentId}
      */
     @GetMapping("/shipment/{shipmentId}")
-    @PreAuthorize("hasAnyRole('BUYER', 'FARMER', 'VENDOR', 'ADMIN')")
+    @PreAuthorize("hasAuthority('VEHICLE:READ')")
     public ResponseEntity<ApiResponse<VehicleBookingDto>> getBookingByShipment(
             @PathVariable UUID shipmentId) {
         
@@ -88,7 +88,7 @@ public class VehicleBookingController {
      * - Reverts shipment status to CREATED.
      */
     @DeleteMapping("/{bookingId}")
-    @PreAuthorize("hasAnyRole('BUYER', 'FARMER', 'VENDOR')")
+    @PreAuthorize("hasAuthority('VEHICLE:CREATE')")
     public ResponseEntity<ApiResponse<Void>> cancelBooking(@PathVariable UUID bookingId) {
         
         UUID buyerId = UserContextHolder.getUserId();

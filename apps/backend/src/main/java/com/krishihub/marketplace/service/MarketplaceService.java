@@ -44,9 +44,11 @@ public class MarketplaceService {
         User farmer = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        if (farmer.getRole() != User.UserRole.FARMER) {
-            throw new BadRequestException("Only farmers can create crop listings");
-        }
+        // Authorization Note: Role check removed - now handled at controller level via @PreAuthorize
+        // Controller requires MARKETPLACE:CREATE permission which is granted to FARMER role
+        // if (farmer.getRole() != User.UserRole.FARMER) {
+        //     throw new BadRequestException("Only farmers can create crop listings");
+        // }
 
         CropListing listing = CropListing.builder()
                 .farmer(farmer)

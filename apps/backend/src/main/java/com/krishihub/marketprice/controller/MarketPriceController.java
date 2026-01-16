@@ -106,7 +106,7 @@ public class MarketPriceController {
     }
 
     @PostMapping("/override")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:PANEL')")
     public ResponseEntity<ApiResponse<MarketPriceDto>> overridePrice(@Valid @RequestBody MarketPriceDto priceDto) {
         // In real app, extract user ID from SecurityContext
         UUID adminId = UUID.randomUUID();
@@ -115,14 +115,14 @@ public class MarketPriceController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:PANEL')")
     public ResponseEntity<ApiResponse<MarketPriceDto>> addPrice(@Valid @RequestBody MarketPriceDto priceDto) {
         MarketPriceDto price = priceService.addPrice(priceDto);
         return ResponseEntity.ok(ApiResponse.success("Price added successfully", price));
     }
 
     @PostMapping("/ingest")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:PANEL')")
     public ResponseEntity<ApiResponse<String>> triggerIngestion() {
         ingestionService.triggerIngestion();
         return ResponseEntity.ok(ApiResponse.success("Ingestion triggered successfully", null));

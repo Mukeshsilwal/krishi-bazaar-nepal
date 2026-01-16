@@ -134,16 +134,31 @@ public class PaymentService {
     }
 
     @Transactional
-    public TransactionDto verifyPayment(UUID transactionId, String gatewayTransactionId) {
-        Transaction transaction = transactionRepository.findById(transactionId).orElse(null);
+    public TransactionDto verifyPayment(String identifier, String gatewayTransactionId) {
+        // 1. Try to find by transactionId (String)
+        Transaction transaction = transactionRepository.findByTransactionId(identifier).orElse(null);
+
+        // 2. If not found, try to treat identifier as UUID (PK or Order ID)
+        if (transaction == null) {
+            try {
+                UUID uuid = UUID.fromString(identifier);
+                transaction = transactionRepository.findById(uuid).orElse(null);
+                
+                if (transaction == null) {
+                    List<Transaction> transactions = transactionRepository.findByOrderId(uuid);
+                    if (!transactions.isEmpty()) {
+                         transaction = transactions.stream()
+                                .min((t1, t2) -> t2.getCreatedAt().compareTo(t1.getCreatedAt()))
+                                .orElse(null);
+                    }
+                }
+            } catch (IllegalArgumentException e) {
+                // Not a valid UUID
+            }
+        }
 
         if (transaction == null) {
-            List<Transaction> transactions = transactionRepository.findByOrderId(transactionId);
-            if (transactions.isEmpty()) {
-                throw new ResourceNotFoundException("Transaction not found for ID or Order ID: " + transactionId);
-            }
-            transaction = transactions.stream().min((t1, t2) -> t2.getCreatedAt().compareTo(t1.getCreatedAt()))
-                    .orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
+             throw new ResourceNotFoundException("Transaction not found for identifier: " + identifier);
         }
 
         if (transaction.getPaymentStatus() == Transaction.PaymentStatus.COMPLETED) {
@@ -177,7 +192,6 @@ public class PaymentService {
                 orderService.updatePaymentStatus(transaction.getOrder().getId(), OrderStatus.PAID);
                 eventPublisher.publishEvent(new PaymentCompletedEvent(this, transaction));
 
-                log.info("Payment verified and completed: {}", transactionId);
             } else {
                 transaction.setPaymentStatus(Transaction.PaymentStatus.FAILED);
                 // We already set gatewayResponse above

@@ -21,11 +21,9 @@ public class PaymentCallbackController {
 
     @GetMapping("/esewa")
     public ResponseEntity<ApiResponse<String>> handleEsewaCallback(
-            @RequestParam("data") String data // eSewa V2 sends encoded data
+            @RequestParam("data") String data
             ) {
         log.info("Received eSewa callback: {}", data);
-        // Implement V2 decoding if needed, or if this is failure/success url hit directly.
-        // Assuming standard verification flow is preferred. 
         return ResponseEntity.ok(ApiResponse.success("eSewa callback received", "eSewa callback received"));
     }
 
@@ -36,13 +34,11 @@ public class PaymentCallbackController {
         return ResponseEntity.ok(ApiResponse.success("Khalti callback received", "Khalti callback received"));
     }
     
-    // Explicit server-to-server check
     @PostMapping("/verify/{transactionId}")
     public ResponseEntity<ApiResponse<TransactionDto>> triggerVerification(
-            @PathVariable UUID transactionId,
+            @PathVariable String transactionId,
             @RequestParam(required = false) String gatewayTxnId) {
         
-        // This endpoint can be forced by admin/system to re-check a specific ID
         TransactionDto txn = paymentService.verifyPayment(transactionId, gatewayTxnId);
         return ResponseEntity.ok(ApiResponse.success(txn));
     }

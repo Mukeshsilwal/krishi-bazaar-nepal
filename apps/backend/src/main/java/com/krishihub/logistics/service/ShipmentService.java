@@ -74,12 +74,12 @@ public class ShipmentService {
         boolean isBuyer = order.getBuyer().getId().equals(currentUserId);
         boolean isFarmer = order.getFarmer() != null && order.getFarmer().getId().equals(currentUserId);
         
-        // We should also allow Admin.
-        // checking role via SecurityContextHolder
-        boolean isAdmin = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication()
-            .getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        // Authorization Note: Admin role check removed - now handled at controller level via @PreAuthorize
+        // Controller endpoints use LOGISTICS:READ or LOGISTICS:MANAGE permissions
+        // boolean isAdmin = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication()
+        //     .getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        if (!isBuyer && !isFarmer && !isAdmin) {
+        if (!isBuyer && !isFarmer) {
              throw new org.springframework.security.access.AccessDeniedException("You are not authorized to view this shipment");
         }
     }

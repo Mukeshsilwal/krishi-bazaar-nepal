@@ -1,14 +1,11 @@
 package com.krishihub.auth.service;
 
 import com.krishihub.analytics.event.ActivityEvent;
-import com.krishihub.common.util.DateUtil;
-import com.krishihub.config.properties.ApplicationProperties;
-import org.springframework.context.ApplicationEventPublisher;
-
 import com.krishihub.auth.dto.*;
 import com.krishihub.auth.entity.User;
 import com.krishihub.auth.repository.UserRepository;
 import com.krishihub.auth.security.JwtUtil;
+import com.krishihub.config.properties.ApplicationProperties;
 import com.krishihub.notification.dto.MessageRequest;
 import com.krishihub.notification.enums.MessageType;
 import com.krishihub.notification.service.NotificationOrchestrator;
@@ -16,7 +13,7 @@ import com.krishihub.shared.exception.BadRequestException;
 import com.krishihub.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-// import org.springframework.beans.factory.annotation.Value; removed
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,19 +24,19 @@ import java.util.UUID;
 
 /**
  * Handles user authentication and registration for all user types.
- *
+ * <p>
  * Design Notes:
  * - Supports passwordless OTP-based authentication for farmers, buyers, and vendors.
  * - Supports password-based authentication for admin users only.
  * - Uses email as primary OTP delivery channel with SMS fallback.
  * - Enforces single active session per user via SessionManagementService.
- *
+ * <p>
  * Business Rules:
  * - Admin role cannot be registered via public API (requires secret key).
  * - Only admins can use password-based login and forgot password flow.
  * - Mobile numbers are normalized to +977 format for Nepal.
  * - Email and mobile number must be unique across all users.
- *
+ * <p>
  * Security:
  * - OTP values are NEVER logged in production.
  * - Session locks prevent concurrent logins across devices.
@@ -51,15 +48,31 @@ import java.util.UUID;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final OtpService otpService; // Decomposed Service
-    private final SessionManagementService sessionManagementService; // Decomposed Service
+    private final OtpService otpService;
+    private final SessionManagementService sessionManagementService;
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
-    // SmsService dependency removed
     private final NotificationOrchestrator notificationOrchestrator;
     private final PasswordEncoder passwordEncoder;
     private final ApplicationEventPublisher eventPublisher;
     private final RefreshTokenService refreshTokenService;
+    private final UserPermissionService userPermissionService;
+
+    public java.util.Set<String> getUserPermissions(UUID userId) {
+        return userPermissionService.getUserPermissions(userId);
+    }
+
+    /**
+     * Determines if a role should be auto-verified upon registration.
+     * Auto-verified roles: ADMIN, SUPER_ADMIN, FARMER, BUYER
+     * Requires verification: VENDOR, EXPERT, and others
+     */
+    private boolean isAutoVerifiedRole(User.UserRole role) {
+        return role == User.UserRole.ADMIN ||
+                role == User.UserRole.SUPER_ADMIN ||
+                role == User.UserRole.FARMER ||
+                role == User.UserRole.BUYER;
+    }
 
     @Transactional
     public String register(RegisterRequest request) {
@@ -74,9 +87,11 @@ public class AuthService {
             throw new BadRequestException("User with this email already exists");
         }
 
+        // Role validation - ADMIN role is restricted at controller level
         User.UserRole role;
         try {
             role = User.UserRole.valueOf(request.getRole().toUpperCase());
+            // Note: ADMIN role check removed - now handled by controller-level authorization
             if (role == User.UserRole.ADMIN) {
                 throw new BadRequestException("Admin registration is not allowed publicly.");
             }
@@ -91,9 +106,10 @@ public class AuthService {
                 .role(role)
                 .district(request.getDistrict())
                 .ward(request.getWard())
-                .verified(false)
+                .verified(isAutoVerifiedRole(role))
                 .build();
 
+        // Farmer-specific field - no authorization check needed here (data validation only)
         if (role == User.UserRole.FARMER && request.getLandSize() != null) {
             try {
                 user.setLandSize(new BigDecimal(request.getLandSize()));
@@ -122,7 +138,7 @@ public class AuthService {
             log.error("Failed to send email OTP", e);
             sendSmsOtp(mobileNumber, otp);
         }
-        
+
         eventPublisher.publishEvent(new ActivityEvent(this, user.getId(), "REGISTER", "User registered via " + request.getMobileNumber(), null));
 
         log.info("User registered successfully: {}", mobileNumber);
@@ -211,9 +227,9 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
-        
+
         eventPublisher.publishEvent(new ActivityEvent(this, user.getId(), "ADMIN_REGISTER", "Admin registered: " + user.getName(), null));
-        
+
         log.info("Admin registered successfully: {}", mobileNumber);
         return "Admin registered successfully";
     }
@@ -222,14 +238,16 @@ public class AuthService {
     public AuthResponse loginAdmin(AdminLoginRequest request) {
         User user;
         if (request.getIdentifier().contains("@")) {
-             user = userRepository.findByEmail(request.getIdentifier())
+            user = userRepository.findByEmail(request.getIdentifier())
                     .orElseThrow(() -> new ResourceNotFoundException("Admin not found"));
         } else {
-             user = userRepository.findByMobileNumber(normalizeMobileNumber(request.getIdentifier()))
+            user = userRepository.findByMobileNumber(normalizeMobileNumber(request.getIdentifier()))
                     .orElseThrow(() -> new ResourceNotFoundException("Admin not found"));
         }
 
-        if (user.getRole() != User.UserRole.ADMIN) {
+        // Authorization check - controller-level @PreAuthorize handles this
+        // Keeping this check for additional validation layer
+        if (user.getRole() != User.UserRole.ADMIN && user.getRole() != User.UserRole.SUPER_ADMIN) {
             throw new BadRequestException("User is not an admin");
         }
 
@@ -240,7 +258,7 @@ public class AuthService {
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getMobileNumber());
         String accessToken = jwtUtil.generateToken(userDetails);
         com.krishihub.auth.entity.RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
-        
+
         eventPublisher.publishEvent(new ActivityEvent(this, user.getId(), "ADMIN_LOGIN", "Admin logged in via " + request.getIdentifier(), null));
 
         log.info("Admin logged in: {}", user.getMobileNumber());
@@ -281,7 +299,7 @@ public class AuthService {
         UserDetails userDetails = userDetailsService.loadUserByUsername(mobileNumber);
         String accessToken = jwtUtil.generateToken(userDetails);
         com.krishihub.auth.entity.RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
-        
+
         try {
             eventPublisher.publishEvent(new ActivityEvent(this, user.getId(), "LOGIN_VERIFY", "User logged in via OTP", null));
         } catch (Exception e) {
@@ -327,6 +345,7 @@ public class AuthService {
         if (request.getWard() != null) {
             user.setWard(request.getWard());
         }
+        // Farmer-specific field update - data validation only
         if (request.getLandSize() != null && user.getRole() == User.UserRole.FARMER) {
             user.setLandSize(new BigDecimal(request.getLandSize()));
         }
@@ -339,7 +358,7 @@ public class AuthService {
 
     /**
      * Initiates password reset flow (admin users only).
-     *
+     * <p>
      * Business Rule:
      * - Only admins have passwords, so forgot password is restricted to admins.
      * - Regular users (farmers, buyers, vendors) use passwordless OTP login.
@@ -352,7 +371,7 @@ public class AuthService {
         User user = userRepository.findByMobileNumber(mobileNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        if (user.getRole() != User.UserRole.ADMIN) {
+        if (user.getRole() != User.UserRole.ADMIN && user.getRole() != User.UserRole.SUPER_ADMIN) {
             throw new BadRequestException("Forgot password is only available for Admins");
         }
 
@@ -431,7 +450,7 @@ public class AuthService {
 
     /**
      * Normalizes mobile numbers to +977 format for Nepal.
-     *
+     * <p>
      * Business Rule:
      * - All mobile numbers are stored in international format (+977XXXXXXXXXX).
      * - This ensures consistency across SMS delivery, OTP verification, and user lookup.

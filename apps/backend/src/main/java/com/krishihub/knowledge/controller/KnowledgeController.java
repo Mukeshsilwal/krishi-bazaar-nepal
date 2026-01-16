@@ -9,6 +9,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/knowledge")
@@ -64,23 +65,27 @@ public class KnowledgeController {
         return ResponseEntity.ok(ApiResponse.success(knowledgeService.getArticleById(articleId)));
     }
 
-    // Admin Endpoints (Ideally secured with PreAuthorize)
+    // Admin Endpoints
     @PostMapping("/categories")
+    @PreAuthorize("hasAuthority('KNOWLEDGE:MANAGE')")
     public ResponseEntity<ApiResponse<KnowledgeCategory>> createCategory(@RequestBody KnowledgeCategory category) {
         return ResponseEntity.ok(ApiResponse.success("Category created successfully", knowledgeService.createCategory(category)));
     }
 
     @PostMapping("/articles")
+    @PreAuthorize("hasAuthority('KNOWLEDGE:MANAGE')")
     public ResponseEntity<ApiResponse<Article>> createArticle(@RequestBody Article article) {
         return ResponseEntity.ok(ApiResponse.success("Article created successfully", knowledgeService.createArticle(article)));
     }
 
     @PutMapping("/articles/{id}")
+    @PreAuthorize("hasAuthority('KNOWLEDGE:MANAGE')")
     public ResponseEntity<ApiResponse<Article>> updateArticle(@PathVariable UUID id, @RequestBody Article article) {
         return ResponseEntity.ok(ApiResponse.success("Article updated successfully", knowledgeService.updateArticle(id, article)));
     }
 
     @DeleteMapping("/articles/{id}")
+    @PreAuthorize("hasAuthority('KNOWLEDGE:MANAGE')")
     public ResponseEntity<ApiResponse<Void>> deleteArticle(@PathVariable UUID id) {
         knowledgeService.deleteArticle(id);
         return ResponseEntity.ok(ApiResponse.success("Article deleted successfully", null));

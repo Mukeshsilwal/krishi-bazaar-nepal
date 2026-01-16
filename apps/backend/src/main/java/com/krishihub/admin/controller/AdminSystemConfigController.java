@@ -19,13 +19,13 @@ public class AdminSystemConfigController {
     private final SystemConfigService systemConfigService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:SETTINGS')")
     public ResponseEntity<ApiResponse<List<SystemConfig>>> getAllConfigs() {
         return ResponseEntity.ok(ApiResponse.success("System configurations fetched", systemConfigService.getAllConfigs()));
     }
 
     @PutMapping("/{key}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:SETTINGS')")
     public ResponseEntity<ApiResponse<SystemConfig>> updateConfig(
             @PathVariable String key,
             @RequestBody SystemConfigUpdateRequest request) {

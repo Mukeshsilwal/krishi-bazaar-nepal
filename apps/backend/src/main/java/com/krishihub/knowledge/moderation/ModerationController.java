@@ -3,6 +3,7 @@ package com.krishihub.knowledge.moderation;
 import com.krishihub.shared.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/knowledge/moderation")
 @RequiredArgsConstructor
-// @PreAuthorize("hasRole('ADMIN') or hasRole('EXPERT_REVIEWER')")
+@PreAuthorize("hasAnyAuthority('ADMIN:PANEL', 'KNOWLEDGE:MODERATE')")
 public class ModerationController {
 
     private final ModerationService moderationService;

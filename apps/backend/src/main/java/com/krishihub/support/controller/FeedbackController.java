@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,6 +22,7 @@ public class FeedbackController {
     private final FeedbackService feedbackService;
 
     @PostMapping("/feedback")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Feedback>> submitFeedback(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody FeedbackRequest request) {
@@ -35,11 +37,13 @@ public class FeedbackController {
     }
 
     @GetMapping("/admin/feedback")
+    @PreAuthorize("hasAuthority('ADMIN:PANEL')")
     public ResponseEntity<ApiResponse<List<Feedback>>> getAllFeedback() {
         return ResponseEntity.ok(ApiResponse.success("Feedback list", feedbackService.getAllFeedback()));
     }
 
     @PatchMapping("/admin/feedback/{id}/status")
+    @PreAuthorize("hasAuthority('ADMIN:PANEL')")
     public ResponseEntity<ApiResponse<Feedback>> updateStatus(
             @PathVariable UUID id,
             @RequestBody StatusUpdateRequest request) {

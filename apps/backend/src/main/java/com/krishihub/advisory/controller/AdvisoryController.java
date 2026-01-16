@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 import com.krishihub.common.context.UserContextHolder;
 import java.util.UUID;
 
@@ -34,6 +35,7 @@ public class AdvisoryController {
     }
 
     @org.springframework.web.bind.annotation.PostMapping("/generate")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> generateAdvisoryRules() {
         UUID userId = UserContextHolder.getUserId();
         advisoryService.generateAdvisoryRules(userId);

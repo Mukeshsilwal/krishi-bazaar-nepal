@@ -6,6 +6,7 @@ import com.krishihub.shared.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 import java.util.UUID;
@@ -13,6 +14,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/price-alerts")
 @RequiredArgsConstructor
+@PreAuthorize("isAuthenticated()")
 public class PriceAlertController {
 
     private final PriceAlertService priceAlertService;

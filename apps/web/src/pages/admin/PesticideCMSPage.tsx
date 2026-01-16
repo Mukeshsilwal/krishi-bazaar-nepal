@@ -40,6 +40,7 @@ import {
 } from 'lucide-react';
 import advisoryService from '@/modules/advisory/services/advisoryService';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface Pesticide {
   id?: string;
@@ -98,6 +99,7 @@ const PesticideCMSPage = () => {
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string | null }>({ open: false, id: null });
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,10 +124,14 @@ const PesticideCMSPage = () => {
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm(language === 'ne' ? 'के तपाईं निश्चित हुनुहुन्छ?' : 'Are you sure?')) {
-      setPesticides(prev => prev.filter(p => p.id !== id));
-      toast.success(language === 'ne' ? 'मेटाइयो' : 'Deleted');
-    }
+    setDeleteDialog({ open: true, id });
+  };
+
+  const confirmDelete = () => {
+    if (!deleteDialog.id) return;
+    setPesticides(prev => prev.filter(p => p.id !== deleteDialog.id));
+    toast.success(language === 'ne' ? 'मेटाइयो' : 'Deleted');
+    setDeleteDialog({ open: false, id: null });
   };
 
   const filteredPesticides = pesticides.filter(p => {
@@ -449,6 +455,19 @@ const PesticideCMSPage = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}
+        onConfirm={confirmDelete}
+        title={language === 'ne' ? 'कीटनाशक मेटाउनुहोस्' : 'Delete Pesticide'}
+        description={language === 'ne' ? 'के तपाईं यो कीटनाशक मेटाउन चाहनुहुन्छ? यो कार्य पूर्ववत गर्न सकिँदैन।' : 'Are you sure you want to delete this pesticide? This action cannot be undone.'}
+        confirmText={language === 'ne' ? 'मेटाउनुहोस्' : 'Delete'}
+        cancelText={language === 'ne' ? 'रद्द गर्नुहोस्' : 'Cancel'}
+        variant="destructive"
+        icon={<Trash2 className="h-6 w-6 text-red-600" />}
+      />
     </>
   );
 };

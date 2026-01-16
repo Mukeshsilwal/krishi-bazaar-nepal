@@ -29,20 +29,20 @@ public class GovernmentSchemeController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('FINANCE:MANAGE')")
     public ResponseEntity<ApiResponse<GovernmentScheme>> createScheme(@RequestBody GovernmentScheme scheme) {
         return ResponseEntity.ok(ApiResponse.success("Scheme created", service.createScheme(scheme)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('FINANCE:MANAGE')")
     public ResponseEntity<ApiResponse<GovernmentScheme>> updateScheme(@PathVariable UUID id,
             @RequestBody GovernmentScheme scheme) {
         return ResponseEntity.ok(ApiResponse.success("Scheme updated", service.updateScheme(id, scheme)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('FINANCE:MANAGE')")
     public ResponseEntity<ApiResponse<Void>> deleteScheme(@PathVariable UUID id) {
         service.deleteScheme(id);
         return ResponseEntity.ok(ApiResponse.success("Scheme deleted", null));

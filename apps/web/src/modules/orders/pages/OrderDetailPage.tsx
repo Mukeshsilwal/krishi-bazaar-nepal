@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/context/AuthContext';
+import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import orderService from '../services/orderService';
 import paymentService from '../../../services/paymentService';
 
@@ -11,6 +14,7 @@ export default function OrderDetailPage() {
     const [order, setOrder] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
+    const [cancelDialog, setCancelDialog] = useState(false);
 
     useEffect(() => {
         fetchOrder();
@@ -35,10 +39,10 @@ export default function OrderDetailPage() {
             const response = await orderService.updateOrderStatus(id!, { status: 'CONFIRMED' });
             if (response.code === 0) {
                 setOrder(response.data);
-                alert('Order confirmed successfully!');
+                toast.success('Order confirmed successfully!');
             }
         } catch (error: any) {
-            alert(error.response?.data?.message || 'Failed to confirm order');
+            toast.error(error.response?.data?.message || 'Failed to confirm order');
         } finally {
             setActionLoading(false);
         }
@@ -72,7 +76,7 @@ export default function OrderDetailPage() {
                 }
             }
         } catch (error: any) {
-            alert(error.response?.data?.message || 'Failed to initiate payment');
+            toast.error(error.response?.data?.message || 'Failed to initiate payment');
         } finally {
             setActionLoading(false);
         }
@@ -84,10 +88,10 @@ export default function OrderDetailPage() {
             const response = await orderService.updateOrderStatus(id!, { status: 'READY' });
             if (response.code === 0) {
                 setOrder(response.data);
-                alert('Order marked as ready!');
+                toast.success('Order marked as ready!');
             }
         } catch (error: any) {
-            alert(error.response?.data?.message || 'Failed to update order');
+            toast.error(error.response?.data?.message || 'Failed to update order');
         } finally {
             setActionLoading(false);
         }
@@ -99,10 +103,10 @@ export default function OrderDetailPage() {
             const response = await orderService.updateOrderStatus(id!, { status });
             if (response.code === 0) {
                 setOrder(response.data);
-                alert(`Order marked as ${status.replace(/_/g, ' ').toLowerCase()}!`);
+                toast.success(`Order marked as ${status.replace(/_/g, ' ').toLowerCase()}!`);
             }
         } catch (error: any) {
-            alert(error.response?.data?.message || 'Failed to update order');
+            toast.error(error.response?.data?.message || 'Failed to update order');
         } finally {
             setActionLoading(false);
         }
@@ -112,17 +116,21 @@ export default function OrderDetailPage() {
         await handleUpdateStatus('COMPLETED');
     };
 
-    const handleCancel = async () => {
-        if (!confirm('Are you sure you want to cancel this order?')) return;
+    const handleCancelClick = () => {
+        setCancelDialog(true);
+    };
 
+    const handleConfirmCancel = async () => {
         setActionLoading(true);
         try {
             await orderService.cancelOrder(id!);
+            toast.success('Order cancelled successfully');
             navigate('/orders');
         } catch (error: any) {
-            alert(error.response?.data?.message || 'Failed to cancel order');
+            toast.error(error.response?.data?.message || 'Failed to cancel order');
         } finally {
             setActionLoading(false);
+            setCancelDialog(false);
         }
     };
 
@@ -364,7 +372,7 @@ export default function OrderDetailPage() {
                             {/* Cancel Button */}
                             {(order.status === 'PENDING' || order.status === 'CONFIRMED') && (
                                 <button
-                                    onClick={handleCancel}
+                                    onClick={handleCancelClick}
                                     disabled={actionLoading}
                                     className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 disabled:opacity-50"
                                 >
@@ -375,6 +383,18 @@ export default function OrderDetailPage() {
                     </div>
                 </div>
             </div>
+
+            <ConfirmDialog
+                open={cancelDialog}
+                onOpenChange={setCancelDialog}
+                onConfirm={handleConfirmCancel}
+                title="Cancel Order"
+                description="Are you sure you want to cancel this order? This action cannot be undone."
+                confirmText="Yes, Cancel Order"
+                cancelText="No, Keep Order"
+                variant="destructive"
+                icon={<AlertTriangle className="h-6 w-6 text-red-600" />}
+            />
         </div>
     );
 }

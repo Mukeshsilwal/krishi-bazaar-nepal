@@ -28,7 +28,7 @@ public class AIDiagnosisController {
     // Farmer Endpoints
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('DIAGNOSIS:CREATE')")
     public ResponseEntity<AIDiagnosis> submitDiagnosis(
             @RequestBody AIDiagnosisSubmissionRequest request) {
         // Enforce farmer ID from session
@@ -38,7 +38,7 @@ public class AIDiagnosisController {
     }
 
     @GetMapping("/history")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('DIAGNOSIS:CREATE')")
     public ResponseEntity<Page<AIDiagnosis>> getHistory(
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         UUID userId = UserContextHolder.getUserId();
@@ -46,7 +46,7 @@ public class AIDiagnosisController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('DIAGNOSIS:CREATE')")
     public ResponseEntity<AIDiagnosis> getDiagnosis(@PathVariable UUID id) {
         AIDiagnosis diagnosis = service.getDiagnosis(id);
         UUID userId = UserContextHolder.getUserId();
@@ -65,14 +65,14 @@ public class AIDiagnosisController {
     // Admin/Expert Endpoints
 
     @GetMapping("/queue")
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    @PreAuthorize("hasAnyAuthority('ADMIN:PANEL', 'DIAGNOSIS:REVIEW')")
     public ResponseEntity<Page<AIDiagnosis>> getReviewQueue(
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable) {
         return ResponseEntity.ok(service.getReviewQueue(pageable));
     }
 
     @PostMapping("/{id}/review")
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    @PreAuthorize("hasAnyAuthority('ADMIN:PANEL', 'DIAGNOSIS:REVIEW')")
     public ResponseEntity<AIDiagnosis> reviewDiagnosis(
             @PathVariable UUID id,
             @RequestBody ReviewDiagnosisRequest request) {

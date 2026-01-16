@@ -3,29 +3,63 @@ import authService from '../services/authService';
 
 const AuthContext = createContext(null);
 
+/**
+ * Decode JWT token and extract permissions
+ * @param {string} token - JWT token
+ * @returns {object} Decoded token payload
+ */
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [permissions, setPermissions] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        // Check if user is logged in on mount
-        const storedUser = authService.getUser();
-        if (storedUser) {
-            setUser(storedUser);
+    /**
+     * Fetch permissions from API
+     */
+    const fetchPermissions = async () => {
+        try {
+            const response = await authService.getPermissions();
+            if (response.code === 0 && Array.isArray(response.data)) {
+                setPermissions(response.data);
+                console.log('✅ Permissions loaded from API:', response.data.length);
+            } else {
+                setPermissions([]);
+            }
+        } catch (error) {
+            console.error('Failed to fetch permissions:', error);
+            setPermissions([]);
+        }
+    };
 
-            // Refresh user data from server to get latest fields (like createdAt)
-            authService.getCurrentUser()
-                .then(response => {
+    useEffect(() => {
+        const initializeAuth = async () => {
+            // Check if user is logged in on mount
+            const storedUser = authService.getUser();
+
+            if (storedUser) {
+                setUser(storedUser);
+                try {
+                    await fetchPermissions();
+                } catch (error) {
+                    console.error("Error fetching permissions during init:", error);
+                }
+
+                // Refresh user data from server to get latest fields (like createdAt)
+                try {
+                    const response = await authService.getCurrentUser();
                     if (response.code === 0 && response.data) {
                         setUser(response.data);
                         localStorage.setItem('user', JSON.stringify(response.data));
                     }
-                })
-                .catch(err => {
-                    console.error('Failed to refresh user data:', err);
-                });
-        }
-        setLoading(false);
+                } catch (err) {
+                    // console.error('Failed to refresh user data:', err);
+                    // Silent fail is okay here, we have stored user
+                }
+            }
+            setLoading(false);
+        };
+
+        initializeAuth();
     }, []);
 
     const login = async (mobileNumber, otp) => {
@@ -33,6 +67,7 @@ export const AuthProvider = ({ children }) => {
             const response = await authService.verifyOtp(mobileNumber, otp);
             if (response.code === 0 && response.data) {
                 setUser(response.data.user);
+                await fetchPermissions();
                 return { code: 0, data: response.data };
             }
             return { code: 'ERROR', message: response.message };
@@ -49,11 +84,11 @@ export const AuthProvider = ({ children }) => {
         try {
             console.log('Attempting admin login for:', identifier);
             const response = await authService.adminLogin(identifier, password);
-            console.log('Admin login response:', response);
 
             if (response.code === 0 && response.data) {
                 console.log('Setting user state:', response.data.user);
                 setUser(response.data.user);
+                await fetchPermissions();
                 return { code: 0, data: response.data };
             }
             return { code: 'ERROR', message: response.message };
@@ -81,6 +116,7 @@ export const AuthProvider = ({ children }) => {
     const logout = async () => {
         await authService.logout();
         setUser(null);
+        setPermissions([]);
     };
 
     const updateUser = (userData) => {
@@ -90,6 +126,7 @@ export const AuthProvider = ({ children }) => {
 
     const value = {
         user,
+        permissions,
         loading,
         login,
         adminLogin,
@@ -97,6 +134,9 @@ export const AuthProvider = ({ children }) => {
         logout,
         updateUser,
         isAuthenticated: !!user,
+        hasPermission: (permission) => permissions.includes(permission),
+        hasAnyPermission: (permissionList) => permissionList.some(p => permissions.includes(p)),
+        hasAllPermissions: (permissionList) => permissionList.every(p => permissions.includes(p)),
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

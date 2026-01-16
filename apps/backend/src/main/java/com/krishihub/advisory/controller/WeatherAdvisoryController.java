@@ -37,19 +37,19 @@ public class WeatherAdvisoryController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:PANEL')")
     public ResponseEntity<ApiResponse<WeatherAdvisory>> createAdvisory(@RequestBody WeatherAdvisory advisory) {
         return ResponseEntity.ok(ApiResponse.success("Advisory created", service.createAdvisory(advisory)));
     }
 
     @GetMapping("/test-broadcast")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:PANEL')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> testBroadcast(@RequestParam String district) {
         return ResponseEntity.ok(ApiResponse.success("Broadcast test result", service.testBroadcast(district)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:PANEL')")
     public ResponseEntity<ApiResponse<Void>> deleteAdvisory(@PathVariable UUID id) {
         service.deleteAdvisory(id);
         return ResponseEntity.ok(ApiResponse.success("Advisory deleted", null));
@@ -60,6 +60,7 @@ public class WeatherAdvisoryController {
      * Uses centralized logging service
      */
     @PostMapping("/feedback")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> submitFeedback(@RequestBody AdvisoryFeedbackDTO feedbackDTO) {
         advisoryDeliveryLogService.logFeedbackReceived(
                 feedbackDTO.getDeliveryLogId(),
@@ -73,6 +74,7 @@ public class WeatherAdvisoryController {
      * Uses centralized logging service
      */
     @PostMapping("/opened/{deliveryLogId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> markAsOpened(@PathVariable UUID deliveryLogId) {
         advisoryDeliveryLogService.logAdvisoryOpened(deliveryLogId);
         return ResponseEntity.ok(ApiResponse.success("Advisory marked as opened", null));
@@ -83,6 +85,7 @@ public class WeatherAdvisoryController {
      * Uses centralized logging service
      */
     @GetMapping("/logs/farmer/{farmerId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<AdvisoryLogResponseDTO>>> getFarmerLogs(@PathVariable UUID farmerId) {
         List<AdvisoryLogResponseDTO> logs = advisoryDeliveryLogService.getFarmerAdvisoryHistory(farmerId);
         return ResponseEntity.ok(ApiResponse.success("Delivery logs retrieved", logs));
@@ -93,7 +96,7 @@ public class WeatherAdvisoryController {
      * Uses centralized analytics service
      */
     @GetMapping("/analytics")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:PANEL')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getAnalytics() {
         java.util.Calendar cal = java.util.Calendar.getInstance();
         cal.setTime(com.krishihub.common.util.DateUtil.nowUtc());

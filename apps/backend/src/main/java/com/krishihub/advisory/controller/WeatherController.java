@@ -65,7 +65,7 @@ public class WeatherController {
      * Get all weather signals across districts
      */
     @GetMapping("/signals")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:PANEL')")
     public ResponseEntity<ApiResponse<Map<String, List<WeatherSignal>>>> getAllWeatherSignals() {
         Map<String, List<WeatherSignal>> signals = weatherIngestionService.getAllWeatherSignals();
 
@@ -76,7 +76,7 @@ public class WeatherController {
      * Trigger manual weather data ingestion
      */
     @PostMapping("/ingest")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:PANEL')")
     public ResponseEntity<ApiResponse<Void>> triggerIngestion() {
         weatherIngestionService.pollWeatherData();
 
@@ -87,7 +87,7 @@ public class WeatherController {
      * Trigger manual advisory processing
      */
     @PostMapping("/process-advisories")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:PANEL')")
     public ResponseEntity<ApiResponse<Void>> processAdvisories() {
         orchestrator.processWeatherAdvisories();
 
@@ -98,7 +98,7 @@ public class WeatherController {
      * Process advisory for a specific farmer
      */
     @PostMapping("/process-advisory/{farmerId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:PANEL')")
     public ResponseEntity<ApiResponse<Void>> processAdvisoryForFarmer(@PathVariable UUID farmerId) {
         orchestrator.processAdvisoryForFarmer(farmerId);
 
@@ -109,7 +109,7 @@ public class WeatherController {
      * Get weather ingestion health status
      */
     @GetMapping("/health")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:PANEL')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getHealthStatus() {
         Map<String, Object> status = weatherIngestionService.getHealthStatus();
 
@@ -120,7 +120,7 @@ public class WeatherController {
      * Get orchestrator health status
      */
     @GetMapping("/orchestrator/health")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN:PANEL')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getOrchestratorHealth() {
         Map<String, Object> status = orchestrator.getHealthStatus();
 

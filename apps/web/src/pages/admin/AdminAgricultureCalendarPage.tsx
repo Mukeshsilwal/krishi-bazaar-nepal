@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { Trash2 } from 'lucide-react';
 import { useAgricultureCalendar } from '../../features/agricultureCalendar/useAgricultureCalendar';
 import { agricultureCalendarService, AgricultureCalendarEntry } from '../../services/agricultureCalendarService';
 import { CROPS, NEPALI_MONTHS, ACTIVITY_TYPES } from '../../features/agricultureCalendar/constants';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 const AdminAgricultureCalendarPage: React.FC = () => {
     const { entries, refresh, loading, selectedCrop, setSelectedCrop, selectedMonth, setSelectedMonth } = useAgricultureCalendar();
@@ -10,6 +12,7 @@ const AdminAgricultureCalendarPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingEntry, setEditingEntry] = useState<Partial<AgricultureCalendarEntry> | null>(null);
     const [submitting, setSubmitting] = useState(false);
+    const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string | null }>({ open: false, id: null });
 
     // Initial load
     useEffect(() => {
@@ -33,16 +36,22 @@ const AdminAgricultureCalendarPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (id: string) => {
-        if (!window.confirm('के तपाई यो जानकारी हटाउन चाहनुहुन्छ?')) return;
+    const handleDelete = (id: string) => {
+        setDeleteDialog({ open: true, id });
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteDialog.id) return;
 
         try {
-            await agricultureCalendarService.deleteEntry(id);
+            await agricultureCalendarService.deleteEntry(deleteDialog.id);
             toast.success('सफलतापूर्वक हटाइयो');
             refresh();
         } catch (error) {
             console.error(error);
             toast.error('हटाउन समस्या भयो');
+        } finally {
+            setDeleteDialog({ open: false, id: null });
         }
     };
 
@@ -251,6 +260,19 @@ const AdminAgricultureCalendarPage: React.FC = () => {
                     </div>
                 </div>
             )}
+
+            {/* Delete Confirmation Dialog */}
+            <ConfirmDialog
+                open={deleteDialog.open}
+                onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}
+                onConfirm={confirmDelete}
+                title="जानकारी हटाउनुहोस्"
+                description="के तपाई यो जानकारी हटाउन चाहनुहुन्छ? यो कार्य पूर्ववत गर्न सकिँदैन।"
+                confirmText="हटाउनुहोस्"
+                cancelText="रद्द गर्नुहोस्"
+                variant="destructive"
+                icon={<Trash2 className="h-6 w-6 text-red-600" />}
+            />
         </div>
     );
 };

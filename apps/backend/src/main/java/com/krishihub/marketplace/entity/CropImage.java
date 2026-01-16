@@ -10,6 +10,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "crop_images")
 @EntityListeners(AuditingEntityListener.class)
@@ -25,6 +27,7 @@ public class CropImage {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "listing_id", nullable = false)
+    @JsonIgnore
     private CropListing listing;
 
     @Column(name = "image_url", nullable = false, length = 500)
