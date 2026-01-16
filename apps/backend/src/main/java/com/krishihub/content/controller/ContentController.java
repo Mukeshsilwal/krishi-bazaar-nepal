@@ -21,7 +21,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/admin/content")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAuthority(T(com.krishihub.auth.constant.PermissionConstants).CONTENT_MANAGE)")
 public class ContentController {
 
     private final ContentService contentService;
