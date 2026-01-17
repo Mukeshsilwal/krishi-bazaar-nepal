@@ -91,7 +91,7 @@ public class CmsService {
         articleVersionRepository.save(version);
     }
 
-    public java.util.List<Article> getAllArticles() {
-        return articleRepository.findAll();
+    public org.springframework.data.domain.Page<Article> getAllArticles(org.springframework.data.domain.Pageable pageable) {
+        return articleRepository.findAll(pageable);
     }
 }

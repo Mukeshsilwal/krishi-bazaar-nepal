@@ -42,6 +42,12 @@ public class RoleService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<RoleDto> getAllRoles(org.springframework.data.domain.Pageable pageable) {
+        return roleRepository.findAll(pageable)
+                .map(this::toDto);
+    }
+
     /**
      * Create a new custom role with specified permissions.
      *

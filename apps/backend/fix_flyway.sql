@@ -1,8 +1,2 @@
--- Fix Flyway Migration Conflict
--- This script removes the problematic V999 migration record
--- Run this in your PostgreSQL database client (pgAdmin, DBeaver, etc.)
-
-DELETE FROM flyway_schema_history WHERE version = '999';
-
--- Verify the deletion
-SELECT * FROM flyway_schema_history ORDER BY installed_rank DESC LIMIT 5;
+-- Fix Flyway migration issue by deleting the failed migration record
+DELETE FROM flyway_schema_history WHERE version = '20260117122349' AND success = false;

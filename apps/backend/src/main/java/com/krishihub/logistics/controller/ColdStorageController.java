@@ -22,11 +22,31 @@ public class ColdStorageController {
     private final ColdStorageService coldStorageService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ColdStorage>>> getColdStorages(@RequestParam(required = false) String district) {
+    public ResponseEntity<ApiResponse<PaginatedResponse<com.krishihub.logistics.dto.ColdStorageDto>>> getColdStorages(
+            @RequestParam(required = false) String district,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name,asc") String sort) {
+            
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0];
+        String sortDirection = sortParams.length > 1 ? sortParams[1] : "asc";
+        
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(
+            page, 
+            size, 
+            org.springframework.data.domain.Sort.by(
+                org.springframework.data.domain.Sort.Direction.fromString(sortDirection), 
+                sortField
+            )
+        );
+
         if (district != null) {
-            return ResponseEntity.ok(ApiResponse.success(coldStorageService.getColdStorageByDistrict(district)));
+            return ResponseEntity.ok(ApiResponse.success(
+                coldStorageService.getColdStorageByDistrict(district, pageable)));
         }
-        return ResponseEntity.ok(ApiResponse.success(coldStorageService.getAllColdStorages()));
+        return ResponseEntity.ok(ApiResponse.success(
+            coldStorageService.getAllColdStorages(pageable)));
     }
 
     @PostMapping
@@ -45,9 +65,9 @@ public class ColdStorageController {
 
     @GetMapping("/bookings")
     @PreAuthorize("hasAuthority('LOGISTICS:MANAGE')")
-    public ResponseEntity<ApiResponse<PaginatedResponse<StorageBooking>>> getAllBookings(
+    public ResponseEntity<ApiResponse<PaginatedResponse<com.krishihub.logistics.dto.StorageBookingDto>>> getAllBookings(
             @PageableDefault(size = 20) Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(
-                PaginatedResponse.from(coldStorageService.getAllBookings(pageable))));
+                coldStorageService.getAllBookings(pageable)));
     }
 }

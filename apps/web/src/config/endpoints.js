@@ -116,6 +116,7 @@ export const ADVISORY_LOG_ENDPOINTS = {
     FEEDBACK: '/advisory-logs/feedback',
     OPENED: (id) => `/advisory-logs/opened/${id}`,
     ANALYTICS: '/advisory-logs/analytics',
+    DISTRICT_RISK: '/advisory-logs/analytics/district-risk',
     ALERT_FATIGUE: '/advisory-logs/analytics/alert-fatigue',
     HIGH_RISK_DISTRICTS: '/advisory-logs/analytics/high-risk-districts',
     TOP_RULES: '/advisory-logs/analytics/top-rules',
@@ -213,12 +214,15 @@ export const COLD_STORAGE_ENDPOINTS = {
 // ==================== Messaging & Notifications ====================
 
 export const MESSAGE_ENDPOINTS = {
-    SEND: '/messages',
-    CONVERSATIONS: '/messages/conversations',
-    CONVERSATION: (userId) => `/messages/${userId}`,
-    UNREAD_COUNT: '/messages/unread/count',
-    PRESENCE: '/messages/presence',
-    MARK_READ: (userId) => `/messages/${userId}/read`,
+    BASE: '/chat',
+    SEND: '/chat/message/send',
+    CONVERSATIONS: '/chat/conversations',
+    CONVERSATION: (id) => `/chat/conversation/${id}`,
+    MESSAGES: '/chat/messages',
+    CREATE_CONVERSATION: '/chat/conversation/create',
+    UNREAD_COUNT: '/chat/unread/count',
+    PRESENCE: '/chat/presence',
+    MARK_READ: '/chat/message/read',
 };
 
 export const NOTIFICATION_ENDPOINTS = {
@@ -226,6 +230,7 @@ export const NOTIFICATION_ENDPOINTS = {
     MARK_READ: (id) => `/notifications/${id}/read`,
     MARK_ALL_READ: '/notifications/read-all',
     UNREAD_COUNT: '/notifications/unread-count',
+    TOKENS: '/notifications/tokens',
 };
 
 export const ADMIN_NOTIFICATION_ENDPOINTS = {

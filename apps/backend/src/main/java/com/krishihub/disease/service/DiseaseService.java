@@ -14,8 +14,10 @@ public interface DiseaseService {
     Pesticide createPesticide(Pesticide pesticide);
 
     List<Pesticide> getAllPesticides();
+    org.springframework.data.domain.Page<Pesticide> getAllPesticides(org.springframework.data.domain.Pageable pageable);
 
     List<Disease> getAllDiseases();
+    org.springframework.data.domain.Page<Disease> getAllDiseases(org.springframework.data.domain.Pageable pageable);
 
     void linkPesticideToDisease(UUID diseaseId, UUID pesticideId, String dosage, Integer interval, Boolean isPrimary);
 

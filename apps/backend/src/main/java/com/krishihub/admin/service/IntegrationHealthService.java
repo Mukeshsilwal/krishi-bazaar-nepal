@@ -19,6 +19,7 @@ public class IntegrationHealthService {
     private final com.krishihub.config.properties.CloudinaryProperties cloudinaryProperties;
     private final com.krishihub.config.properties.PaymentProperties paymentProperties;
     private final com.krishihub.config.properties.SmsProperties smsProperties;
+    private final com.krishihub.config.TwilioConfig twilioConfig;
 
     public Map<String, IntegrationStatus> checkIntegrations() {
         Map<String, IntegrationStatus> statusMap = new HashMap<>();
@@ -35,7 +36,28 @@ public class IntegrationHealthService {
         // 4. SMS Gateway Check
         statusMap.put("SMS Gateway", checkSms());
 
+        // 5. Twilio (WhatsApp) Check
+        statusMap.put("Twilio", checkTwilio());
+
+        // 6. Firebase (Push) Check
+        statusMap.put("Firebase", checkFirebase());
+
         return statusMap;
+    }
+
+    private IntegrationStatus checkTwilio() {
+        if (twilioConfig.getAccountSid() == null || twilioConfig.getAccountSid().startsWith("AC00000")) {
+            return IntegrationStatus.builder().status("UNKNOWN").details("Not Configured (Default SID)").build();
+        }
+        return IntegrationStatus.builder().status("UP").details("Number: " + twilioConfig.getWhatsappNumber()).build();
+    }
+
+    private IntegrationStatus checkFirebase() {
+        boolean isInitialized = !com.google.firebase.FirebaseApp.getApps().isEmpty();
+        return IntegrationStatus.builder()
+                .status(isInitialized ? "UP" : "DOWN")
+                .details(isInitialized ? "Initialized" : "Failed to initialize or not configured")
+                .build();
     }
 
     private IntegrationStatus checkOpenAi() {

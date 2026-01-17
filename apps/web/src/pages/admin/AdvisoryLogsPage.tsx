@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import advisoryLogService, { AdvisoryLogResponse, AdvisoryLogFilter } from '@/services/advisoryLogService';
 import AdvisoryLogDetailDrawer from '@/components/admin/AdvisoryLogDetailDrawer';
+import DateDisplay from '@/components/common/DateDisplay';
 
 const AdvisoryLogsPage = () => {
   const { language } = useLanguage();
@@ -272,8 +273,8 @@ const AdvisoryLogsPage = () => {
                             {language === 'ne' ? statusInfo.ne : statusInfo.en}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {new Date(log.createdAt).toLocaleDateString()}
+                        <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                          <DateDisplay date={log.createdAt} showNepali={true} />
                         </TableCell>
                         <TableCell className="text-right">
                           <Button variant="ghost" size="sm" onClick={(e) => {

@@ -19,8 +19,16 @@ public class GovernmentSchemeService {
         return repository.findAll();
     }
 
+    public org.springframework.data.domain.Page<GovernmentScheme> getAllSchemes(org.springframework.data.domain.Pageable pageable) {
+        return repository.findAll(pageable);
+    }
+
     public List<GovernmentScheme> getActiveSchemes() {
         return repository.findByActiveTrue();
+    }
+
+    public org.springframework.data.domain.Page<GovernmentScheme> getActiveSchemes(org.springframework.data.domain.Pageable pageable) {
+        return repository.findByActiveTrue(pageable);
     }
 
     @Transactional

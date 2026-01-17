@@ -12,18 +12,27 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class WeatherAdvisoryService {
 
     private final WeatherAdvisoryRepository repository;
     private final com.krishihub.auth.repository.UserRepository userRepository;
     private final AdvisoryDeliveryLogService advisoryDeliveryLogService;
-
-    public List<WeatherAdvisory> getAllAdvisories() {
+    // @org.springframework.scheduling.annotation.Async // Removed to ensure synchronous execution for debugging
+    public java.util.List<WeatherAdvisory> getAllAdvisories() {
         return repository.findAll();
     }
 
-    public List<WeatherAdvisory> getActiveAdvisories() {
+    public org.springframework.data.domain.Page<WeatherAdvisory> getAllAdvisories(org.springframework.data.domain.Pageable pageable) {
+        return repository.findAll(pageable);
+    }
+
+    public java.util.List<WeatherAdvisory> getActiveAdvisories() {
         return repository.findByActiveTrue();
+    }
+
+    public org.springframework.data.domain.Page<WeatherAdvisory> getActiveAdvisories(org.springframework.data.domain.Pageable pageable) {
+        return repository.findByActiveTrue(pageable);
     }
 
     @Transactional
@@ -38,7 +47,6 @@ public class WeatherAdvisoryService {
         broadcastAdvisory(saved);
         return saved;
     }
-
     // @org.springframework.scheduling.annotation.Async // Removed to ensure synchronous execution for debugging
     public void broadcastAdvisory(WeatherAdvisory advisory) {
         try {
@@ -70,9 +78,7 @@ public class WeatherAdvisoryService {
             }
         } catch (Exception e) {
             // Log error but don't fail the transaction
-            // log.error("Failed to broadcast advisory", e);
-             System.err.println("Failed to broadcast advisory: " + e.getMessage());
-             e.printStackTrace();
+            log.error("Failed to broadcast advisory {}: {}", advisory.getId(), e.getMessage(), e);
         }
     }
 

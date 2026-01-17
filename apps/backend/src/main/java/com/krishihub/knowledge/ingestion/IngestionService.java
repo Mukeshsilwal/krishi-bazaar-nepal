@@ -3,6 +3,7 @@ package com.krishihub.knowledge.ingestion;
 import com.krishihub.knowledge.source.KnowledgeSource;
 import com.krishihub.knowledge.source.KnowledgeSourceRepository;
 import com.krishihub.knowledge.source.KnowledgeSourceService;
+import com.rometools.rome.io.SyndFeedInput;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -51,21 +52,38 @@ public class IngestionService {
     }
 
     private void fetchRssFeed(KnowledgeSource source) {
-        // TODO: Implement actual RSS parsing logic using Rome or java.net.http
-        // For POC, we will simulate fetching
         log.info("Fetching RSS feed from: {}", source.getUrl());
+        try {
+            java.net.URL feedUrl = new java.net.URL(source.getUrl());
+            SyndFeedInput input = new SyndFeedInput();
+            com.rometools.rome.feed.synd.SyndFeed feed = input.build(new com.rometools.rome.io.XmlReader(feedUrl));
 
-        // Simulation of fetched item
-        String simulatedTitle = "Simulated Article from " + source.getName() + " at " + com.krishihub.common.util.DateUtil.nowUtc();
-        String simulatedBody = "This is the raw content of the article relevant to farming.";
-        String simulatedUrl = source.getUrl() + "/article/1";
-        String contentHash = calculateHash(simulatedTitle + simulatedBody);
+            log.info("Parsed RSS feed: {} with {} entries", feed.getTitle(), feed.getEntries().size());
 
-        saveRawContent(source, simulatedTitle, simulatedBody, simulatedUrl, "Unknown Author", contentHash);
+            for (com.rometools.rome.feed.synd.SyndEntry entry : feed.getEntries()) {
+                String title = entry.getTitle();
+                String body = entry.getDescription() != null ? entry.getDescription().getValue() : "";
+                
+                // If body is empty, try contents
+                if (body.isEmpty() && entry.getContents() != null && !entry.getContents().isEmpty()) {
+                    body = entry.getContents().get(0).getValue();
+                }
+
+                String url = entry.getLink();
+                String author = entry.getAuthor();
+                String hash = calculateHash(title + body + url);
+                
+                java.util.Date publishedDate = entry.getPublishedDate();
+
+                saveRawContent(source, title, body, url, author, hash, publishedDate);
+            }
+        } catch (Exception e) {
+            log.error("Failed to fetch RSS feed from " + source.getUrl(), e);
+        }
     }
 
     private void saveRawContent(KnowledgeSource source, String title, String body, String url, String author,
-            String hash) {
+            String hash, java.util.Date publishedAt) {
         if (rawContentRepository.existsByContentHash(hash)) {
             log.info("Content already exists, skipping: {}", title);
             return;
@@ -78,6 +96,7 @@ public class IngestionService {
                 .sourceUrl(url)
                 .author(author)
                 .contentHash(hash)
+                .publishedAtSource(publishedAt)
                 .fetchedAt(com.krishihub.common.util.DateUtil.nowUtc())
                 .status(RawKnowledgeContent.IngestionStatus.PENDING_PROCESSING)
                 .build();

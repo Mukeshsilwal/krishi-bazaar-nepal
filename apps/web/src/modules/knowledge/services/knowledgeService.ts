@@ -25,18 +25,20 @@ export interface Article {
 
 const knowledgeService = {
     getCategories: async () => {
-        const response = await api.get<KnowledgeCategory[]>(KNOWLEDGE_ENDPOINTS.CATEGORIES);
-        return (response.data as any).data;
+        const response = await api.get<KnowledgeCategory[]>(KNOWLEDGE_ENDPOINTS.CATEGORIES, { params: { size: 100 } });
+        const data = (response.data as any).data;
+        return data.content || data;
     },
 
     getArticles: async (categoryId?: string, tag?: string, status?: string) => {
-        const params: any = {};
+        const params: any = { size: 100 };
         if (categoryId && categoryId !== 'undefined') params.categoryId = categoryId;
         if (tag && tag !== 'undefined') params.tag = tag;
         if (status && status !== 'undefined') params.status = status;
 
         const response = await api.get<Article[]>(KNOWLEDGE_ENDPOINTS.ARTICLES, { params });
-        return (response.data as any).data;
+        const data = (response.data as any).data;
+        return data.content || data;
     },
 
     getArticleById: async (id: string) => {

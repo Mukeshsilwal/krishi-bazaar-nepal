@@ -62,10 +62,8 @@ const AdminLogisticsPage = () => {
         try {
             // Request large page size to keep UI simple for now
             const response = await logisticsService.getAllBookings({ page: 0, size: 100, sort: 'id,desc' });
-            console.log('Bookings response:', response); // Debug log
             setBookings(response || []);
         } catch (error) {
-            console.error('Bookings fetch error:', error);
             toast.error("Failed to load bookings");
             setBookings([]); // Set empty array on error
         } finally {

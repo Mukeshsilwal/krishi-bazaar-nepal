@@ -30,12 +30,10 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     const fetchSettings = async () => {
         try {
             const response = await api.get('/public/settings');
-            console.log('Settings API Response:', response.data);
 
             // Check for success code (standardized API response)
             if (response.data.code === 0 || response.data.success) {
                 const responseData = response.data.data;
-                console.log('Settings Response Data:', responseData);
 
                 let settingsMap: Record<string, string> = {};
 
@@ -60,13 +58,10 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
                     settingsMap = responseData;
                 }
 
-                console.log('Final Settings Map:', settingsMap);
                 setSettings(settingsMap);
             } else {
-                console.warn('Settings fetch failed with code:', response.data.code);
             }
         } catch (error) {
-            console.error('Failed to fetch settings:', error);
         } finally {
             setLoading(false);
         }

@@ -14,6 +14,6 @@ public interface UserActivityRepository extends JpaRepository<UserActivity, Long
     List<UserActivity> findByUserId(java.util.UUID userId);
 
     Page<UserActivity> findByTimestampBetween(java.util.Date start, java.util.Date end, Pageable pageable);
-    
+
     Page<UserActivity> findByAction(String action, Pageable pageable);
 }

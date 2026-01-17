@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import api from '@/services/api';
+import { CMS_ENDPOINTS } from '@/config/endpoints';
 import { Button } from "@/components/ui/button";
 import {
     Table,
@@ -53,9 +54,9 @@ const CmsDashboard = () => {
 
     const fetchArticles = async () => {
         try {
-            const res = await api.get(CMS_ENDPOINTS.ARTICLES);
+            const res = await api.get(CMS_ENDPOINTS.ARTICLES, { params: { size: 100 } });
             if (res.data.code === 0) {
-                setArticles(res.data.data); // Assuming data is nested under 'data' property
+                setArticles(res.data.data.content || res.data.data);
             }
         } catch (error) {
             console.error("Failed to fetch articles", error);

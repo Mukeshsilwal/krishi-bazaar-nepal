@@ -19,20 +19,57 @@ public class ColdStorageService {
     private final ColdStorageRepository coldStorageRepository;
     private final com.krishihub.logistics.repository.StorageBookingRepository storageBookingRepository;
 
-    public List<ColdStorage> getAllColdStorages() {
-        return coldStorageRepository.findAll();
+    public com.krishihub.shared.dto.PaginatedResponse<com.krishihub.logistics.dto.ColdStorageDto> getAllColdStorages(Pageable pageable) {
+        Page<ColdStorage> page = coldStorageRepository.findAll(pageable);
+        List<com.krishihub.logistics.dto.ColdStorageDto> dtos = page.getContent().stream()
+                .map(com.krishihub.logistics.dto.ColdStorageDto::fromEntity)
+                .toList();
+        
+        return com.krishihub.shared.dto.PaginatedResponse.of(
+                dtos,
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
     }
 
     public List<ColdStorage> getColdStorageByDistrict(String district) {
         return coldStorageRepository.findByDistrict(district);
     }
 
+    public com.krishihub.shared.dto.PaginatedResponse<com.krishihub.logistics.dto.ColdStorageDto> getColdStorageByDistrict(String district, Pageable pageable) {
+        Page<ColdStorage> page = coldStorageRepository.findByDistrict(district, pageable);
+        List<com.krishihub.logistics.dto.ColdStorageDto> dtos = page.getContent().stream()
+                .map(com.krishihub.logistics.dto.ColdStorageDto::fromEntity)
+                .toList();
+                
+        return com.krishihub.shared.dto.PaginatedResponse.of(
+                dtos,
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
+    }
+
     public ColdStorage createColdStorage(ColdStorage coldStorage) {
         return coldStorageRepository.save(coldStorage);
     }
 
-    public Page<com.krishihub.logistics.entity.StorageBooking> getAllBookings(Pageable pageable) {
-        return storageBookingRepository.findAll(pageable);
+    public com.krishihub.shared.dto.PaginatedResponse<com.krishihub.logistics.dto.StorageBookingDto> getAllBookings(Pageable pageable) {
+        Page<com.krishihub.logistics.entity.StorageBooking> page = storageBookingRepository.findAll(pageable);
+        List<com.krishihub.logistics.dto.StorageBookingDto> dtos = page.getContent().stream()
+                .map(com.krishihub.logistics.dto.StorageBookingDto::fromEntity)
+                .toList();
+                
+        return com.krishihub.shared.dto.PaginatedResponse.of(
+                dtos,
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
     }
 
     public StorageBooking bookStorage(StorageBooking booking) {

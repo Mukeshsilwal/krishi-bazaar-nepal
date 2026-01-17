@@ -31,9 +31,19 @@ public class FeedbackService {
         return feedbackRepository.save(feedback);
     }
 
-    public List<Feedback> getAllFeedback() {
-        // Ideally paginated
-        return feedbackRepository.findAll();
+    public com.krishihub.shared.dto.PaginatedResponse<com.krishihub.support.dto.FeedbackDto> getAllFeedback(org.springframework.data.domain.Pageable pageable) {
+        org.springframework.data.domain.Page<Feedback> page = feedbackRepository.findAll(pageable);
+        java.util.List<com.krishihub.support.dto.FeedbackDto> dtos = page.getContent().stream()
+                .map(com.krishihub.support.dto.FeedbackDto::fromEntity)
+                .toList();
+        
+        return com.krishihub.shared.dto.PaginatedResponse.of(
+                dtos,
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
     }
 
     public Feedback updateStatus(UUID feedbackId, String status) {

@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class AdminFarmerService {
 
         private final UserRepository userRepository;
@@ -211,7 +212,7 @@ public class AdminFarmerService {
                 notificationSenderService.sendNotification(saved.getId());
              } catch (Exception e) {
                  // Log but don't fail import
-                 System.err.println("Failed to notify user " + user.getId());
+                 log.error("Failed to notify user {} about account status change", user.getId(), e);
              }
         }
         

@@ -14,6 +14,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class ShipmentEventListener {
 
     private final ShipmentService shipmentService;
@@ -67,7 +68,7 @@ public class ShipmentEventListener {
         } catch (RuntimeException e) {
             // Shipment might not exist for some orders or error fetching it
             // Log error or ignore if shipment creation is optional
-            System.err.println("Error updating shipment for order " + event.getOrder().getId() + ": " + e.getMessage());
+            log.error("Error updating shipment for order {}: {}", event.getOrder().getId(), e.getMessage(), e);
         }
     }
     

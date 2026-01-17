@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+import com.krishihub.advisory.dto.DistrictRiskDto;
+
 /**
  * Controller for Advisory Logs
  * Provides admin and farmer APIs for advisory tracking and analytics
@@ -66,11 +68,8 @@ public class AdvisoryLogController {
      */
     @GetMapping("/analytics/district-risk")
     @PreAuthorize("hasAuthority('ADMIN:ANALYTICS')")
-    public ResponseEntity<ApiResponse<Object>> getDistrictRiskInsights(
-            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(pattern="yyyy-MM-dd") java.util.Date since) {
-
-        // TODO: Implement district risk insights
-        return ResponseEntity.ok(ApiResponse.success("District risk insights", null));
+    public ResponseEntity<ApiResponse<List<DistrictRiskDto>>> getDistrictRiskInsights() {
+        return ResponseEntity.ok(ApiResponse.success("District risk insights retrieved", logService.getDistrictRiskInsights()));
     }
 
     /**

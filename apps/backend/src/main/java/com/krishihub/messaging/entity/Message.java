@@ -27,11 +27,15 @@ public class Message {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "conversation_id")
+    private Conversation conversation;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id", nullable = false)
     private User sender;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receiver_id", nullable = false)
+    @JoinColumn(name = "receiver_id")
     private User receiver;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -41,12 +45,44 @@ public class Message {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String message;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    @Builder.Default
+    private MessageType type = MessageType.TEXT;
+
     @Column(name = "is_read", nullable = false)
     @Builder.Default
     private Boolean isRead = false;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean deleted = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    @Builder.Default
+    private com.krishihub.messaging.enums.MessageStatus status = com.krishihub.messaging.enums.MessageStatus.SENT;
+
+    @Column(name = "delivered_at")
+    private Date deliveredAt;
+
+    @Column(name = "seen_at")
+    private Date seenAt;
+
+    // File attachment fields
+    @Column(name = "file_url", length = 500)
+    private String fileUrl;
+
+    @Column(name = "file_name", length = 255)
+    private String fileName;
+
+    @Column(name = "file_size")
+    private Long fileSize;
+
+    @Column(name = "file_type", length = 100)
+    private String fileType;
+
     @CreatedDate
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", nullable = false, updatable = false)
     private Date createdAt;
 }

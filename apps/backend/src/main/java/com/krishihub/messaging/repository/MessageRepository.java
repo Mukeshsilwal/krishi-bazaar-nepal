@@ -7,40 +7,27 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.UUID;
 
-@Repository
 public interface MessageRepository extends JpaRepository<Message, UUID> {
+    
+    Page<Message> findByConversationIdOrderByCreatedAtDesc(UUID conversationId, Pageable pageable);
 
-    @Query("SELECT m FROM Message m WHERE " +
-            "(m.sender.id = :userId OR m.receiver.id = :userId) " +
-            "ORDER BY m.createdAt DESC")
-    Page<Message> findConversations(@Param("userId") UUID userId, Pageable pageable);
-
-    @Query("SELECT m FROM Message m WHERE " +
-            "(m.sender.id = :user1 AND m.receiver.id = :user2) OR " +
-            "(m.sender.id = :user2 AND m.receiver.id = :user1) " +
-            "ORDER BY m.createdAt ASC")
-    List<Message> findConversationBetween(@Param("user1") UUID user1, @Param("user2") UUID user2);
-
-    @Query("SELECT m FROM Message m WHERE " +
-            "m.listing.id = :listingId AND " +
-            "((m.sender.id = :user1 AND m.receiver.id = :user2) OR " +
-            "(m.sender.id = :user2 AND m.receiver.id = :user1)) " +
-            "ORDER BY m.createdAt ASC")
-    List<Message> findConversationAboutListing(
-            @Param("listingId") UUID listingId,
-            @Param("user1") UUID user1,
-            @Param("user2") UUID user2);
-
-    @Query("SELECT COUNT(m) FROM Message m WHERE m.receiver.id = :userId AND m.isRead = false")
+    @Query("SELECT COUNT(m) FROM Message m JOIN ConversationParticipant cp ON m.conversation.id = cp.conversation.id WHERE cp.user.id = :userId AND m.sender.id != :userId AND m.isRead = false")
     long countUnreadMessages(@Param("userId") UUID userId);
 
+    @Query("SELECT COUNT(m) FROM Message m WHERE m.conversation.id = :conversationId AND m.receiver.id = :userId AND m.isRead = false")
+    long countUnreadMessagesByConversation(@Param("conversationId") UUID conversationId, @Param("userId") UUID userId);
+
     @Modifying
-    @Query("UPDATE Message m SET m.isRead = true WHERE " +
-            "m.receiver.id = :receiverId AND m.sender.id = :senderId AND m.isRead = false")
-    int markAsRead(@Param("receiverId") UUID receiverId, @Param("senderId") UUID senderId);
+    @Query("UPDATE Message m SET m.isRead = true, m.status = 'SEEN', m.seenAt = CURRENT_TIMESTAMP WHERE m.conversation.id = :conversationId AND m.receiver.id = :userId AND m.isRead = false")
+    int markConversationAsRead(@Param("conversationId") UUID conversationId, @Param("userId") UUID userId);
+
+    @Modifying
+    @Query("UPDATE Message m SET m.status = 'DELIVERED', m.deliveredAt = CURRENT_TIMESTAMP WHERE m.receiver.id = :userId AND m.status = 'SENT'")
+    int markMessagesAsDelivered(@Param("userId") UUID userId);
+
+    @Query("SELECT DISTINCT m.sender.id FROM Message m WHERE m.receiver.id = :userId AND m.status = 'SENT'")
+    java.util.List<UUID> findSendersOfPendingMessages(@Param("userId") UUID userId);
 }

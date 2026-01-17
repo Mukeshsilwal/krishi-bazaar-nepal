@@ -22,6 +22,9 @@ public class NotificationSenderService {
     private final NotificationRepository notificationRepository;
 
     private final NotificationOrchestrator notificationOrchestrator;
+    private final FcmService fcmService;
+    private final com.krishihub.notification.repository.DeviceTokenRepository deviceTokenRepository;
+
     @Autowired
     private UserRepository userRepository;
 
@@ -65,8 +68,24 @@ public class NotificationSenderService {
                         }
                         break;
                     case PUSH:
-                        // TODO: Implement Push Notification
-                        success = true;
+                        java.util.List<com.krishihub.notification.entity.DeviceToken> tokens = deviceTokenRepository.findByUserId(user.getId());
+                        if (!tokens.isEmpty()) {
+                            for (com.krishihub.notification.entity.DeviceToken deviceToken : tokens) {
+                                try {
+                                    fcmService.sendNotification(
+                                        deviceToken.getToken(),
+                                        notification.getTitle(),
+                                        notification.getMessage(),
+                                        java.util.Map.of("id", notification.getId().toString())
+                                    );
+                                    success = true;
+                                } catch (Exception e) {
+                                    log.error("Failed to send push to token {}: {}", deviceToken.getToken(), e.getMessage());
+                                }
+                            }
+                        } else {
+                            log.warn("No device tokens found for user {}", user.getId());
+                        }
                         break;
                     case WHATSAPP:
                         MessageRequest whatsappRequest = MessageRequest.builder()

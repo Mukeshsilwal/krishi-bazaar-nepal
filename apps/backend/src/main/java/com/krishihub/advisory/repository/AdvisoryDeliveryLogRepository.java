@@ -2,6 +2,7 @@ package com.krishihub.advisory.repository;
 
 import com.krishihub.advisory.entity.AdvisoryDeliveryLog;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -14,7 +15,7 @@ import java.util.UUID;
  * Repository for advisory delivery logs
  */
 @Repository
-public interface AdvisoryDeliveryLogRepository extends JpaRepository<AdvisoryDeliveryLog, UUID> {
+public interface AdvisoryDeliveryLogRepository extends JpaRepository<AdvisoryDeliveryLog, UUID>, JpaSpecificationExecutor<AdvisoryDeliveryLog> {
 
         /**
          * Find logs by farmer ID
@@ -162,4 +163,14 @@ public interface AdvisoryDeliveryLogRepository extends JpaRepository<AdvisoryDel
                         +
                         "FROM AdvisoryDeliveryLog l WHERE l.createdAt >= :since")
         Double getFeedbackRate(@Param("since") java.util.Date since);
+
+        /**
+         * Get aggregated risk data per district
+         */
+        @Query("SELECT new com.krishihub.advisory.dto.DistrictRiskAggregation(" +
+               "l.district, COUNT(l), l.severity, l.ruleName) " +
+               "FROM AdvisoryDeliveryLog l " +
+               "WHERE l.createdAt >= :since AND l.district IS NOT NULL " +
+               "GROUP BY l.district, l.severity, l.ruleName")
+        List<com.krishihub.advisory.dto.DistrictRiskAggregation> getDistrictRiskAggregation(@Param("since") java.util.Date since);
 }

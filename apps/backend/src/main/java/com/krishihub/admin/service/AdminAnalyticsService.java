@@ -19,7 +19,7 @@ public class AdminAnalyticsService {
     private final OrderRepository orderRepository;
     private final ArticleRepository articleRepository;
 
-    public com.krishihub.admin.dto.AdminDashboardStats getDashboardStats() {
+    public AdminDashboardStats getDashboardStats() {
         long totalUsers = userRepository.count();
         long totalOrders = orderRepository.count();
         long totalArticles = articleRepository.count();

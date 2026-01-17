@@ -39,8 +39,26 @@ public class DiseaseController {
     // Admin Endpoints
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Disease>>> getAllDiseases() {
-        return ResponseEntity.ok(ApiResponse.success(diseaseService.getAllDiseases()));
+    public ResponseEntity<ApiResponse<com.krishihub.shared.dto.PaginatedResponse<Disease>>> getAllDiseases(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "nameEn,asc") String sort) {
+        
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0];
+        String sortDirection = sortParams.length > 1 ? sortParams[1] : "asc";
+        
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+            page, 
+            size, 
+            org.springframework.data.domain.Sort.by(
+                org.springframework.data.domain.Sort.Direction.fromString(sortDirection), 
+                sortField
+            )
+        );
+
+        return ResponseEntity.ok(ApiResponse.success(
+            com.krishihub.shared.dto.PaginatedResponse.from(diseaseService.getAllDiseases(pageable))));
     }
 
     @PostMapping
@@ -56,8 +74,26 @@ public class DiseaseController {
     }
 
     @GetMapping("/pesticides")
-    public ResponseEntity<ApiResponse<List<Pesticide>>> getAllPesticides() {
-        return ResponseEntity.ok(ApiResponse.success(diseaseService.getAllPesticides()));
+    public ResponseEntity<ApiResponse<com.krishihub.shared.dto.PaginatedResponse<Pesticide>>> getAllPesticides(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "nameEn,asc") String sort) {
+        
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0];
+        String sortDirection = sortParams.length > 1 ? sortParams[1] : "asc";
+        
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+            page, 
+            size, 
+            org.springframework.data.domain.Sort.by(
+                org.springframework.data.domain.Sort.Direction.fromString(sortDirection), 
+                sortField
+            )
+        );
+
+        return ResponseEntity.ok(ApiResponse.success(
+            com.krishihub.shared.dto.PaginatedResponse.from(diseaseService.getAllPesticides(pageable))));
     }
 
     @PostMapping("/{diseaseId}/link-pesticide")

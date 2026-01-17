@@ -30,4 +30,15 @@ public class PaginatedResponse<T> {
                 .last(page.isLast())
                 .build();
     }
+
+    public static <T> PaginatedResponse<T> of(List<T> content, int page, int size, long totalElements, int totalPages) {
+        return PaginatedResponse.<T>builder()
+                .content(content)
+                .page(page)
+                .size(size)
+                .totalElements(totalElements)
+                .totalPages(totalPages)
+                .last(page >= totalPages - 1)
+                .build();
+    }
 }

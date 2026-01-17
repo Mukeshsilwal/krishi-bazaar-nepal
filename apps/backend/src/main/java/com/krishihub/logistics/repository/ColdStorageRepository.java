@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface ColdStorageRepository extends JpaRepository<ColdStorage, UUID> {
     List<ColdStorage> findByDistrict(String district);
+    org.springframework.data.domain.Page<ColdStorage> findByDistrict(String district, org.springframework.data.domain.Pageable pageable);
 }

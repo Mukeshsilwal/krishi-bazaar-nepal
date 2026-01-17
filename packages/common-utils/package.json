@@ -15,5 +15,8 @@
     },
     "devDependencies": {
         "typescript": "^5.3.3"
+    },
+    "dependencies": {
+        "nepali-date-converter": "^3.4.0"
     }
 }

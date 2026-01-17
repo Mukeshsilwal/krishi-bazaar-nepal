@@ -57,6 +57,11 @@ public class Article {
     private String licenseType;
     private String originalAuthor;
 
+    @Column(unique = true)
+    private String externalId;
+
+    private String externalUrl;
+
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;

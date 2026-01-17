@@ -10,6 +10,7 @@ import { SettingsProvider } from './context/SettingsContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import RouteErrorBoundary from './components/common/RouteErrorBoundary';
+import PushNotificationManager from './components/common/PushNotificationManager';
 
 const PublicLayout = lazy(() => import('./components/layout/PublicLayout'));
 const AppLayout = lazy(() => import('./components/layout/AppLayout'));
@@ -110,6 +111,7 @@ function App() {
           <SettingsProvider>
             <CartProvider>
               <ErrorBoundary>
+                <PushNotificationManager />
                 <Suspense fallback={<LoadingSpinner />}>
                   {/* SPA Layout Structure */}
                   <Routes>

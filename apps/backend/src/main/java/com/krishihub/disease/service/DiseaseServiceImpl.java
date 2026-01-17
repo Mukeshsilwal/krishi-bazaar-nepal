@@ -35,8 +35,18 @@ public class DiseaseServiceImpl implements DiseaseService {
     }
 
     @Override
+    public org.springframework.data.domain.Page<Pesticide> getAllPesticides(org.springframework.data.domain.Pageable pageable) {
+        return pesticideRepository.findAll(pageable);
+    }
+
+    @Override
     public List<Disease> getAllDiseases() {
         return diseaseRepository.findAll();
+    }
+
+    @Override
+    public org.springframework.data.domain.Page<Disease> getAllDiseases(org.springframework.data.domain.Pageable pageable) {
+        return diseaseRepository.findAll(pageable);
     }
 
     @Override

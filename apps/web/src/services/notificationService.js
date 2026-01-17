@@ -14,6 +14,11 @@ const notificationService = {
 
     markAsRead: async (id) => {
         await api.put(NOTIFICATION_ENDPOINTS.MARK_READ(id));
+    },
+
+    registerDeviceToken: async (token) => {
+        const response = await api.post(NOTIFICATION_ENDPOINTS.TOKENS, { token });
+        return response.data;
     }
 };
 

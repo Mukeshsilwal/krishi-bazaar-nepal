@@ -18,6 +18,7 @@ import {
 import adminService from '@/services/adminService';
 import { DashboardSkeleton } from '@/components/ui/skeletons';
 import { useQuery } from '@tanstack/react-query';
+import DistrictRiskCard from '@/components/admin/DistrictRiskCard';
 
 interface DashboardStats {
   // User Metrics
@@ -67,6 +68,12 @@ const AdminDashboardPage = () => {
     queryKey: ['admin-dashboard-stats'],
     queryFn: adminService.getDashboardStats,
     staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  const { data: districtRisks } = useQuery({
+    queryKey: ['admin-district-risk-analytics'],
+    queryFn: adminService.getDistrictRiskAnalytics,
+    staleTime: 1000 * 60 * 10, // 10 minutes
   });
 
   if (isLoading) {
@@ -255,6 +262,11 @@ const AdminDashboardPage = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* District Risk Analytics */}
+        <div className="lg:col-span-2">
+          <DistrictRiskCard risks={districtRisks || []} />
+        </div>
 
         {/* Quick Actions */}
         <Card className="lg:col-span-2">

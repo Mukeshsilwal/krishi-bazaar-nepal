@@ -7,6 +7,7 @@ import com.krishihub.advisory.repository.AdvisoryDeliveryLogRepository;
 import com.krishihub.shared.dto.CursorPageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -208,10 +210,8 @@ public class AdvisoryDeliveryLogService {
 
         // Build query based on filters
         List<AdvisoryDeliveryLog> logs = repository.findAll(
+                com.krishihub.advisory.specification.AdvisoryLogSpecification.withFilter(filter),
                 PageRequest.of(0, limit + 1, Sort.by(Sort.Direction.DESC, "createdAt"))).getContent();
-
-        // TODO: Apply filters properly using Specification or custom query
-        // For now, simple implementation
 
         boolean hasMore = logs.size() > limit;
         if (hasMore) {
@@ -328,6 +328,52 @@ public class AdvisoryDeliveryLogService {
             log.warn("Invalid cursor: {}", cursor);
             return null;
         }
+    }
+
+    /**
+     * Get district-wise risk insights based on advisory aggregations
+     */
+    @Cacheable(value = "districtRisks", key = "'all'")
+    public List<DistrictRiskDto> getDistrictRiskInsights() {
+        java.util.Date since = com.krishihub.common.util.DateUtil.startOfDay(
+                com.krishihub.common.util.DateUtil.addDays(com.krishihub.common.util.DateUtil.nowUtc(), -30)
+        );
+        
+        List<DistrictRiskAggregation> aggregations = repository.getDistrictRiskAggregation(since);
+        
+        Map<String, List<DistrictRiskAggregation>> byDistrict = aggregations.stream()
+                .collect(Collectors.groupingBy(DistrictRiskAggregation::getDistrict));
+        
+        return byDistrict.entrySet().stream()
+                .map(entry -> {
+                    String district = entry.getKey();
+                    List<DistrictRiskAggregation> data = entry.getValue();
+                    
+                    long total = data.stream().mapToLong(DistrictRiskAggregation::getCount).sum();
+                    
+                    Map<String, Long> severityBreakdown = data.stream()
+                            .collect(Collectors.groupingBy(
+                                    d -> d.getSeverity().name(),
+                                    Collectors.summingLong(DistrictRiskAggregation::getCount)
+                            ));
+                    
+                    List<String> topRisks = data.stream()
+                            .sorted(java.util.Comparator.comparing(DistrictRiskAggregation::getCount).reversed())
+                            .limit(5)
+                            .map(DistrictRiskAggregation::getTitle)
+                            .distinct()
+                            .toList();
+                    
+                    return DistrictRiskDto.builder()
+                            .district(district)
+                            .totalAdvisories(total)
+                            .severityBreakdown(severityBreakdown)
+                            .topRisks(topRisks)
+                            .lastUpdated(java.time.LocalDateTime.now())
+                            .build();
+                })
+                .sorted(java.util.Comparator.comparing(DistrictRiskDto::getTotalAdvisories).reversed())
+                .toList();
     }
 
     /**

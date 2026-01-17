@@ -76,6 +76,10 @@ public class RuleEngineService {
         return ruleRepository.findAll().stream().map(this::mapToDTO).collect(java.util.stream.Collectors.toList());
     }
 
+    public org.springframework.data.domain.Page<com.krishihub.advisory.dto.RuleDTO> getAllRules(org.springframework.data.domain.Pageable pageable) {
+        return ruleRepository.findAll(pageable).map(this::mapToDTO);
+    }
+
     public long getRuleCount() {
         return ruleRepository.count();
     }

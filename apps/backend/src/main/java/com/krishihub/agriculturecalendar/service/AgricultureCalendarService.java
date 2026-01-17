@@ -44,6 +44,22 @@ public class AgricultureCalendarService {
                 .collect(Collectors.toList());
     }
 
+    public org.springframework.data.domain.Page<AgricultureCalendarDto> getAllEntries(CropType crop, NepaliMonth month, org.springframework.data.domain.Pageable pageable) {
+        org.springframework.data.domain.Page<AgricultureCalendarEntry> page;
+
+        if (crop != null && month != null) {
+            page = repository.findByCropAndNepaliMonth(crop, month, pageable);
+        } else if (crop != null) {
+            page = repository.findByCrop(crop, pageable);
+        } else if (month != null) {
+            page = repository.findByNepaliMonth(month, pageable);
+        } else {
+            page = repository.findAll(pageable);
+        }
+
+        return page.map(this::mapToDto);
+    }
+
     @Transactional
     @CacheEvict(value = "agriculture:calendar:all", allEntries = true)
     public AgricultureCalendarDto createEntry(AgricultureCalendarDto dto) {

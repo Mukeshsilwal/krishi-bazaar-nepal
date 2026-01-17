@@ -20,38 +20,74 @@ public class KnowledgeController {
 
     // Public Endpoints
     @GetMapping("/categories")
-    public ResponseEntity<ApiResponse<List<KnowledgeCategory>>> getAllCategories() {
-        return ResponseEntity.ok(ApiResponse.success(knowledgeService.getAllCategories()));
+    public ResponseEntity<ApiResponse<com.krishihub.shared.dto.PaginatedResponse<KnowledgeCategory>>> getAllCategories(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "100") int size,
+            @RequestParam(defaultValue = "name,asc") String sort) {
+            
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0];
+        String sortDirection = sortParams.length > 1 ? sortParams[1] : "asc";
+        
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+            page, 
+            size, 
+            org.springframework.data.domain.Sort.by(
+                org.springframework.data.domain.Sort.Direction.fromString(sortDirection), 
+                sortField
+            )
+        );
+
+        return ResponseEntity.ok(ApiResponse.success(
+            com.krishihub.shared.dto.PaginatedResponse.from(knowledgeService.getAllCategories(pageable))));
     }
 
     @GetMapping("/articles")
-    public ResponseEntity<ApiResponse<List<Article>>> getArticles(
+    public ResponseEntity<ApiResponse<com.krishihub.shared.dto.PaginatedResponse<Article>>> getArticles(
             @RequestParam(required = false) String categoryId,
             @RequestParam(required = false) String tag,
-            @RequestParam(required = false) String status) {
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort) {
+
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0];
+        String sortDirection = sortParams.length > 1 ? sortParams[1] : "asc";
+        
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+            page, 
+            size, 
+            org.springframework.data.domain.Sort.by(
+                org.springframework.data.domain.Sort.Direction.fromString(sortDirection), 
+                sortField
+            )
+        );
 
         if (status != null && !status.trim().isEmpty() && !status.equalsIgnoreCase("undefined")) {
-            return ResponseEntity.ok(ApiResponse.success(knowledgeService.getAllArticles(status)));
+            return ResponseEntity.ok(ApiResponse.success(
+                com.krishihub.shared.dto.PaginatedResponse.from(knowledgeService.getAllArticles(status, pageable))));
         }
 
         UUID catId = null;
         if (categoryId != null && !categoryId.trim().isEmpty() && !categoryId.equalsIgnoreCase("undefined")) {
-            try {
-                catId = UUID.fromString(categoryId);
-            } catch (IllegalArgumentException e) {
-                // Ignore invalid UUID
-            }
+             try {
+                 catId = UUID.fromString(categoryId);
+             } catch (IllegalArgumentException e) {}
         }
 
         String cleanTag = (tag != null && !tag.trim().isEmpty() && !tag.equalsIgnoreCase("undefined")) ? tag : null;
 
         if (catId != null) {
-            return ResponseEntity.ok(ApiResponse.success(knowledgeService.getArticlesByCategory(catId)));
+            return ResponseEntity.ok(ApiResponse.success(
+                com.krishihub.shared.dto.PaginatedResponse.from(knowledgeService.getArticlesByCategory(catId, pageable))));
         }
         if (cleanTag != null) {
-            return ResponseEntity.ok(ApiResponse.success(knowledgeService.getArticlesByTag(cleanTag)));
+            return ResponseEntity.ok(ApiResponse.success(
+                com.krishihub.shared.dto.PaginatedResponse.from(knowledgeService.getArticlesByTag(cleanTag, pageable))));
         }
-        return ResponseEntity.ok(ApiResponse.success(knowledgeService.getPublishedArticles()));
+        return ResponseEntity.ok(ApiResponse.success(
+            com.krishihub.shared.dto.PaginatedResponse.from(knowledgeService.getPublishedArticles(pageable))));
     }
 
     @GetMapping("/articles/{id}")
@@ -74,7 +110,10 @@ public class KnowledgeController {
 
     @PostMapping("/articles")
     @PreAuthorize("hasAuthority('KNOWLEDGE:MANAGE')")
-    public ResponseEntity<ApiResponse<Article>> createArticle(@RequestBody Article article) {
+    public ResponseEntity<ApiResponse<Article>> createArticle(
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.krishihub.auth.model.CustomUserDetails userDetails,
+            @RequestBody Article article) {
+        article.setAuthorId(userDetails.getId());
         return ResponseEntity.ok(ApiResponse.success("Article created successfully", knowledgeService.createArticle(article)));
     }
 

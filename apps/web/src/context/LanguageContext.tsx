@@ -229,6 +229,24 @@ const translations = {
         'contact.success.desc': 'हामीलाई सम्पर्क गर्नुभएकोमा धन्यवाद। हामी तपाईंलाई छिट्टै सम्पर्क गर्नेछौं।',
         'contact.error': 'सन्देश पठाउन असफल भयो',
         'contact.error.desc': 'कृपया केही समयपछि पुनः प्रयास गर्नुहोस् वा हामीलाई फोन मार्फत सम्पर्क गर्नुहोस्।',
+
+        // Chat
+        'chat.title': 'सन्देश',
+        'chat.conversations': 'कुराकानीहरू',
+        'chat.allUsers': 'सबै प्रयोगकर्ता',
+        'chat.noConversations': 'अहिलेसम्म कुनै कुराकानी भएको छैन',
+        'chat.selectConversation': 'कुराकानी सुरु गर्न एकजना छान्नुहोस्',
+        'chat.typeMessage': 'सन्देश लेख्नुहोस्...',
+        'chat.send': 'पठाउनुहोस्',
+        'chat.online': 'अनलाइन',
+        'chat.offline': 'अफलाइन',
+        'chat.typing': 'टाइप गर्दै...',
+        'chat.searchUsers': 'प्रयोगकर्ता खोज्नुहोस्...',
+        'chat.noUsersFound': 'कुनै प्रयोगकर्ता फेला परेन',
+        'chat.unknownUser': 'अज्ञात प्रयोगकर्ता',
+        'chat.noMessages': 'कुनै सन्देश छैन',
+        'chat.loadingConversations': 'कुराकानीहरू लोड हुँदैछ...',
+        'chat.welcome': 'किसान च्याटमा स्वागत छ',
     },
     en: {
         // Navbar
@@ -437,6 +455,24 @@ const translations = {
         'contact.success.desc': 'Thank you for contacting us. We\'ll get back to you shortly.',
         'contact.error': 'Failed to send message',
         'contact.error.desc': 'Please try again later or contact us via phone.',
+
+        // Chat
+        'chat.title': 'Messages',
+        'chat.conversations': 'Conversations',
+        'chat.allUsers': 'All Users',
+        'chat.noConversations': 'No conversations yet',
+        'chat.selectConversation': 'Select a conversation to start chatting',
+        'chat.typeMessage': 'Type a message...',
+        'chat.send': 'Send',
+        'chat.online': 'Online',
+        'chat.offline': 'Offline',
+        'chat.typing': 'Typing...',
+        'chat.searchUsers': 'Search users...',
+        'chat.noUsersFound': 'No users found',
+        'chat.unknownUser': 'Unknown User',
+        'chat.noMessages': 'No messages yet',
+        'chat.loadingConversations': 'Loading conversations...',
+        'chat.welcome': 'Welcome to Kisan Chat',
     },
 };
 

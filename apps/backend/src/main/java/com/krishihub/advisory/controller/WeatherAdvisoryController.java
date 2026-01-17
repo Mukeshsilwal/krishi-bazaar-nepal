@@ -27,13 +27,49 @@ public class WeatherAdvisoryController {
     private final AdvisoryLogAnalyticsService analyticsService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<WeatherAdvisory>>> getAllAdvisories() {
-        return ResponseEntity.ok(ApiResponse.success("Advisories fetched", service.getAllAdvisories()));
+    public ResponseEntity<ApiResponse<com.krishihub.shared.dto.PaginatedResponse<WeatherAdvisory>>> getAllAdvisories(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort) {
+        
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0];
+        String sortDirection = sortParams.length > 1 ? sortParams[1] : "asc";
+        
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+            page, 
+            size, 
+            org.springframework.data.domain.Sort.by(
+                org.springframework.data.domain.Sort.Direction.fromString(sortDirection), 
+                sortField
+            )
+        );
+
+        return ResponseEntity.ok(ApiResponse.success("Advisories fetched", 
+            com.krishihub.shared.dto.PaginatedResponse.from(service.getAllAdvisories(pageable))));
     }
 
     @GetMapping("/active")
-    public ResponseEntity<ApiResponse<List<WeatherAdvisory>>> getActiveAdvisories() {
-        return ResponseEntity.ok(ApiResponse.success("Active advisories fetched", service.getActiveAdvisories()));
+    public ResponseEntity<ApiResponse<com.krishihub.shared.dto.PaginatedResponse<WeatherAdvisory>>> getActiveAdvisories(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "validUntil,asc") String sort) {
+        
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0];
+        String sortDirection = sortParams.length > 1 ? sortParams[1] : "asc";
+        
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+            page, 
+            size, 
+            org.springframework.data.domain.Sort.by(
+                org.springframework.data.domain.Sort.Direction.fromString(sortDirection), 
+                sortField
+            )
+        );
+
+        return ResponseEntity.ok(ApiResponse.success("Active advisories fetched", 
+            com.krishihub.shared.dto.PaginatedResponse.from(service.getActiveAdvisories(pageable))));
     }
 
     @PostMapping

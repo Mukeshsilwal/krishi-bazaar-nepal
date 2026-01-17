@@ -30,7 +30,6 @@ export default function RegisterPage() {
                     setAvailableRoles(response.data.data);
                 }
             } catch (error) {
-                console.error('Failed to fetch roles:', error);
                 // Fallback to default roles if API fails
                 setAvailableRoles(['FARMER', 'BUYER', 'VENDOR', 'EXPERT']);
             }
@@ -45,7 +44,6 @@ export default function RegisterPage() {
 
         try {
             const result = await authService.register(formData);
-            console.log('Registration result:', result);
 
             if (result.code === 0) {
                 setStep('otp');
@@ -53,7 +51,6 @@ export default function RegisterPage() {
                 setError(result.message || 'Registration failed');
             }
         } catch (err: any) {
-            console.error('Registration error:', err);
             setError(err.response?.data?.message || 'Registration failed');
         } finally {
             setLoading(false);
@@ -67,7 +64,6 @@ export default function RegisterPage() {
 
         try {
             const result = await authService.verifyOtp(formData.mobileNumber, otp);
-            console.log('OTP verification result:', result);
 
             if (result.code === 0) {
                 // Check if user is VENDOR or EXPERT (needs approval)
@@ -83,7 +79,6 @@ export default function RegisterPage() {
                 setError(result.message || 'Invalid OTP');
             }
         } catch (err: any) {
-            console.error('OTP verification error:', err);
             setError(err.response?.data?.message || 'Invalid OTP');
         } finally {
             setLoading(false);

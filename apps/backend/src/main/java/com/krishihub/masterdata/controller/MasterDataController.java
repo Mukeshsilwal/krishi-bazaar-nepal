@@ -32,8 +32,26 @@ public class MasterDataController {
 
     @GetMapping("/admin/master-data/categories")
     @PreAuthorize("hasAuthority('MASTERDATA:MANAGE')")
-    public ResponseEntity<ApiResponse<List<MasterCategoryDto>>> getAllCategories() {
-        return ResponseEntity.ok(ApiResponse.success("Categories fetched", masterDataService.getAllCategories()));
+    public ResponseEntity<ApiResponse<com.krishihub.shared.dto.PaginatedResponse<MasterCategoryDto>>> getAllCategories(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "name,asc") String sort) {
+            
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0];
+        String sortDirection = sortParams.length > 1 ? sortParams[1] : "asc";
+        
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+            page, 
+            size, 
+            org.springframework.data.domain.Sort.by(
+                org.springframework.data.domain.Sort.Direction.fromString(sortDirection), 
+                sortField
+            )
+        );
+            
+        return ResponseEntity.ok(ApiResponse.success("Categories fetched", 
+                masterDataService.getAllCategories(pageable)));
     }
 
     @PostMapping("/admin/master-data/categories")
@@ -44,9 +62,27 @@ public class MasterDataController {
 
     @GetMapping("/admin/master-data/categories/{categoryId}/items")
     @PreAuthorize("hasAuthority('MASTERDATA:MANAGE')")
-    public ResponseEntity<ApiResponse<List<MasterItemDto>>> getItemsByCategory(@PathVariable UUID categoryId) {
+    public ResponseEntity<ApiResponse<com.krishihub.shared.dto.PaginatedResponse<MasterItemDto>>> getItemsByCategory(
+            @PathVariable UUID categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "sortOrder,asc") String sort) {
+            
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0];
+        String sortDirection = sortParams.length > 1 ? sortParams[1] : "asc";
+        
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+            page, 
+            size, 
+            org.springframework.data.domain.Sort.by(
+                org.springframework.data.domain.Sort.Direction.fromString(sortDirection), 
+                sortField
+            )
+        );
+            
         return ResponseEntity
-                .ok(ApiResponse.success("Items fetched", masterDataService.getItemsByCategory(categoryId)));
+                .ok(ApiResponse.success("Items fetched", masterDataService.getItemsByCategory(categoryId, pageable)));
     }
 
     @PostMapping("/admin/master-data/categories/{categoryId}/items")

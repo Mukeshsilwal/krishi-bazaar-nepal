@@ -21,12 +21,11 @@ export const AuthProvider = ({ children }) => {
             const response = await authService.getPermissions();
             if (response.code === 0 && Array.isArray(response.data)) {
                 setPermissions(response.data);
-                console.log('✅ Permissions loaded from API:', response.data.length);
+
             } else {
                 setPermissions([]);
             }
         } catch (error) {
-            console.error('Failed to fetch permissions:', error);
             setPermissions([]);
         }
     };
@@ -41,7 +40,6 @@ export const AuthProvider = ({ children }) => {
                 try {
                     await fetchPermissions();
                 } catch (error) {
-                    console.error("Error fetching permissions during init:", error);
                 }
 
                 // Refresh user data from server to get latest fields (like createdAt)
@@ -82,11 +80,11 @@ export const AuthProvider = ({ children }) => {
 
     const adminLogin = async (identifier, password) => {
         try {
-            console.log('Attempting admin login for:', identifier);
+
             const response = await authService.adminLogin(identifier, password);
 
             if (response.code === 0 && response.data) {
-                console.log('Setting user state:', response.data.user);
+
                 setUser(response.data.user);
                 await fetchPermissions();
                 return { code: 0, data: response.data };

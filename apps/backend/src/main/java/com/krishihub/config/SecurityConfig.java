@@ -56,6 +56,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/agriculture-calendar/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/api/chat/files/**").permitAll() // Allow file downloads
                         .requestMatchers("/actuator/**").hasAuthority("ADMIN:PANEL")
                         .requestMatchers("/api/admin/**").hasAuthority("ADMIN:PANEL")
 

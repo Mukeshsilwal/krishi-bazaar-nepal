@@ -31,6 +31,11 @@ public class PermissionService {
         return permissionRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<Permission> getAllPermissions(org.springframework.data.domain.Pageable pageable) {
+        return permissionRepository.findAll(pageable);
+    }
+
     /**
      * Get permissions grouped by module for easier UI display.
      * @return Map of module name to list of permissions

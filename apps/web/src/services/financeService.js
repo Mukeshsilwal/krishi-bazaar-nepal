@@ -27,8 +27,8 @@ const financeService = {
 
     // Subsidies
     getAllSubsidies: async () => {
-        const response = await api.get(SUBSIDY_ENDPOINTS.BASE);
-        return response.data.data;
+        const response = await api.get(SUBSIDY_ENDPOINTS.BASE, { params: { size: 100 } });
+        return response.data.data.content || response.data.data;
     },
 
     createSubsidy: async (data) => { // Admin only

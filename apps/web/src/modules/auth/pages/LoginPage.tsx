@@ -19,17 +19,13 @@ export default function LoginPage() {
 
         try {
             const result = await authService.login(identifier);
-            console.log('Login response:', result);
             // New API structure uses 'code' instead of 'success'
             if (result.code === 0) {
-                console.log('Transitioning to OTP step');
                 setStep('otp');
             } else {
-                console.log('Login failed:', result.message);
                 setError(result.message || 'Failed to send OTP');
             }
         } catch (err: any) {
-            console.error('Login error:', err);
             // Use centralized error resolver
             const { resolveUserMessage } = await import('@/utils/errorUtils');
             setError(resolveUserMessage(err));

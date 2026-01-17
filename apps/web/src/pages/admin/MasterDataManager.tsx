@@ -69,11 +69,11 @@ const MasterDataManager = () => {
 
     const fetchCategories = async () => {
         try {
-            const res = await api.get(ADMIN_MASTER_DATA_ENDPOINTS.CATEGORIES);
+            const res = await api.get(`${ADMIN_MASTER_DATA_ENDPOINTS.CATEGORIES}?page=0&size=100`);
             if (res.data.code === 0) {
-                setCategories(res.data.data);
-                if (res.data.data.length > 0 && !selectedCategory) {
-                    setSelectedCategory(res.data.data[0]);
+                setCategories(res.data.data.content);
+                if (res.data.data.content.length > 0 && !selectedCategory) {
+                    setSelectedCategory(res.data.data.content[0]);
                 }
             }
         } catch (err) {
@@ -84,9 +84,9 @@ const MasterDataManager = () => {
 
     const fetchItems = async (categoryId: string) => {
         try {
-            const res = await api.get(ADMIN_MASTER_DATA_ENDPOINTS.ITEMS_BY_CATEGORY(categoryId));
+            const res = await api.get(`${ADMIN_MASTER_DATA_ENDPOINTS.ITEMS_BY_CATEGORY(categoryId)}?page=0&size=100`);
             if (res.data.code === 0) {
-                setItems(res.data.data);
+                setItems(res.data.data.content);
             }
         } catch (err) {
             console.error(err);

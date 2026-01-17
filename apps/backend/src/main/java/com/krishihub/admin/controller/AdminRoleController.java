@@ -36,9 +36,26 @@ public class AdminRoleController {
      */
     @GetMapping("/roles")
     @PreAuthorize("hasAuthority(T(com.krishihub.auth.constant.PermissionConstants).RBAC_ROLE_READ)")
-    public ResponseEntity<ApiResponse<List<RoleDto>>> getAllRoles() {
-        List<RoleDto> roles = roleService.getAllRoles();
-        return ResponseEntity.ok(ApiResponse.success(roles));
+    public ResponseEntity<ApiResponse<com.krishihub.shared.dto.PaginatedResponse<RoleDto>>> getAllRoles(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "name,asc") String sort) {
+        
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0];
+        String sortDirection = sortParams.length > 1 ? sortParams[1] : "asc";
+        
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+            page, 
+            size, 
+            org.springframework.data.domain.Sort.by(
+                org.springframework.data.domain.Sort.Direction.fromString(sortDirection), 
+                sortField
+            )
+        );
+
+        return ResponseEntity.ok(ApiResponse.success(
+            com.krishihub.shared.dto.PaginatedResponse.from(roleService.getAllRoles(pageable))));
     }
 
     /**
@@ -78,8 +95,11 @@ public class AdminRoleController {
      */
     @GetMapping("/permissions")
     @PreAuthorize("hasAuthority(T(com.krishihub.auth.constant.PermissionConstants).RBAC_PERMISSION_READ)")
-    public ResponseEntity<ApiResponse<List<PermissionDto>>> getAllPermissions(
-            @RequestParam(required = false, defaultValue = "false") boolean grouped) {
+    public ResponseEntity<ApiResponse<?>> getAllPermissions(
+            @RequestParam(required = false, defaultValue = "false") boolean grouped,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "100") int size,
+            @RequestParam(defaultValue = "name,asc") String sort) {
         
         if (grouped) {
             Map<String, List<Permission>> groupedPermissions = permissionService.getPermissionsGroupedByModule();
@@ -90,10 +110,22 @@ public class AdminRoleController {
                     .collect(Collectors.toList());
             return ResponseEntity.ok(ApiResponse.success(permissions));
         } else {
-            List<PermissionDto> permissions = permissionService.getAllPermissions().stream()
-                    .map(this::toPermissionDto)
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(ApiResponse.success(permissions));
+            String[] sortParams = sort.split(",");
+            String sortField = sortParams[0];
+            String sortDirection = sortParams.length > 1 ? sortParams[1] : "asc";
+            
+            org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+                page, 
+                size, 
+                org.springframework.data.domain.Sort.by(
+                    org.springframework.data.domain.Sort.Direction.fromString(sortDirection), 
+                    sortField
+                )
+            );
+            
+            return ResponseEntity.ok(ApiResponse.success(
+                com.krishihub.shared.dto.PaginatedResponse.from(permissionService.getAllPermissions(pageable)
+                    .map(this::toPermissionDto))));
         }
     }
 

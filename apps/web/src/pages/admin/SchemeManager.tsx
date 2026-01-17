@@ -53,9 +53,9 @@ const SchemeManager = () => {
 
     const fetchSchemes = async () => {
         try {
-            const res = await api.get(SCHEME_ENDPOINTS.BASE);
+            const res = await api.get(SCHEME_ENDPOINTS.BASE, { params: { size: 100 } });
             if (res.data.code === 0) {
-                setSchemes(res.data.data);
+                setSchemes(res.data.data.content || res.data.data);
             }
         } catch (error) {
             console.error('Failed to fetch schemes', error);

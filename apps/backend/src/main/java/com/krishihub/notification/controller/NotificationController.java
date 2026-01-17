@@ -39,4 +39,18 @@ public class NotificationController {
         UUID userId = UserContextHolder.getUserId();
         return ResponseEntity.ok(ApiResponse.success(notificationService.getUnreadCount(userId)));
     }
+
+    @PostMapping("/tokens")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<Void>> registerToken(@RequestBody DeviceTokenRequest request) {
+        UUID userId = UserContextHolder.getUserId();
+        notificationService.registerDeviceToken(userId, request.getToken(), request.getDeviceType());
+        return ResponseEntity.ok(ApiResponse.success("Device token registered", null));
+    }
+
+    @lombok.Data
+    public static class DeviceTokenRequest {
+        private String token;
+        private String deviceType;
+    }
 }

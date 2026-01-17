@@ -11,7 +11,14 @@ import { ADMIN_RBAC_ENDPOINTS } from '../config/endpoints';
  * @returns Promise<Role[]>
  */
 export const getAllRoles = async () => {
-    const response = await api.get(ADMIN_RBAC_ENDPOINTS.ROLES);
+    // Request large page size for backward compatibility
+    const response = await api.get(ADMIN_RBAC_ENDPOINTS.ROLES, {
+        params: { size: 100 }
+    });
+    // Handle paginated response
+    if (response.data && response.data.content) {
+        return response.data.content;
+    }
     return response.data;
 };
 
@@ -46,6 +53,7 @@ export const updateRolePermissions = async (roleId, permissionNames) => {
  * Delete a custom role.
  * System-defined roles cannot be deleted.
  * @param {string} roleId - Role ID
+ * @param {string[]} roleData.permissionNames - Array of permission names
  * @returns Promise<void>
  */
 export const deleteRole = async (roleId) => {
@@ -60,8 +68,13 @@ export const deleteRole = async (roleId) => {
  */
 export const getAllPermissions = async (grouped = false) => {
     const response = await api.get(ADMIN_RBAC_ENDPOINTS.PERMISSIONS, {
-        params: { grouped }
+        params: { grouped, size: 500 }
     });
+
+    // Handle paginated response for non-grouped
+    if (!grouped && response.data && response.data.content) {
+        return response.data.content;
+    }
     return response.data;
 };
 

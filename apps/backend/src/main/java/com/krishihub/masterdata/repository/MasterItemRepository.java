@@ -19,4 +19,6 @@ public interface MasterItemRepository extends JpaRepository<MasterItem, UUID> {
     List<MasterItem> findActiveItemsByCategoryCode(String categoryCode, java.util.Date currentDate);
 
     List<MasterItem> findByCategoryIdOrderBySortOrderAsc(UUID categoryId);
+    
+    org.springframework.data.domain.Page<MasterItem> findByCategoryId(UUID categoryId, org.springframework.data.domain.Pageable pageable);
 }

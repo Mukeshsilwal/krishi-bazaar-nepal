@@ -94,8 +94,19 @@ public class SystemConfigService {
                 .orElse(false);
     }
 
-    public List<SystemConfig> getAllConfigs() {
-        return systemConfigRepository.findAll();
+    public com.krishihub.shared.dto.PaginatedResponse<com.krishihub.admin.dto.SystemConfigDto> getAllConfigs(org.springframework.data.domain.Pageable pageable) {
+        org.springframework.data.domain.Page<SystemConfig> page = systemConfigRepository.findAll(pageable);
+        java.util.List<com.krishihub.admin.dto.SystemConfigDto> dtos = page.getContent().stream()
+                .map(com.krishihub.admin.dto.SystemConfigDto::fromEntity)
+                .toList();
+        
+        return com.krishihub.shared.dto.PaginatedResponse.of(
+                dtos,
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
     }
 
     @Transactional

@@ -36,16 +36,19 @@ interface Feedback {
 
 const FeedbackManager = () => {
     const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
 
     useEffect(() => {
         fetchFeedback();
-    }, []);
+    }, [page]);
 
     const fetchFeedback = async () => {
         try {
-            const res = await api.get(FEEDBACK_ENDPOINTS.ADMIN);
+            const res = await api.get(`${FEEDBACK_ENDPOINTS.ADMIN}?page=${page}&size=20`);
             if (res.data.code === 0) {
-                setFeedbacks(res.data.data);
+                setFeedbacks(res.data.data.content);
+                setTotalPages(res.data.data.totalPages);
             }
         } catch (err) {
             console.error(err);
@@ -127,6 +130,28 @@ const FeedbackManager = () => {
                         </TableBody>
                     </Table>
                 </div>
+
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-end space-x-2 py-4 px-4 border-t">
+                        <button
+                            className="text-sm px-3 py-1 border rounded hover:bg-muted disabled:opacity-50"
+                            onClick={() => setPage(p => Math.max(0, p - 1))}
+                            disabled={page === 0}
+                        >
+                            Previous
+                        </button>
+                        <span className="text-sm text-muted-foreground">
+                            Page {page + 1} of {totalPages}
+                        </span>
+                        <button
+                            className="text-sm px-3 py-1 border rounded hover:bg-muted disabled:opacity-50"
+                            onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                            disabled={page >= totalPages - 1}
+                        >
+                            Next
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -1,250 +1,200 @@
-import { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
-import { useMessages } from '../hooks/useMessages';
+import { useEffect, useState } from 'react';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import { useChat } from '../features/chat/hooks/useChat';
+import { useUserDirectory } from '../features/chat/hooks/useUserDirectory';
+import { ChatLayout } from '../features/chat/components/ChatLayout';
+import { ConversationList } from '../features/chat/components/ConversationList';
+import { UserDirectory } from '../features/chat/components/UserDirectory';
+import { MessageArea } from '../features/chat/components/MessageArea';
 import { useLanguage } from '../context/LanguageContext';
-import { useAuth } from '../modules/auth/context/AuthContext';
-import { Send, MessageCircle } from 'lucide-react';
+import { MessageCircle, MessageSquare, Users } from 'lucide-react';
+import { ChatUser } from '../features/chat/services/chatService';
 
 export default function ChatPage() {
     const { userId } = useParams();
-    const { conversations, messages, sendMessage, sendTyping, onlineUsers, typingUsers, loading } = useMessages(userId);
+    const location = useLocation();
+    const navigate = useNavigate();
     const { t } = useLanguage();
-    const { user } = useAuth();
-    const [messageText, setMessageText] = useState('');
-    const [selectedConversation, setSelectedConversation] = useState(userId || null);
-    const messagesEndRef = useRef(null);
+    const [activeTab, setActiveTab] = useState<'conversations' | 'users'>('conversations');
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
+    const {
+        conversations,
+        activeConversation,
+        messages,
+        selectConversation,
+        startConversation,
+        sendMessage,
+        sendTyping,
+        isLoadingConversations,
+        isLoadingMessages,
+        loadMoreMessages,
+        hasMore,
+        onlineUsers,
+        typingUsers
+    } = useChat();
 
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages, typingUsers]); // Scroll when message added or typing status changes
+    const {
+        users,
+        isLoading: isLoadingUsers,
+        handleSearch,
+        handleFilterRole
+    } = useUserDirectory();
 
     useEffect(() => {
         if (userId) {
-            setSelectedConversation(userId);
+            startConversation(userId);
+        } else if (location.state?.targetUser) {
+            startConversation(location.state.targetUser.id);
         }
-    }, [userId]);
+    }, [userId, location.state, startConversation]);
 
-    const handleSendMessage = async (e) => {
-        e.preventDefault();
-        if (!messageText.trim() || !selectedConversation) return;
+    useEffect(() => {
+        if (!userId && !activeConversation && conversations.length > 0 && !isLoadingConversations) {
+            if (window.innerWidth >= 768) {
+                selectConversation(conversations[0]);
+            }
+        }
+    }, [conversations, activeConversation, userId, isLoadingConversations, selectConversation]);
 
-        try {
-            await sendMessage({
-                receiverId: selectedConversation,
-                message: messageText,
-            });
-            setMessageText('');
-        } catch (err) {
-            alert('Failed to send message');
+    const handleBack = () => {
+        if (userId) {
+            navigate('/chat');
+        } else {
+            navigate('/chat');
         }
     };
 
-    const handleInputChange = (e) => {
-        setMessageText(e.target.value);
-        if (selectedConversation && e.target.value.length > 0) {
-            sendTyping(selectedConversation);
+    const handleUserSelect = (user: ChatUser) => {
+        if (user.conversationId) {
+            const existingConv = conversations.find(c => c.id === user.conversationId);
+            if (existingConv) {
+                selectConversation(existingConv);
+                setActiveTab('conversations');
+                return;
+            }
         }
-    }
 
-    // Ensure conversations and messages are always arrays
-    const conversationsArray = Array.isArray(conversations) ? conversations : [];
-    const messagesArray = Array.isArray(messages) ? messages : [];
-    const selectedUser = conversationsArray.find((c) => c.userId === selectedConversation);
-    const isSelectedUserOnline = selectedUser ? onlineUsers[selectedUser.userMobile] : false;
+        startConversation(user.userId);
+        setActiveTab('conversations');
+    };
+
+    const showSidebarOnMobile = !activeConversation;
+
+    const totalUnread = conversations.reduce((sum, conv) => sum + conv.unreadCount, 0);
 
     return (
-        <div className="bg-gray-50 flex flex-col h-[calc(100vh-64px)]">
-            <div className="flex-1 max-w-7xl w-full mx-auto px-4 py-8 sm:px-6 lg:px-8">
-                <div className="bg-white rounded-lg shadow h-full flex overflow-hidden">
-                    {/* Conversations Sidebar */}
-                    <div className="w-1/3 border-r border-gray-200 flex flex-col">
-                        <div className="p-4 border-b border-gray-200">
-                            <h2 className="text-lg font-semibold text-gray-900">
-                                {t('chat.conversations') || 'Conversations'}
-                            </h2>
-                        </div>
-                        <div className="flex-1 overflow-y-auto">
-                            {loading && conversationsArray.length === 0 ? (
-                                <div className="p-4 text-center text-gray-600">Loading...</div>
-                            ) : conversationsArray.length === 0 ? (
-                                <div className="p-4 text-center text-gray-600">
-                                    <MessageCircle className="mx-auto mb-2" size={48} />
-                                    <p>{t('chat.noConversations') || 'No conversations yet'}</p>
-                                </div>
-                            ) : (
-                                conversationsArray.map((conversation) => (
-                                    <button
-                                        key={conversation.userId}
-                                        onClick={() => setSelectedConversation(conversation.userId)}
-                                        className={`w-full p-4 text-left hover:bg-gray-50 transition border-b border-gray-100 ${selectedConversation === conversation.userId
-                                            ? 'bg-green-50'
-                                            : ''
-                                            }`}
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <div className="relative">
-                                                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-semibold">
-                                                    {conversation.userName?.charAt(0) || '?'}
-                                                </div>
-                                                {onlineUsers[conversation.userMobile] && (
-                                                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white" title="Online" />
-                                                )}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-semibold text-gray-900 truncate">
-                                                    {conversation.userName || 'Unknown User'}
-                                                </p>
-                                                <p className="text-sm text-gray-600 truncate">
-                                                    {typingUsers[conversation.userId] ?
-                                                        <span className="text-green-600 italic">Typing...</span> :
-                                                        (conversation.lastMessage || 'No messages')}
-                                                </p>
-                                            </div>
-                                            {conversation.unreadCount > 0 && (
-                                                <div className="bg-green-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center">
-                                                    {conversation.unreadCount}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </button>
-                                ))
-                            )}
+        <ChatLayout
+            showSidebarOnMobile={showSidebarOnMobile}
+            sidebar={
+                <div className="flex flex-col h-full bg-white">
+                    {/* Header */}
+                    <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-green-100">
+                        <h2 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
+                            <MessageCircle className="text-green-600" size={24} />
+                            {t('chat.title') || 'Messages'}
+                        </h2>
+
+                        {/* Tab Switcher */}
+                        <div className="flex gap-2 bg-white rounded-lg p-1 shadow-sm">
+                            <button
+                                onClick={() => setActiveTab('conversations')}
+                                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-md font-medium transition-all ${activeTab === 'conversations'
+                                        ? 'bg-green-600 text-white shadow-md'
+                                        : 'text-gray-700 hover:bg-gray-50'
+                                    }`}
+                            >
+                                <MessageSquare size={18} />
+                                <span className="text-sm">{t('chat.conversations') || 'Chats'}</span>
+                                {totalUnread > 0 && (
+                                    <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-semibold ${activeTab === 'conversations'
+                                            ? 'bg-green-700 text-white'
+                                            : 'bg-red-500 text-white'
+                                        }`}>
+                                        {totalUnread > 99 ? '99+' : totalUnread}
+                                    </span>
+                                )}
+                            </button>
+
+                            <button
+                                onClick={() => setActiveTab('users')}
+                                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-md font-medium transition-all ${activeTab === 'users'
+                                        ? 'bg-green-600 text-white shadow-md'
+                                        : 'text-gray-700 hover:bg-gray-50'
+                                    }`}
+                            >
+                                <Users size={18} />
+                                <span className="text-sm">{t('chat.allUsers') || 'Users'}</span>
+                            </button>
                         </div>
                     </div>
 
-                    {/* Chat Area */}
-                    <div className="flex-1 flex flex-col">
-                        {selectedConversation ? (
-                            <>
-                                {/* Chat Header */}
-                                <div className="p-4 border-b border-gray-200 bg-white">
-                                    <div className="flex items-center gap-3">
-                                        <div className="relative">
-                                            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-semibold">
-                                                {selectedUser?.userName?.charAt(0) || '?'}
-                                            </div>
-                                            {isSelectedUserOnline && (
-                                                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white" />
-                                            )}
-                                        </div>
-                                        <div>
-                                            <h3 className="font-semibold text-gray-900">
-                                                {selectedUser?.userName || 'Unknown User'}
-                                            </h3>
-                                            <p className="text-sm text-gray-600">
-                                                {typingUsers[selectedConversation] ?
-                                                    <span className="text-green-600 italic">Typing...</span> :
-                                                    (isSelectedUserOnline ? 'Online' : (selectedUser?.role || 'User'))}
-                                            </p>
-                                        </div>
-                                    </div>
+                    {/* Content based on active tab */}
+                    {activeTab === 'conversations' ? (
+                        <ConversationList
+                            conversations={conversations}
+                            activeConversationId={activeConversation?.id}
+                            onSelect={(c) => {
+                                selectConversation(c);
+                            }}
+                            onlineUsers={onlineUsers}
+                            typingUsers={typingUsers}
+                            isLoading={isLoadingConversations}
+                        />
+                    ) : (
+                        <UserDirectory
+                            users={users}
+                            onSelect={handleUserSelect}
+                            isLoading={isLoadingUsers}
+                            onSearch={handleSearch}
+                            onFilterRole={handleFilterRole}
+                        />
+                    )}
+                </div>
+            }
+            main={
+                activeConversation ? (
+                    <MessageArea
+                        conversation={activeConversation}
+                        messages={messages}
+                        onSendMessage={sendMessage}
+                        onTyping={sendTyping}
+                        isTyping={!!typingUsers[activeConversation.userId]}
+                        isOnline={!!onlineUsers[activeConversation.userMobile]}
+                        onBack={handleBack}
+                        hasMore={hasMore}
+                        onLoadMore={loadMoreMessages}
+                        isLoadingMore={isLoadingMessages}
+                    />
+                ) : (
+                    <div className="hidden md:flex flex-1 items-center justify-center bg-gradient-to-br from-gray-50 to-green-50">
+                        <div className="text-center max-w-md px-6">
+                            <div className="bg-white p-8 rounded-2xl shadow-lg inline-block mb-6">
+                                <MessageCircle size={64} className="text-green-500" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                                {t('chat.welcome') || 'Welcome to Kisan Chat'}
+                            </h3>
+                            <p className="text-gray-600 mb-6">
+                                {t('chat.selectConversation') || 'Select a conversation to start messaging'}
+                            </p>
+                            <div className="flex flex-col gap-3 text-sm text-gray-500">
+                                <div className="flex items-center gap-2 justify-center">
+                                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                    <span>Real-time messaging</span>
                                 </div>
-
-                                {/* Messages */}
-                                <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                                    {messagesArray.map((message) => {
-                                        const isMine = message.senderId === user?.id;
-                                        return (
-                                            <div
-                                                key={message.id}
-                                                className={`flex ${isMine ? 'justify-end' : 'justify-start'
-                                                    }`}
-                                            >
-                                                <div
-                                                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${isMine
-                                                        ? 'bg-green-600 text-white'
-                                                        : 'bg-gray-200 text-gray-900'
-                                                        }`}
-                                                >
-                                                    <div className="flex items-center justify-between gap-2">
-                                                        <p>{message.message}</p>
-                                                        {isMine && (
-                                                            <div className="flex-shrink-0">
-                                                                {message.isRead ? (
-                                                                    <div className="text-green-200" title="Read">
-                                                                        {/* Double Check Icon */}
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                                            <path d="M18 6L7 17l-5-5"></path>
-                                                                            <path d="m22 10-7.5 7.5L13 16"></path>
-                                                                        </svg>
-                                                                    </div>
-                                                                ) : (
-                                                                    <div className="text-gray-300" title="Sent">
-                                                                        {/* Single Check Icon */}
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                                            <path d="M20 6 9 17l-5-5"></path>
-                                                                        </svg>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <p
-                                                        className={`text-xs mt-1 ${isMine
-                                                            ? 'text-green-100'
-                                                            : 'text-gray-600'
-                                                            }`}
-                                                    >
-                                                        {new Date(message.createdAt).toLocaleTimeString()}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                    {typingUsers[selectedConversation] && (
-                                        <div className="flex justify-start">
-                                            <div className="bg-gray-100 text-gray-500 px-3 py-1 rounded-lg text-xs italic">
-                                                Typing...
-                                            </div>
-                                        </div>
-                                    )}
-                                    <div ref={messagesEndRef} />
+                                <div className="flex items-center gap-2 justify-center">
+                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                    <span>Online status tracking</span>
                                 </div>
-
-                                {/* Message Input */}
-                                <form
-                                    onSubmit={handleSendMessage}
-                                    className="p-4 border-t border-gray-200 bg-white"
-                                >
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            value={messageText}
-                                            onChange={handleInputChange}
-                                            placeholder={
-                                                t('chat.typeMessage') || 'Type a message...'
-                                            }
-                                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
-                                        />
-                                        <button
-                                            type="submit"
-                                            disabled={!messageText.trim()}
-                                            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                                        >
-                                            <Send size={20} />
-                                            {t('chat.send') || 'Send'}
-                                        </button>
-                                    </div>
-                                </form>
-                            </>
-                        ) : (
-                            <div className="flex-1 flex items-center justify-center text-gray-600">
-                                <div className="text-center">
-                                    <MessageCircle className="mx-auto mb-4" size={64} />
-                                    <p className="text-lg">
-                                        {t('chat.selectConversation') ||
-                                            'Select a conversation to start chatting'}
-                                    </p>
+                                <div className="flex items-center gap-2 justify-center">
+                                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                    <span>Message read receipts</span>
                                 </div>
                             </div>
-                        )}
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
+                )
+            }
+        />
     );
 }

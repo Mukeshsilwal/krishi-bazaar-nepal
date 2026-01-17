@@ -30,6 +30,9 @@ public class StorageBooking {
     private UUID farmerId;
 
     @Column(nullable = false)
+    private String commodity;
+
+    @Column(nullable = false)
     private Double quantity; // in kg
 
     @Temporal(TemporalType.DATE)

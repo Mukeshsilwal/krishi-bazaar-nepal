@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/context/AuthContext';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import listingService from '../services/listingService';
@@ -166,6 +166,15 @@ export default function ListingDetailPage() {
                                     <p>📞 {listing.farmer.mobileNumber}</p>
                                     {listing.farmer.verified && (
                                         <p className="text-green-600 font-medium">✓ Verified Farmer</p>
+                                    )}
+                                    {user?.id !== listing.farmer.id && (
+                                        <button
+                                            onClick={() => navigate(`/chat/${listing.farmer.id}`, { state: { targetUser: listing.farmer } })}
+                                            className="mt-4 w-full flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                                        >
+                                            <MessageCircle size={18} />
+                                            Chat with Farmer
+                                        </button>
                                     )}
                                 </div>
                             </div>

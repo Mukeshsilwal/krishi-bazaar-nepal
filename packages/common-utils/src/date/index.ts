@@ -1,9 +1,6 @@
-/**
- * Centralized Date utility.
- * DO NOT create date logic elsewhere.
- * This is the single source of truth.
- */
+import NepaliDate from 'nepali-date-converter';
 
+// Existing formatting functions
 export const formatDate = (date: Date | string | number): string => {
     const d = new Date(date);
     if (isNaN(d.getTime())) {
@@ -30,11 +27,40 @@ export const formatDateTime = (date: Date | string | number): string => {
     });
 };
 
-// Placeholder for Nepali Date conversion logic
-export const toNepaliDate = (date: Date | string): string => {
-    // TODO: Implement actual Nepali date conversion or integrate a library if needed.
-    // For now returning a placeholder to enforce API contract.
-    return `NP-${formatDate(date)}`;
+/**
+ * Converts a Gregorian date to Nepali date (BS)
+ */
+export const toNepaliDate = (date: Date | string | number): string => {
+    try {
+        const d = new Date(date);
+        if (isNaN(d.getTime())) return 'Invalid Date';
+        const nepaliDate = new NepaliDate(d);
+        return nepaliDate.format('YYYY-MM-DD');
+    } catch (e) {
+        return 'Error';
+    }
+};
+
+/**
+ * Formats a date to Nepali date with full name of month and day
+ */
+export const formatNepaliDateLong = (date: Date | string | number): string => {
+    try {
+        const d = new Date(date);
+        if (isNaN(d.getTime())) return 'Invalid Date';
+        const nepaliDate = new NepaliDate(d);
+        return nepaliDate.format('YYYY MMMM DD, dddd');
+    } catch (e) {
+        return 'Error';
+    }
+};
+
+/**
+ * Converts BS to AD
+ */
+export const toGregorianDate = (nepaliYear: number, nepaliMonth: number, nepaliDay: number): Date => {
+    const nepaliDate = new NepaliDate(nepaliYear, nepaliMonth, nepaliDay);
+    return nepaliDate.toJsDate();
 };
 
 export const fromApiDate = (dateStr: string): Date => {

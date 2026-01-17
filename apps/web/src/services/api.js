@@ -17,7 +17,9 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    console.log(`[API Request] ${config.method.toUpperCase()} ${config.url}`, config);
+    if (import.meta.env.DEV) {
+      console.debug(`[API Request] ${config.method.toUpperCase()} ${config.url}`, config);
+    }
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

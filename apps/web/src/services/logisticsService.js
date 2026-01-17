@@ -4,9 +4,9 @@ import { COLD_STORAGE_ENDPOINTS, LOGISTICS_ENDPOINTS } from '../config/endpoints
 const logisticsService = {
     // Cold Storage
     getAllColdStorages: async (district) => {
-        const params = district ? { district } : {};
+        const params = district ? { district, size: 100 } : { size: 100 };
         const response = await api.get(COLD_STORAGE_ENDPOINTS.BASE, { params });
-        return response.data.data;
+        return response.data.data.content || response.data.data;
     },
 
     createColdStorage: async (data) => {

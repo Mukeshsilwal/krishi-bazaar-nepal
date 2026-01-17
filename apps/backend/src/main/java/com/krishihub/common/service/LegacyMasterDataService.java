@@ -21,6 +21,10 @@ public class LegacyMasterDataService {
         return cropTypeRepository.findAll();
     }
 
+    public org.springframework.data.domain.Page<CropType> getAllCropTypes(org.springframework.data.domain.Pageable pageable) {
+        return cropTypeRepository.findAll(pageable);
+    }
+
     public CropType createCropType(CropType cropType) {
         return cropTypeRepository.save(cropType);
     }

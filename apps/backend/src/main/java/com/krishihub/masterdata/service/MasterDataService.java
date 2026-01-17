@@ -58,10 +58,19 @@ public class MasterDataService {
 
     // --- Admin APIs ---
 
-    public List<MasterCategoryDto> getAllCategories() {
-        return categoryRepository.findAll().stream()
+    public com.krishihub.shared.dto.PaginatedResponse<MasterCategoryDto> getAllCategories(org.springframework.data.domain.Pageable pageable) {
+        org.springframework.data.domain.Page<MasterCategory> page = categoryRepository.findAll(pageable);
+        java.util.List<MasterCategoryDto> dtos = page.getContent().stream()
                 .map(this::mapToCategoryDto)
-                .collect(Collectors.toList());
+                .toList();
+        
+        return com.krishihub.shared.dto.PaginatedResponse.of(
+                dtos,
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
     }
 
     @Transactional
@@ -80,10 +89,19 @@ public class MasterDataService {
         return mapToCategoryDto(categoryRepository.save(category));
     }
 
-    public List<MasterItemDto> getItemsByCategory(UUID categoryId) {
-        return itemRepository.findByCategoryIdOrderBySortOrderAsc(categoryId).stream()
+    public com.krishihub.shared.dto.PaginatedResponse<MasterItemDto> getItemsByCategory(UUID categoryId, org.springframework.data.domain.Pageable pageable) {
+        org.springframework.data.domain.Page<MasterItem> page = itemRepository.findByCategoryId(categoryId, pageable);
+        java.util.List<MasterItemDto> dtos = page.getContent().stream()
                 .map(this::mapToItemDto)
-                .collect(Collectors.toList());
+                .toList();
+        
+        return com.krishihub.shared.dto.PaginatedResponse.of(
+                dtos,
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
     }
 
     @Transactional

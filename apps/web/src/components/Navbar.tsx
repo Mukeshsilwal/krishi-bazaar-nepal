@@ -5,7 +5,7 @@ import NotificationBell from './NotificationBell';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../modules/auth/context/AuthContext';
 import { useCart } from '@/context/CartContext';
-import { useMessages } from '../hooks/useMessages';
+import { useGlobalChat } from '../features/chat/hooks/useGlobalChat';
 import { useSettings } from '@/context/SettingsContext';
 import Logo from './Logo';
 import MoreMenu from './navigation/MoreMenu';
@@ -23,7 +23,7 @@ const Navbar = ({ variant = 'public' }: NavbarProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { totalItems } = useCart();
-  const { unreadCount } = useMessages();
+  const { unreadCount } = useGlobalChat();
   const { settings } = useSettings();
 
   const toggleLanguage = () => {

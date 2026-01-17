@@ -1,5 +1,5 @@
 import api from './api';
-import { ADMIN_ENDPOINTS } from '../config/endpoints';
+import { ADMIN_ENDPOINTS, ADVISORY_LOG_ENDPOINTS } from '../config/endpoints';
 
 const adminService = {
     getDashboardStats: async () => {
@@ -24,6 +24,14 @@ const adminService = {
 
     approveUser: async (userId) => {
         await api.post(ADMIN_ENDPOINTS.APPROVE_USER(userId));
+    },
+
+    getDistrictRiskAnalytics: async () => {
+        const response = await api.get(ADVISORY_LOG_ENDPOINTS.DISTRICT_RISK);
+        if (response.data.code === 0) {
+            return response.data.data;
+        }
+        return [];
     }
 };
 

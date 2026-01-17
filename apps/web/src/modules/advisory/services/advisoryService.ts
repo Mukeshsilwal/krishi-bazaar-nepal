@@ -62,18 +62,20 @@ const advisoryService = {
     },
 
     getAllPesticides: async () => {
-        const response = await api.get(DISEASE_ENDPOINTS.PESTICIDES);
+        const response = await api.get(DISEASE_ENDPOINTS.PESTICIDES, { params: { size: 100 } });
         // Normalize response
         if (response.data.code === 0) {
-            return response.data.data;
+            const data = response.data.data;
+            return data.content || data;
         }
         return [];
     },
 
     getAllDiseases: async () => {
-        const response = await api.get(DISEASE_ENDPOINTS.BASE);
+        const response = await api.get(DISEASE_ENDPOINTS.BASE, { params: { size: 100 } });
         if (response.data.code === 0) {
-            return response.data.data;
+            const data = response.data.data;
+            return data.content || data;
         }
         return [];
     },
@@ -87,9 +89,10 @@ const advisoryService = {
     },
 
     getPesticides: async () => {
-        const response = await api.get(DISEASE_ENDPOINTS.PESTICIDES);
+        const response = await api.get(DISEASE_ENDPOINTS.PESTICIDES, { params: { size: 100 } });
         if (response.data.code === 0) {
-            return response.data.data;
+            const data = response.data.data;
+            return data.content || data;
         }
         return [];
     },

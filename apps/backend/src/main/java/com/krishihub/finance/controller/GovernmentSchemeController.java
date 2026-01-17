@@ -19,13 +19,49 @@ public class GovernmentSchemeController {
     private final GovernmentSchemeService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<GovernmentScheme>>> getAllSchemes() {
-        return ResponseEntity.ok(ApiResponse.success("Schemes fetched", service.getAllSchemes()));
+    public ResponseEntity<ApiResponse<com.krishihub.shared.dto.PaginatedResponse<GovernmentScheme>>> getAllSchemes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "title,asc") String sort) {
+        
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0];
+        String sortDirection = sortParams.length > 1 ? sortParams[1] : "asc";
+        
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+            page, 
+            size, 
+            org.springframework.data.domain.Sort.by(
+                org.springframework.data.domain.Sort.Direction.fromString(sortDirection), 
+                sortField
+            )
+        );
+
+        return ResponseEntity.ok(ApiResponse.success("Schemes fetched", 
+            com.krishihub.shared.dto.PaginatedResponse.from(service.getAllSchemes(pageable))));
     }
 
     @GetMapping("/active")
-    public ResponseEntity<ApiResponse<List<GovernmentScheme>>> getActiveSchemes() {
-        return ResponseEntity.ok(ApiResponse.success("Active schemes fetched", service.getActiveSchemes()));
+    public ResponseEntity<ApiResponse<com.krishihub.shared.dto.PaginatedResponse<GovernmentScheme>>> getActiveSchemes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "title,asc") String sort) {
+        
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0];
+        String sortDirection = sortParams.length > 1 ? sortParams[1] : "asc";
+        
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+            page, 
+            size, 
+            org.springframework.data.domain.Sort.by(
+                org.springframework.data.domain.Sort.Direction.fromString(sortDirection), 
+                sortField
+            )
+        );
+
+        return ResponseEntity.ok(ApiResponse.success("Active schemes fetched", 
+            com.krishihub.shared.dto.PaginatedResponse.from(service.getActiveSchemes(pageable))));
     }
 
     @PostMapping

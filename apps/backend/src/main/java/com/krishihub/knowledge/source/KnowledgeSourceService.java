@@ -30,6 +30,11 @@ public class KnowledgeSourceService {
     }
 
     @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<KnowledgeSource> getAllSources(org.springframework.data.domain.Pageable pageable) {
+        return sourceRepository.findAll(pageable);
+    }
+
+    @Transactional(readOnly = true)
     public KnowledgeSource getSourceById(UUID id) {
         return sourceRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Source not found with id: " + id));
