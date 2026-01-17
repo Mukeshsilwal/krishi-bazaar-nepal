@@ -35,9 +35,6 @@ spring:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
-    # Temporarily repair schema history to handle removed migration V999
-    # This will mark the missing migration as deleted on next deploy
-    # Remove this flag after one successful deployment
     repair-on-migrate: true
 
   servlet:
