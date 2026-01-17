@@ -29,7 +29,7 @@ public class StorageBooking {
     @Column(name = "farmer_id", nullable = false)
     private UUID farmerId;
 
-    @Column(nullable = false)
+    @Column(nullable = true)  // Made nullable to support existing records
     private String commodity;
 
     @Column(nullable = false)

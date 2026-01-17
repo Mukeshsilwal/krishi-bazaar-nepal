@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -19,9 +20,25 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/register")
-    public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody RegisterRequest request) {
-        String message = authService.register(request);
+    /**
+     * User registration endpoint supporting both JSON and multipart/form-data.
+     * 
+     * Accepts:
+     * - Content-Type: application/json (backward compatible - no image)
+     * - Content-Type: multipart/form-data (with optional profileImage file)
+     * 
+     * The profileImage parameter is optional to maintain backward compatibility.
+     * If provided, it will be uploaded to Cloudinary and the URL stored in the database.
+     * 
+     * @param request Registration data (name, email, phone, role, etc.)
+     * @param profileImage Optional profile image file (max 2MB, jpg/png/webp)
+     * @return Success message with OTP delivery confirmation
+     */
+    @PostMapping(value = "/register", consumes = {"application/json", "multipart/form-data"})
+    public ResponseEntity<ApiResponse<String>> register(
+            @Valid @ModelAttribute RegisterRequest request,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+        String message = authService.register(request, profileImage);
         return ResponseEntity.ok(ApiResponse.success(message, message));
     }
 

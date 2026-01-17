@@ -2,8 +2,31 @@ import api from '../../../services/api';
 import { AUTH_ENDPOINTS } from '../../../config/endpoints';
 
 const authService = {
-    // Register new user
-    register: async (userData) => {
+    // Register new user (supports optional profile image)
+    register: async (userData, profileImage = null) => {
+        // If profile image is provided, use multipart/form-data
+        if (profileImage) {
+            const formData = new FormData();
+
+            // Append all user data fields
+            Object.keys(userData).forEach(key => {
+                if (userData[key]) {
+                    formData.append(key, userData[key]);
+                }
+            });
+
+            // Append profile image
+            formData.append('profileImage', profileImage);
+
+            const response = await api.post(AUTH_ENDPOINTS.REGISTER, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return response.data;
+        }
+
+        // Backward compatible: JSON-only request (no image)
         const response = await api.post(AUTH_ENDPOINTS.REGISTER, userData);
         return response.data;
     },

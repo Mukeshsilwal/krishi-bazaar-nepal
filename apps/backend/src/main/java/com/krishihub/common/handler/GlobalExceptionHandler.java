@@ -146,7 +146,31 @@ public class GlobalExceptionHandler {
                 ));
     }
 
-    // Catch-all for unexpected errors
+    // File Upload Exceptions
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<?>> handleMaxUploadSizeExceeded(
+            org.springframework.web.multipart.MaxUploadSizeExceededException ex) {
+        log.warn("File size exceeded: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(ApiResponse.error(
+                        "File size exceeds the maximum allowed limit of 2MB",
+                        getDeveloperMessage(ex)
+                ));
+    }
+
+    @ExceptionHandler(java.net.SocketTimeoutException.class)
+    public ResponseEntity<ApiResponse<?>> handleSocketTimeout(java.net.SocketTimeoutException ex) {
+        log.error("Upload timeout: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.GATEWAY_TIMEOUT)
+                .body(ApiResponse.error(
+                        "Upload timed out. Please check your connection and try again.",
+                        getDeveloperMessage(ex)
+                ));
+    }
+
+    // Catch-all for unexpected errors (includes Cloudinary exceptions)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> handleUnknown(Exception ex) {
         log.error("Unhandled exception", ex);

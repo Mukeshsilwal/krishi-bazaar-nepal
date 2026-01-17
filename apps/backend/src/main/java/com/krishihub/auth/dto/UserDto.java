@@ -24,6 +24,7 @@ public class UserDto {
     private String ward;
     private BigDecimal landSize;
     private Boolean verified;
+    private String profileImageUrl;
     private java.util.Date createdAt;
 
     private java.util.List<com.krishihub.admin.dto.RoleDto> assignedRoles;
@@ -39,6 +40,7 @@ public class UserDto {
                 .ward(user.getWard())
                 .landSize(user.getLandSize())
                 .verified(user.getVerified())
+                .profileImageUrl(user.getProfileImageUrl())
                 .createdAt(user.getCreatedAt())
                 .assignedRoles(user.getRoles().stream()
                         .map(role -> com.krishihub.admin.dto.RoleDto.builder()

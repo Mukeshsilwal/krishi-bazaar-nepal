@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -30,17 +31,20 @@ import java.util.UUID;
  * - Supports password-based authentication for admin users only.
  * - Uses email as primary OTP delivery channel with SMS fallback.
  * - Enforces single active session per user via SessionManagementService.
+ * - Supports optional profile image upload during registration for all roles.
  * <p>
  * Business Rules:
  * - Admin role cannot be registered via public API (requires secret key).
  * - Only admins can use password-based login and forgot password flow.
  * - Mobile numbers are normalized to +977 format for Nepal.
  * - Email and mobile number must be unique across all users.
+ * - Profile images are uploaded to Cloudinary after user creation.
  * <p>
  * Security:
  * - OTP values are NEVER logged in production.
  * - Session locks prevent concurrent logins across devices.
  * - All authentication failures throw user-safe exception messages.
+ * - Profile images are validated for size (2MB max) and format (jpg/png/webp).
  */
 @Service
 @RequiredArgsConstructor
@@ -57,6 +61,7 @@ public class AuthService {
     private final ApplicationEventPublisher eventPublisher;
     private final RefreshTokenService refreshTokenService;
     private final UserPermissionService userPermissionService;
+    private final com.krishihub.shared.service.CloudinaryStorageService cloudinaryStorageService;
 
     public java.util.Set<String> getUserPermissions(UUID userId) {
         return userPermissionService.getUserPermissions(userId);
@@ -74,8 +79,27 @@ public class AuthService {
                 role == User.UserRole.BUYER;
     }
 
+    /**
+     * Registers a new user with optional profile image upload.
+     * 
+     * Transaction Flow:
+     * 1. Validate request data
+     * 2. Create and save user entity (without image URL)
+     * 3. If profile image provided, upload to Cloudinary
+     * 4. Update user with profile image URL
+     * 5. Send OTP for verification
+     * 
+     * Rollback occurs if:
+     * - Image upload fails
+     * - Database update fails
+     * - Any validation fails
+     * 
+     * @param request Registration request with user details
+     * @param profileImage Optional profile image file
+     * @return Success message with OTP delivery confirmation
+     */
     @Transactional
-    public String register(RegisterRequest request) {
+    public String register(RegisterRequest request, MultipartFile profileImage) {
         log.info("AuthService: Register request received for mobile: {}", request.getMobileNumber());
         String mobileNumber = normalizeMobileNumber(request.getMobileNumber());
 
@@ -99,6 +123,7 @@ public class AuthService {
             throw new BadRequestException("Invalid role. Must be FARMER, BUYER, or VENDOR");
         }
 
+        // Step 1: Create user entity without profile image
         User user = User.builder()
                 .mobileNumber(mobileNumber)
                 .email(request.getEmail())
@@ -118,7 +143,22 @@ public class AuthService {
             }
         }
 
-        userRepository.save(user);
+        // Step 2: Save user to get generated ID
+        user = userRepository.save(user);
+
+        // Step 3: Upload profile image if provided
+        if (profileImage != null && !profileImage.isEmpty()) {
+            try {
+                String imageUrl = cloudinaryStorageService.uploadProfileImage(profileImage, user.getId().toString());
+                user.setProfileImageUrl(imageUrl);
+                userRepository.save(user);
+                log.info("Profile image uploaded and saved for user: {}", user.getId());
+            } catch (Exception e) {
+                log.error("Failed to upload profile image for user {}: {}", user.getId(), e.getMessage());
+                // Transaction will rollback automatically due to @Transactional
+                throw new BadRequestException("Failed to upload profile image: " + e.getMessage());
+            }
+        }
 
         // Email is preferred delivery channel for OTP (cheaper than SMS)
         // SMS is used as fallback if email delivery fails

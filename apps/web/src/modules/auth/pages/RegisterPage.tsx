@@ -19,6 +19,8 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [availableRoles, setAvailableRoles] = useState<string[]>([]);
+    const [profileImage, setProfileImage] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
     const { settings } = useSettings();
 
     // Fetch available roles on component mount
@@ -37,13 +39,48 @@ export default function RegisterPage() {
         fetchRoles();
     }, []);
 
+    // Handle profile image selection
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate file size (2MB max)
+        if (file.size > 2 * 1024 * 1024) {
+            setError('Profile image must be less than 2MB');
+            return;
+        }
+
+        // Validate file type
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+            setError('Profile image must be JPG, PNG, or WebP format');
+            return;
+        }
+
+        setProfileImage(file);
+        setError('');
+
+        // Generate preview
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setImagePreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    // Remove selected image
+    const handleRemoveImage = () => {
+        setProfileImage(null);
+        setImagePreview(null);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setLoading(true);
 
         try {
-            const result = await authService.register(formData);
+            const result = await authService.register(formData, profileImage);
 
             if (result.code === 0) {
                 setStep('otp');
@@ -142,6 +179,68 @@ export default function RegisterPage() {
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                     required
                                 />
+                            </div>
+
+                            {/* Profile Image Upload */}
+                            <div>
+                                <label className="block text-gray-700 font-medium mb-2">
+                                    Profile Picture (Optional)
+                                </label>
+
+                                {imagePreview ? (
+                                    <div className="relative">
+                                        <div className="w-32 h-32 mx-auto mb-3 rounded-full overflow-hidden border-4 border-green-100">
+                                            <img
+                                                src={imagePreview}
+                                                alt="Profile preview"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={handleRemoveImage}
+                                            className="mx-auto block text-sm text-red-600 hover:text-red-700 font-medium"
+                                        >
+                                            Remove Image
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="relative">
+                                        <input
+                                            type="file"
+                                            id="profileImage"
+                                            accept="image/jpeg,image/jpg,image/png,image/webp"
+                                            onChange={handleImageChange}
+                                            className="hidden"
+                                        />
+                                        <label
+                                            htmlFor="profileImage"
+                                            className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-green-500 hover:bg-green-50 transition"
+                                        >
+                                            <svg
+                                                className="w-10 h-10 text-gray-400 mb-2"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                                                />
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                                                />
+                                            </svg>
+                                            <span className="text-sm text-gray-600">Click to upload profile picture</span>
+                                            <span className="text-xs text-gray-500 mt-1">JPG, PNG, or WebP (max 2MB)</span>
+                                        </label>
+                                    </div>
+                                )}
                             </div>
 
                             <div>

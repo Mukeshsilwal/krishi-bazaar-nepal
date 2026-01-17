@@ -70,6 +70,9 @@ public class User {
     @Column(name = "verification_notes", length = 500)
     private String verificationNotes;
 
+    @Column(name = "profile_image_url")
+    private String profileImageUrl;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Date createdAt;
