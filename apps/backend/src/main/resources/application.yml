@@ -22,4 +22,4 @@ file:
   upload-dir: uploads/chat
 
 app:
-  base-url: http://localhost:8080
+  base-url: https://krishi-bazaar-nepal-web.vercel.app
