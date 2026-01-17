@@ -38,7 +38,7 @@ spring:
     repair-on-migrate: true
     validate-on-migrate: true
     out-of-order: true
-    
+
   servlet:
     multipart:
       max-file-size: 10MB
