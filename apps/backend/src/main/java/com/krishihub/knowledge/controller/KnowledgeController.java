@@ -23,7 +23,7 @@ public class KnowledgeController {
     public ResponseEntity<ApiResponse<com.krishihub.shared.dto.PaginatedResponse<KnowledgeCategory>>> getAllCategories(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "100") int size,
-            @RequestParam(defaultValue = "name,asc") String sort) {
+            @RequestParam(defaultValue = "nameEn,asc") String sort) {
             
         String[] sortParams = sort.split(",");
         String sortField = sortParams[0];

@@ -24,11 +24,18 @@ export const requestForToken = async () => {
         if (currentToken) {
             return currentToken;
         } else {
-            console.warn('No registration token available. Request permission to generate one.');
+            // No token available - user needs to grant permission
             return null;
         }
-    } catch (err) {
-        console.error('An error occurred while retrieving token. ', err);
+    } catch (err: any) {
+        // Gracefully handle permission-blocked errors (expected behavior)
+        if (err?.code === 'messaging/permission-blocked' || err?.code === 'messaging/permission-denied') {
+            // User has blocked notifications - this is normal, don't log as error
+            return null;
+        }
+
+        // Log other unexpected errors
+        console.error('An error occurred while retrieving token:', err);
         return null;
     }
 };

@@ -16,7 +16,17 @@ export const useAgricultureCalendar = () => {
                 selectedCrop || undefined,
                 selectedMonth || undefined
             );
-            setEntries(data);
+
+            // Handle paginated response structure
+            if (data && data.content && Array.isArray(data.content)) {
+                setEntries(data.content);
+            } else if (Array.isArray(data)) {
+                setEntries(data);
+            } else {
+                // Fallback or empty
+                setEntries([]);
+            }
+
             setErrorState(null);
         } catch (error) {
             console.error('Failed to fetch calendar entries:', error);

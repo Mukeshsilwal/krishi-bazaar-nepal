@@ -22,8 +22,12 @@ class RouteErrorBoundary extends Component<Props, State> {
     }
 
     componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-        console.error('RouteErrorBoundary caught an error:', error);
-        console.error('Component stack:', errorInfo.componentStack);
+        console.error('==================== ERROR CAUGHT ====================');
+        console.error('Error:', error);
+        console.error('Error Message:', error.message);
+        console.error('Error Stack:', error.stack);
+        console.error('Component Stack:', errorInfo.componentStack);
+        console.error('====================================================');
     }
 
     handleRetry = () => {

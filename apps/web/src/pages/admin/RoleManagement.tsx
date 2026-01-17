@@ -66,7 +66,8 @@ const RoleManagement = () => {
         try {
             const response = await api.get(ADMIN_RBAC_ENDPOINTS.ROLES);
             if (response.data.code === 0) {
-                setRoles(response.data.data);
+                const content = response.data.data?.content;
+                setRoles(Array.isArray(content) ? content : []);
             }
         } catch (error) {
             console.error('Failed to fetch roles', error);
@@ -78,7 +79,8 @@ const RoleManagement = () => {
         try {
             const response = await api.get(ADMIN_RBAC_ENDPOINTS.PERMISSIONS);
             if (response.data.code === 0) {
-                setPermissions(response.data.data);
+                const content = response.data.data?.content;
+                setPermissions(Array.isArray(content) ? content : []);
             }
         } catch (error) {
             console.error('Failed to fetch permissions', error);

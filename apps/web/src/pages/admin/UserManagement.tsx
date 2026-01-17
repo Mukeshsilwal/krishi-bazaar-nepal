@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAdminTitle } from '@/context/AdminContext';
 import api from '@/services/api';
 import { Button } from "@/components/ui/button";
@@ -102,14 +102,15 @@ const UserManagement = () => {
         try {
             const response = await api.get(ADMIN_RBAC_ENDPOINTS.ROLES);
             if (response.data.code === 0) {
-                setAvailableRoles(response.data.data);
+                const content = response.data.data?.content;
+                setAvailableRoles(Array.isArray(content) ? content : []);
             }
         } catch (error) {
             console.error('Failed to fetch roles', error);
         }
     };
 
-    const fetchUsers = async (pageNo: number, isReset: boolean = false) => {
+    const fetchUsers = useCallback(async (pageNo: number, isReset: boolean = false) => {
         setLoading(true);
         try {
             const params = new URLSearchParams();
@@ -122,20 +123,32 @@ const UserManagement = () => {
 
             const response = await api.get(`${ADMIN_ENDPOINTS.USERS}?${params.toString()}`);
 
-            // Updated to check code === 0 instead of deprecated success boolean
-            if (response.data.code === 0) {
-                const newUsers = response.data.data.content;
+            // Check for success code (0)
+            if (response.data.code === 0 && response.data.data) {
+                // Ensure content is an array
+                const content = response.data.data.content;
+                const newUsers = Array.isArray(content) ? content : [];
+
                 setUsers(prev => isReset ? newUsers : [...prev, ...newUsers]);
                 setHasMore(!response.data.data.last);
                 setPage(pageNo);
+            } else {
+                // If no data or error, set empty array
+                if (isReset) {
+                    setUsers([]);
+                }
             }
         } catch (error) {
             console.error('Failed to fetch users', error);
             toast.error("Failed to fetch users");
+            // Set empty array on error if it's a reset
+            if (isReset) {
+                setUsers([]);
+            }
         } finally {
             setLoading(false);
         }
-    };
+    }, [debouncedSearchTerm, selectedRole, selectedStatus]);
 
     const loadMore = () => {
         if (!loading && hasMore) {

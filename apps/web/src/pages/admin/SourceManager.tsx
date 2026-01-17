@@ -56,9 +56,12 @@ const SourceManager = () => {
 
     const fetchSources = async () => {
         try {
-            const res = await api.get(KNOWLEDGE_ENDPOINTS.SOURCES);
+            const res = await api.get(KNOWLEDGE_ENDPOINTS.SOURCES, { params: { size: 100 } });
             if (res.data.code === 0) {
-                setSources(res.data.data);
+                const data = res.data.data;
+                // Handle paginated response which returns { content: [...] }
+                const content = data?.content || data;
+                setSources(Array.isArray(content) ? content : []);
             } else {
                 toast.error(res.data.message || "Failed to fetch sources");
             }

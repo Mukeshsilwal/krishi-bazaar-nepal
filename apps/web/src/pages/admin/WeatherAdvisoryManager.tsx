@@ -61,12 +61,17 @@ const WeatherAdvisoryManager = () => {
     const fetchAdvisories = async () => {
         try {
             const res = await api.get(WEATHER_ADVISORY_ENDPOINTS.BASE);
-            if (res.data.code === 0) {
-                setAdvisories(res.data.data);
+            if (res.data.code === 0 && res.data.data) {
+                // Ensure data is an array
+                const data = Array.isArray(res.data.data) ? res.data.data : [];
+                setAdvisories(data);
+            } else {
+                setAdvisories([]);
             }
         } catch (error) {
             console.error('Failed to fetch advisories', error);
             toast.error("Failed to load weather advisories");
+            setAdvisories([]); // Set empty array on error
         }
     };
 

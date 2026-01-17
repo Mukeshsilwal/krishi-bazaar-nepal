@@ -25,7 +25,12 @@ export interface Article {
 
 const knowledgeService = {
     getCategories: async () => {
-        const response = await api.get<KnowledgeCategory[]>(KNOWLEDGE_ENDPOINTS.CATEGORIES, { params: { size: 100 } });
+        const response = await api.get<KnowledgeCategory[]>(KNOWLEDGE_ENDPOINTS.CATEGORIES, {
+            params: {
+                size: 100,
+                sort: 'nameEn,asc'
+            }
+        });
         const data = (response.data as any).data;
         return data.content || data;
     },

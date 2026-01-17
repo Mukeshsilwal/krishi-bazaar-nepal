@@ -48,7 +48,7 @@ const DistrictRiskCard: React.FC<DistrictRiskCardProps> = ({ risks }) => {
                         const highRiskPercentage = Math.round((highRiskCount / total) * 100);
 
                         return (
-                            <div key={risk.districtName} className="space-y-2">
+                            <div key={`${risk.districtName}-${index}`} className="space-y-2">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <MapPin className="h-4 w-4 text-muted-foreground" />

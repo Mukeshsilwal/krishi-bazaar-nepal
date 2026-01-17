@@ -35,10 +35,13 @@ const AdminLogisticsPage = () => {
     const fetchStorages = async () => {
         setLoading(true);
         try {
-            const response = await api.get(COLD_STORAGE_ENDPOINTS.BASE);
-            setStorages(response.data.data);
+            const response = await api.get(COLD_STORAGE_ENDPOINTS.BASE, { params: { size: 100 } });
+            const data = response.data.data;
+            const content = data?.content || data;
+            setStorages(Array.isArray(content) ? content : []);
         } catch (error) {
             toast.error("Failed to load cold storages");
+            setStorages([]);
         } finally {
             setLoading(false);
         }

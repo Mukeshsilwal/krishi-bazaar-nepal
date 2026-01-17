@@ -13,7 +13,7 @@ export interface AgricultureCalendarEntry {
 
 export const agricultureCalendarService = {
     getAllEntries: async (crop?: string, month?: string) => {
-        const params = {};
+        const params = { size: 100 };
         if (crop) params['crop'] = crop;
         if (month) params['month'] = month;
 
