@@ -80,7 +80,7 @@ export default function MyListingsPage() {
                 {/* Create Button */}
                 <div className="mb-6 flex gap-3">
                     <Link
-                        to="/create-listing"
+                        to="/marketplace/create"
                         className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
                     >
                         <Plus size={20} />
@@ -124,7 +124,7 @@ export default function MyListingsPage() {
                                     {t('listings.empty.desc')}
                                 </p>
                                 <Link
-                                    to="/create-listing"
+                                    to="/marketplace/create"
                                     className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
                                 >
                                     <Plus size={20} />
