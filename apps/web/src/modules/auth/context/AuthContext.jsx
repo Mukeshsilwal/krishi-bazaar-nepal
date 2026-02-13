@@ -19,14 +19,25 @@ export const AuthProvider = ({ children }) => {
     const fetchPermissions = async () => {
         try {
             const response = await authService.getPermissions();
-            if (response.code === 0 && Array.isArray(response.data)) {
+            if (response.code === 0 && Array.isArray(response.data) && response.data.length > 0) {
                 setPermissions(response.data);
-
+            } else {
+                // Fallback: Infer permissions from role if API returns empty
+                const currentUser = authService.getUser();
+                if (currentUser?.role === 'ADMIN') {
+                    setPermissions(['ADMIN:PANEL', 'ADMIN:READ', 'ADMIN:WRITE']);
+                } else {
+                    setPermissions([]);
+                }
+            }
+        } catch (error) {
+            // Fallback on error
+            const currentUser = authService.getUser();
+            if (currentUser?.role === 'ADMIN') {
+                setPermissions(['ADMIN:PANEL', 'ADMIN:READ', 'ADMIN:WRITE']);
             } else {
                 setPermissions([]);
             }
-        } catch (error) {
-            setPermissions([]);
         }
     };
 
