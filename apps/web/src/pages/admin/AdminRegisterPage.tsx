@@ -16,7 +16,8 @@ const AdminRegisterPage = () => {
         email: '',
         mobileNumber: '',
         password: '',
-        adminSecret: ''
+        adminSecret: '',
+        district: ''
     });
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -98,6 +99,16 @@ const AdminRegisterPage = () => {
                                 placeholder="Enter secret key to authorize"
                                 value={formData.adminSecret}
                                 onChange={(e) => setFormData({ ...formData, adminSecret: e.target.value })}
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="district">District</Label>
+                            <Input
+                                id="district"
+                                placeholder="e.g. Kathmandu"
+                                value={formData.district}
+                                onChange={(e) => setFormData({ ...formData, district: e.target.value })}
                                 required
                             />
                         </div>
