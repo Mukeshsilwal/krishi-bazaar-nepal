@@ -32,12 +32,12 @@ spring:
       algorithm: TLSv1.2
 
   flyway:
-    enabled: true
-    baseline-on-migrate: true
+    enabled: false
+    baseline-on-migrate: false
     locations: classpath:db/migration
-    repair-on-migrate: true
-    validate-on-migrate: true
-    out-of-order: true
+    repair-on-migrate: false
+    validate-on-migrate: false
+    out-of-order: false
 
   servlet:
     multipart:
