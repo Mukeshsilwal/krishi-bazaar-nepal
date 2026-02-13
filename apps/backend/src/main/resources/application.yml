@@ -2,7 +2,7 @@ spring:
   application:
     name: kisan-sarathi-backend
   profiles:
-    active: prod
+    active: dev
   data:
     redis:
       timeout: 2000
