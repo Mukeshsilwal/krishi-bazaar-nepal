@@ -15,7 +15,6 @@ import PushNotificationManager from './components/common/PushNotificationManager
 const PublicLayout = lazy(() => import('./components/layout/PublicLayout'));
 const AppLayout = lazy(() => import('./components/layout/AppLayout'));
 
-// Pages
 const Index = lazy(() => import('./pages/Index'));
 const LoginPage = lazy(() => import('./modules/auth/pages/LoginPage'));
 const RegisterPage = lazy(() => import('./modules/auth/pages/RegisterPage'));
