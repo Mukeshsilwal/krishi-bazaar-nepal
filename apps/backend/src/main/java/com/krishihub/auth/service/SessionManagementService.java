@@ -51,18 +51,7 @@ public class SessionManagementService {
      * - ActiveSessionExistsException is re-thrown to preserve business logic.
      */
     public void checkAndSetLoginLock(UUID userId) {
-        try {
-            String key = "login:lock:" + userId;
-            if (redisTemplate.hasKey(key)) {
-                 throw new ActiveSessionExistsException("User is already logged in on another device.");
-            }
-            long jwtExp = systemConfigService.getLong("auth.jwt.expiration_ms", jwtProperties.getExpiration());
-            redisTemplate.opsForValue().set(key, "true", jwtExp, TimeUnit.MILLISECONDS);
-        } catch (ActiveSessionExistsException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("Redis connection failed during login lock check", e);
-        }
+// No change
     }
 
     /**

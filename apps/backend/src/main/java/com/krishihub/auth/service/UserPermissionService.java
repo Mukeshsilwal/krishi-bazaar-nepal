@@ -33,10 +33,28 @@ public class UserPermissionService {
     public Set<String> getUserPermissions(UUID userId) {
         log.debug("Fetching permissions from DB for user: {}", userId);
         return userRepository.findById(userId)
-                .map(user -> user.getRoles().stream()
-                        .flatMap(role -> role.getPermissions().stream())
-                        .map(Permission::getName)
-                        .collect(Collectors.toSet()))
+                .map(user -> {
+                    Set<String> permissions = user.getRoles().stream()
+                            .flatMap(role -> role.getPermissions().stream())
+                            .map(Permission::getName)
+                            .collect(Collectors.toSet());
+
+                    // Fallback for users with only enum role (e.g. newly registered or before migration)
+                    if (permissions.isEmpty()) {
+                        if (user.getRole() == User.UserRole.ADMIN || user.getRole() == User.UserRole.SUPER_ADMIN) {
+                            log.info("Applying fallback ADMIN permissions for user: {}", userId);
+                            return Set.of(
+                                "ADMIN:PANEL", "ADMIN:READ", "ADMIN:WRITE", 
+                                "ADMIN:USERS", "ADMIN:ROLES", "ADMIN:SETTINGS",
+                                "USER:READ", "USER:VERIFY"
+                            );
+                        }
+                        if (user.getRole() == User.UserRole.FARMER) {
+                            return Set.of("MARKETPLACE:READ", "MARKETPLACE:CREATE", "ORDER:READ", "ORDER:CREATE");
+                        }
+                    }
+                    return permissions;
+                })
                 .orElse(Collections.emptySet());
     }
 

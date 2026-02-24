@@ -61,6 +61,7 @@ public class AuthService {
     private final ApplicationEventPublisher eventPublisher;
     private final RefreshTokenService refreshTokenService;
     private final UserPermissionService userPermissionService;
+    private final com.krishihub.auth.repository.RoleRepository roleRepository;
     private final com.krishihub.shared.service.CloudinaryStorageService cloudinaryStorageService;
 
     public java.util.Set<String> getUserPermissions(UUID userId) {
@@ -142,6 +143,9 @@ public class AuthService {
                 throw new BadRequestException("Invalid land size format");
             }
         }
+
+        // Assign RBAC roles based on enum
+        assignDefaultRole(user);
 
         // Step 2: Save user to get generated ID
         user = userRepository.save(user);
@@ -265,6 +269,9 @@ public class AuthService {
                 .ward("0")
                 .createdAt(com.krishihub.common.util.DateUtil.nowUtc())
                 .build();
+
+        // Assign RBAC roles based on enum
+        assignDefaultRole(user);
 
         userRepository.save(user);
 
@@ -512,5 +519,27 @@ public class AuthService {
 
     public void logout(UUID userId) {
         sessionManagementService.logout(userId);
+    }
+
+    /**
+     * Assigns the corresponding RBAC Role entity based on UserRole enum.
+     * This ensures the user has permission-based access in addition to role-based access.
+     */
+    private void assignDefaultRole(User user) {
+        String rbacRoleName = switch (user.getRole()) {
+            case ADMIN, SUPER_ADMIN -> "SUPER_ADMIN";
+            case FARMER -> "FARMER_ROLE";
+            case BUYER -> "BUYER_ROLE";
+            case VENDOR -> "VENDOR_ROLE";
+            case EXPERT -> "EXPERT_ROLE";
+        };
+
+        roleRepository.findByName(rbacRoleName).ifPresent(role -> {
+            if (user.getRoles() == null) {
+                user.setRoles(new java.util.HashSet<>());
+            }
+            user.getRoles().add(role);
+            log.info("Assigned RBAC role {} to user {}", rbacRoleName, user.getMobileNumber());
+        });
     }
 }
