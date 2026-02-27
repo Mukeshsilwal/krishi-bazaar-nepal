@@ -20,6 +20,7 @@ public class PermissionConstants {
     public static final String CONTENT_ARTICLE_WRITE = "CONTENT:ARTICLE:WRITE";
 
     // Notifications
+    public static final String NOTIFICATION_MANAGE = "NOTIFICATION:MANAGE";
     public static final String NOTIFICATION_ALERT_MANAGE = "NOTIFICATION:ALERT:MANAGE";
     public static final String NOTIFICATION_TEMPLATE_MANAGE = "NOTIFICATION:TEMPLATE:MANAGE";
 
@@ -32,6 +33,11 @@ public class PermissionConstants {
     
     // Admin Panel
     public static final String ADMIN_PANEL = "ADMIN:PANEL";
+    public static final String ADMIN_READ = "ADMIN:READ";
+    public static final String ADMIN_WRITE = "ADMIN:WRITE";
+    public static final String ADMIN_USERS = "ADMIN:USERS";
+    public static final String ADMIN_ROLES = "ADMIN:ROLES";
+    public static final String ADMIN_SETTINGS = "ADMIN:SETTINGS";
 
     // Master Data
     public static final String MASTER_DATA_MANAGE = "MASTER_DATA:MANAGE";

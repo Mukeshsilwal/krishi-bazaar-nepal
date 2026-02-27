@@ -50,7 +50,13 @@ public class PermissionInitializer implements ApplicationRunner {
             PermissionConstants.CONTENT_MANAGE,
             PermissionConstants.MARKETPLACE_PRODUCT_MANAGE,
             PermissionConstants.MASTER_DATA_MANAGE,
-            PermissionConstants.ADMIN_PANEL
+            PermissionConstants.ADMIN_PANEL,
+            PermissionConstants.ADMIN_READ,
+            PermissionConstants.ADMIN_WRITE,
+            PermissionConstants.ADMIN_USERS,
+            PermissionConstants.ADMIN_ROLES,
+            PermissionConstants.ADMIN_SETTINGS,
+            PermissionConstants.NOTIFICATION_MANAGE
         );
 
         Set<Permission> allPermissions = new HashSet<>();
