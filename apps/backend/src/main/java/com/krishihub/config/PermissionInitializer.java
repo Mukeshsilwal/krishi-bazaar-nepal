@@ -49,7 +49,8 @@ public class PermissionInitializer implements ApplicationRunner {
             PermissionConstants.CMS_MANAGE,
             PermissionConstants.CONTENT_MANAGE,
             PermissionConstants.MARKETPLACE_PRODUCT_MANAGE,
-            PermissionConstants.MASTER_DATA_MANAGE
+            PermissionConstants.MASTER_DATA_MANAGE,
+            PermissionConstants.ADMIN_PANEL
         );
 
         Set<Permission> allPermissions = new HashSet<>();
@@ -69,8 +70,29 @@ public class PermissionInitializer implements ApplicationRunner {
             allPermissions.add(permission);
         }
 
-        // 3. Ensure SUPER_ADMIN Role Exists and has ALL Permissions
-        // We use the Role name "SUPER_ADMIN" which corresponds to User.UserRole.SUPER_ADMIN
+        // 3. Ensure ADMIN and SUPER_ADMIN Roles Exist
+        
+        // Admin Role - Basic Management
+        String adminRoleName = "ADMIN";
+        roleRepository.findByName(adminRoleName).ifPresentOrElse(
+            role -> {
+                log.info("Updating ADMIN permissions...");
+                role.getPermissions().addAll(allPermissions);
+                roleRepository.save(role);
+            },
+            () -> {
+                log.info("Creating ADMIN role...");
+                Role role = Role.builder()
+                        .name(adminRoleName)
+                        .description("Administrator - Standard Access")
+                        .isSystemDefined(true)
+                        .permissions(allPermissions)
+                        .build();
+                roleRepository.save(role);
+            }
+        );
+
+        // Super Admin Role - Full Access
         String superAdminRoleName = "SUPER_ADMIN";
         
         roleRepository.findByName(superAdminRoleName).ifPresentOrElse(

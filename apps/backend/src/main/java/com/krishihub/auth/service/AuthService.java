@@ -527,7 +527,8 @@ public class AuthService {
      */
     private void assignDefaultRole(User user) {
         String rbacRoleName = switch (user.getRole()) {
-            case ADMIN, SUPER_ADMIN -> "SUPER_ADMIN";
+            case ADMIN -> "ADMIN";
+            case SUPER_ADMIN -> "SUPER_ADMIN";
             case FARMER -> "FARMER_ROLE";
             case BUYER -> "BUYER_ROLE";
             case VENDOR -> "VENDOR_ROLE";

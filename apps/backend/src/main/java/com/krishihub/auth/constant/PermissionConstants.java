@@ -30,6 +30,9 @@ public class PermissionConstants {
     // Marketplace
     public static final String MARKETPLACE_PRODUCT_MANAGE = "MARKETPLACE:PRODUCT:MANAGE";
     
+    // Admin Panel
+    public static final String ADMIN_PANEL = "ADMIN:PANEL";
+
     // Master Data
     public static final String MASTER_DATA_MANAGE = "MASTER_DATA:MANAGE";
 
