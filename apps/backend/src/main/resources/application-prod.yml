@@ -19,7 +19,7 @@ spring:
 
   data:
     redis:
-      url: ${REDIS_URL:${REDIS_HOST:redis://red-d5ccj5khg0os73e6993g:6379}}
+      url: ${REDIS_URL:${REDIS_HOST:redis://red-d6ghfia4d50c73emq3bg:6379}}
 
   rabbitmq:
     host: ${RABBITMQ_HOST}
