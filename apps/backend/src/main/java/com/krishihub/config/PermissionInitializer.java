@@ -56,7 +56,32 @@ public class PermissionInitializer implements ApplicationRunner {
             PermissionConstants.ADMIN_USERS,
             PermissionConstants.ADMIN_ROLES,
             PermissionConstants.ADMIN_SETTINGS,
-            PermissionConstants.NOTIFICATION_MANAGE
+            PermissionConstants.ADMIN_ANALYTICS,
+            PermissionConstants.NOTIFICATION_MANAGE,
+            PermissionConstants.LOGISTICS_MANAGE,
+            PermissionConstants.LOGISTICS_READ,
+            PermissionConstants.VEHICLE_READ,
+            PermissionConstants.VEHICLE_CREATE,
+            PermissionConstants.PAYMENT_READ,
+            PermissionConstants.PAYMENT_INITIATE,
+            PermissionConstants.PAYMENT_VERIFY,
+            PermissionConstants.ORDER_READ,
+            PermissionConstants.ORDER_CREATE,
+            PermissionConstants.ORDER_UPDATE,
+            PermissionConstants.ORDER_DELETE,
+            PermissionConstants.MARKETPLACE_READ,
+            PermissionConstants.MARKETPLACE_CREATE,
+            PermissionConstants.MARKETPLACE_UPDATE,
+            PermissionConstants.MARKETPLACE_DELETE,
+            PermissionConstants.KNOWLEDGE_MANAGE,
+            PermissionConstants.CALENDAR_MANAGE,
+            PermissionConstants.FINANCE_MANAGE,
+            PermissionConstants.AGRISTORE_MANAGE,
+            PermissionConstants.DIAGNOSIS_CREATE,
+            PermissionConstants.MASTERDATA_MANAGE,
+            PermissionConstants.MASTER_DATA_READ,
+            PermissionConstants.USER_READ,
+            PermissionConstants.USER_VERIFY
         );
 
         Set<Permission> allPermissions = new HashSet<>();
