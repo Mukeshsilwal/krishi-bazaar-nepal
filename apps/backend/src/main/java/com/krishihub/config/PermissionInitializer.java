@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,7 @@ public class PermissionInitializer implements ApplicationRunner {
 
     private final PermissionRepository permissionRepository;
     private final RoleRepository roleRepository;
+    private final CacheManager cacheManager;
 
     @Override
     @Transactional
@@ -108,6 +110,7 @@ public class PermissionInitializer implements ApplicationRunner {
         roleRepository.findByName(adminRoleName).ifPresentOrElse(
             role -> {
                 log.info("Updating ADMIN permissions...");
+                role.getPermissions().clear();
                 role.getPermissions().addAll(allPermissions);
                 roleRepository.save(role);
             },
@@ -129,7 +132,7 @@ public class PermissionInitializer implements ApplicationRunner {
         roleRepository.findByName(superAdminRoleName).ifPresentOrElse(
             role -> {
                 log.info("Updating SUPER_ADMIN permissions...");
-                // Add all new permissions to existing ones
+                role.getPermissions().clear();
                 role.getPermissions().addAll(allPermissions);
                 roleRepository.save(role);
             },
@@ -144,6 +147,12 @@ public class PermissionInitializer implements ApplicationRunner {
                 roleRepository.save(role);
             }
         );
+
+        // 4. Force Cache Eviction for all users
+        if (cacheManager.getCache("userPermissions") != null) {
+            log.info("Clearing userPermissions cache to apply updated RBAC rules...");
+            cacheManager.getCache("userPermissions").clear();
+        }
 
         log.info("RBAC Initialization Completed.");
     }
