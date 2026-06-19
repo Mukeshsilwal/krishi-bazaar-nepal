@@ -1,6 +1,8 @@
 spring:
   application:
     name: kisan-sarathi-backend
+  cache:
+    type: ${CACHE_TYPE:simple}
 
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://mukesh_silwal_4u1a_user:x5FUI88NQbAIPe3r9sGktvUxVYHW86Pm@dpg-d8qj33ho3t8c73esd7hg-a/mukesh_silwal_4u1a}

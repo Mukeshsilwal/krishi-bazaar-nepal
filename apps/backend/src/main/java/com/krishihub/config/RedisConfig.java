@@ -36,38 +36,46 @@ import java.time.Duration;
 public class RedisConfig implements CachingConfigurer {
 
     @Bean
-    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        log.info("Initializing RedisCacheManager with DefaultTyping enabled");
-        ObjectMapper mapper = new ObjectMapper();
+    @org.springframework.context.annotation.Primary
+    public org.springframework.cache.CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+        try {
+            log.info("Testing Redis connection...");
+            connectionFactory.getConnection().close();
+            log.info("Redis connection successful. Initializing RedisCacheManager with DefaultTyping enabled");
 
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        mapper.activateDefaultTyping(
-                LaissezFaireSubTypeValidator.instance,
-                ObjectMapper.DefaultTyping.NON_FINAL,
-                JsonTypeInfo.As.PROPERTY);
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+            mapper.activateDefaultTyping(
+                    LaissezFaireSubTypeValidator.instance,
+                    ObjectMapper.DefaultTyping.NON_FINAL,
+                    JsonTypeInfo.As.PROPERTY);
 
-        // Register Mixin for PageImpl and PageRequest
-        mapper.addMixIn(PageImpl.class, PageMixin.class);
-        mapper.addMixIn(PageRequest.class, PageRequestMixin.class);
-        
-        // Register Custom Deserializer for Sort via Module
-        SimpleModule sortModule = new SimpleModule();
-        sortModule.addDeserializer(Sort.class, new SortDeserializer());
-        mapper.registerModule(sortModule);
+            // Register Mixin for PageImpl and PageRequest
+            mapper.addMixIn(PageImpl.class, PageMixin.class);
+            mapper.addMixIn(PageRequest.class, PageRequestMixin.class);
 
-        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(mapper);
+            // Register Custom Deserializer for Sort via Module
+            SimpleModule sortModule = new SimpleModule();
+            sortModule.addDeserializer(Sort.class, new SortDeserializer());
+            mapper.registerModule(sortModule);
 
-        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofHours(1))
-                .disableCachingNullValues()
-                .serializeKeysWith(
-                        RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(RedisSerializationContext.SerializationPair
-                        .fromSerializer(serializer));
+            GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(mapper);
 
-        return RedisCacheManager.builder(connectionFactory)
-                .cacheDefaults(config)
-                .build();
+            RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
+                    .entryTtl(Duration.ofHours(1))
+                    .disableCachingNullValues()
+                    .serializeKeysWith(
+                            RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                    .serializeValuesWith(RedisSerializationContext.SerializationPair
+                            .fromSerializer(serializer));
+
+            return RedisCacheManager.builder(connectionFactory)
+                    .cacheDefaults(config)
+                    .build();
+        } catch (Exception e) {
+            log.warn("Redis connection failed: {}. Falling back to simple ConcurrentMapCacheManager.", e.getMessage());
+            return new org.springframework.cache.concurrent.ConcurrentMapCacheManager();
+        }
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -100,13 +108,13 @@ public class RedisConfig implements CachingConfigurer {
             if (node.has("orders") && node.get("orders").isArray()) {
                 java.util.List<org.springframework.data.domain.Sort.Order> orders = new java.util.ArrayList<>();
                 for (com.fasterxml.jackson.databind.JsonNode orderNode : node.get("orders")) {
-                     String property = orderNode.has("property") ? orderNode.get("property").asText() : null;
-                     String directionStr = orderNode.has("direction") ? orderNode.get("direction").asText() : "ASC";
-                     
-                     if (property != null) {
-                         org.springframework.data.domain.Sort.Direction direction = org.springframework.data.domain.Sort.Direction.fromString(directionStr);
-                         orders.add(new org.springframework.data.domain.Sort.Order(direction, property));
-                     }
+                    String property = orderNode.has("property") ? orderNode.get("property").asText() : null;
+                    String directionStr = orderNode.has("direction") ? orderNode.get("direction").asText() : "ASC";
+
+                    if (property != null) {
+                        org.springframework.data.domain.Sort.Direction direction = org.springframework.data.domain.Sort.Direction.fromString(directionStr);
+                        orders.add(new org.springframework.data.domain.Sort.Order(direction, property));
+                    }
                 }
                 if (!orders.isEmpty()) {
                     return org.springframework.data.domain.Sort.by(orders);
