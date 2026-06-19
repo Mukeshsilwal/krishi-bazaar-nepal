@@ -11,6 +11,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableJpaAuditing(auditorAwareRef = "auditorAware")
 @org.springframework.cache.annotation.EnableCaching
+exclude = {
+               RabbitAutoConfiguration.class
+    }
 public class KrishiHubApplication {
 
     public static void main(String[] args) {
