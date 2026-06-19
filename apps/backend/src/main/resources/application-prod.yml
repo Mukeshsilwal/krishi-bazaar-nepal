@@ -30,6 +30,9 @@ spring:
     ssl:
       enabled: ${RABBITMQ_SSL_ENABLED:true}
       algorithm: TLSv1.2
+    listener:
+      simple:
+        auto-startup: ${RABBITMQ_LISTENER_AUTO_STARTUP:true}
 
   flyway:
     enabled: false
