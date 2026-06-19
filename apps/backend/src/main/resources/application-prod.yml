@@ -3,9 +3,9 @@ spring:
     name: kisan-sarathi-backend
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://dpg-d5am0vmuk2gs73erg5h0-a/krishi_sarathii}
-    username: ${SPRING_DATASOURCE_USERNAME:krishi_sarathii_user}
-    password: ${SPRING_DATASOURCE_PASSWORD:bFRFoLX1XTwtOv1US0mhZnJGhWQu65N5}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://mukesh_silwal_4u1a_user:x5FUI88NQbAIPe3r9sGktvUxVYHW86Pm@dpg-d8qj33ho3t8c73esd7hg-a/mukesh_silwal_4u1a}
+    username: ${SPRING_DATASOURCE_USERNAME:mukesh_silwal_4u1a_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:x5FUI88NQbAIPe3r9sGktvUxVYHW86Pm}
     driver-class-name: org.postgresql.Driver
 
   jpa:
